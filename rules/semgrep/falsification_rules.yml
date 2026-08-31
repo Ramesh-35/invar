@@ -1,0 +1,32 @@
+# INVAR falsification — LOCAL, EXPERIMENTAL Semgrep instrument.
+#
+# This is NOT a comprehensive enterprise detection ruleset. It exists only to
+# give the composite baseline a fair, honest chance to catch the corpus cases.
+# Two rules:
+#   * tc005-cleartext-secret-logging (ERROR)  — a control the composite SHOULD
+#     catch. Its id contains "tc005" so a match counts as isolating TC-005.
+#   * tc001-untyped-json-passthrough (WARNING) — an ADVISORY only. It flags a
+#     `|| 0` fallback but deliberately does NOT isolate cross-repository schema
+#     drift, and its id carries no catch_signature. A firing of this rule must
+#     be read as an advisory finding, never as a catch.
+#
+# Run always against this local file (`--config <this file>`), never
+# `--config auto`.
+rules:
+  - id: tc005-cleartext-secret-logging
+    languages: [generic]
+    severity: ERROR
+    message: >-
+      Cleartext secret written to a log sink (password/secret/auth_token).
+    patterns:
+      - pattern-regex: '(?i)(console\.log|println!|logger\.\w+)\s*\(.*\b(password|secret|auth_token)\b'
+
+  - id: tc001-untyped-json-passthrough
+    languages: [generic]
+    severity: WARNING
+    message: >-
+      ADVISORY ONLY: a value is read with a `|| 0` fallback. This flags a
+      potential untyped passthrough. It does NOT isolate cross-repository schema
+      drift and MUST NOT be interpreted as catching TC-001.
+    patterns:
+      - pattern-regex: '\|\|\s*0\b'

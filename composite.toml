@@ -1,0 +1,28 @@
+# Composite skeptic baseline — declarations only.
+#
+# The presence of a section here does NOT assert that the binary is installed.
+# The evaluator resolves each tool at run time:
+#   * binary absent      -> that leg is SKIPPED (never PASS)
+#   * ran, uninterpretable-> that leg is ERROR  (never PASS)
+# A leg that did not execute is never counted as "caught nothing".
+
+[semgrep]
+enabled = true
+bin_path = "semgrep"
+rules = "./rules/semgrep/falsification_rules.yml"
+
+[opa]
+enabled = true
+bin_path = "opa"
+rules = "./rules/opa"
+
+[opentelemetry]
+# Runtime observability. Requires a live collector AND a running workload.
+# Offline there is nothing to observe, so this leg runs as SKIPPED. This is why
+# the runtime-shaped corpus cases (TC-002/003/004) resolve to UNKNOWN.
+enabled = true
+
+[property_testing]
+# Requires a bound runner plus per-case properties, which Phase 1 does not ship.
+# Runs as SKIPPED until those exist.
+enabled = true

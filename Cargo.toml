@@ -1,0 +1,10 @@
+# INVAR Platform — workspace root.
+#
+# Phase 1 authorizes exactly one production member: the falsification
+# instrument. The deferred crates (invar-core, invar-lsp, invar-cusum) and the
+# invar-isv package intentionally carry NO Cargo.toml, so they are not members
+# and cannot build. They are promoted into the workspace only when a specific
+# falsifiable requirement authorizes them (see docs/decisions/DR-003).
+[workspace]
+resolver = "2"
+members = ["crates/invar-falsify"]

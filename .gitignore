@@ -1,0 +1,24 @@
+# Rust build artifacts
+/target
+**/target
+
+# Falsification run outputs (regenerated deterministically; not source of truth)
+/runs
+crates/invar-falsify/runs
+
+# SQLite WAL sidecar files
+*.db-wal
+*.db-shm
+
+# OS / editor cruft
+.DS_Store
+*.swp
+
+# Python (harness experimentation)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Semgrep / tool caches
+.semgrep/

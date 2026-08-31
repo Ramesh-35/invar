@@ -1,0 +1,59 @@
+name: invar-falsify CI
+
+# Phase-1 CI: build and test the falsification instrument, validate the corpus
+# manifest, and run the harness with Semgrep genuinely installed so the static
+# leg executes. A run whose required leg is SKIPPED is honest (UNKNOWN), not a
+# failure — CI does not force verdicts.
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  falsify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build
+        run: cargo build --workspace --locked
+
+      - name: Test (acceptance)
+        run: cargo test --workspace --locked
+
+      - name: Install Semgrep (so the static leg genuinely executes)
+        run: pip install semgrep
+
+      - name: Validate manifest
+        run: cargo run -p invar-falsify --locked -- validate --manifest corpus_manifest.json
+
+      - name: Run falsification harness
+        run: |
+          cargo run -p invar-falsify --locked -- run \
+            --manifest corpus_manifest.json \
+            --composite composite.toml \
+            --output runs/ci
+
+      - name: Verify ledger integrity
+        run: cargo run -p invar-falsify --locked -- verify --ledger runs/ci/ledger.db
+
+      - name: Upload run artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: falsification-run
+          path: |
+            runs/ci/run_results.json
+            runs/ci/EPISTEMIC_REPORT.md

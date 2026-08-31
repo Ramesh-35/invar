@@ -1,0 +1,56 @@
+{
+  "corpus_version": "0.1.0-alpha",
+  "description": "INVAR Phase-1 falsification corpus. Five FIXTURE-tier cases. `expected_status` is an a-priori human hypothesis and is IGNORED by the evaluator, which decides only from executed-leg evidence.",
+  "cases": [
+    {
+      "id": "TC-001",
+      "description": "Cross-repository AST schema desync: producer removed `tax_amount_cents` for `tax_breakdown`; consumer still reads the removed field with `|| 0`, silently under-billing 5000 vs 5400.",
+      "cross_repository": true,
+      "failure_type": "AST_SCHEMA_DESYNC",
+      "evidence_tier": "FIXTURE",
+      "target_path": "./corpus/tc001_schema_desync",
+      "catch_signature": null,
+      "expected_status": "PROVEN_RESIDUE"
+    },
+    {
+      "id": "TC-002",
+      "description": "Concurrency invariant: non-atomic check-then-act on shared stock can drive inventory negative under interleaving.",
+      "cross_repository": false,
+      "failure_type": "CONCURRENCY_INVARIANT",
+      "evidence_tier": "FIXTURE",
+      "target_path": "./corpus/tc002_concurrency_invariant",
+      "catch_signature": null,
+      "expected_status": "UNKNOWN"
+    },
+    {
+      "id": "TC-003",
+      "description": "Runtime state leak: request-scoped user context stored in a module-level singleton can leak across requests.",
+      "cross_repository": false,
+      "failure_type": "RUNTIME_STATE_LEAK",
+      "evidence_tier": "FIXTURE",
+      "target_path": "./corpus/tc003_runtime_state_leak",
+      "catch_signature": null,
+      "expected_status": "UNKNOWN"
+    },
+    {
+      "id": "TC-004",
+      "description": "Temporal drift: token expiry validated against a different host's clock than it was issued on; clock drift flips validity.",
+      "cross_repository": false,
+      "failure_type": "TEMPORAL_DRIFT",
+      "evidence_tier": "FIXTURE",
+      "target_path": "./corpus/tc004_temporal_drift",
+      "catch_signature": null,
+      "expected_status": "UNKNOWN"
+    },
+    {
+      "id": "TC-005",
+      "description": "Local cleartext secret logging (TS console.log + Rust println!). A control case a good static rule SHOULD catch.",
+      "cross_repository": false,
+      "failure_type": "AST_SCHEMA_DESYNC",
+      "evidence_tier": "FIXTURE",
+      "target_path": "./corpus/tc005_secret_logging",
+      "catch_signature": "tc005",
+      "expected_status": "CAUGHT_BY_COMPOSITE"
+    }
+  ]
+}

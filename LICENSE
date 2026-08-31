@@ -1,0 +1,16 @@
+INVAR Platform — LICENSE PENDING
+
+[UNRESOLVED DECISION] The license for the INVAR Platform has not yet been
+chosen. This repository is established under an open-core intent (see INVAR.md
+section on monetization architecture, marked [STRATEGIC HYPOTHESIS]), but the
+concrete license text — including the open-core boundary between the community
+instrument and any enterprise components — is a deliberate deferred decision.
+
+Until this file is replaced with a chosen license:
+
+  - No open-source grant is implied.
+  - All rights reserved by the copyright holder.
+
+This placeholder exists so the repository structure is complete and the
+license decision is explicit rather than silently assumed. Do not treat the
+absence of a chosen license as permission.

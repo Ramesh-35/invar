@@ -1,0 +1,28 @@
+[package]
+name = "invar-falsify"
+version = "0.1.0-alpha"
+edition = "2021"
+description = "INVAR Phase-1 deterministic falsification instrument (EICS category-residue probe)."
+license = "LicenseRef-INVAR-PENDING"
+publish = false
+
+[[bin]]
+name = "invar-falsify"
+path = "src/main.rs"
+
+[lib]
+name = "invar_falsify"
+path = "src/lib.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+blake3 = "1"
+rusqlite = { version = "0.32", features = ["bundled"] }
+thiserror = "1"
+anyhow = "1"
+
+[dev-dependencies]
+# Used only by the ledger tamper test to edit a committed row out-of-band.
+rusqlite = { version = "0.32", features = ["bundled"] }
