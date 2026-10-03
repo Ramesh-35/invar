@@ -56,3 +56,18 @@ a missing tool from masquerading as evidence that the composite failed.
 **candidate** but can never, by themselves, prove a category claim. Only `REAL`
 cross-repository incidents can promote a candidate toward evidence, and only
 through a confirming differential probe (DR-003).
+
+## Gate 0 adjudication (2026-10-03)
+
+The committed source was built and its acceptance suite run and adjudicated.
+This is a has-implementation confirmation only. It is not REAL-tier evidence.
+
+- Commit tested: `2164ac4`
+- Source fingerprint (sha256 over all `.rs` + `Cargo.toml` + `Cargo.lock`): `821cb199c128fcfcbf4962622d7d03dbc59b30950c5914744e5edc73165cbe3d`
+- `cargo build --workspace --locked`: GREEN
+- `cargo test --workspace --locked -- --nocapture --test-threads=1`: 6/6 PASS (0 failed, 0 ignored, 0 skipped)
+- has-implementation: CONFIRMED (was UNCONFIRMED)
+- Rung: `TESTED-SYNTHETIC` (ADJUDICATED). Never bare `[PROVEN]`, never REAL.
+- Environment: Linux cloud container, cargo/rustc 1.95.0.
+- Caveat: NOT Mac-native execution. A founder-side `cargo test` on the authoritative machine remains a separate confirmation.
+- Boundary: no REAL-tier evidence exists yet. All six tests are synthetic / FIXTURE evidence.
