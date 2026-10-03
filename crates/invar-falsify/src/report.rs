@@ -53,6 +53,20 @@ impl RunReport {
         }
     }
 
+    /// Run-level conservation. Two properties, both must hold:
+    ///   1. the three verdict buckets partition every case (nothing dropped);
+    ///   2. every case's composite-coverage accounting balances.
+    /// Property 1 is trivially true for three total variants, but asserting it
+    /// guards against a future verdict state silently escaping the partition,
+    /// and property 2 is the per-case residual conservation.
+    pub fn conservation_holds(&self) -> bool {
+        let total = self.cases.len();
+        let partitioned = self.count(EpistemicStatus::CAUGHT_BY_COMPOSITE)
+            + self.count(EpistemicStatus::PROVEN_RESIDUE)
+            + self.count(EpistemicStatus::UNKNOWN);
+        partitioned == total && self.cases.iter().all(|c| c.conservation.holds())
+    }
+
     /// Serialize the run artifact (without any self-referential hash).
     pub fn to_results_json(&self) -> serde_json::Result<String> {
         serde_json::to_string_pretty(self)
@@ -103,13 +117,19 @@ impl RunReport {
 
         out.push_str("## Per-case detail\n\n");
         for c in &self.cases {
-            out.push_str(&format!("### {} — {:?}\n\n", c.id, c.status));
+            out.push_str(&format!("### {} - {:?}\n\n", c.id, c.status));
             out.push_str(&format!("_{}_\n\n", c.description));
             out.push_str(&format!(
                 "- failure_type: `{:?}` | evidence tier: `{:?}` | cross-repository: `{}`\n",
                 c.failure_type, c.evidence_tier, c.cross_repository
             ));
             out.push_str(&format!("- rationale: {}\n", c.rationale));
+            out.push_str(&format!(
+                "- coverage (conservation-with-residual): {}/{} composite leg(s) executed; residual (uncovered, NOT cleared by any catch): [{}]\n",
+                c.conservation.executed_legs,
+                c.conservation.total_legs,
+                c.conservation.residual_legs.join(", ")
+            ));
             out.push_str("- composite legs:\n");
             for leg in &c.legs {
                 let caught = if leg.caught_designated {
@@ -119,7 +139,7 @@ impl RunReport {
                 };
                 let state = leg_state_str(leg.state);
                 out.push_str(&format!(
-                    "  - `{}`: {} — {}{}\n",
+                    "  - `{}`: {} - {}{}\n",
                     leg.tool, state, leg.summary, caught
                 ));
             }
@@ -138,7 +158,12 @@ impl RunReport {
         out.push_str("- [x] No performance/security/zero-knowledge benchmark was manufactured.\n");
         out.push_str("- [x] No fabricated tool verdict: `SKIPPED` and `ERROR` legs were counted as neither PASS nor \"caught nothing\".\n");
         out.push_str("- [x] No verdict was assigned from a case's `failure_type` or `expected_status`.\n");
-        out.push_str("- [x] FIXTURE evidence was not promoted to a proven category claim.\n\n");
+        out.push_str("- [x] FIXTURE evidence was not promoted to a proven category claim.\n");
+        out.push_str(&format!(
+            "- [{}] Conservation holds: the three verdict buckets partition all {} case(s) and every case's composite-coverage residual is preserved, never cleared by a catch.\n\n",
+            if self.conservation_holds() { "x" } else { " " },
+            self.cases.len()
+        ));
         out.push_str(&format!(
             "Leg-state legend: `PASS`/`FAIL` = executed; `SKIPPED` = did not run (tool absent/offline); \
              `ERROR` = ran but uninterpretable; `UNKNOWN` = executed but irreducible. \

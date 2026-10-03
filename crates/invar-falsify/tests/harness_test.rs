@@ -1,10 +1,11 @@
 //! Acceptance tests for the Phase-1 falsification instrument.
 //!
-//! Exactly six tests, split between the classifier's epistemic honesty and the
-//! bi-temporal ledger's integrity. These are the ground truth the crate is
-//! written to satisfy.
+//! Ten tests in four groups: the classifier's epistemic honesty (1-3), the
+//! bi-temporal ledger's integrity (4-6), temporal admissibility via as-of
+//! reconstruction (7-8, GAP-C), and conservation-with-residual (9-10, GAP-F).
+//! These are the ground truth the crate is written to satisfy.
 
-use invar_falsify::evaluator::{classify, LegState, LegVerdict};
+use invar_falsify::evaluator::{classify, composite_residual, LegState, LegVerdict};
 use invar_falsify::ledger::{Ledger, LedgerError};
 use invar_falsify::manifest::{
     EpistemicStatus, EvidenceTier, FailureType, TestCase,
@@ -165,4 +166,118 @@ fn ledger_uses_wal_on_disk() {
         assert_eq!(ledger.journal_mode().unwrap().to_lowercase(), "wal");
     }
     cleanup(&path);
+}
+
+// 7. (GAP-C) A fact recorded later (t_r) is invisible to an earlier as-of
+//    reconstruction: later knowledge cannot contaminate an earlier judgment.
+#[test]
+fn replay_as_of_excludes_later_knowledge() {
+    let path = unique_db_path("asof_tr");
+    {
+        let ledger = Ledger::open(path.to_str().unwrap()).unwrap();
+        // A: valid at 10, recorded at 100. B: valid at 20, recorded at 200.
+        ledger.append_at(10, 100, "case_verdict", "A", "content-a").unwrap();
+        ledger.append_at(20, 200, "case_verdict", "B", "content-b").unwrap();
+
+        // As known at t_r = 150 (valid-time open), only A is admissible.
+        let seen = ledger.replay_as_of(150, i64::MAX).unwrap();
+        assert_eq!(seen.len(), 1);
+        assert_eq!(seen[0].subject, "A");
+
+        // As known at t_r = 200, both are admissible.
+        let seen_all = ledger.replay_as_of(200, i64::MAX).unwrap();
+        assert_eq!(seen_all.len(), 2);
+
+        // The full chain still verifies regardless of the as-of slice.
+        assert_eq!(ledger.verify().unwrap(), 2);
+    }
+    cleanup(&path);
+}
+
+// 8. (GAP-C) The valid-time bound is enforced independently of t_r, and a
+//    tampered row is still caught during as-of reconstruction.
+#[test]
+fn replay_as_of_respects_valid_time_and_catches_tamper() {
+    let path = unique_db_path("asof_tv");
+    {
+        let ledger = Ledger::open(path.to_str().unwrap()).unwrap();
+        ledger.append_at(10, 100, "case_verdict", "A", "content-a").unwrap();
+        // B becomes true in the world only at t_v = 300, though recorded early.
+        ledger.append_at(300, 110, "case_verdict", "B", "content-b").unwrap();
+
+        // As-of valid-time 50 excludes B even though it was recorded by t_r=110.
+        let seen = ledger.replay_as_of(i64::MAX, 50).unwrap();
+        assert_eq!(seen.len(), 1);
+        assert_eq!(seen[0].subject, "A");
+    }
+
+    // Tamper with row 1 out-of-band; as-of reconstruction must refuse.
+    {
+        let raw = rusqlite::Connection::open(&path).unwrap();
+        raw.execute("UPDATE lineage SET content = 'tampered' WHERE id = 1", [])
+            .unwrap();
+    }
+    let ledger = Ledger::open(path.to_str().unwrap()).unwrap();
+    match ledger.replay_as_of(i64::MAX, i64::MAX) {
+        Err(LedgerError::StateMismatch { id }) => assert_eq!(id, 1),
+        other => panic!("expected StateMismatch at id 1, got {other:?}"),
+    }
+    cleanup(&path);
+}
+
+// 9. (GAP-F) A catch does not clear the residual: a CAUGHT_BY_COMPOSITE case
+//    whose other legs were SKIPPED still records them as uncovered.
+#[test]
+fn catch_preserves_composite_residual() {
+    let tc = case(FailureType::AST_SCHEMA_DESYNC, Some("tc005"));
+    let legs = vec![
+        leg("semgrep", LegState::FAIL, 1, true),
+        skipped("opa"),
+        skipped("opentelemetry"),
+        skipped("property_testing"),
+    ];
+    let (status, _why) = classify(&tc, &legs);
+    assert_eq!(status, EpistemicStatus::CAUGHT_BY_COMPOSITE);
+
+    let cons = composite_residual(&legs);
+    assert_eq!(cons.total_legs, 4);
+    assert_eq!(cons.executed_legs, 1);
+    assert_eq!(
+        cons.residual_legs,
+        vec![
+            "opa".to_string(),
+            "opentelemetry".to_string(),
+            "property_testing".to_string()
+        ]
+    );
+    assert!(cons.holds(), "conservation: total == executed + residual");
+}
+
+// 10. (GAP-F) The conservation equation balances whether all legs executed or
+//     none did: the residual is accounted for, never silently dropped.
+#[test]
+fn conservation_balances_across_coverage() {
+    // All four executed: residual empty.
+    let all = vec![
+        leg("semgrep", LegState::PASS, 0, false),
+        leg("opa", LegState::PASS, 0, false),
+        leg("opentelemetry", LegState::FAIL, 1, false),
+        leg("property_testing", LegState::PASS, 0, false),
+    ];
+    let c_all = composite_residual(&all);
+    assert_eq!(c_all.executed_legs, 4);
+    assert!(c_all.residual_legs.is_empty());
+    assert!(c_all.holds());
+
+    // None executed: everything is residual, nothing vanishes.
+    let none = vec![
+        skipped("semgrep"),
+        skipped("opa"),
+        skipped("opentelemetry"),
+        skipped("property_testing"),
+    ];
+    let c_none = composite_residual(&none);
+    assert_eq!(c_none.executed_legs, 0);
+    assert_eq!(c_none.residual_legs.len(), 4);
+    assert!(c_none.holds());
 }

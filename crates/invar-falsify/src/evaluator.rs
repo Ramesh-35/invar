@@ -82,6 +82,54 @@ impl LegVerdict {
     }
 }
 
+/// Conservation-with-residual accounting for one case.
+///
+/// A catch by one composite leg does NOT mean the composite as a whole covered
+/// the case: other legs may have been SKIPPED/ERROR and produced no
+/// observation. This records that uncovered remainder explicitly, so a verdict
+/// of `CAUGHT_BY_COMPOSITE` can never silently imply total coverage. The
+/// residual is computed from leg evidence alone and is independent of the
+/// verdict.
+///
+/// Conservation invariant (checked by `holds`):
+///   `total_legs == executed_legs + residual_legs.len()`
+#[derive(Debug, Clone, Serialize)]
+pub struct CaseConservation {
+    /// Breadth of the composite considered for this case (number of legs run).
+    pub total_legs: usize,
+    /// Legs that produced an executed observation (PASS/FAIL).
+    pub executed_legs: usize,
+    /// Legs that produced no executed observation (SKIPPED/ERROR/UNKNOWN): the
+    /// uncovered remainder, preserved even when the case was caught.
+    pub residual_legs: Vec<String>,
+}
+
+impl CaseConservation {
+    /// The conservation equation. True by construction here; asserted in tests
+    /// and in the run report so a future change cannot let coverage vanish.
+    pub fn holds(&self) -> bool {
+        self.total_legs == self.executed_legs + self.residual_legs.len()
+    }
+}
+
+/// Compute the composite-coverage residual for a case from its legs. Pointedly
+/// independent of the verdict: a `CAUGHT_BY_COMPOSITE` case whose other legs
+/// were SKIPPED still has a non-empty residual.
+pub fn composite_residual(legs: &[LegVerdict]) -> CaseConservation {
+    let total_legs = legs.len();
+    let executed_legs = legs.iter().filter(|l| l.state.executed()).count();
+    let residual_legs = legs
+        .iter()
+        .filter(|l| !l.state.executed())
+        .map(|l| l.tool.clone())
+        .collect();
+    CaseConservation {
+        total_legs,
+        executed_legs,
+        residual_legs,
+    }
+}
+
 /// The full evaluated result for one case.
 #[derive(Debug, Clone, Serialize)]
 pub struct CaseResult {
@@ -93,6 +141,9 @@ pub struct CaseResult {
     pub status: EpistemicStatus,
     pub rationale: String,
     pub expected_status: Option<EpistemicStatus>,
+    /// Conservation-with-residual accounting: what the composite did NOT cover,
+    /// recorded regardless of the verdict.
+    pub conservation: CaseConservation,
     pub legs: Vec<LegVerdict>,
 }
 
@@ -170,6 +221,7 @@ pub fn evaluate_case(tc: &TestCase, composite: &CompositeConfig, timeout: Durati
         run_otel(&composite.opentelemetry, tc),
         run_property(&composite.property_testing, tc),
     ];
+    let conservation = composite_residual(&legs);
     let (status, rationale) = classify(tc, &legs);
     CaseResult {
         id: tc.id.clone(),
@@ -180,6 +232,7 @@ pub fn evaluate_case(tc: &TestCase, composite: &CompositeConfig, timeout: Durati
         status,
         rationale,
         expected_status: tc.expected_status,
+        conservation,
         legs,
     }
 }

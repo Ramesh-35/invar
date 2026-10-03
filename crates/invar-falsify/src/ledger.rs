@@ -162,6 +162,23 @@ impl Ledger {
         self.commit(now, now, kind, subject, content)
     }
 
+    /// Append with BOTH clocks explicit. This is the honest primitive for
+    /// recording a fact whose knowledge time (t_r) is not "now" (a historical
+    /// import, or a controlled reconstruction fixture). The recorded t_r is
+    /// bound into `lineage_hash` via the context string, so a t_r written here
+    /// cannot later be altered without `verify()` detecting it: an explicit t_r
+    /// is a recorded claim, not a trusted-forever flag.
+    pub fn append_at(
+        &self,
+        valid_time_us: i64,
+        transaction_time_us: i64,
+        kind: &str,
+        subject: &str,
+        content: &str,
+    ) -> Result<LineageNode, LedgerError> {
+        self.commit(valid_time_us, transaction_time_us, kind, subject, content)
+    }
+
     fn last_lineage_hash(&self) -> Result<[u8; 32], LedgerError> {
         let row: Option<Vec<u8>> = self
             .conn
@@ -217,6 +234,79 @@ impl Ledger {
             count += 1;
         }
         Ok(count)
+    }
+
+    /// Bi-temporal as-of reconstruction (temporal admissibility gate).
+    ///
+    /// Re-walks and verifies the FULL chain first, exactly as `verify()` does,
+    /// so tampering anywhere is still caught, then returns only the nodes that
+    /// were admissible as known at `as_of_t_r` and true at or before
+    /// `as_of_t_v`. A row is admitted only when BOTH hold:
+    ///
+    ///   * `transaction_time_us <= as_of_t_r`  (it had been recorded by then)
+    ///   * `valid_time_us        <= as_of_t_v`  (it was true in the world by then)
+    ///
+    /// A fact recorded after `as_of_t_r` is therefore invisible to this
+    /// reconstruction. That is the temporal-admissibility guarantee: later
+    /// knowledge cannot contaminate an earlier judgment. The chain is verified
+    /// over all rows (not just the admissible prefix) because `lineage_hash`
+    /// binds every row to its predecessor, so integrity is a property of the
+    /// whole log, not of a slice of it.
+    pub fn replay_as_of(
+        &self,
+        as_of_t_r: i64,
+        as_of_t_v: i64,
+    ) -> Result<Vec<LineageNode>, LedgerError> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id, valid_time_us, transaction_time_us, kind, subject, content, state_hash, lineage_hash
+             FROM lineage ORDER BY id ASC",
+        )?;
+        let rows = stmt.query_map([], |r| {
+            Ok((
+                r.get::<_, i64>(0)?,
+                r.get::<_, i64>(1)?,
+                r.get::<_, i64>(2)?,
+                r.get::<_, String>(3)?,
+                r.get::<_, String>(4)?,
+                r.get::<_, String>(5)?,
+                r.get::<_, Vec<u8>>(6)?,
+                r.get::<_, Vec<u8>>(7)?,
+            ))
+        })?;
+
+        let mut prev = [0u8; 32];
+        let mut admissible: Vec<LineageNode> = Vec::new();
+        for row in rows {
+            let (id, tv, tr, kind, subject, content, stored_state, stored_lin) = row?;
+            let stored_state = to_hash(id, stored_state)?;
+            let stored_lin = to_hash(id, stored_lin)?;
+
+            let recomputed_state = state_hash(&content);
+            if recomputed_state != stored_state {
+                return Err(LedgerError::StateMismatch { id });
+            }
+            let context = format!("{kind}|{subject}|{tv}|{tr}");
+            let recomputed_lin = lineage_hash(&prev, &recomputed_state, &context);
+            if recomputed_lin != stored_lin {
+                return Err(LedgerError::LineageBroken { id });
+            }
+            prev = stored_lin;
+
+            // Admissibility filter applied only AFTER integrity is confirmed.
+            if tr <= as_of_t_r && tv <= as_of_t_v {
+                admissible.push(LineageNode {
+                    id,
+                    valid_time_us: tv,
+                    transaction_time_us: tr,
+                    kind,
+                    subject,
+                    content,
+                    state_hash: recomputed_state,
+                    lineage_hash: stored_lin,
+                });
+            }
+        }
+        Ok(admissible)
     }
 
     /// The on-disk journal mode (used to prove WAL is active).
