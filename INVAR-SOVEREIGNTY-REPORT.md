@@ -34,9 +34,12 @@ reserved for REAL evidence and is never a synthetic status.
   `rules/opa/falsification_policy.rego`.
 - Docs: `OVERVIEW, SIMPLICITY, laws/M1, laws/M2, strategy/CUDA-THESIS`,
   `decisions/DR-001..006`, `epistemic/STATUS`, `falsification/METHODOLOGY`.
-- CI: ABSENT. `action/` holds only `.gitkeep`; there is no `.github/workflows`.
-  (Reconciliation note: earlier scaffolds referenced a `ci.yml`; the committed
-  repo has none.)
+- CI: PRESENT at `.github/workflows/ci.yml` (59 lines): on push to master/main
+  and on pull request it installs the Rust stable toolchain, runs `cargo build`
+  and `cargo test --workspace --locked`, installs Semgrep, validates the
+  manifest, runs the harness to `runs/ci`, and verifies the ledger. DEFINED,
+  NEVER EXECUTED: the repo has no remote, so this workflow has not run once.
+  (`action/` holds only `.gitkeep`; the composite GitHub Action is deferred.)
 
 ## C. Mathematical / constitutional inventory
 Implemented in code (crate):
@@ -120,7 +123,8 @@ and no reproduced differential isolation.
 
 ## I. Top contradictions / gaps
 1. Staging master overstates rungs vs the math ruling. Resolved: repo corrected, master superseded.
-2. No CI in the committed repo. Gap.
+2. CI is defined (`.github/workflows/ci.yml`) but has never executed: the repo
+   has no remote. The residual gap is execution and adjudication, not absence.
 3. Math-registry primitives are formalized off-repo, absent from disk. Gap.
 4. Tests cannot be re-run in the device VM (no cargo). The cheap unblock is a
    remote-adjudicated `cargo test` on the Mac to move the rung from
