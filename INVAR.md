@@ -80,17 +80,21 @@ epistemic vocabularies are in
 - Nothing here claims performance, security, correctness, or category
   superiority as fact.
 
-## F. Verified facts (PROVEN in this repository)
+## F. Verified facts (TEST-PROVEN on synthetic fixtures)
 
-1. `[PROVEN]` The classifier never reads `failure_type`/`expected_status` to
+1. `[TEST-PROVEN]` The classifier never reads `failure_type`/`expected_status` to
    decide a verdict's polarity (it reads `failure_type` only for leg-coverage).
-2. `[PROVEN]` The ledger keeps valid-time and transaction-time in distinct
+2. `[TEST-PROVEN]` The ledger keeps valid-time and transaction-time in distinct
    columns and re-verifies its BLAKE3 chain by recomputation, not a stored flag.
-3. `[PROVEN]` A silent row edit in the ledger is detected as a `StateMismatch`.
+   The chain authenticates the transaction-time append log only, not a poset edge-set.
+3. `[ADVERSARIALLY-VALIDATED-ON-SYNTHETIC]` A silent row edit in the ledger is detected as a `StateMismatch`.
 
-(These become fully PROVEN once `cargo test` is executed in an environment with
-the Rust toolchain; until then they are **claimed-and-authored**, and the run
-report will state which have actually executed.)
+(Rung: TEST-PROVEN. The six tests are authored in-repo and were last reported
+green by Claude Code on this Mac in an earlier session. They are NOT re-executed
+or adjudicated this session (the device shell has no `cargo`), and the repo has
+no remote, so HAS-IMPL stays UNCONFIRMED under the build gate until a fresh green
+`cargo test` is run and adjudicated. Bare `PROVEN` is reserved for REAL,
+non-synthetic evidence and is never a synthetic status.)
 
 ## G. Hypotheses (testable, untested)
 

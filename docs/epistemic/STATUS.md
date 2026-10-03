@@ -12,6 +12,15 @@ Mixing them is an error.
 | `[TARGET]` | A desired outcome with no supporting evidence yet. |
 | `[UNVERIFIED]` | Asserted elsewhere; not established here. |
 | `[STRATEGIC HYPOTHESIS]` | A business/positioning bet, not a technical fact. |
+| `[TEST-PROVEN]` | Demonstrated by an automated test on SYNTHETIC fixtures; last green run reported, not re-adjudicated. Never equal to `[PROVEN]`. |
+| `[ADVERSARIALLY-VALIDATED-ON-SYNTHETIC]` | A test that actively tries to break the property (e.g. ledger tamper detection) passed, on synthetic data. Still synthetic. |
+
+
+> **Reservation (math-thread ruling; DR-003/DR-006).** Bare `[PROVEN]` is
+> reserved for REAL, non-synthetic evidence: a differential residue isolated
+> on a real cross-repository incident. Synthetic harness results are at most
+> `[TEST-PROVEN]`. A BLAKE3 hash chain authenticates the transaction-time
+> append log only, not a poset edge-set.
 
 ## 2. Case verdict (the evaluator's output — exactly one per case)
 
