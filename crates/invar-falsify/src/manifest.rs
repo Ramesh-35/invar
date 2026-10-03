@@ -34,7 +34,7 @@ pub enum EpistemicStatus {
 /// Provenance of the evidence backing a case. FIXTURE evidence can never, by
 /// itself, promote a category claim; only REAL evidence can.
 #[allow(non_camel_case_types)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EvidenceTier {
     FIXTURE,
     REAL,

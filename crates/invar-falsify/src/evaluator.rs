@@ -130,6 +130,23 @@ pub fn composite_residual(legs: &[LegVerdict]) -> CaseConservation {
     }
 }
 
+/// GAP-B evaluator hook: independence-aware corroboration over evidence SOURCES.
+///
+/// This is the aggregation the composite will use once it carries multiple
+/// evidence carriers per invariant. It is deliberately NOT called by `classify`
+/// today: the Phase-1 composite legs (semgrep/opa/opentelemetry/property) are
+/// distinct tools, not multiple carriers of one observation, so there is no
+/// correlated evidence to de-duplicate in the live path yet. Until such evidence
+/// exists this is exercised directly by the acceptance tests. Stating that
+/// plainly is the point: the capability is real and tested; its live invocation
+/// is not yet earned, so `classify`'s honesty core is left untouched.
+pub fn corroboration_of(
+    graph: &crate::provenance::ProvenanceGraph,
+    source_ids: &[&str],
+) -> crate::provenance::Corroboration {
+    graph.corroboration(source_ids)
+}
+
 /// The full evaluated result for one case.
 #[derive(Debug, Clone, Serialize)]
 pub struct CaseResult {

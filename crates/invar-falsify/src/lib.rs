@@ -19,4 +19,5 @@ pub mod config;
 pub mod evaluator;
 pub mod ledger;
 pub mod manifest;
+pub mod provenance;
 pub mod report;

@@ -1,15 +1,26 @@
 //! Acceptance tests for the Phase-1 falsification instrument.
 //!
-//! Ten tests in four groups: the classifier's epistemic honesty (1-3), the
+//! Twelve tests in five groups: the classifier's epistemic honesty (1-3), the
 //! bi-temporal ledger's integrity (4-6), temporal admissibility via as-of
-//! reconstruction (7-8, GAP-C), and conservation-with-residual (9-10, GAP-F).
-//! These are the ground truth the crate is written to satisfy.
+//! reconstruction (7-8, GAP-C), conservation-with-residual (9-10, GAP-F), and
+//! provenance independence (11-12, GAP-B). These are the ground truth the crate
+//! is written to satisfy. (Tests 11-12 are kept here rather than in a separate
+//! acceptance.rs so the crate's acceptance ground truth stays in one file.)
 
 use invar_falsify::evaluator::{classify, composite_residual, LegState, LegVerdict};
 use invar_falsify::ledger::{Ledger, LedgerError};
 use invar_falsify::manifest::{
     EpistemicStatus, EvidenceTier, FailureType, TestCase,
 };
+use invar_falsify::provenance::{Corroboration, Independence, ProvenanceGraph, ProvenanceSource};
+
+fn source(id: &str, ancestors: &[&str]) -> ProvenanceSource {
+    ProvenanceSource {
+        source_id: id.to_string(),
+        ancestor_ids: ancestors.iter().map(|s| s.to_string()).collect(),
+        trust_tier: EvidenceTier::FIXTURE,
+    }
+}
 
 fn case(failure_type: FailureType, catch_signature: Option<&str>) -> TestCase {
     TestCase {
@@ -280,4 +291,55 @@ fn conservation_balances_across_coverage() {
     assert_eq!(c_none.executed_legs, 0);
     assert_eq!(c_none.residual_legs.len(), 4);
     assert!(c_none.holds());
+}
+
+// 11. (GAP-B) Two sources descending from one ancestor are not independent,
+//     and an unknown source can never be declared independent.
+#[test]
+fn shared_ancestor_sources_are_not_independent() {
+    let mut g = ProvenanceGraph::new();
+    g.add_source(source("root", &[]));
+    g.add_source(source("a", &["root"]));
+    g.add_source(source("b", &["root"]));
+
+    assert!(!g.are_independent("a", "b"));
+    assert_eq!(g.independence("a", "b"), Independence::Correlated);
+
+    // A source is never independent of itself.
+    assert_eq!(g.independence("a", "a"), Independence::Correlated);
+
+    // Unknown provenance is Unknown, never Independent.
+    assert_eq!(g.independence("a", "ghost"), Independence::Unknown);
+    assert!(!g.are_independent("a", "ghost"));
+
+    // Genuinely disjoint lineages are independent.
+    g.add_source(source("c", &[]));
+    assert!(g.are_independent("a", "c"));
+    assert_eq!(g.independence("a", "c"), Independence::Independent);
+}
+
+// 12. (GAP-B) Shared-ancestry corroboration stays BANDED; only disjoint
+//     lineages promote to CONFIDENT. Adding more carriers from the same
+//     lineage must not inflate standing.
+#[test]
+fn shared_ancestry_does_not_promote_standing() {
+    let mut g = ProvenanceGraph::new();
+    g.add_source(source("root", &[]));
+    g.add_source(source("a", &["root"]));
+    g.add_source(source("b", &["root"]));
+
+    // a and b share "root": correlated, so they cannot corroborate as two.
+    assert_eq!(g.corroboration(&["a", "b"]), Corroboration::Banded);
+
+    // A genuinely independent source with disjoint lineage promotes to CONFIDENT.
+    g.add_source(source("c", &[]));
+    assert_eq!(g.corroboration(&["a", "c"]), Corroboration::Confident);
+
+    // a + b + c is still only TWO independent groups ({a,b}, {c}): adding b, a
+    // non-independent carrier, does not inflate beyond CONFIDENT nor collapse it.
+    assert_eq!(g.corroboration(&["a", "b", "c"]), Corroboration::Confident);
+
+    // Degenerate cases: one source is BANDED, none is UNSUPPORTED.
+    assert_eq!(g.corroboration(&["a"]), Corroboration::Banded);
+    assert_eq!(g.corroboration(&[]), Corroboration::Unsupported);
 }
