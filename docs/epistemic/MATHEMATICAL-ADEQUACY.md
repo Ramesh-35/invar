@@ -1,9 +1,10 @@
 # INVAR Mathematical Adequacy Audit
 
 This is an AUDIT, not an implementation. No crate, evaluator, ledger, or test
-was changed to produce it. It measures what the repository at commit `af1b1b6`
-(code unchanged since `2164ac4`, Gate 0) can and cannot establish for each of the
-six adequacy primitives. It imports no NEXTLOGIC or VEM vocabulary: every
+was changed to produce it. It measures what the repository can and cannot establish for each of the six
+adequacy primitives. First issued at commit `af1b1b6` (code at Gate 0
+`2164ac4`); rows C and F updated at commit `6c68af1` (source fingerprint
+`d72bd765`), GAP-C and GAP-F closed on synthetic rows, 10/10 acceptance tests. It imports no NEXTLOGIC or VEM vocabulary: every
 primitive is stated generically, over any system that presents an invariant.
 
 Method: for each primitive the constitution requirement is matched against the
@@ -34,10 +35,10 @@ UNKNOWN.
 |---|---|---|
 | A Epistemic Standing | PARTIAL | Case verdict carries a three-state standing (`EpistemicStatus`) plus rationale and refuses over-claim; no per-evidence standing, no standing algebra. |
 | B Provenance Independence | ABSENT | No model of evidence provenance or independence from the subject; no shared-ancestry de-duplication. A different axis (verdict independent of the declared expectation) is present and tested, but it is not this primitive. |
-| C Temporal Admissibility | PARTIAL | Bitemporal substrate present and tamper-evident (`valid_time_us` vs `transaction_time_us`, `verify()`), but there is no as-of reconstruction and no admissibility gate, so contamination cannot yet be prevented or tested. |
+| C Temporal Admissibility | SATISFIED (synthetic) | `replay_as_of(as_of_t_r, as_of_t_v)` verifies the full chain then admits only rows with `t_r <= as_of_t_r` and `t_v <= as_of_t_v`; a later-recorded fact is invisible to an earlier reconstruction (tests 7-8). GAP-C closed on synthetic rows, commit `6c68af1`. |
 | D Reality Boundary | PARTIAL | `EvidenceTier::FIXTURE`/`REAL` is load-bearing in the verdict language and refuses to promote FIXTURE, but the tier is a self-declared manifest field with no verification, so promotion is on the honor system. |
 | E Weakest-link Composition | PARTIAL | The non-execution dimension is genuinely proven: a missing/SKIPPED/ERROR required leg forces UNKNOWN (`classify` + test 3). The "otherwise inadmissible" dimension (an executed but compromised leg) is not modeled. |
-| F Conservation-with-residual | PARTIAL | UNKNOWN is a first-class non-collapsing state and residue is named and counted; but a catch is treated as full explanation (no residual after a catch) and no conservation invariant is asserted or tested. |
+| F Conservation-with-residual | SATISFIED (synthetic) | `composite_residual` records uncovered legs on every case and preserves them even on a catch; `CaseConservation::holds` and `RunReport::conservation_holds` assert the balance (tests 9-10). GAP-F closed on synthetic rows, commit `6c68af1`. Residual is composite-coverage breadth; per-finding residual is future work. |
 
 ## Final adjudication
 
@@ -45,18 +46,21 @@ UNKNOWN.
 MATHEMATICAL ADEQUACY
 A Epistemic Standing:        PARTIAL
 B Provenance Independence:   ABSENT
-C Temporal Admissibility:    PARTIAL
+C Temporal Admissibility:    SATISFIED (synthetic)
 D Reality Boundary:          PARTIAL
 E Weakest-link Composition:  PARTIAL
-F Conservation-with-residual:PARTIAL
+F Conservation-with-residual:SATISFIED (synthetic)
 Overall adequacy: NOT ESTABLISHED
 ```
 
 Overall is NOT ESTABLISHED by INVAR's own weakest-link rule: B is ABSENT as an
-enforced property, and no primitive is fully SATISFIED. The single genuinely
-proven adequacy behavior in the repository is the execution-coverage weakest
-link inside E. Everything else is substrate, declaration, or language discipline,
-not demonstrated adequacy.
+enforced property, so the composite is capped there no matter how many other
+primitives advance. As of commit `6c68af1`, C and F are SATISFIED on synthetic
+ledger rows and fixtures (GAP-C, GAP-F closed, 10/10 acceptance tests), and the
+execution-coverage weakest link inside E remains proven. "(synthetic)" means
+TESTED-SYNTHETIC: proven on synthetic rows, never REAL. D is still on the honor
+system and B is still unmodeled; until B exists and D is enforced, overall
+adequacy cannot rise above NOT ESTABLISHED.
 
 ## Per-primitive evidence
 
@@ -109,7 +113,7 @@ not demonstrated adequacy.
 9. Gap requires: new architecture (a provenance/independence model on evidence),
    not merely new tests.
 
-### C. Temporal Admissibility: PARTIAL
+### C. Temporal Admissibility: SATISFIED (synthetic)
 
 1. Constitution requires: later-known facts must not participate in a
    reconstruction whose knowledge cut precedes them; replay at T must match what
@@ -129,8 +133,10 @@ not demonstrated adequacy.
 7. Smallest falsification attack: append a fact at t_r = T2 with t_v = T1, then
    ask for the state as known at T1; nothing restricts the answer to rows with
    t_r <= T1.
-8. Status: PARTIAL (substrate present and tested; the admissibility judgment is
-   absent).
+8. Status: SATISFIED on synthetic rows (TESTED-SYNTHETIC). UPDATE commit
+   `6c68af1`: `replay_as_of` implements the admissibility gate; tests 7-8 prove a
+   later-recorded fact is invisible to an earlier reconstruction and that an
+   out-of-band tampered row is still caught during reconstruction. Not REAL.
 9. Gap requires: new code (an as-of reconstruction query plus an admissibility
    gate) over the EXISTING ledger columns. No schema change needed.
 
@@ -186,7 +192,7 @@ not demonstrated adequacy.
 9. Gap requires: new code to recognize executed-but-inadmissible, which itself
    depends on B (independence) and D (reality boundary) existing first.
 
-### F. Conservation-with-residual: PARTIAL
+### F. Conservation-with-residual: SATISFIED (synthetic)
 
 1. Constitution requires: a successful finding must not imply total coverage;
    the uncovered/unexplained remainder must be accounted for and preserved.
@@ -207,9 +213,12 @@ not demonstrated adequacy.
 7. Smallest falsification attack: a case that is partly caught and partly
    uncaught; the trichotomy forces one label and the uncaught part of a caught
    case is lost.
-8. Status: PARTIAL.
-9. Gap requires: new representation (a residual attached to every verdict,
-   including catches) and a tested conservation invariant over the partition.
+8. Status: SATISFIED on synthetic rows (TESTED-SYNTHETIC). UPDATE commit
+   `6c68af1`: `composite_residual`, `CaseConservation::holds`, and
+   `RunReport::conservation_holds` record and assert the residual, preserved
+   even on a catch (tests 9-10). Residual is composite-coverage breadth.
+9. Remaining (not blocking closure): a richer per-finding residual within a
+   partially-explained divergence. Future work.
 
 ## Gap ledger
 
@@ -243,7 +252,7 @@ not demonstrated adequacy.
 - REALITY DEPENDENCY: a genuine external artifact to attest. This gap cannot be
   fully closed with fixtures.
 
-### GAP-C (no as-of temporal reconstruction)
+### GAP-C (as-of temporal reconstruction) - CLOSED on synthetic rows (commit `6c68af1`)
 - WHY IT MATTERS: without replay(T), INVAR cannot show that an earlier judgment
   was not contaminated by later knowledge, which is the core temporal guarantee.
 - CURRENT EVIDENCE: bitemporal columns and tamper-evident chain exist; no as-of
@@ -254,7 +263,7 @@ not demonstrated adequacy.
   existing `lineage` table plus a test. No schema change.
 - REALITY DEPENDENCY: none; provable on synthetic rows.
 
-### GAP-F (conservation after a catch)
+### GAP-F (conservation after a catch) - CLOSED on synthetic rows (commit `6c68af1`)
 - WHY IT MATTERS: treating a catch as total explanation lets a partial success
   hide an uncovered remainder.
 - CURRENT EVIDENCE: residue and UNKNOWN exist; no residual after a catch, no
@@ -277,8 +286,9 @@ not demonstrated adequacy.
 
 ## Sequencing note
 
-Per the standing doctrine, this audit implements nothing. The next build is one
-chosen gap, smallest attack first. GAP-C and GAP-F are closable on synthetic
-rows with no new architecture and no reality dependency; GAP-B needs a small
-independence model; GAP-D and the first REAL rung need a genuine external
-artifact. The founder selects which gap is next.
+UPDATE (commit `6c68af1`): GAP-C and GAP-F are CLOSED on synthetic rows, 10/10
+acceptance tests GREEN in the Linux cloud container (not Mac-native). Overall
+adequacy remains NOT ESTABLISHED by weakest-link: B is still ABSENT and D is
+still unenforced. The next candidates are GAP-B (a small independence model,
+closable on synthetic multi-source cases) and then GAP-D with the first REAL
+cross-repository artifact. The founder selects which gap is next.
