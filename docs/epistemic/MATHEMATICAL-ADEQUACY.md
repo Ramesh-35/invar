@@ -3,8 +3,9 @@
 This is an AUDIT, not an implementation. No crate, evaluator, ledger, or test
 was changed to produce it. It measures what the repository can and cannot establish for each of the six
 adequacy primitives. First issued at commit `af1b1b6` (code at Gate 0
-`2164ac4`); rows C and F updated at commit `6c68af1` (source fingerprint
-`d72bd765`), GAP-C and GAP-F closed on synthetic rows, 10/10 acceptance tests. It imports no NEXTLOGIC or VEM vocabulary: every
+`2164ac4`); rows C and F updated at commit `6c68af1`, row B at commit
+`0fc1d9a` (source fingerprint `bd78112`); GAP-B, GAP-C, and GAP-F closed on
+synthetic data, 12/12 acceptance tests. It imports no NEXTLOGIC or VEM vocabulary: every
 primitive is stated generically, over any system that presents an invariant.
 
 Method: for each primitive the constitution requirement is matched against the
@@ -34,7 +35,7 @@ UNKNOWN.
 | Primitive | Status | One-line basis |
 |---|---|---|
 | A Epistemic Standing | PARTIAL | Case verdict carries a three-state standing (`EpistemicStatus`) plus rationale and refuses over-claim; no per-evidence standing, no standing algebra. |
-| B Provenance Independence | ABSENT | No model of evidence provenance or independence from the subject; no shared-ancestry de-duplication. A different axis (verdict independent of the declared expectation) is present and tested, but it is not this primitive. |
+| B Provenance Independence | SATISFIED (synthetic) | `provenance::ProvenanceGraph` decides independence from recorded ancestry (`independence` -> Independent/Correlated/Unknown; unknown is never independent) and de-duplicates shared-ancestry carriers so they cannot corroborate as independent (`corroboration` -> Banded/Confident), tests 11-12. GAP-B closed on synthetic sources, commit `0fc1d9a`. Standalone: not yet wired into `classify` (no correlated evidence in the Phase-1 composite). |
 | C Temporal Admissibility | SATISFIED (synthetic) | `replay_as_of(as_of_t_r, as_of_t_v)` verifies the full chain then admits only rows with `t_r <= as_of_t_r` and `t_v <= as_of_t_v`; a later-recorded fact is invisible to an earlier reconstruction (tests 7-8). GAP-C closed on synthetic rows, commit `6c68af1`. |
 | D Reality Boundary | PARTIAL | `EvidenceTier::FIXTURE`/`REAL` is load-bearing in the verdict language and refuses to promote FIXTURE, but the tier is a self-declared manifest field with no verification, so promotion is on the honor system. |
 | E Weakest-link Composition | PARTIAL | The non-execution dimension is genuinely proven: a missing/SKIPPED/ERROR required leg forces UNKNOWN (`classify` + test 3). The "otherwise inadmissible" dimension (an executed but compromised leg) is not modeled. |
@@ -45,7 +46,7 @@ UNKNOWN.
 ```
 MATHEMATICAL ADEQUACY
 A Epistemic Standing:        PARTIAL
-B Provenance Independence:   ABSENT
+B Provenance Independence:   SATISFIED (synthetic)
 C Temporal Admissibility:    SATISFIED (synthetic)
 D Reality Boundary:          PARTIAL
 E Weakest-link Composition:  PARTIAL
@@ -53,14 +54,16 @@ F Conservation-with-residual:SATISFIED (synthetic)
 Overall adequacy: NOT ESTABLISHED
 ```
 
-Overall is NOT ESTABLISHED by INVAR's own weakest-link rule: B is ABSENT as an
-enforced property, so the composite is capped there no matter how many other
-primitives advance. As of commit `6c68af1`, C and F are SATISFIED on synthetic
-ledger rows and fixtures (GAP-C, GAP-F closed, 10/10 acceptance tests), and the
-execution-coverage weakest link inside E remains proven. "(synthetic)" means
-TESTED-SYNTHETIC: proven on synthetic rows, never REAL. D is still on the honor
-system and B is still unmodeled; until B exists and D is enforced, overall
-adequacy cannot rise above NOT ESTABLISHED.
+Overall is NOT ESTABLISHED by INVAR's own weakest-link rule. As of commit
+`0fc1d9a`, B, C, and F are SATISFIED on synthetic sources/rows/fixtures (GAP-B,
+GAP-C, GAP-F closed, 12/12 acceptance tests). "(synthetic)" means
+TESTED-SYNTHETIC: proven on synthetic data, never REAL. The composite is now
+capped by the remaining PARTIALs: A (case-verdict standing granularity, held to
+a real-case dependency), D (reality boundary, still self-declared and
+unenforced, REAL-dependent), and E (executed-but-inadmissible, which needs both
+B and an enforced D). Closing B therefore does NOT establish overall adequacy
+and does NOT make GAP-D the only remaining bridge: A and E are synthetic-
+closable PARTIALs that also cap the composite. Overall stays NOT ESTABLISHED.
 
 ## Per-primitive evidence
 
@@ -89,7 +92,7 @@ adequacy cannot rise above NOT ESTABLISHED.
 9. Gap requires: new representation (a standing type richer than the trichotomy),
    not merely new evidence.
 
-### B. Provenance Independence: ABSENT
+### B. Provenance Independence: SATISFIED (synthetic)
 
 1. Constitution requires: the result must be shown independent of the system
    under examination, not self-attested, and multiple carriers descending from
@@ -109,9 +112,13 @@ adequacy cannot rise above NOT ESTABLISHED.
    self-attested by the system under test.
 7. Smallest falsification attack: supply two legs that are the same observation
    relabeled; the composite treats them as independent coverage.
-8. Status: ABSENT (for the commissioned primitive).
-9. Gap requires: new architecture (a provenance/independence model on evidence),
-   not merely new tests.
+8. Status: SATISFIED on synthetic sources (TESTED-SYNTHETIC). UPDATE commit
+   `0fc1d9a`: `provenance::ProvenanceGraph` models ancestry and decides
+   independence (Independent/Correlated/Unknown; unknown never independent) and
+   de-duplicates shared-ancestry carriers (Banded vs Confident), tests 11-12.
+9. Remaining scope: not yet wired into `classify`, because the Phase-1 composite
+   has no correlated multi-carrier evidence to de-duplicate in the live path;
+   wiring is deferred until such evidence exists. The model itself is complete.
 
 ### C. Temporal Admissibility: SATISFIED (synthetic)
 
@@ -222,7 +229,7 @@ adequacy cannot rise above NOT ESTABLISHED.
 
 ## Gap ledger
 
-### GAP-B (provenance independence)
+### GAP-B (provenance independence) - CLOSED on synthetic sources (commit `0fc1d9a`)
 - WHY IT MATTERS: without it, correlated or self-attested evidence can masquerade
   as independent corroboration, which is the most dangerous way a skeptic engine
   can lie. It caps overall adequacy today.
@@ -286,9 +293,13 @@ adequacy cannot rise above NOT ESTABLISHED.
 
 ## Sequencing note
 
-UPDATE (commit `6c68af1`): GAP-C and GAP-F are CLOSED on synthetic rows, 10/10
-acceptance tests GREEN in the Linux cloud container (not Mac-native). Overall
-adequacy remains NOT ESTABLISHED by weakest-link: B is still ABSENT and D is
-still unenforced. The next candidates are GAP-B (a small independence model,
-closable on synthetic multi-source cases) and then GAP-D with the first REAL
-cross-repository artifact. The founder selects which gap is next.
+UPDATE (commit `0fc1d9a`): GAP-B, GAP-C, and GAP-F are CLOSED on synthetic data,
+12/12 acceptance tests GREEN in the Linux cloud container (not Mac-native).
+Overall adequacy remains NOT ESTABLISHED by weakest-link: the remaining caps are
+A and E (both synthetic-closable PARTIALs) and D (REAL-dependent). GAP-D is NOT
+the sole remaining bridge; A and E must also close before synthetic adequacy is
+complete. The next candidates are GAP-E (executed-but-inadmissible: now that B
+exists, the evaluator can reject non-independent carriers, though its reality
+axis still waits on D), GAP-A (a richer case-verdict standing, held by this
+audit to a real-case dependency), and GAP-D (the REAL bridge, needs a genuine
+external artifact). The founder selects which gap is next.
