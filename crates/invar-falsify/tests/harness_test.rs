@@ -1,27 +1,42 @@
 //! Acceptance tests for the Phase-1 falsification instrument.
 //!
-//! Fourteen tests in six groups: the classifier's epistemic honesty (1-3), the
+//! Sixteen tests in seven groups: the classifier's epistemic honesty (1-3), the
 //! bi-temporal ledger's integrity (4-6), temporal admissibility via as-of
 //! reconstruction (7-8, GAP-C), conservation-with-residual (9-10, GAP-F),
-//! provenance independence (11-12, GAP-B), and executed-but-inadmissible
-//! degradation (13-14, GAP-E). These are the ground truth the crate is written
-//! to satisfy. (Tests are kept in this one file so the crate's acceptance
-//! ground truth stays cohesive.)
+//! provenance independence (11-12, GAP-B), executed-but-inadmissible
+//! degradation (13-14, GAP-E), and reality-tier admission (15-16, GAP-D gate).
+//! These are the ground truth the crate is written to satisfy. (Tests are kept
+//! in this one file so the crate's acceptance ground truth stays cohesive.)
 
 use invar_falsify::evaluator::{
-    admit_temporal, classify, composite_residual, leg_corroboration, LegState, LegVerdict,
+    admit_reality, admit_temporal, classify, composite_residual, leg_corroboration, LegState,
+    LegVerdict,
 };
 use invar_falsify::ledger::{Ledger, LedgerError};
 use invar_falsify::manifest::{
     EpistemicStatus, EvidenceTier, FailureType, TestCase,
 };
 use invar_falsify::provenance::{Corroboration, Independence, ProvenanceGraph, ProvenanceSource};
+use invar_falsify::reality::{verify_real_tier, AdmissibilityError, RealArtifactProof};
 
 fn source(id: &str, ancestors: &[&str]) -> ProvenanceSource {
     ProvenanceSource {
         source_id: id.to_string(),
         ancestor_ids: ancestors.iter().map(|s| s.to_string()).collect(),
         trust_tier: EvidenceTier::FIXTURE,
+    }
+}
+
+fn real_case(failure_type: FailureType, catch_signature: Option<&str>) -> TestCase {
+    TestCase {
+        id: "TC-REAL".to_string(),
+        description: "real-tier placeholder".to_string(),
+        cross_repository: true,
+        failure_type,
+        evidence_tier: EvidenceTier::REAL,
+        target_path: "./corpus/real".to_string(),
+        catch_signature: catch_signature.map(|s| s.to_string()),
+        expected_status: None,
     }
 }
 
@@ -415,4 +430,74 @@ fn correlated_executed_legs_do_not_earn_confident() {
         leg_corroboration(&legs, &leg_sources, &independent),
         Corroboration::Confident
     );
+}
+
+// 15. (GAP-D) A case that self-declares REAL with no proof is refused by the
+//     reality-admission gate: every leg is demoted INADMISSIBLE and the verdict
+//     degrades to UNKNOWN. This neutralizes the trivial M4 self-promotion.
+#[test]
+fn unbacked_real_tier_is_refused_and_degrades_to_unknown() {
+    let tc = real_case(FailureType::AST_SCHEMA_DESYNC, Some("tc005"));
+    // Legs that, on FIXTURE, would be a clean catch.
+    let legs = vec![
+        leg("semgrep", LegState::FAIL, 1, true),
+        skipped("opa"),
+        skipped("opentelemetry"),
+        skipped("property_testing"),
+    ];
+    // On FIXTURE this is CAUGHT; the REAL claim is what must be gated.
+    assert_eq!(
+        verify_real_tier(tc.evidence_tier, None, None),
+        Err(AdmissibilityError::MissingProof)
+    );
+    let admitted = admit_reality(&legs, tc.evidence_tier, None, None);
+    assert!(admitted.iter().all(|l| l.state == LegState::INADMISSIBLE));
+    assert_eq!(classify(&tc, &admitted).0, EpistemicStatus::UNKNOWN);
+}
+
+// 16. (GAP-D) A REAL claim whose proof BINDS to the recorded residue is
+//     admitted (the verdict stands); a proof whose hash does not bind is
+//     refused and degrades to UNKNOWN. NOTE: binding is a necessary, not
+//     sufficient, check; it does not prove the commits are real.
+#[test]
+fn backed_real_tier_is_admitted_and_mismatch_is_refused() {
+    let tc = real_case(FailureType::AST_SCHEMA_DESYNC, Some("tc005"));
+    let legs = vec![
+        leg("semgrep", LegState::FAIL, 1, true),
+        skipped("opa"),
+        skipped("opentelemetry"),
+        skipped("property_testing"),
+    ];
+    let residue = [7u8; 32];
+    let proof = RealArtifactProof {
+        producer_repo: "example/api-producer".to_string(),
+        producer_commit: "aaaaaaaaaaaa".to_string(),
+        consumer_repo: "example/api-consumer".to_string(),
+        consumer_commit: "bbbbbbbbbbbb".to_string(),
+        diff_probe_hash: residue,
+    };
+
+    // Proof binds to the recorded residue: admitted, caught verdict stands.
+    assert!(verify_real_tier(tc.evidence_tier, Some(&proof), Some(residue)).is_ok());
+    let admitted = admit_reality(&legs, tc.evidence_tier, Some(&proof), Some(residue));
+    assert_eq!(
+        admitted.iter().find(|l| l.tool == "semgrep").unwrap().state,
+        LegState::FAIL
+    );
+    assert_eq!(
+        classify(&tc, &admitted).0,
+        EpistemicStatus::CAUGHT_BY_COMPOSITE
+    );
+
+    // Proof that does NOT bind to the residue is refused, degrading to UNKNOWN.
+    let bad = RealArtifactProof {
+        diff_probe_hash: [9u8; 32],
+        ..proof.clone()
+    };
+    assert_eq!(
+        verify_real_tier(tc.evidence_tier, Some(&bad), Some(residue)),
+        Err(AdmissibilityError::ResidueMismatch)
+    );
+    let demoted = admit_reality(&legs, tc.evidence_tier, Some(&bad), Some(residue));
+    assert_eq!(classify(&tc, &demoted).0, EpistemicStatus::UNKNOWN);
 }

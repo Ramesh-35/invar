@@ -190,6 +190,38 @@ pub fn admit_temporal(
         .collect()
 }
 
+/// GAP-D reality-admission stage. If a case claims `EvidenceTier::REAL` and the
+/// reality gate refuses it (no proof, no recorded residue, or a proof whose
+/// hash does not bind to the recorded residue), every leg is demoted to
+/// INADMISSIBLE so the case degrades to UNKNOWN through the existing weakest-
+/// link path. FIXTURE cases and admitted REAL cases pass through unchanged.
+///
+/// This is a NECESSARY, not sufficient, gate: admission here means the proof
+/// binds to the recorded residue, NOT that the referenced commits are real.
+/// See `crate::reality` for the full scope limit. Like the other admissibility
+/// stages it is composable and inert on the metadata-free Phase-1 corpus (all
+/// FIXTURE), and is exercised directly by the acceptance tests.
+pub fn admit_reality(
+    legs: &[LegVerdict],
+    tier: crate::manifest::EvidenceTier,
+    proof: Option<&crate::reality::RealArtifactProof>,
+    recorded_residue_hash: Option<[u8; 32]>,
+) -> Vec<LegVerdict> {
+    match crate::reality::verify_real_tier(tier, proof, recorded_residue_hash) {
+        Ok(()) => legs.to_vec(),
+        Err(e) => legs
+            .iter()
+            .map(|l| LegVerdict {
+                tool: l.tool.clone(),
+                state: LegState::INADMISSIBLE,
+                findings: l.findings,
+                caught_designated: false,
+                summary: format!("reality-admission gate refused REAL tier: {e}"),
+            })
+            .collect(),
+    }
+}
+
 /// GAP-E provenance admissibility: the corroboration standing of the EXECUTED
 /// legs that support a verdict, keyed by each leg's provenance source. Carriers
 /// that share ancestry collapse to one group, so correlated legs cannot earn
