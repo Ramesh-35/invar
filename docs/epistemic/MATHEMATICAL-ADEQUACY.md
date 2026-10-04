@@ -4,8 +4,9 @@ This is an AUDIT, not an implementation. No crate, evaluator, ledger, or test
 was changed to produce it. It measures what the repository can and cannot establish for each of the six
 adequacy primitives. First issued at commit `af1b1b6` (code at Gate 0
 `2164ac4`); rows C and F updated at commit `6c68af1`, row B at commit
-`0fc1d9a`, row E at commit `71290d6` (source fingerprint `379598f`); GAP-B,
-GAP-C, GAP-E, and GAP-F closed on synthetic data, 14/14 acceptance tests. It imports no NEXTLOGIC or VEM vocabulary: every
+`0fc1d9a`, row E at commit `71290d6`; the GAP-D admission gate at commit
+`ef60dc6` (source fingerprint `dc900e7`); B, C, E, F closed on synthetic data and
+the D gate added (D still PARTIAL), 16/16 acceptance tests. It imports no NEXTLOGIC or VEM vocabulary: every
 primitive is stated generically, over any system that presents an invariant.
 
 Method: for each primitive the constitution requirement is matched against the
@@ -37,7 +38,7 @@ UNKNOWN.
 | A Epistemic Standing | PARTIAL | Case verdict carries a three-state standing (`EpistemicStatus`) plus rationale and refuses over-claim; no per-evidence standing, no standing algebra. |
 | B Provenance Independence | SATISFIED (synthetic) | `provenance::ProvenanceGraph` decides independence from recorded ancestry (`independence` -> Independent/Correlated/Unknown; unknown is never independent) and de-duplicates shared-ancestry carriers so they cannot corroborate as independent (`corroboration` -> Banded/Confident), tests 11-12. GAP-B closed on synthetic sources, commit `0fc1d9a`. Standalone: not yet wired into `classify` (no correlated evidence in the Phase-1 composite). |
 | C Temporal Admissibility | SATISFIED (synthetic) | `replay_as_of(as_of_t_r, as_of_t_v)` verifies the full chain then admits only rows with `t_r <= as_of_t_r` and `t_v <= as_of_t_v`; a later-recorded fact is invisible to an earlier reconstruction (tests 7-8). GAP-C closed on synthetic rows, commit `6c68af1`. |
-| D Reality Boundary | PARTIAL | `EvidenceTier::FIXTURE`/`REAL` is load-bearing in the verdict language and refuses to promote FIXTURE, but the tier is a self-declared manifest field with no verification, so promotion is on the honor system. |
+| D Reality Boundary | PARTIAL | GAP-D adds a reality-admission gate (`reality::verify_real_tier` + `evaluator::admit_reality`, commit `ef60dc6`): an unbacked REAL claim is refused and degraded to UNKNOWN (tests 15-16), neutralizing trivial self-promotion. Still PARTIAL: the gate binds a proof to the recorded residue but cannot verify the referenced commits are real, so a fabricated proof still passes locally. Externality is unverified; closing D needs a real artifact. |
 | E Weakest-link Composition | SATISFIED (synthetic) | Non-execution degradation is proven (test 3); GAP-E adds executed-but-inadmissible degradation on two axes: temporal via `admit_temporal` (a leg beyond the as-of bound becomes INADMISSIBLE, so a required one forces UNKNOWN, test 13) and provenance via `leg_corroboration` (correlated carriers capped at Banded, test 14), commit `71290d6`. Carve-out: the reality-boundary inadmissibility axis is REAL-dependent and stays with D. |
 | F Conservation-with-residual | SATISFIED (synthetic) | `composite_residual` records uncovered legs on every case and preserves them even on a catch; `CaseConservation::holds` and `RunReport::conservation_holds` assert the balance (tests 9-10). GAP-F closed on synthetic rows, commit `6c68af1`. Residual is composite-coverage breadth; per-finding residual is future work. |
 
@@ -165,14 +166,21 @@ ESTABLISHED until REAL evidence arrives.
 6. Cannot establish: that a case claiming `evidence_tier = REAL` is actually
    grounded in an external system. The tier is a self-declared field with no
    verification, so the boundary is honored, not enforced.
-7. Smallest falsification attack: author a synthetic case with
-   `evidence_tier: REAL`; the system accepts the REAL standing with no external
-   grounding. The commissioned M4 attack passes today.
-8. Status: PARTIAL (distinction present, load-bearing, tested on the FIXTURE
-   side; forgery-resistance absent).
-9. Gap requires: new architecture (an admission check that REAL tier must be
-   backed by an external, independently attestable artifact), plus a reality
-   dependency (a real artifact to attest).
+7. Smallest falsification attack, now split: the TRIVIAL form (author a case with
+   `evidence_tier: REAL` and no proof) is REFUSED and degraded to UNKNOWN
+   (test 15, commit `ef60dc6`). The RESIDUAL form (supply a fabricated
+   `RealArtifactProof` whose hash matches a fabricated residue) still passes the
+   local gate: it binds but does not externally verify. That residual form keeps
+   D open.
+8. Status: PARTIAL. UPDATE commit `ef60dc6` (GAP-D): the admission gate is
+   enforced (unbacked REAL refused, test 15; residue mismatch refused, test 16),
+   but it is a binding/consistency check, not externality verification, so
+   forgery-resistance against a fabricated-but-consistent proof is still absent.
+   D does not reach SATISFIED and is never "(synthetic)".
+9. Gap requires: external resolution of the referenced artifacts (fetch the
+   commits, re-run the probe against the real repositories). Needs network or
+   real-repo access and a genuine incident. Cannot be closed offline or
+   synthetically.
 
 ### E. Weakest-link Composition: SATISFIED (synthetic)
 
@@ -248,12 +256,14 @@ ESTABLISHED until REAL evidence arrives.
 - REALITY DEPENDENCY: none to define the check; a real multi-source case to
   prove it on.
 
-### GAP-D (reality-boundary promotion is unenforced)
+### GAP-D (reality boundary) - GATE ADDED (commit `ef60dc6`), NOT CLOSED
 - WHY IT MATTERS: a synthetic case can claim REAL standing with no external
   grounding, which would let fixture work leak into a REAL claim. Directly
   blocks any future REAL rung.
-- CURRENT EVIDENCE: `EvidenceTier` gates language but not admission; no promotion
-  test exists.
+- CURRENT EVIDENCE: reality-admission gate added (`reality::verify_real_tier` +
+  `evaluator::admit_reality`): an unbacked REAL claim is refused and degraded to
+  UNKNOWN (tests 15-16). Binding, not externality: a fabricated proof matching a
+  fabricated residue still passes locally, so D is not closed.
 - MINIMAL FALSIFICATION TEST: a synthetic case with `evidence_tier: REAL` and no
   external artifact must be refused REAL standing.
 - MINIMAL IMPLEMENTATION REQUIRED: an admission rule that REAL requires a
@@ -306,12 +316,12 @@ ESTABLISHED until REAL evidence arrives.
 
 ## Sequencing note
 
-UPDATE (commit `71290d6`): GAP-B, GAP-C, GAP-E, and GAP-F are CLOSED on synthetic
-data, 14/14 acceptance tests GREEN in the Linux cloud container (not Mac-native).
-Primitives B, C, E, and F are SATISFIED (synthetic); A and D remain PARTIAL, so
-overall adequacy is still NOT ESTABLISHED by weakest-link. This is the limit of
-what synthetic local harnesses can prove: both remaining gaps are REAL-dependent.
-A (a richer case-verdict standing) is held by this audit to a real case that the
-trichotomy demonstrably mislabels; D (the reality boundary, and with it E's
-third inadmissibility axis) needs a genuine external cross-repository artifact.
-The next build is GAP-D with the first REAL evidence. The founder confirms.
+UPDATE (commit `ef60dc6`): the GAP-D reality-admission GATE is added (16/16
+acceptance tests GREEN, not Mac-native). It refuses unbacked REAL claims, but it
+is a binding check, not externality verification, so D stays PARTIAL and overall
+adequacy stays NOT ESTABLISHED. The two remaining caps, A and D, are both
+REAL-dependent and cannot be closed by any local synthetic harness. Closing D
+for real requires one genuine cross-repository incident whose commits can be
+independently resolved and whose probe is actually re-run; evaluating it is the
+only path to INVAR's first bare [PROVEN]. The founder must supply that incident;
+it cannot be manufactured here.

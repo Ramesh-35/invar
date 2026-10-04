@@ -57,7 +57,11 @@ case whose required leg is `SKIPPED`/`ERROR`/`INADMISSIBLE` is `UNKNOWN`, never
 `FIXTURE` cases are hand-built to probe the thesis. They can produce a residue
 **candidate** but can never, by themselves, prove a category claim. Only `REAL`
 cross-repository incidents can promote a candidate toward evidence, and only
-through a confirming differential probe (DR-003).
+through a confirming differential probe (DR-003). A `REAL` claim is additionally
+gated by the reality-admission check (`reality::verify_real_tier`, GAP-D): an
+unbacked `REAL` tier is refused and degraded to `UNKNOWN`. That gate is
+necessary, not sufficient: it binds a proof to the recorded residue but does not
+verify the referenced commits are real, so it does not by itself earn `[PROVEN]`.
 
 ## Gate 0 adjudication (2026-10-03)
 
