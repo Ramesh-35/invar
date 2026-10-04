@@ -77,3 +77,21 @@ This is a has-implementation confirmation only. It is not REAL-tier evidence.
 - Environment: Linux cloud container, cargo/rustc 1.95.0.
 - Caveat: NOT Mac-native execution. A founder-side `cargo test` on the authoritative machine remains a separate confirmation.
 - Boundary: no REAL-tier evidence exists yet. All six tests are synthetic / FIXTURE evidence.
+
+## Contract kinds (general invariant engine, 2026-10-04)
+
+The engine dispatches evidence to a deterministic checker by declared kind
+(`invariant::check_contract`). Residue empty = contract holds; non-empty = the
+named violation. These expand the PRODUCT surface, not epistemic adequacy: the
+A-F adequacy matrix is unchanged by their addition.
+
+| Kind | Checks | Evidence tier so far |
+|---|---|---|
+| `SchemaContract` | consumer-read payload fields the producer schema does not DEFINE | REAL (REAL-INCIDENT-001) + synthetic tests 17-18 |
+| `EventContract` | consumer-handler fields the producer payload does not EMIT | SYNTHETIC only (test 19); no real incident yet |
+| `LockOrderContract` | sequence inversion / missing precondition in a trace | SYNTHETIC only (test 20); no real incident yet |
+
+A kind reaches REAL standing only when run on a real incident of that kind,
+through the same reality-admission gate (GAP-D). Until then it is a tested but
+synthetic checker. Do not report EventContract or LockOrderContract as
+REAL-proven.
