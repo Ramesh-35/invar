@@ -28,27 +28,38 @@ target and the yardstick every later phase is measured against.
 5. How do I put it into my existing workflow?
 If any answer is unclear, the product is not ready.
 
-## Current reality (verified at `fdf6551`, 2026-10-03)
-A real developer today reaches STEP 0. Honest per-step status:
+## Current reality (verified at `0197eca`, 2026-10-04)
+A developer who builds the binary from source can now run INVAR against two real
+checkouts and get an honest, specific verdict. Honest per-step status:
 1. Discover: NO. Nothing published, no public page, no package.
-2. Install: NO. No release artifact, no installer, no crates.io/npm presence.
-3. Init: NO. `invar-falsify` is source-only; no `init` scaffold for a user project.
-4. Define: PARTIAL as internals. Invariants today are hand-built FIXTURE corpus
-   cases plus Semgrep/OPA rule files, not a developer-authored invariant format.
-5. Run: ONLY with the full repo + Rust toolchain + a semgrep venv present. Not a
-   developer path.
-6-8. Violate / useful failure / evidence: the engine produces a verdict,
-   `EPISTEMIC_REPORT.md`, and a BLAKE3-chained `run_results.json` for the FIXTURE
-   corpus. It is honest, but it is not yet a developer-facing failure on the
-   developer's own code.
-9-12. Fix / rerun / CI / operate: NOT established.
+2. Install: NO. No release artifact or crates.io/npm presence; must `cargo build`
+   from source.
+3. Init: PARTIAL. `invar.toml` is the config format ([producer]/[consumer] paths
+   plus repo/commit provenance); there is no `invar init` scaffold yet.
+4. Define: PARTIAL. For the AST_SCHEMA_DESYNC contract the invariant is implicit
+   (every payload field the consumer reads must be a producer-DEFINED property);
+   there is no general developer-authored invariant language yet.
+5. Run: YES (from source). `invar check --config invar.toml` runs the cross-repo
+   differential probe over local checkouts, the mode CI uses.
+6. Violate: YES. REAL-INCIDENT-001 is a real violation; `invar check` exits 1.
+7. Useful failure: YES. It names the exact residue (`["amount_cents"]`), the
+   derived BLAKE3 probe hash, and the reality-gate result.
+8. Evidence: YES, honest. `invar audit` verifies the bi-temporal ledger and lists
+   its nodes; the composite-baseline comparison is explicit, never fabricated.
+9. Fix: YES. Restore the field (or update the consumer) and re-run.
+10. Re-run: YES. A holding contract reports HOLDS and exits 0.
+11. CI: PARTIAL. `check` has CI-grade exit codes; there is no packaged, reusable
+    GitHub Action for users yet (the repo's own ci.yml is INVAR's build).
+12. Operate / upgrade: NO. No user-facing release, versioning, or upgrade path.
 
 ## The gap, stated plainly
-INVAR is, today, an internally-run falsification instrument, not a developer
-product. The journey above is the backlog, gated behind Phase 2: the developer
-surface is built only after the category survives a REAL incident (DR-003).
-Building install/init/CI before that would be polishing a product whose reason to
-exist is unproven.
+INVAR has crossed from an internally-run instrument to a runnable developer tool
+for one contract type (cross-repository schema desync), and its reason to exist
+survived a REAL incident (REAL-INCIDENT-001, DR-003 cleared for that one case).
+What remains before the journey is complete: discoverability and a real install
+path (steps 1-2), an `invar init` scaffold and a general invariant language
+(steps 3-4), a packaged CI action (step 11), and a user release and upgrade path
+(step 12). The engine is honest and runnable; it is not yet packaged or general.
 
 ## Guardrails for when this journey is built
 - Simplicity is the standard: a developer must not need posets, epistemic
