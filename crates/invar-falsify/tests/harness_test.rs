@@ -1,12 +1,14 @@
 //! Acceptance tests for the Phase-1 falsification instrument.
 //!
-//! Sixteen tests in seven groups: the classifier's epistemic honesty (1-3), the
-//! bi-temporal ledger's integrity (4-6), temporal admissibility via as-of
+//! Eighteen tests in eight groups: the classifier's epistemic honesty (1-3),
+//! the bi-temporal ledger's integrity (4-6), temporal admissibility via as-of
 //! reconstruction (7-8, GAP-C), conservation-with-residual (9-10, GAP-F),
 //! provenance independence (11-12, GAP-B), executed-but-inadmissible
-//! degradation (13-14, GAP-E), and reality-tier admission (15-16, GAP-D gate).
-//! These are the ground truth the crate is written to satisfy. (Tests are kept
-//! in this one file so the crate's acceptance ground truth stays cohesive.)
+//! degradation (13-14, GAP-E), reality-tier admission (15-16, GAP-D gate), and
+//! the cross-repository differential probe (17-18, GAP-D resolving step, run
+//! against the exact bytes of REAL-INCIDENT-001). These are the ground truth
+//! the crate is written to satisfy. (Tests are kept in this one file so the
+//! crate's acceptance ground truth stays cohesive.)
 
 use invar_falsify::evaluator::{
     admit_reality, admit_temporal, classify, composite_residual, leg_corroboration, LegState,
@@ -17,7 +19,31 @@ use invar_falsify::manifest::{
     EpistemicStatus, EvidenceTier, FailureType, TestCase,
 };
 use invar_falsify::provenance::{Corroboration, Independence, ProvenanceGraph, ProvenanceSource};
-use invar_falsify::reality::{verify_real_tier, AdmissibilityError, RealArtifactProof};
+use invar_falsify::reality::{
+    derive_probe_hash, differential_residue, verify_real_tier, AdmissibilityError,
+    RealArtifactProof,
+};
+
+// Exact bytes fetched from the two commits of REAL-INCIDENT-001.
+const PRODUCER_SCHEMA_P1: &str = r#"{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OrderPayload",
+  "type": "object",
+  "properties": {
+    "order_id": { "type": "string" },
+    "amount_micro_units": { "type": "integer" }
+  },
+  "required": ["order_id", "amount_cents"]
+}
+"#;
+const CONSUMER_CLIENT_C1: &str = r#"// Consumer expectation bound to Producer schema.json
+function processOrder(payload) {
+  if (!payload.amount_cents) {
+    throw new Error("Missing invariant requirement: amount_cents");
+  }
+  return payload.amount_cents / 100;
+}
+"#;
 
 fn source(id: &str, ancestors: &[&str]) -> ProvenanceSource {
     ProvenanceSource {
@@ -500,4 +526,33 @@ fn backed_real_tier_is_admitted_and_mismatch_is_refused() {
     );
     let demoted = admit_reality(&legs, tc.evidence_tier, Some(&bad), Some(residue));
     assert_eq!(classify(&tc, &demoted).0, EpistemicStatus::UNKNOWN);
+}
+
+// 17. (GAP-D resolving) The differential probe, run on the EXACT real bytes of
+//     REAL-INCIDENT-001, isolates the one field the consumer requires that the
+//     producer schema does not define: amount_cents. The probe hash is
+//     deterministic.
+#[test]
+fn differential_probe_isolates_real_residue() {
+    let residue = differential_residue(PRODUCER_SCHEMA_P1, CONSUMER_CLIENT_C1);
+    assert_eq!(residue, vec!["amount_cents".to_string()]);
+
+    // The producer defines amount_micro_units and order_id; neither is residue.
+    assert!(!residue.contains(&"amount_micro_units".to_string()));
+    assert!(!residue.contains(&"order_id".to_string()));
+
+    // Hash is deterministic over the canonical residue.
+    assert_eq!(
+        derive_probe_hash(&residue),
+        derive_probe_hash(&["amount_cents".to_string()])
+    );
+}
+
+// 18. (GAP-D resolving, control) When the consumer only reads a field the
+//     producer DOES define, there is no residue: the probe does not invent one.
+#[test]
+fn differential_probe_empty_when_contract_holds() {
+    let consumer_ok = r#"function processOrder(payload) { return payload.order_id; }"#;
+    let residue = differential_residue(PRODUCER_SCHEMA_P1, consumer_ok);
+    assert!(residue.is_empty(), "no residue when the field is defined");
 }

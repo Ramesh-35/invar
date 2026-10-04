@@ -24,7 +24,64 @@
 //! Primitive D remains PARTIAL. It is never "(synthetic) SATISFIED": the whole
 //! point of D is that it cannot be closed by synthetic means.
 
+use std::collections::BTreeSet;
+
 use crate::manifest::EvidenceTier;
+
+/// External-resolving step (GAP-D, run-time half).
+///
+/// Given a producer JSON-schema and a consumer source, return the fields the
+/// consumer reads off `payload` that the producer's schema does NOT define as
+/// properties. A non-empty result is the isolated cross-repository residue: a
+/// contract the consumer depends on that the producer no longer provides.
+///
+/// This is deterministic and pure: it operates on bytes that were fetched and
+/// externally resolved out of band (the commit SHAs were confirmed to resolve,
+/// with a negative control). It does not itself perform network I/O, so it
+/// cannot by itself attest that the bytes came from real commits; that attest
+/// is the audited fetch. Honest division of labor, stated so it is not misread.
+pub fn differential_residue(producer_schema_json: &str, consumer_source: &str) -> Vec<String> {
+    let defined: BTreeSet<String> =
+        serde_json::from_str::<serde_json::Value>(producer_schema_json)
+            .ok()
+            .and_then(|v| {
+                v.get("properties")
+                    .and_then(|p| p.as_object())
+                    .map(|o| o.keys().cloned().collect())
+            })
+            .unwrap_or_default();
+
+    let mut referenced: BTreeSet<String> = BTreeSet::new();
+    let bytes = consumer_source.as_bytes();
+    let needle = "payload.";
+    let mut i = 0usize;
+    while let Some(pos) = consumer_source[i..].find(needle) {
+        let start = i + pos + needle.len();
+        let mut end = start;
+        while end < consumer_source.len() {
+            let c = bytes[end];
+            if c.is_ascii_alphanumeric() || c == b'_' {
+                end += 1;
+            } else {
+                break;
+            }
+        }
+        if end > start {
+            referenced.insert(consumer_source[start..end].to_string());
+        }
+        i = start.max(i + pos + 1);
+    }
+
+    referenced.difference(&defined).cloned().collect()
+}
+
+/// Derive the BLAKE3 probe hash of a residue, canonicalized (sorted, newline
+/// joined) so the same residue always hashes identically.
+pub fn derive_probe_hash(residue: &[String]) -> [u8; 32] {
+    let mut sorted = residue.to_vec();
+    sorted.sort();
+    *blake3::hash(sorted.join("\n").as_bytes()).as_bytes()
+}
 
 /// A claim that a residue was isolated from a specific cross-repository pair.
 /// The fields are asserted by whoever supplies the proof; this module checks
