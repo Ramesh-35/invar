@@ -12,11 +12,9 @@ use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 
 use invar_falsify::evaluator::{evaluate_case, CaseResult};
+use invar_falsify::invariant::{check_contract, ContractInput, Step};
 use invar_falsify::ledger::Ledger;
-use invar_falsify::manifest::{CompositeConfig, EpistemicStatus, EvidenceTier, Manifest};
-use invar_falsify::reality::{
-    derive_probe_hash, differential_residue, verify_real_tier, RealArtifactProof,
-};
+use invar_falsify::manifest::{CompositeConfig, EpistemicStatus, Manifest};
 use invar_falsify::report::{RunReport, ENGINE_VERSION};
 
 #[derive(Parser)]
@@ -304,10 +302,6 @@ fn cmd_verify(args: VerifyArgs) -> Result<i32> {
     }
 }
 
-fn hex(b: &[u8]) -> String {
-    b.iter().map(|x| format!("{x:02x}")).collect()
-}
-
 fn section_get(
     sections: &[(String, Vec<(String, String)>)],
     sec: &str,
@@ -319,81 +313,122 @@ fn section_get(
         .and_then(|(_, p)| p.iter().find(|(k, _)| k == key).map(|(_, v)| v.clone()))
 }
 
-/// `invar check`: the CI entrypoint. Reads an invar.toml, runs the
-/// cross-repository differential probe over the two LOCAL checkouts, binds the
-/// derived residue through the reality gate when commit provenance is given,
-/// and exits non-zero when the contract is violated. It reports INVAR's own
-/// differential finding; the full PROVEN_RESIDUE epistemic verdict additionally
-/// requires an executed composite baseline, which `check` does not fabricate.
+fn getk(pairs: &[(String, String)], k: &str) -> Option<String> {
+    pairs.iter().find(|(kk, _)| kk == k).map(|(_, v)| v.clone())
+}
+
+fn parse_step(s: &str) -> Result<Step> {
+    let parts: Vec<&str> = s.split(':').collect();
+    if parts.len() != 3 {
+        anyhow::bail!("step {s:?} must be actor:action:resource");
+    }
+    Ok(Step::new(parts[0].trim(), parts[1].trim(), parts[2].trim()))
+}
+
+fn read_trace(path: &str) -> Result<Vec<Step>> {
+    let raw = std::fs::read_to_string(path).with_context(|| format!("reading trace {path}"))?;
+    let mut steps = Vec::new();
+    for line in raw.lines() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        steps.push(parse_step(line)?);
+    }
+    Ok(steps)
+}
+
+/// `invar check`: the CI entrypoint. Evaluates every `[[invariant]]` block in
+/// invar.toml, dispatching each to its contract checker by `kind`
+/// (schema|event|lock_order). Exits 1 if ANY contract is violated. A legacy
+/// single `[producer]`/`[consumer]` schema form is still accepted when there are
+/// no `[[invariant]]` blocks. It reports INVAR's differential findings; the full
+/// PROVEN_RESIDUE epistemic verdict and the reality gate live in the resolving
+/// path (`reality.rs`, example `real_incident`), which `check` does not fabricate.
 fn cmd_check(args: CheckArgs) -> Result<i32> {
     let raw = std::fs::read_to_string(&args.config)
         .with_context(|| format!("reading {}", args.config))?;
     let sections = invar_falsify::config::parse_sections(&args.config, &raw)
         .map_err(|e| anyhow::anyhow!("{e}"))?;
 
-    let producer_schema_path = section_get(&sections, "producer", "schema")
-        .context("invar.toml needs [producer] schema = \"<path>\"")?;
-    let consumer_source_path = section_get(&sections, "consumer", "source")
-        .context("invar.toml needs [consumer] source = \"<path>\"")?;
-    let producer_schema = std::fs::read_to_string(&producer_schema_path)
-        .with_context(|| format!("reading producer schema {producer_schema_path}"))?;
-    let consumer_source = std::fs::read_to_string(&consumer_source_path)
-        .with_context(|| format!("reading consumer source {consumer_source_path}"))?;
-
-    let residue = differential_residue(&producer_schema, &consumer_source);
-    let probe = derive_probe_hash(&residue);
-
-    let p_repo = section_get(&sections, "producer", "repo").unwrap_or_default();
-    let p_commit = section_get(&sections, "producer", "commit").unwrap_or_default();
-    let c_repo = section_get(&sections, "consumer", "repo").unwrap_or_default();
-    let c_commit = section_get(&sections, "consumer", "commit").unwrap_or_default();
-    let gate = if !p_commit.is_empty() && !c_commit.is_empty() {
-        let proof = RealArtifactProof {
-            producer_repo: p_repo.clone(),
-            producer_commit: p_commit.clone(),
-            consumer_repo: c_repo.clone(),
-            consumer_commit: c_commit.clone(),
-            diff_probe_hash: probe,
-        };
-        match verify_real_tier(EvidenceTier::REAL, Some(&proof), Some(probe)) {
-            Ok(()) => "ADMITTED (proof binds to derived residue)",
-            Err(_) => "REFUSED",
+    // Collect [[invariant]] blocks; fall back to a single legacy schema block.
+    let mut blocks: Vec<Vec<(String, String)>> = sections
+        .iter()
+        .filter(|(n, _)| n == "invariant")
+        .map(|(_, p)| p.clone())
+        .collect();
+    if blocks.is_empty() {
+        if let (Some(ps), Some(cs)) = (
+            section_get(&sections, "producer", "schema"),
+            section_get(&sections, "consumer", "source"),
+        ) {
+            blocks.push(vec![
+                ("kind".into(), "schema".into()),
+                ("id".into(), section_get(&sections, "case", "id").unwrap_or_else(|| "schema-0".into())),
+                ("producer".into(), ps),
+                ("consumer".into(), cs),
+            ]);
         }
-    } else {
-        "n/a (no commit provenance; treated as FIXTURE)"
-    };
-
-    println!("INVAR check");
-    println!("  producer schema : {producer_schema_path}");
-    println!("  consumer source : {consumer_source_path}");
-    if !p_commit.is_empty() {
-        println!("  producer        : {p_repo}@{p_commit}");
     }
-    if !c_commit.is_empty() {
-        println!("  consumer        : {c_repo}@{c_commit}");
+    if blocks.is_empty() {
+        anyhow::bail!("invar.toml has no [[invariant]] blocks and no [producer]/[consumer] schema form");
     }
-    println!("  reality gate    : {gate}");
-    println!("  probe hash      : {}", hex(&probe));
 
-    let code = if residue.is_empty() {
-        println!("  contract        : HOLDS");
+    println!("INVAR check ({} contract(s))", blocks.len());
+    let mut violations = 0usize;
+    let mut summaries: Vec<String> = Vec::new();
+    for (idx, b) in blocks.iter().enumerate() {
+        let kind = getk(b, "kind").unwrap_or_default();
+        let id = getk(b, "id").unwrap_or_else(|| format!("inv-{idx}"));
+        let residue = match kind.as_str() {
+            "schema" => {
+                let p = getk(b, "producer").context("schema invariant needs producer = <path>")?;
+                let c = getk(b, "consumer").context("schema invariant needs consumer = <path>")?;
+                let pr = std::fs::read_to_string(&p).with_context(|| format!("reading {p}"))?;
+                let cr = std::fs::read_to_string(&c).with_context(|| format!("reading {c}"))?;
+                check_contract(&ContractInput::Schema { producer_schema: &pr, consumer_source: &cr })
+            }
+            "event" => {
+                let p = getk(b, "producer").context("event invariant needs producer = <path>")?;
+                let c = getk(b, "consumer").context("event invariant needs consumer = <path>")?;
+                let pr = std::fs::read_to_string(&p).with_context(|| format!("reading {p}"))?;
+                let cr = std::fs::read_to_string(&c).with_context(|| format!("reading {c}"))?;
+                check_contract(&ContractInput::Event { producer_payload: &pr, consumer_handler: &cr })
+            }
+            "lock_order" => {
+                let before = parse_step(&getk(b, "before").context("lock_order needs before = actor:action:resource")?)?;
+                let after = parse_step(&getk(b, "after").context("lock_order needs after = actor:action:resource")?)?;
+                let observed = read_trace(&getk(b, "trace").context("lock_order needs trace = <path>")?)?;
+                check_contract(&ContractInput::LockOrder { before, after, observed })
+            }
+            other => anyhow::bail!("unknown invariant kind {other:?} (schema|event|lock_order)"),
+        };
+        if residue.is_empty() {
+            println!("  [HOLDS]    {id} ({kind})");
+            summaries.push(format!("{id}:{kind}=HOLDS"));
+        } else {
+            violations += 1;
+            println!("  [VIOLATED] {id} ({kind}): {residue:?}");
+            summaries.push(format!("{id}:{kind}=VIOLATED"));
+        }
+    }
+
+    let code = if violations == 0 {
+        println!("result: ALL {} contract(s) hold", blocks.len());
         0
     } else {
-        println!("  contract        : VIOLATED");
-        println!("  residue         : consumer requires {residue:?} the producer does not define");
-        println!("  note            : INVAR differential-probe finding. The full PROVEN_RESIDUE");
-        println!("                    verdict additionally requires an executed composite baseline.");
+        println!("result: {violations} of {} contract(s) VIOLATED", blocks.len());
         1
     };
 
     if let Some(path) = &args.ledger {
         let ledger = Ledger::open(path).with_context(|| format!("opening ledger {path}"))?;
-        let kind = if residue.is_empty() { "contract_holds" } else { "contract_violated" };
+        let kind = if violations == 0 { "all_hold" } else { "violations" };
         ledger
-            .append_now(kind, "invar_check", &format!("probe={}; residue={residue:?}", hex(&probe)))
+            .append_now(kind, "invar_check", &summaries.join("; "))
             .context("appending to ledger")?;
         let n = ledger.verify().context("verifying ledger")?;
-        println!("  ledger          : {path} ({n} node(s) verified)");
+        println!("ledger: {path} ({n} node(s) verified)");
     }
     Ok(code)
 }
