@@ -62,6 +62,15 @@ fn parse_flat(path: &str, text: &str) -> Result<Vec<(String, Vec<(String, String
     Ok(sections)
 }
 
+/// Public reuse of the flat-TOML-subset parser for other configs (e.g.
+/// `invar.toml`), so the CLI parses config the same way, with no `toml` crate.
+pub fn parse_sections(
+    path: &str,
+    text: &str,
+) -> Result<Vec<(String, Vec<(String, String)>)>, ConfigError> {
+    parse_flat(path, text)
+}
+
 /// Strip an inline `#` comment, but not one inside a quoted string.
 fn strip_comment(line: &str) -> &str {
     let mut in_quote = false;

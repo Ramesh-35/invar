@@ -13,7 +13,10 @@ use clap::{Parser, Subcommand};
 
 use invar_falsify::evaluator::{evaluate_case, CaseResult};
 use invar_falsify::ledger::Ledger;
-use invar_falsify::manifest::{CompositeConfig, EpistemicStatus, Manifest};
+use invar_falsify::manifest::{CompositeConfig, EpistemicStatus, EvidenceTier, Manifest};
+use invar_falsify::reality::{
+    derive_probe_hash, differential_residue, verify_real_tier, RealArtifactProof,
+};
 use invar_falsify::report::{RunReport, ENGINE_VERSION};
 
 #[derive(Parser)]
@@ -37,6 +40,12 @@ enum Command {
     Report(ReportArgs),
     /// Re-walk a ledger and confirm its bi-temporal BLAKE3 chain.
     Verify(VerifyArgs),
+    /// Check a cross-repository contract from an invar.toml (CI entrypoint).
+    Check(CheckArgs),
+    /// Verify and summarize a ledger; point to the adequacy matrix.
+    Audit(AuditArgs),
+    /// Reconstruct ledger state as known at a bi-temporal coordinate.
+    Replay(ReplayArgs),
 }
 
 #[derive(Parser)]
@@ -81,6 +90,32 @@ struct VerifyArgs {
     ledger: String,
 }
 
+#[derive(Parser)]
+struct CheckArgs {
+    #[arg(long, default_value = "invar.toml")]
+    config: String,
+    #[arg(long)]
+    ledger: Option<String>,
+}
+
+#[derive(Parser)]
+struct AuditArgs {
+    #[arg(long)]
+    ledger: String,
+}
+
+#[derive(Parser)]
+struct ReplayArgs {
+    #[arg(long)]
+    ledger: String,
+    /// Transaction-time bound: admit only rows recorded at or before this.
+    #[arg(long)]
+    as_of_tr: i64,
+    /// Valid-time bound (default: open).
+    #[arg(long)]
+    as_of_tv: Option<i64>,
+}
+
 fn main() {
     let cli = Cli::parse();
     let code = match cli.command {
@@ -88,6 +123,9 @@ fn main() {
         Command::Validate(a) => dispatch(cmd_validate(a)),
         Command::Report(a) => dispatch(cmd_report(a)),
         Command::Verify(a) => dispatch(cmd_verify(a)),
+        Command::Check(a) => dispatch(cmd_check(a)),
+        Command::Audit(a) => dispatch(cmd_audit(a)),
+        Command::Replay(a) => dispatch(cmd_replay(a)),
     };
     std::process::exit(code);
 }
@@ -264,4 +302,152 @@ fn cmd_verify(args: VerifyArgs) -> Result<i32> {
             Ok(2)
         }
     }
+}
+
+fn hex(b: &[u8]) -> String {
+    b.iter().map(|x| format!("{x:02x}")).collect()
+}
+
+fn section_get(
+    sections: &[(String, Vec<(String, String)>)],
+    sec: &str,
+    key: &str,
+) -> Option<String> {
+    sections
+        .iter()
+        .find(|(n, _)| n == sec)
+        .and_then(|(_, p)| p.iter().find(|(k, _)| k == key).map(|(_, v)| v.clone()))
+}
+
+/// `invar check`: the CI entrypoint. Reads an invar.toml, runs the
+/// cross-repository differential probe over the two LOCAL checkouts, binds the
+/// derived residue through the reality gate when commit provenance is given,
+/// and exits non-zero when the contract is violated. It reports INVAR's own
+/// differential finding; the full PROVEN_RESIDUE epistemic verdict additionally
+/// requires an executed composite baseline, which `check` does not fabricate.
+fn cmd_check(args: CheckArgs) -> Result<i32> {
+    let raw = std::fs::read_to_string(&args.config)
+        .with_context(|| format!("reading {}", args.config))?;
+    let sections = invar_falsify::config::parse_sections(&args.config, &raw)
+        .map_err(|e| anyhow::anyhow!("{e}"))?;
+
+    let producer_schema_path = section_get(&sections, "producer", "schema")
+        .context("invar.toml needs [producer] schema = \"<path>\"")?;
+    let consumer_source_path = section_get(&sections, "consumer", "source")
+        .context("invar.toml needs [consumer] source = \"<path>\"")?;
+    let producer_schema = std::fs::read_to_string(&producer_schema_path)
+        .with_context(|| format!("reading producer schema {producer_schema_path}"))?;
+    let consumer_source = std::fs::read_to_string(&consumer_source_path)
+        .with_context(|| format!("reading consumer source {consumer_source_path}"))?;
+
+    let residue = differential_residue(&producer_schema, &consumer_source);
+    let probe = derive_probe_hash(&residue);
+
+    let p_repo = section_get(&sections, "producer", "repo").unwrap_or_default();
+    let p_commit = section_get(&sections, "producer", "commit").unwrap_or_default();
+    let c_repo = section_get(&sections, "consumer", "repo").unwrap_or_default();
+    let c_commit = section_get(&sections, "consumer", "commit").unwrap_or_default();
+    let gate = if !p_commit.is_empty() && !c_commit.is_empty() {
+        let proof = RealArtifactProof {
+            producer_repo: p_repo.clone(),
+            producer_commit: p_commit.clone(),
+            consumer_repo: c_repo.clone(),
+            consumer_commit: c_commit.clone(),
+            diff_probe_hash: probe,
+        };
+        match verify_real_tier(EvidenceTier::REAL, Some(&proof), Some(probe)) {
+            Ok(()) => "ADMITTED (proof binds to derived residue)",
+            Err(_) => "REFUSED",
+        }
+    } else {
+        "n/a (no commit provenance; treated as FIXTURE)"
+    };
+
+    println!("INVAR check");
+    println!("  producer schema : {producer_schema_path}");
+    println!("  consumer source : {consumer_source_path}");
+    if !p_commit.is_empty() {
+        println!("  producer        : {p_repo}@{p_commit}");
+    }
+    if !c_commit.is_empty() {
+        println!("  consumer        : {c_repo}@{c_commit}");
+    }
+    println!("  reality gate    : {gate}");
+    println!("  probe hash      : {}", hex(&probe));
+
+    let code = if residue.is_empty() {
+        println!("  contract        : HOLDS");
+        0
+    } else {
+        println!("  contract        : VIOLATED");
+        println!("  residue         : consumer requires {residue:?} the producer does not define");
+        println!("  note            : INVAR differential-probe finding. The full PROVEN_RESIDUE");
+        println!("                    verdict additionally requires an executed composite baseline.");
+        1
+    };
+
+    if let Some(path) = &args.ledger {
+        let ledger = Ledger::open(path).with_context(|| format!("opening ledger {path}"))?;
+        let kind = if residue.is_empty() { "contract_holds" } else { "contract_violated" };
+        ledger
+            .append_now(kind, "invar_check", &format!("probe={}; residue={residue:?}", hex(&probe)))
+            .context("appending to ledger")?;
+        let n = ledger.verify().context("verifying ledger")?;
+        println!("  ledger          : {path} ({n} node(s) verified)");
+    }
+    Ok(code)
+}
+
+/// `invar audit`: verify a ledger and summarize its nodes. The adequacy matrix
+/// is NOT emitted from the binary: its statuses are adjudicated in the doc, and
+/// hardcoding them here could silently drift from reality, so we point to it.
+fn cmd_audit(args: AuditArgs) -> Result<i32> {
+    if !Path::new(&args.ledger).exists() {
+        anyhow::bail!("ledger file does not exist: {}", args.ledger);
+    }
+    let ledger = Ledger::open(&args.ledger)
+        .with_context(|| format!("opening ledger {}", args.ledger))?;
+    let count = match ledger.verify() {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("ledger integrity FAILED: {e}");
+            return Ok(2);
+        }
+    };
+    let mode = ledger.journal_mode().unwrap_or_else(|_| "unknown".to_string());
+    let nodes = ledger.replay_as_of(i64::MAX, i64::MAX)?;
+    println!("INVAR audit");
+    println!("  ledger        : {} ({count} node(s) verified, journal_mode={mode})", args.ledger);
+    for n in &nodes {
+        println!(
+            "  - id={} kind={} subject={} t_v={} t_r={}",
+            n.id, n.kind, n.subject, n.valid_time_us, n.transaction_time_us
+        );
+    }
+    println!("  adequacy matrix: docs/epistemic/MATHEMATICAL-ADEQUACY.md (adjudicated there,");
+    println!("                   not emitted by this binary, so it cannot silently drift).");
+    Ok(0)
+}
+
+/// `invar replay`: reconstruct ledger state as known at a bi-temporal
+/// coordinate, excluding anything recorded or valid after the bound.
+fn cmd_replay(args: ReplayArgs) -> Result<i32> {
+    if !Path::new(&args.ledger).exists() {
+        anyhow::bail!("ledger file does not exist: {}", args.ledger);
+    }
+    let ledger = Ledger::open(&args.ledger)
+        .with_context(|| format!("opening ledger {}", args.ledger))?;
+    let tv = args.as_of_tv.unwrap_or(i64::MAX);
+    let nodes = ledger
+        .replay_as_of(args.as_of_tr, tv)
+        .map_err(|e| anyhow::anyhow!("replay failed (ledger integrity?): {e}"))?;
+    println!("INVAR replay as-of t_r={} t_v={}", args.as_of_tr, tv);
+    println!("  admissible nodes: {}", nodes.len());
+    for n in &nodes {
+        println!(
+            "  - id={} kind={} subject={} t_v={} t_r={}",
+            n.id, n.kind, n.subject, n.valid_time_us, n.transaction_time_us
+        );
+    }
+    Ok(0)
 }
