@@ -1,13 +1,16 @@
 //! Acceptance tests for the Phase-1 falsification instrument.
 //!
-//! Twelve tests in five groups: the classifier's epistemic honesty (1-3), the
+//! Fourteen tests in six groups: the classifier's epistemic honesty (1-3), the
 //! bi-temporal ledger's integrity (4-6), temporal admissibility via as-of
-//! reconstruction (7-8, GAP-C), conservation-with-residual (9-10, GAP-F), and
-//! provenance independence (11-12, GAP-B). These are the ground truth the crate
-//! is written to satisfy. (Tests 11-12 are kept here rather than in a separate
-//! acceptance.rs so the crate's acceptance ground truth stays in one file.)
+//! reconstruction (7-8, GAP-C), conservation-with-residual (9-10, GAP-F),
+//! provenance independence (11-12, GAP-B), and executed-but-inadmissible
+//! degradation (13-14, GAP-E). These are the ground truth the crate is written
+//! to satisfy. (Tests are kept in this one file so the crate's acceptance
+//! ground truth stays cohesive.)
 
-use invar_falsify::evaluator::{classify, composite_residual, LegState, LegVerdict};
+use invar_falsify::evaluator::{
+    admit_temporal, classify, composite_residual, leg_corroboration, LegState, LegVerdict,
+};
 use invar_falsify::ledger::{Ledger, LedgerError};
 use invar_falsify::manifest::{
     EpistemicStatus, EvidenceTier, FailureType, TestCase,
@@ -342,4 +345,74 @@ fn shared_ancestry_does_not_promote_standing() {
     // Degenerate cases: one source is BANDED, none is UNSUPPORTED.
     assert_eq!(g.corroboration(&["a"]), Corroboration::Banded);
     assert_eq!(g.corroboration(&[]), Corroboration::Unsupported);
+}
+
+// 13. (GAP-E) An executed, caught leg whose evidence lies beyond the as-of
+//     bound is temporally inadmissible: it cannot count, so a case that would
+//     have been CAUGHT degrades to UNKNOWN and the leg is logged as residual.
+#[test]
+fn executed_but_temporally_inadmissible_degrades_to_unknown() {
+    let tc = case(FailureType::AST_SCHEMA_DESYNC, Some("tc005"));
+    // semgrep (the required leg) executed and even caught the designated failure.
+    let legs = vec![
+        leg("semgrep", LegState::FAIL, 1, true),
+        skipped("opa"),
+        skipped("opentelemetry"),
+        skipped("property_testing"),
+    ];
+    // Without admissibility, this is a catch.
+    assert_eq!(classify(&tc, &legs).0, EpistemicStatus::CAUGHT_BY_COMPOSITE);
+
+    // But semgrep's evidence was recorded/valid at 500, beyond the as-of bound 100.
+    let times = vec![("semgrep".to_string(), 500i64, 500i64)];
+    let admitted = admit_temporal(&legs, &times, 100, 100);
+
+    // The required leg is now INADMISSIBLE (not executed), so the honest verdict
+    // is UNKNOWN, not an unearned catch.
+    assert_eq!(
+        admitted.iter().find(|l| l.tool == "semgrep").unwrap().state,
+        LegState::INADMISSIBLE
+    );
+    assert_eq!(classify(&tc, &admitted).0, EpistemicStatus::UNKNOWN);
+
+    // The inadmissible leg is accounted for as residual, never silently dropped.
+    let cons = composite_residual(&admitted);
+    assert_eq!(cons.executed_legs, 0);
+    assert!(cons.residual_legs.contains(&"semgrep".to_string()));
+    assert!(cons.holds());
+}
+
+// 14. (GAP-E) Executed legs that claim to corroborate but share provenance
+//     cannot earn CONFIDENT standing; only genuinely independent legs do.
+#[test]
+fn correlated_executed_legs_do_not_earn_confident() {
+    let legs = vec![
+        leg("semgrep", LegState::FAIL, 1, true),
+        leg("opa", LegState::FAIL, 1, true),
+        skipped("opentelemetry"),
+        skipped("property_testing"),
+    ];
+    let leg_sources = vec![
+        ("semgrep".to_string(), "semgrep_src".to_string()),
+        ("opa".to_string(), "opa_src".to_string()),
+    ];
+
+    // Both carriers descend from one origin: correlated, capped at BANDED.
+    let mut correlated = ProvenanceGraph::new();
+    correlated.add_source(source("origin", &[]));
+    correlated.add_source(source("semgrep_src", &["origin"]));
+    correlated.add_source(source("opa_src", &["origin"]));
+    assert_eq!(
+        leg_corroboration(&legs, &leg_sources, &correlated),
+        Corroboration::Banded
+    );
+
+    // Disjoint lineages: the same two executed legs now earn CONFIDENT.
+    let mut independent = ProvenanceGraph::new();
+    independent.add_source(source("semgrep_src", &[]));
+    independent.add_source(source("opa_src", &[]));
+    assert_eq!(
+        leg_corroboration(&legs, &leg_sources, &independent),
+        Corroboration::Confident
+    );
 }

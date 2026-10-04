@@ -38,10 +38,16 @@ pub enum LegState {
     ERROR,
     /// Reserved for a leg whose executed result cannot be reduced to PASS/FAIL.
     UNKNOWN,
+    /// (GAP-E) Executed and interpretable, but NOT allowed to count: its
+    /// evidence lies outside the as-of temporal bound (GAP-C), or it is a
+    /// provenance-correlated duplicate carrier (GAP-B). Never a catch. Like
+    /// SKIPPED/ERROR it is not "executed", so it can only degrade a verdict.
+    INADMISSIBLE,
 }
 
 impl LegState {
-    /// Only PASS and FAIL are "executed" — the evaluator has a real result.
+    /// Only PASS and FAIL are "executed" - the evaluator has a real, admissible
+    /// result. SKIPPED, ERROR, UNKNOWN, and INADMISSIBLE are all non-executed.
     pub fn executed(&self) -> bool {
         matches!(self, LegState::PASS | LegState::FAIL)
     }
@@ -145,6 +151,66 @@ pub fn corroboration_of(
     source_ids: &[&str],
 ) -> crate::provenance::Corroboration {
     graph.corroboration(source_ids)
+}
+
+/// GAP-E temporal admissibility stage. Given per-leg evidence times and an
+/// as-of bound, any executed leg whose evidence lies outside the bound
+/// (`t_r > as_of_t_r` OR `t_v > as_of_t_v`) is demoted to `INADMISSIBLE` and
+/// stripped of any catch. The result is fed to the UNCHANGED `classify`, so an
+/// inadmissible required leg degrades the case to UNKNOWN by the existing
+/// weakest-link rule: no new certainty is created, only removed.
+///
+/// A leg with no supplied timing is passed through unchanged (its temporal
+/// admissibility is simply not asserted here). This stage is composable and
+/// inert when no timing is supplied, which is the case for the metadata-free
+/// Phase-1 corpus; the acceptance tests exercise the active path.
+pub fn admit_temporal(
+    legs: &[LegVerdict],
+    leg_times: &[(String, i64, i64)],
+    as_of_t_r: i64,
+    as_of_t_v: i64,
+) -> Vec<LegVerdict> {
+    legs.iter()
+        .map(|l| {
+            if let Some((_, tr, tv)) = leg_times.iter().find(|(t, _, _)| *t == l.tool) {
+                if *tr > as_of_t_r || *tv > as_of_t_v {
+                    return LegVerdict {
+                        tool: l.tool.clone(),
+                        state: LegState::INADMISSIBLE,
+                        findings: l.findings,
+                        caught_designated: false,
+                        summary: format!(
+                            "executed but temporally inadmissible (t_r={tr}, t_v={tv} beyond as_of t_r={as_of_t_r}, t_v={as_of_t_v})"
+                        ),
+                    };
+                }
+            }
+            l.clone()
+        })
+        .collect()
+}
+
+/// GAP-E provenance admissibility: the corroboration standing of the EXECUTED
+/// legs that support a verdict, keyed by each leg's provenance source. Carriers
+/// that share ancestry collapse to one group, so correlated legs cannot earn
+/// `Confident` independent corroboration; they are capped at `Banded`. Legs
+/// with no supplied source are ignored for this computation.
+pub fn leg_corroboration(
+    legs: &[LegVerdict],
+    leg_sources: &[(String, String)],
+    graph: &crate::provenance::ProvenanceGraph,
+) -> crate::provenance::Corroboration {
+    let ids: Vec<&str> = legs
+        .iter()
+        .filter(|l| l.state.executed())
+        .filter_map(|l| {
+            leg_sources
+                .iter()
+                .find(|(t, _)| *t == l.tool)
+                .map(|(_, s)| s.as_str())
+        })
+        .collect();
+    graph.corroboration(&ids)
 }
 
 /// The full evaluated result for one case.

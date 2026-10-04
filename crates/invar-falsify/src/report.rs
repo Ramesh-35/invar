@@ -181,5 +181,6 @@ fn leg_state_str(state: LegState) -> &'static str {
         LegState::SKIPPED => "SKIPPED",
         LegState::ERROR => "ERROR",
         LegState::UNKNOWN => "UNKNOWN",
+        LegState::INADMISSIBLE => "INADMISSIBLE",
     }
 }
