@@ -95,3 +95,8 @@ A kind reaches REAL standing only when run on a real incident of that kind,
 through the same reality-admission gate (GAP-D). Until then it is a tested but
 synthetic checker. Do not report EventContract or LockOrderContract as
 REAL-proven.
+
+`invar check` dispatches all three kinds from `[[invariant]]` blocks in
+`invar.toml` and exits non-zero if any contract is violated. The reality gate
+and the PROVEN_RESIDUE epistemic verdict stay in the resolving path, not in
+`check`.
