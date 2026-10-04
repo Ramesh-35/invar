@@ -44,11 +44,13 @@ to have executed (coverage).
 | `SKIPPED` | no | Did not run (tool absent, disabled, or nothing to observe offline). |
 | `ERROR` | no | Tried to run but the result is uninterpretable. |
 | `UNKNOWN` | no | Executed but the result cannot be reduced to PASS/FAIL. |
+| `INADMISSIBLE` | no | Executed and interpretable, but not allowed to count: temporally outside the as-of bound (GAP-C) or a provenance-correlated duplicate carrier (GAP-B/GAP-E). Never a catch. |
 
-**Load-bearing rule:** `SKIPPED` and `ERROR` are **never** `PASS` and **never**
-"caught nothing". Only `PASS`/`FAIL` count as executed. A case whose required
-leg is `SKIPPED`/`ERROR` is `UNKNOWN`, never `PROVEN_RESIDUE`. This is what keeps
-a missing tool from masquerading as evidence that the composite failed.
+**Load-bearing rule:** `SKIPPED`, `ERROR`, and `INADMISSIBLE` are **never**
+`PASS` and **never** "caught nothing". Only `PASS`/`FAIL` count as executed. A
+case whose required leg is `SKIPPED`/`ERROR`/`INADMISSIBLE` is `UNKNOWN`, never
+`PROVEN_RESIDUE`. This keeps a missing tool, or an executed-but-inadmissible one
+(GAP-E), from masquerading as evidence that the composite failed.
 
 ## FIXTURE vs REAL evidence
 

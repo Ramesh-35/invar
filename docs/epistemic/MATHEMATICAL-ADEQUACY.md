@@ -4,8 +4,8 @@ This is an AUDIT, not an implementation. No crate, evaluator, ledger, or test
 was changed to produce it. It measures what the repository can and cannot establish for each of the six
 adequacy primitives. First issued at commit `af1b1b6` (code at Gate 0
 `2164ac4`); rows C and F updated at commit `6c68af1`, row B at commit
-`0fc1d9a` (source fingerprint `bd78112`); GAP-B, GAP-C, and GAP-F closed on
-synthetic data, 12/12 acceptance tests. It imports no NEXTLOGIC or VEM vocabulary: every
+`0fc1d9a`, row E at commit `71290d6` (source fingerprint `379598f`); GAP-B,
+GAP-C, GAP-E, and GAP-F closed on synthetic data, 14/14 acceptance tests. It imports no NEXTLOGIC or VEM vocabulary: every
 primitive is stated generically, over any system that presents an invariant.
 
 Method: for each primitive the constitution requirement is matched against the
@@ -38,7 +38,7 @@ UNKNOWN.
 | B Provenance Independence | SATISFIED (synthetic) | `provenance::ProvenanceGraph` decides independence from recorded ancestry (`independence` -> Independent/Correlated/Unknown; unknown is never independent) and de-duplicates shared-ancestry carriers so they cannot corroborate as independent (`corroboration` -> Banded/Confident), tests 11-12. GAP-B closed on synthetic sources, commit `0fc1d9a`. Standalone: not yet wired into `classify` (no correlated evidence in the Phase-1 composite). |
 | C Temporal Admissibility | SATISFIED (synthetic) | `replay_as_of(as_of_t_r, as_of_t_v)` verifies the full chain then admits only rows with `t_r <= as_of_t_r` and `t_v <= as_of_t_v`; a later-recorded fact is invisible to an earlier reconstruction (tests 7-8). GAP-C closed on synthetic rows, commit `6c68af1`. |
 | D Reality Boundary | PARTIAL | `EvidenceTier::FIXTURE`/`REAL` is load-bearing in the verdict language and refuses to promote FIXTURE, but the tier is a self-declared manifest field with no verification, so promotion is on the honor system. |
-| E Weakest-link Composition | PARTIAL | The non-execution dimension is genuinely proven: a missing/SKIPPED/ERROR required leg forces UNKNOWN (`classify` + test 3). The "otherwise inadmissible" dimension (an executed but compromised leg) is not modeled. |
+| E Weakest-link Composition | SATISFIED (synthetic) | Non-execution degradation is proven (test 3); GAP-E adds executed-but-inadmissible degradation on two axes: temporal via `admit_temporal` (a leg beyond the as-of bound becomes INADMISSIBLE, so a required one forces UNKNOWN, test 13) and provenance via `leg_corroboration` (correlated carriers capped at Banded, test 14), commit `71290d6`. Carve-out: the reality-boundary inadmissibility axis is REAL-dependent and stays with D. |
 | F Conservation-with-residual | SATISFIED (synthetic) | `composite_residual` records uncovered legs on every case and preserves them even on a catch; `CaseConservation::holds` and `RunReport::conservation_holds` assert the balance (tests 9-10). GAP-F closed on synthetic rows, commit `6c68af1`. Residual is composite-coverage breadth; per-finding residual is future work. |
 
 ## Final adjudication
@@ -49,21 +49,21 @@ A Epistemic Standing:        PARTIAL
 B Provenance Independence:   SATISFIED (synthetic)
 C Temporal Admissibility:    SATISFIED (synthetic)
 D Reality Boundary:          PARTIAL
-E Weakest-link Composition:  PARTIAL
+E Weakest-link Composition:  SATISFIED (synthetic)
 F Conservation-with-residual:SATISFIED (synthetic)
 Overall adequacy: NOT ESTABLISHED
 ```
 
 Overall is NOT ESTABLISHED by INVAR's own weakest-link rule. As of commit
-`0fc1d9a`, B, C, and F are SATISFIED on synthetic sources/rows/fixtures (GAP-B,
-GAP-C, GAP-F closed, 12/12 acceptance tests). "(synthetic)" means
-TESTED-SYNTHETIC: proven on synthetic data, never REAL. The composite is now
-capped by the remaining PARTIALs: A (case-verdict standing granularity, held to
-a real-case dependency), D (reality boundary, still self-declared and
-unenforced, REAL-dependent), and E (executed-but-inadmissible, which needs both
-B and an enforced D). Closing B therefore does NOT establish overall adequacy
-and does NOT make GAP-D the only remaining bridge: A and E are synthetic-
-closable PARTIALs that also cap the composite. Overall stays NOT ESTABLISHED.
+`71290d6`, B, C, E, and F are SATISFIED on synthetic data (GAP-B, GAP-C, GAP-E,
+GAP-F closed, 14/14 acceptance tests). "(synthetic)" means TESTED-SYNTHETIC:
+proven on synthetic data, never REAL. E is satisfied on its temporal and
+provenance inadmissibility axes; its third axis, reality-boundary
+inadmissibility, is REAL-dependent and carried by D. The composite is now capped
+by the two remaining PARTIALs, A and D, and both are REAL-dependent: A needs a
+real case that the trichotomy demonstrably mislabels, and D needs a genuine
+external artifact. Synthetic adequacy is at its limit; overall stays NOT
+ESTABLISHED until REAL evidence arrives.
 
 ## Per-primitive evidence
 
@@ -174,7 +174,7 @@ closable PARTIALs that also cap the composite. Overall stays NOT ESTABLISHED.
    backed by an external, independently attestable artifact), plus a reality
    dependency (a real artifact to attest).
 
-### E. Weakest-link Composition: PARTIAL
+### E. Weakest-link Composition: SATISFIED (synthetic)
 
 1. Constitution requires: the composite may not be stronger than its weakest
    admissible input, and must degrade when a required component is UNKNOWN,
@@ -194,10 +194,14 @@ closable PARTIALs that also cap the composite. Overall stays NOT ESTABLISHED.
    unmodeled. Also `required_legs` covers only two failure-type groups.
 7. Smallest falsification attack: supply a required leg that executed (PASS/FAIL)
    but whose evidence is inadmissible; the composite still counts it as coverage.
-8. Status: PARTIAL (non-execution dimension satisfied and tested; inadmissibility
-   beyond non-execution absent; depends on B and D to complete).
-9. Gap requires: new code to recognize executed-but-inadmissible, which itself
-   depends on B (independence) and D (reality boundary) existing first.
+8. Status: SATISFIED on synthetic data (TESTED-SYNTHETIC). UPDATE commit
+   `71290d6` (GAP-E): `admit_temporal` demotes a leg beyond the as-of bound to
+   INADMISSIBLE so a required one degrades the case to UNKNOWN (test 13), and
+   `leg_corroboration` caps provenance-correlated carriers at Banded (test 14).
+   classify() is untouched; degradation flows through the existing weakest link.
+9. Carve-out: the third inadmissibility axis, an executed leg whose REAL tier is
+   forged or unverified, is REAL-dependent and stays with GAP-D. E is therefore
+   SATISFIED (synthetic), not unconditionally.
 
 ### F. Conservation-with-residual: SATISFIED (synthetic)
 
@@ -291,15 +295,23 @@ closable PARTIALs that also cap the composite. Overall stays NOT ESTABLISHED.
   real case proves the trichotomy loses needed information.
 - REALITY DEPENDENCY: a real case that the trichotomy demonstrably mislabels.
 
+### GAP-E (executed-but-inadmissible degradation) - CLOSED on synthetic axes (commit `71290d6`)
+- WHY IT MATTERS: an executed leg that is temporally out of bounds or a
+  correlated duplicate carrier must not grant coverage or corroboration it did
+  not earn.
+- CURRENT EVIDENCE: `admit_temporal` + `LegState::INADMISSIBLE` (temporal axis),
+  `leg_corroboration` (provenance axis), tests 13-14.
+- REMAINING: the reality-boundary inadmissibility axis (forged or unverified
+  REAL tier) is REAL-dependent and tracked under GAP-D.
+
 ## Sequencing note
 
-UPDATE (commit `0fc1d9a`): GAP-B, GAP-C, and GAP-F are CLOSED on synthetic data,
-12/12 acceptance tests GREEN in the Linux cloud container (not Mac-native).
-Overall adequacy remains NOT ESTABLISHED by weakest-link: the remaining caps are
-A and E (both synthetic-closable PARTIALs) and D (REAL-dependent). GAP-D is NOT
-the sole remaining bridge; A and E must also close before synthetic adequacy is
-complete. The next candidates are GAP-E (executed-but-inadmissible: now that B
-exists, the evaluator can reject non-independent carriers, though its reality
-axis still waits on D), GAP-A (a richer case-verdict standing, held by this
-audit to a real-case dependency), and GAP-D (the REAL bridge, needs a genuine
-external artifact). The founder selects which gap is next.
+UPDATE (commit `71290d6`): GAP-B, GAP-C, GAP-E, and GAP-F are CLOSED on synthetic
+data, 14/14 acceptance tests GREEN in the Linux cloud container (not Mac-native).
+Primitives B, C, E, and F are SATISFIED (synthetic); A and D remain PARTIAL, so
+overall adequacy is still NOT ESTABLISHED by weakest-link. This is the limit of
+what synthetic local harnesses can prove: both remaining gaps are REAL-dependent.
+A (a richer case-verdict standing) is held by this audit to a real case that the
+trichotomy demonstrably mislabels; D (the reality boundary, and with it E's
+third inadmissibility axis) needs a genuine external cross-repository artifact.
+The next build is GAP-D with the first REAL evidence. The founder confirms.
