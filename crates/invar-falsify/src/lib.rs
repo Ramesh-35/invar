@@ -17,6 +17,7 @@
 
 pub mod config;
 pub mod evaluator;
+pub mod invariant;
 pub mod ledger;
 pub mod manifest;
 pub mod provenance;

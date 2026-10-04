@@ -34,6 +34,13 @@ fn parse_flat(path: &str, text: &str) -> Result<Vec<(String, Vec<(String, String
             continue;
         }
         if let Some(inner) = line.strip_prefix('[').and_then(|s| s.strip_suffix(']')) {
+            // Support [[array.table]] by stripping the inner brackets too, so a
+            // repeated section like [[invariant]] becomes another "invariant".
+            let inner = inner.trim();
+            let inner = inner
+                .strip_prefix('[')
+                .and_then(|s| s.strip_suffix(']'))
+                .unwrap_or(inner);
             let name = inner.trim().to_string();
             if name.is_empty() {
                 return Err(ConfigError::Syntax {

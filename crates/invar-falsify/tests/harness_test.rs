@@ -1,14 +1,15 @@
 //! Acceptance tests for the Phase-1 falsification instrument.
 //!
-//! Eighteen tests in eight groups: the classifier's epistemic honesty (1-3),
-//! the bi-temporal ledger's integrity (4-6), temporal admissibility via as-of
+//! Twenty tests in nine groups: the classifier's epistemic honesty (1-3), the
+//! bi-temporal ledger's integrity (4-6), temporal admissibility via as-of
 //! reconstruction (7-8, GAP-C), conservation-with-residual (9-10, GAP-F),
 //! provenance independence (11-12, GAP-B), executed-but-inadmissible
-//! degradation (13-14, GAP-E), reality-tier admission (15-16, GAP-D gate), and
-//! the cross-repository differential probe (17-18, GAP-D resolving step, run
-//! against the exact bytes of REAL-INCIDENT-001). These are the ground truth
-//! the crate is written to satisfy. (Tests are kept in this one file so the
-//! crate's acceptance ground truth stays cohesive.)
+//! degradation (13-14, GAP-E), reality-tier admission (15-16, GAP-D gate), the
+//! cross-repository differential probe (17-18, GAP-D resolving step, run against
+//! the exact bytes of REAL-INCIDENT-001), and the general invariant engine's
+//! EventContract and LockOrderContract kinds (19-20, synthetic). These are the
+//! ground truth the crate is written to satisfy. (Tests are kept in this one
+//! file so the crate's acceptance ground truth stays cohesive.)
 
 use invar_falsify::evaluator::{
     admit_reality, admit_temporal, classify, composite_residual, leg_corroboration, LegState,
@@ -23,6 +24,7 @@ use invar_falsify::reality::{
     derive_probe_hash, differential_residue, verify_real_tier, AdmissibilityError,
     RealArtifactProof,
 };
+use invar_falsify::invariant::{check_contract, ContractInput, Step};
 
 // Exact bytes fetched from the two commits of REAL-INCIDENT-001.
 const PRODUCER_SCHEMA_P1: &str = r#"{
@@ -555,4 +557,59 @@ fn differential_probe_empty_when_contract_holds() {
     let consumer_ok = r#"function processOrder(payload) { return payload.order_id; }"#;
     let residue = differential_residue(PRODUCER_SCHEMA_P1, consumer_ok);
     assert!(residue.is_empty(), "no residue when the field is defined");
+}
+
+// 19. (General engine, synthetic) EventContract: a consumer handler reading a
+//     payload field the producer does not emit is a violation; a compatible
+//     handler holds.
+#[test]
+fn event_contract_detects_unemitted_field() {
+    let producer_payload = r#"{ "order_id": "o1", "amount_micro_units": 500 }"#;
+    let consumer_handler = r#"function onOrder(payload) { return payload.currency + payload.order_id; }"#;
+    let residue = check_contract(&ContractInput::Event {
+        producer_payload,
+        consumer_handler,
+    });
+    assert_eq!(residue, vec!["currency".to_string()]);
+
+    // Control: a handler that only reads emitted fields holds.
+    let compatible = r#"function onOrder(payload) { return payload.order_id; }"#;
+    let ok = check_contract(&ContractInput::Event {
+        producer_payload,
+        consumer_handler: compatible,
+    });
+    assert!(ok.is_empty());
+}
+
+// 20. (General engine, synthetic) LockOrderContract: acquiring a lock AFTER the
+//     dependent trigger fired is a sequence inversion; the correct order holds.
+#[test]
+fn lock_order_contract_detects_inversion() {
+    let before = Step::new("ServiceA", "acquire", "LockX");
+    let after = Step::new("ServiceB", "trigger", "EventY");
+
+    // Inverted: B triggers before A acquires.
+    let inverted = vec![
+        Step::new("ServiceB", "trigger", "EventY"),
+        Step::new("ServiceA", "acquire", "LockX"),
+    ];
+    let residue = check_contract(&ContractInput::LockOrder {
+        before: before.clone(),
+        after: after.clone(),
+        observed: inverted,
+    });
+    assert_eq!(residue.len(), 1);
+    assert!(residue[0].starts_with("ORDER_INVERSION"));
+
+    // Correct order holds.
+    let ordered = vec![
+        Step::new("ServiceA", "acquire", "LockX"),
+        Step::new("ServiceB", "trigger", "EventY"),
+    ];
+    let ok = check_contract(&ContractInput::LockOrder {
+        before,
+        after,
+        observed: ordered,
+    });
+    assert!(ok.is_empty());
 }
