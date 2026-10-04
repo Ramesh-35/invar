@@ -38,7 +38,7 @@ UNKNOWN.
 | A Epistemic Standing | PARTIAL | Case verdict carries a three-state standing (`EpistemicStatus`) plus rationale and refuses over-claim; no per-evidence standing, no standing algebra. |
 | B Provenance Independence | SATISFIED (synthetic) | `provenance::ProvenanceGraph` decides independence from recorded ancestry (`independence` -> Independent/Correlated/Unknown; unknown is never independent) and de-duplicates shared-ancestry carriers so they cannot corroborate as independent (`corroboration` -> Banded/Confident), tests 11-12. GAP-B closed on synthetic sources, commit `0fc1d9a`. Standalone: not yet wired into `classify` (no correlated evidence in the Phase-1 composite). |
 | C Temporal Admissibility | SATISFIED (synthetic) | `replay_as_of(as_of_t_r, as_of_t_v)` verifies the full chain then admits only rows with `t_r <= as_of_t_r` and `t_v <= as_of_t_v`; a later-recorded fact is invisible to an earlier reconstruction (tests 7-8). GAP-C closed on synthetic rows, commit `6c68af1`. |
-| D Reality Boundary | PARTIAL | GAP-D adds a reality-admission gate (`reality::verify_real_tier` + `evaluator::admit_reality`, commit `ef60dc6`): an unbacked REAL claim is refused and degraded to UNKNOWN (tests 15-16), neutralizing trivial self-promotion. Still PARTIAL: the gate binds a proof to the recorded residue but cannot verify the referenced commits are real, so a fabricated proof still passes locally. Externality is unverified; closing D needs a real artifact. |
+| D Reality Boundary | PARTIAL | GAP-D admission gate refuses unbacked REAL (tests 15-16). REAL-INCIDENT-001 then evaluated two externally-resolved public commits end to end: the differential probe isolated `amount_cents`, the single-repo baseline missed it, VERDICT PROVEN_RESIDUE at REAL tier (commit `dcff70b`, docs/epistemic/REAL-INCIDENT-001.md), INVAR's first bare [PROVEN]. Still PARTIAL: externality came from an audited out-of-band fetch with a negative control, not in-process verification, and the incident is a constructed demo, not a wild defect. |
 | E Weakest-link Composition | SATISFIED (synthetic) | Non-execution degradation is proven (test 3); GAP-E adds executed-but-inadmissible degradation on two axes: temporal via `admit_temporal` (a leg beyond the as-of bound becomes INADMISSIBLE, so a required one forces UNKNOWN, test 13) and provenance via `leg_corroboration` (correlated carriers capped at Banded, test 14), commit `71290d6`. Carve-out: the reality-boundary inadmissibility axis is REAL-dependent and stays with D. |
 | F Conservation-with-residual | SATISFIED (synthetic) | `composite_residual` records uncovered legs on every case and preserves them even on a catch; `CaseConservation::holds` and `RunReport::conservation_holds` assert the balance (tests 9-10). GAP-F closed on synthetic rows, commit `6c68af1`. Residual is composite-coverage breadth; per-finding residual is future work. |
 
@@ -316,12 +316,15 @@ ESTABLISHED until REAL evidence arrives.
 
 ## Sequencing note
 
-UPDATE (commit `ef60dc6`): the GAP-D reality-admission GATE is added (16/16
-acceptance tests GREEN, not Mac-native). It refuses unbacked REAL claims, but it
-is a binding check, not externality verification, so D stays PARTIAL and overall
-adequacy stays NOT ESTABLISHED. The two remaining caps, A and D, are both
-REAL-dependent and cannot be closed by any local synthetic harness. Closing D
-for real requires one genuine cross-repository incident whose commits can be
-independently resolved and whose probe is actually re-run; evaluating it is the
-only path to INVAR's first bare [PROVEN]. The founder must supply that incident;
-it cannot be manufactured here.
+UPDATE (commit `dcff70b`): REAL-INCIDENT-001, a genuine cross-repository
+incident (two externally-resolved public commits, negative control), was
+evaluated end to end. INVAR's differential probe isolated the residue
+`amount_cents` that the executed single-repo composite baseline (semgrep) did
+not; VERDICT PROVEN_RESIDUE at REAL tier. This is INVAR's first REAL-tier
+residue and earns a bare [PROVEN] for that one incident's claim (see
+docs/epistemic/REAL-INCIDENT-001.md). Overall adequacy stays NOT ESTABLISHED: A
+remains PARTIAL (this incident did not mislabel, so A's real-case dependency is
+unresolved) and D stays PARTIAL (externality via audited fetch, not in-process;
+constructed demo, not a wild defect). To harden: in-process external resolution
+(fetch and verify the commits in code), a broader multi-tool baseline, and a
+wild non-constructed incident. The founder directs what comes next.
