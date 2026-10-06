@@ -100,3 +100,29 @@ REAL-proven.
 `invar.toml` and exits non-zero if any contract is violated. The reality gate
 and the PROVEN_RESIDUE epistemic verdict stay in the resolving path, not in
 `check`.
+
+## Phase I: `invar init` and `invar check --ci` (2026-10-06)
+
+`invar init` scans a workspace and proposes an `invar.toml`. Discovery is
+HEURISTIC (file names and text patterns; only JSON is actually parsed). It
+proposes runnable contracts only for JSON Schema and OpenAPI-JSON component
+schemas paired with a consumer by field-name overlap. YAML specs, AsyncAPI,
+protobuf, Axum/Actix/Express/FastAPI routes and Pydantic models are listed as
+found-but-not-checkable. A proposal is not a verified contract.
+
+`invar check --ci` resolves `github:OWNER/REPO@REF:PATH` references (REF may be
+`{base}`, from GITHUB_BASE_REF) into memory through a `Transport` seam, hashes
+the bytes with BLAKE3, records them as provenance, and never writes them to
+disk. This path is tested with a mock transport only.
+
+Live transport: NOT COMPILED IN. The zero-dependency build has no HTTPS client,
+so in-process fetching needs either one TLS/HTTP dependency or a subprocess
+transport (for example curl); either relaxes a stated constraint. Decision
+pending. Until it is made, remote references fail closed with exit 3.
+
+`invar check` exit codes: 0 all contracts hold; 1 at least one VIOLATED; 2
+ledger integrity break; 3 the manifest could not be evaluated (an ERROR, never
+a verdict).
+
+Primitive D is NOT advanced by this phase: the in-process resolver has not run
+against a live remote artifact. The adequacy matrix is unchanged.
