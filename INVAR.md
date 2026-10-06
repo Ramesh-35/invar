@@ -139,8 +139,10 @@ non-synthetic evidence and is never a synthetic status.)
 `[STRATEGIC HYPOTHESIS]` An open-core split: the falsification instrument and
 corpus schema are community; enterprise value (managed lineage, org-wide merge
 gates, cross-repo fleets) is commercial. This is a business bet, not a technical
-claim, and the concrete license boundary is an **unresolved decision** (see
-[`LICENSE`](LICENSE)).
+claim. Resolved 2026-10-06: this repository (the community instrument) is
+licensed MIT OR Apache-2.0 (see [`LICENSE`](LICENSE)), so any commercial
+enterprise components must live outside it; where that boundary falls is still a
+business decision.
 
 ### Phased execution roadmap
 

@@ -169,3 +169,17 @@ NOT yet verified, stated plainly:
 
 Primitive D is unchanged (PARTIAL) and the adequacy matrix headline is
 unchanged.
+
+## Release decisions (2026-10-06)
+
+- License: MIT OR Apache-2.0 (founder decision; supersedes the "still pending"
+  note above). LICENSE-MIT and LICENSE-APACHE added; README and INVAR.md
+  updated. Commercial components, if any, must live outside this repository.
+- CLI binary renamed to `invar`; the internal package stays `invar-falsify`.
+- Repository: GitHub, private first (reversible), to be made public after a
+  review of the strategy and commission docs. Pushed by the founder from their
+  Mac; this session holds no GitHub credentials.
+- First tag: `v0.1.0-alpha`, published as a prerelease. It matches the binary's
+  `0.1.0-alpha` and the NOT ESTABLISHED adequacy.
+- Still unverified until the push: the runner self-test, and the release builds
+  for all three targets. Primitive D is unchanged (PARTIAL).

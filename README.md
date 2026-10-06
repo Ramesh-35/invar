@@ -58,4 +58,5 @@ classified `UNKNOWN`, not residue.
 
 ## License
 
-[UNRESOLVED] — see [`LICENSE`](LICENSE). Not yet chosen.
+Licensed under either of [Apache License 2.0](LICENSE-APACHE) or [MIT](LICENSE-MIT),
+at your option. See [`LICENSE`](LICENSE).
