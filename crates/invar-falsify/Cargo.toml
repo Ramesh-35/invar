@@ -3,11 +3,11 @@ name = "invar-falsify"
 version = "0.1.0-alpha"
 edition = "2021"
 description = "INVAR Phase-1 deterministic falsification instrument (EICS category-residue probe)."
-license = "LicenseRef-INVAR-PENDING"
+license = "MIT OR Apache-2.0"
 publish = false
 
 [[bin]]
-name = "invar-falsify"
+name = "invar"
 path = "src/main.rs"
 
 [lib]

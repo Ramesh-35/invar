@@ -18,7 +18,7 @@ dest="${RUNNER_TEMP:-/tmp}/invar-bin"
 mkdir -p "$dest"
 
 if [ -n "$tag" ] && [ -n "$target" ] && [ -n "${INVAR_ACTION_REPO:-}" ] && command -v gh >/dev/null; then
-  asset="invar-falsify-${tag}-${target}.tar.gz"
+  asset="invar-${tag}-${target}.tar.gz"
   if gh release download "$tag" --repo "$INVAR_ACTION_REPO" \
        --pattern "$asset" --pattern "$asset.sha256" --dir "$dest" --clobber 2>/dev/null; then
     if command -v sha256sum >/dev/null; then
@@ -27,7 +27,7 @@ if [ -n "$tag" ] && [ -n "$target" ] && [ -n "${INVAR_ACTION_REPO:-}" ] && comma
       (cd "$dest" && shasum -a 256 -c "$asset.sha256")
     fi
     tar -xzf "$dest/$asset" -C "$dest"
-    echo "bin=$dest/invar-falsify" >> "$GITHUB_OUTPUT"
+    echo "bin=$dest/invar" >> "$GITHUB_OUTPUT"
     echo "invar: using release $tag ($target), checksum verified"
     exit 0
   fi
@@ -35,5 +35,5 @@ if [ -n "$tag" ] && [ -n "$target" ] && [ -n "${INVAR_ACTION_REPO:-}" ] && comma
 fi
 
 cargo build --release --locked -p invar-falsify --manifest-path "$INVAR_ACTION_PATH/Cargo.toml"
-echo "bin=$INVAR_ACTION_PATH/target/release/invar-falsify" >> "$GITHUB_OUTPUT"
+echo "bin=$INVAR_ACTION_PATH/target/release/invar" >> "$GITHUB_OUTPUT"
 echo "invar: built from source (${INVAR_ACTION_REF:-local checkout})"

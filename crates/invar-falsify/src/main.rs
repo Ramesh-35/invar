@@ -1,4 +1,4 @@
-//! `invar-falsify` — the INVAR Phase-1 falsification instrument CLI.
+//! `invar`: the INVAR command-line instrument (built from crate `invar-falsify`).
 //!
 //! Exit codes:
 //!   0  execution completed (verdicts may include UNKNOWN unless --strict)
@@ -23,7 +23,7 @@ use invar_falsify::resolver::{CurlTransport, Resolver, Transport};
 
 #[derive(Parser)]
 #[command(
-    name = "invar-falsify",
+    name = "invar",
     version = "0.1.0-alpha",
     about = "Deterministic falsification harness for the INVAR category-residue hypothesis."
 )]
