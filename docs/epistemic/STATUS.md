@@ -113,16 +113,25 @@ found-but-not-checkable. A proposal is not a verified contract.
 `invar check --ci` resolves `github:OWNER/REPO@REF:PATH` references (REF may be
 `{base}`, from GITHUB_BASE_REF) into memory through a `Transport` seam, hashes
 the bytes with BLAKE3, records them as provenance, and never writes them to
-disk. This path is tested with a mock transport only.
+disk. Tested with a mock transport and demonstrated live (below).
 
-Live transport: NOT COMPILED IN. The zero-dependency build has no HTTPS client,
-so in-process fetching needs either one TLS/HTTP dependency or a subprocess
-transport (for example curl); either relaxes a stated constraint. Decision
-pending. Until it is made, remote references fail closed with exit 3.
+Live transport: `CurlTransport` (founder decision 2026-10-06). The
+zero-dependency build has no HTTPS client, so the constraint relaxed was "no
+shell-out", not "zero dependencies". curl runs as an argv subprocess (never a
+shell), HTTPS-only including redirects, size- and time-bounded, with the token
+passed on stdin, never on the command line. curl is inside the trust boundary,
+as a TLS crate would have been. Live run (commit `8830086`): `invar check --ci`
+fetched REAL-INCIDENT-001's consumer at C1 in-process, 229 bytes, BLAKE3
+`ecd0a60aa8fd380e574fae70e75810da57f3b43c744ec03d492bc3b21c576f69`, identical to
+an independent BLAKE3 of the out-of-band copy; VIOLATED `amount_cents`, exit 1.
+A bogus-SHA control returned HTTP 404 and exited 3 (ERROR, not a verdict).
 
 `invar check` exit codes: 0 all contracts hold; 1 at least one VIOLATED; 2
 ledger integrity break; 3 the manifest could not be evaluated (an ERROR, never
 a verdict).
 
-Primitive D is NOT advanced by this phase: the in-process resolver has not run
-against a live remote artifact. The adequacy matrix is unchanged.
+Primitive D stays PARTIAL. In-process resolution has now run against a live
+remote artifact, which removes the "externality only out-of-band" limit for the
+`--ci` path. Still open: a single constructed demo incident, no run on an
+actual CI runner yet, and `check` does not run the reality gate or the
+composite baseline. The adequacy matrix headline is unchanged.

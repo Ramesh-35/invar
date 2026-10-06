@@ -72,3 +72,18 @@ Does NOT establish:
 - A multi-tool baseline. Only semgrep (the one required leg for this failure
   type) executed; a broader baseline would harden the "composite missed it"
   claim.
+
+## Addendum 2026-10-06: in-process re-resolution
+
+`invar check --ci` (commit `8830086`) fetched the consumer artifact itself,
+inside the binary, through the curl transport:
+`github:Ramesh-35/invar-demo-consumer@fe73889bf250275711339d065ecc37f21879fc72:client.js`,
+229 bytes, BLAKE3 `ecd0a60aa8fd380e574fae70e75810da57f3b43c744ec03d492bc3b21c576f69`.
+An independent BLAKE3 over the out-of-band copy fetched 2026-10-04 is
+identical, so both paths saw the same bytes. Contract VIOLATED on
+`amount_cents`; a bogus-SHA control returned 404 and exited 3.
+
+This removes the "externality only out-of-band" limit for the `--ci` path.
+Unchanged: a constructed demo, a single incident, and `check` does not run the
+reality gate or the composite baseline, so this run is a contract violation,
+not a new PROVEN_RESIDUE verdict.
