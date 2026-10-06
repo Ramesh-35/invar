@@ -87,6 +87,85 @@ fn fetch(resolver: &Resolver, spec: &str, prov: &mut Vec<Fetched>) -> Result<Str
     Ok(r.text)
 }
 
+/// Marker used by the GitHub Action to find and update its own PR comment.
+pub const REPORT_MARKER: &str = "<!-- invar-check -->";
+
+/// Render a value from a scanned repo as GitHub-safe inline code. Contract ids
+/// and residue are attacker-controllable in a fork PR, so they are always shown
+/// as code (no mention pings, no links, no HTML), with table pipes escaped and
+/// backticks and line breaks neutralized.
+fn md_code(s: &str) -> String {
+    let cleaned: String = s
+        .chars()
+        .map(|c| match c {
+            '`' => '\'',
+            '\n' | '\r' | '\t' => ' ',
+            c => c,
+        })
+        .collect();
+    format!("`{}`", cleaned.replace('|', "\\|"))
+}
+
+const MAX_RESIDUE_SHOWN: usize = 20;
+
+/// Markdown report for a PR comment or job summary. States plainly that a
+/// contract violation is not a PROVEN_RESIDUE verdict.
+pub fn render_report_md(outcomes: &[ContractOutcome]) -> String {
+    let violated = outcomes.iter().filter(|o| !o.residue.is_empty()).count();
+    let mut s = String::new();
+    s.push_str(REPORT_MARKER);
+    s.push('\n');
+    if violated == 0 {
+        s.push_str(&format!(
+            "### INVAR contract check: ALL HOLD ({} contract(s))\n\n",
+            outcomes.len()
+        ));
+    } else {
+        s.push_str(&format!(
+            "### INVAR contract check: VIOLATED ({violated} of {})\n\n",
+            outcomes.len()
+        ));
+    }
+    s.push_str("| Contract | Kind | Result | Residue |\n|---|---|---|---|\n");
+    for o in outcomes {
+        let (result, residue) = if o.residue.is_empty() {
+            ("holds", String::new())
+        } else {
+            let mut cells: Vec<String> =
+                o.residue.iter().take(MAX_RESIDUE_SHOWN).map(|r| md_code(r)).collect();
+            if o.residue.len() > MAX_RESIDUE_SHOWN {
+                cells.push(format!("+{} more", o.residue.len() - MAX_RESIDUE_SHOWN));
+            }
+            ("**VIOLATED**", cells.join(", "))
+        };
+        s.push_str(&format!(
+            "| {} | {} | {} | {} |\n",
+            md_code(&o.id),
+            md_code(&o.kind),
+            result,
+            residue
+        ));
+    }
+    let fetched: Vec<&Fetched> = outcomes.iter().flat_map(|o| o.provenance.iter()).collect();
+    if !fetched.is_empty() {
+        s.push_str("\n**Remote artifacts fetched in-process**\n\n");
+        for f in fetched {
+            s.push_str(&format!(
+                "- {} ({} bytes, BLAKE3 {})\n",
+                md_code(&f.reference),
+                f.bytes,
+                md_code(&f.blake3_hex)
+            ));
+        }
+    }
+    s.push_str(
+        "\n<sub>A violation is contract residue found by INVAR's differential probe. \
+         It is not a PROVEN_RESIDUE verdict, which additionally requires the reality \
+         gate and an executed composite baseline.</sub>\n",
+    );
+    s
+}
+
 /// Evaluate every contract declared in the manifest.
 pub fn evaluate(sections: &Sections, resolver: &Resolver) -> Result<Vec<ContractOutcome>> {
     let blocks = gather_blocks(sections)?;

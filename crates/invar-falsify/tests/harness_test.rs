@@ -1,6 +1,6 @@
 //! Acceptance tests for the Phase-1 falsification instrument.
 //!
-//! Twenty-two tests in eleven groups: the classifier's epistemic honesty (1-3),
+//! Twenty-three tests in twelve groups: the classifier's epistemic honesty (1-3),
 //! the bi-temporal ledger's integrity (4-6), temporal admissibility via as-of
 //! reconstruction (7-8, GAP-C), conservation-with-residual (9-10, GAP-F),
 //! provenance independence (11-12, GAP-B), executed-but-inadmissible
@@ -8,8 +8,10 @@
 //! cross-repository differential probe (17-18, run against the exact bytes of
 //! REAL-INCIDENT-001), the general invariant engine's EventContract and
 //! LockOrderContract kinds (19-20, synthetic), `invar init` zero-touch discovery
-//! (21), and `invar check --ci` in-memory remote resolution through a mock
-//! transport (22). These are the ground truth the crate is written to satisfy.
+//! (21), `invar check --ci` in-memory remote resolution through a mock
+//! transport (22), and the GitHub Action surface: PR-report rendering and the
+//! structure of action.yml (23). These are the ground truth the crate is
+//! written to satisfy.
 //! (Tests are kept in this one file so the acceptance ground truth stays
 //! cohesive.)
 
@@ -27,12 +29,12 @@ use invar_falsify::reality::{
     RealArtifactProof,
 };
 use invar_falsify::invariant::{check_contract, ContractInput, Step};
-use invar_falsify::check::evaluate;
+use invar_falsify::check::{evaluate, render_report_md, ContractOutcome, REPORT_MARKER};
 use invar_falsify::config::parse_sections;
 use invar_falsify::init::{discover, render_manifest};
 use invar_falsify::resolver::{
-    curl_args, github_request, parse_ref, CurlTransport, MockTransport, ResolveError, Resolver,
-    Transport,
+    curl_args, github_request, parse_ref, CurlTransport, Fetched, MockTransport, ResolveError,
+    Resolver, Transport,
 };
 
 fn temp_workspace(tag: &str) -> std::path::PathBuf {
@@ -791,5 +793,84 @@ fn ci_resolves_remote_consumer_in_memory() {
     let e = evaluate(&sections, &ci).unwrap_err().to_string();
     assert!(e.contains("HTTP 404"), "{e}");
     let _ = std::fs::remove_dir_all(&root);
+}
+
+fn unescaped_pipes(line: &str) -> usize {
+    let b = line.as_bytes();
+    (0..b.len()).filter(|&i| b[i] == b'|' && (i == 0 || b[i - 1] != b'\\')).count()
+}
+
+/// Default of an action input, read structurally (no YAML parser in this build).
+fn input_default(yml: &str, name: &str) -> Option<String> {
+    let lines: Vec<&str> = yml.lines().collect();
+    let start = lines.iter().position(|l| *l == format!("  {name}:"))?;
+    lines[start + 1..]
+        .iter()
+        .take_while(|l| l.starts_with("    "))
+        .find_map(|l| l.trim().strip_prefix("default:").map(|v| v.trim().to_string()))
+}
+
+// 23. GitHub Action surface. (a) The PR report is rendered by tested Rust:
+//     hostile ids and residue from a fork PR stay inside escaped inline code, so
+//     they cannot break the table, ping users, or inject links; it carries the
+//     marker the action uses to update its comment, provenance, and the
+//     not-a-PROVEN_RESIDUE disclaimer. (b) action.yml declares the specified
+//     inputs and outputs, never interpolates ${{ }} into a shell line, maps exit
+//     codes so an ERROR is never a verdict, and keeps the comment best-effort.
+#[test]
+fn action_report_and_manifest_are_sound() {
+    let outcomes = vec![
+        ContractOutcome {
+            id: "evil|id`@org".into(),
+            kind: "schema".into(),
+            residue: vec!["amount_cents".into(), "a|b".into(), "@someone".into()],
+            provenance: vec![Fetched {
+                reference: "github:o/r@main:client.js".into(),
+                url: "https://raw.githubusercontent.com/o/r/main/client.js".into(),
+                bytes: 229,
+                blake3_hex: "ecd0a60aa8fd380e574fae70e75810da57f3b43c744ec03d492bc3b21c576f69".into(),
+            }],
+        },
+        ContractOutcome { id: "ok".into(), kind: "event".into(), residue: vec![], provenance: vec![] },
+    ];
+    let md = render_report_md(&outcomes);
+    assert!(md.starts_with(REPORT_MARKER));
+    assert!(md.contains("VIOLATED (1 of 2)"));
+    for row in md.lines().filter(|l| l.starts_with("| `")) {
+        assert_eq!(unescaped_pipes(row), 5, "row must keep 4 columns: {row}");
+    }
+    assert!(md.contains("`evil\\|id'@org`"), "backtick neutralized, pipe escaped");
+    assert!(md.contains("`@someone`"), "mention rendered inert inside code");
+    assert!(md.contains("`a\\|b`"));
+    assert!(md.contains("ecd0a60aa8fd380e574fae70e75810da57f3b43c744ec03d492bc3b21c576f69"));
+    assert!(md.contains("not a PROVEN_RESIDUE verdict"));
+    let hold = render_report_md(&outcomes[1..]);
+    assert!(hold.contains("ALL HOLD (1 contract(s))"));
+
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let yml = std::fs::read_to_string(root.join("action.yml")).expect("action.yml at repo root");
+    assert!(yml.contains("  using: composite"));
+    assert_eq!(input_default(&yml, "config").as_deref(), Some("invar.toml"));
+    assert_eq!(input_default(&yml, "base_ref").as_deref(), Some("${{ github.base_ref }}"));
+    assert_eq!(input_default(&yml, "github_token").as_deref(), Some("${{ github.token }}"));
+    assert_eq!(input_default(&yml, "post_comment").as_deref(), Some("'true'"));
+    for out in ["exit_code", "verdict", "report"] {
+        assert!(yml.contains(&format!("  {out}:")), "output {out}");
+    }
+    // Script-injection guard: no ${{ }} expression on a shell line.
+    for l in yml.lines() {
+        assert!(!(l.trim_start().starts_with("run:") && l.contains("${{")), "interpolated run line: {l}");
+    }
+    assert!(yml.contains("continue-on-error: true"), "PR comment must be best-effort");
+
+    for script in ["install.sh", "run.sh", "comment.sh", "gate.sh"] {
+        assert!(yml.contains(&format!("action/{script}")), "{script} referenced");
+        assert!(root.join("action").join(script).is_file(), "{script} exists");
+    }
+    let run = std::fs::read_to_string(root.join("action/run.sh")).unwrap();
+    assert!(run.contains("1) verdict=violated") && run.contains("*) verdict=error"));
+    assert!(run.contains("--report-md"));
+    let gate = std::fs::read_to_string(root.join("action/gate.sh")).unwrap();
+    assert!(gate.contains("ERROR, not a verdict") && gate.contains("exit 3"));
 }
 

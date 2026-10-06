@@ -1,0 +1,93 @@
+name: INVAR contract check
+description: >-
+  Check the cross-repository contracts declared in invar.toml. Remote artifacts
+  referenced as github:OWNER/REPO@REF:PATH are fetched in-process, BLAKE3-hashed
+  and never written to disk. A contract violation fails the job; an evaluation
+  ERROR fails it separately and is never reported as a verdict.
+author: INVAR
+branding:
+  icon: shield
+  color: gray-dark
+
+inputs:
+  config:
+    description: Path to invar.toml, relative to the workspace.
+    required: false
+    default: invar.toml
+  base_ref:
+    description: Baseline ref substituted for {base} in remote references.
+    required: false
+    default: ${{ github.base_ref }}
+  github_token:
+    description: Token for remote spec fetches and for posting the PR comment.
+    required: false
+    default: ${{ github.token }}
+  post_comment:
+    description: Post or update a markdown report on the PR when a contract is violated (and refresh it once contracts hold again).
+    required: false
+    default: 'true'
+  fail_on_violation:
+    description: Fail the job on a contract violation. 'false' gives report-only mode. Errors always fail.
+    required: false
+    default: 'true'
+  version:
+    description: Release tag of the binary to download. Defaults to the action ref; if no release asset matches, the action builds from source.
+    required: false
+    default: ''
+
+outputs:
+  exit_code:
+    description: invar check exit code (0 hold, 1 violated, 2 ledger break, 3 error).
+    value: ${{ steps.check.outputs.exit_code }}
+  verdict:
+    description: hold | violated | ledger_break | error
+    value: ${{ steps.check.outputs.verdict }}
+  report:
+    description: Path to the markdown report (absent on error).
+    value: ${{ steps.check.outputs.report }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve invar binary
+      id: bin
+      shell: bash
+      env:
+        INVAR_VERSION: ${{ inputs.version }}
+        INVAR_ACTION_REPO: ${{ github.action_repository }}
+        INVAR_ACTION_REF: ${{ github.action_ref }}
+        INVAR_ACTION_PATH: ${{ github.action_path }}
+        GH_TOKEN: ${{ inputs.github_token }}
+      run: bash "$INVAR_ACTION_PATH/action/install.sh"
+
+    - name: Run invar check --ci
+      id: check
+      shell: bash
+      env:
+        INVAR_BIN: ${{ steps.bin.outputs.bin }}
+        INVAR_CONFIG: ${{ inputs.config }}
+        INVAR_BASE_REF: ${{ inputs.base_ref }}
+        INVAR_TOKEN: ${{ inputs.github_token }}
+        INVAR_ACTION_PATH: ${{ github.action_path }}
+      run: bash "$INVAR_ACTION_PATH/action/run.sh"
+
+    - name: Post or refresh PR comment
+      if: (steps.check.outputs.exit_code == '0' || steps.check.outputs.exit_code == '1') && inputs.post_comment == 'true' && github.event_name == 'pull_request'
+      continue-on-error: true
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+        INVAR_EXIT: ${{ steps.check.outputs.exit_code }}
+        INVAR_REPORT: ${{ steps.check.outputs.report }}
+        INVAR_PR: ${{ github.event.pull_request.number }}
+        INVAR_REPO: ${{ github.repository }}
+        INVAR_ACTION_PATH: ${{ github.action_path }}
+      run: bash "$INVAR_ACTION_PATH/action/comment.sh"
+
+    - name: Gate
+      shell: bash
+      env:
+        INVAR_EXIT: ${{ steps.check.outputs.exit_code }}
+        INVAR_FAIL_ON_VIOLATION: ${{ inputs.fail_on_violation }}
+        INVAR_ACTION_PATH: ${{ github.action_path }}
+      run: bash "$INVAR_ACTION_PATH/action/gate.sh"

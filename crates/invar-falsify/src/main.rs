@@ -14,7 +14,7 @@ use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 
 use invar_falsify::evaluator::{evaluate_case, CaseResult};
-use invar_falsify::check::evaluate;
+use invar_falsify::check::{evaluate, render_report_md};
 use invar_falsify::init::{discover, render_manifest};
 use invar_falsify::ledger::Ledger;
 use invar_falsify::manifest::{CompositeConfig, EpistemicStatus, Manifest};
@@ -104,6 +104,9 @@ struct CheckArgs {
     /// GITHUB_TOKEN and GITHUB_BASE_REF are read from the environment).
     #[arg(long, default_value_t = false)]
     ci: bool,
+    /// Also write a markdown report (PR comment / job summary) to this path.
+    #[arg(long)]
+    report_md: Option<String>,
 }
 
 #[derive(Parser)]
@@ -405,6 +408,13 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
         println!("result: {violations} of {} contract(s) VIOLATED", outcomes.len());
         1
     };
+
+    if let Some(path) = &args.report_md {
+        if let Err(e) = std::fs::write(path, render_report_md(&outcomes)) {
+            eprintln!("ERROR (not a verdict): writing report {path}: {e}");
+            return Ok(3);
+        }
+    }
 
     if let Some(path) = &args.ledger {
         let ledger = match Ledger::open(path) {

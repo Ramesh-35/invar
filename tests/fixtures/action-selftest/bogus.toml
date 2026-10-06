@@ -1,0 +1,6 @@
+# Negative control: a SHA that does not exist must be an ERROR, never a verdict.
+[[invariant]]
+kind = "schema"
+id = "bogus-sha-control"
+producer = "schema.json"
+consumer = "github:Ramesh-35/invar-demo-consumer@0000000000000000000000000000000000000000:client.js"
