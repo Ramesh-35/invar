@@ -1,15 +1,17 @@
 //! Acceptance tests for the Phase-1 falsification instrument.
 //!
-//! Twenty tests in nine groups: the classifier's epistemic honesty (1-3), the
-//! bi-temporal ledger's integrity (4-6), temporal admissibility via as-of
+//! Twenty-two tests in eleven groups: the classifier's epistemic honesty (1-3),
+//! the bi-temporal ledger's integrity (4-6), temporal admissibility via as-of
 //! reconstruction (7-8, GAP-C), conservation-with-residual (9-10, GAP-F),
 //! provenance independence (11-12, GAP-B), executed-but-inadmissible
 //! degradation (13-14, GAP-E), reality-tier admission (15-16, GAP-D gate), the
-//! cross-repository differential probe (17-18, GAP-D resolving step, run against
-//! the exact bytes of REAL-INCIDENT-001), and the general invariant engine's
-//! EventContract and LockOrderContract kinds (19-20, synthetic). These are the
-//! ground truth the crate is written to satisfy. (Tests are kept in this one
-//! file so the crate's acceptance ground truth stays cohesive.)
+//! cross-repository differential probe (17-18, run against the exact bytes of
+//! REAL-INCIDENT-001), the general invariant engine's EventContract and
+//! LockOrderContract kinds (19-20, synthetic), `invar init` zero-touch discovery
+//! (21), and `invar check --ci` in-memory remote resolution through a mock
+//! transport (22). These are the ground truth the crate is written to satisfy.
+//! (Tests are kept in this one file so the acceptance ground truth stays
+//! cohesive.)
 
 use invar_falsify::evaluator::{
     admit_reality, admit_temporal, classify, composite_residual, leg_corroboration, LegState,
@@ -25,6 +27,28 @@ use invar_falsify::reality::{
     RealArtifactProof,
 };
 use invar_falsify::invariant::{check_contract, ContractInput, Step};
+use invar_falsify::check::evaluate;
+use invar_falsify::config::parse_sections;
+use invar_falsify::init::{discover, render_manifest};
+use invar_falsify::resolver::{
+    github_request, parse_ref, MockTransport, ResolveError, Resolver, Transport,
+};
+
+fn temp_workspace(tag: &str) -> std::path::PathBuf {
+    let nanos = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_nanos())
+        .unwrap_or(0);
+    let dir = std::env::temp_dir().join(format!("invar_{tag}_{}_{nanos}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    dir
+}
+
+fn put(root: &std::path::Path, rel: &str, body: &str) {
+    let p = root.join(rel);
+    std::fs::create_dir_all(p.parent().unwrap()).unwrap();
+    std::fs::write(p, body).unwrap();
+}
 
 // Exact bytes fetched from the two commits of REAL-INCIDENT-001.
 const PRODUCER_SCHEMA_P1: &str = r#"{
@@ -613,3 +637,150 @@ fn lock_order_contract_detects_inversion() {
     });
     assert!(ok.is_empty());
 }
+
+const OPENAPI_JSON: &str = r#"{
+  "openapi": "3.0.0",
+  "info": { "title": "orders", "version": "1" },
+  "paths": {},
+  "components": { "schemas": { "Order": {
+    "type": "object",
+    "properties": { "order_id": { "type": "string" }, "amount_micro_units": { "type": "integer" } },
+    "required": ["order_id", "amount_cents"]
+  } } }
+}"#;
+
+// 21. `invar init` discovers specs, consumers, routes and models, proposes only
+//     runnable contracts (JSON Schema and OpenAPI-JSON component, each paired
+//     with a consumer by field overlap), skips vendored directories, lists the
+//     rest as inventory, and emits a manifest that parses and actually runs.
+#[test]
+fn init_discovers_and_emits_runnable_manifest() {
+    let root = temp_workspace("init");
+    put(&root, "schemas/order.schema.json", PRODUCER_SCHEMA_P1);
+    put(&root, "api/openapi.json", OPENAPI_JSON);
+    put(&root, "api/openapi.yaml", "openapi: 3.0.0\ninfo:\n  title: orders\n");
+    put(&root, "proto/order.proto", "syntax = \"proto3\";\nmessage Order { string order_id = 1; }\n");
+    put(&root, "src/client.js", CONSUMER_CLIENT_C1);
+    put(
+        &root,
+        "server/app.py",
+        "from fastapi import FastAPI\nfrom pydantic import BaseModel\napp = FastAPI()\n\nclass Order(BaseModel):\n    order_id: str\n\n@app.get(\"/orders\")\ndef list_orders():\n    return []\n",
+    );
+    put(&root, "server/routes.rs", "let app = Router::new().route(\"/orders\", get(list));\n");
+    // A vendored decoy that would be a consumer if it were scanned.
+    put(&root, "node_modules/pkg/client.js", "x = payload.amount_cents;\n");
+
+    let d = discover(&root);
+    assert_eq!(d.schemas.len(), 2, "json-schema + openapi component");
+    assert_eq!(d.consumers.len(), 1, "node_modules must be skipped");
+    assert_eq!(d.consumers[0].path, "src/client.js");
+    assert_eq!(d.proposals.len(), 2);
+
+    let manifest = render_manifest(&d);
+    // Non-checkable artifacts are inventoried, explicitly not proposed.
+    for needle in [
+        "api/openapi.yaml",
+        "proto/order.proto",
+        "pydantic Order",
+        "fastapi GET \"/orders\"",
+        "axum \"/orders\"",
+        "HEURISTIC",
+    ] {
+        assert!(manifest.contains(needle), "manifest should mention {needle}");
+    }
+
+    // It parses with the flat-TOML parser...
+    let sections = parse_sections("invar.toml", &manifest).unwrap();
+    let blocks = sections.iter().filter(|(n, _)| n == "invariant").count();
+    assert_eq!(blocks, 2);
+
+    // ...and it runs: both proposed contracts find the real residue.
+    std::fs::write(root.join("invar.toml"), &manifest).unwrap();
+    let outcomes = evaluate(&sections, &Resolver::local(&root)).unwrap();
+    assert_eq!(outcomes.len(), 2);
+    for o in &outcomes {
+        assert_eq!(o.residue, vec!["amount_cents".to_string()], "{}", o.id);
+        assert!(o.provenance.is_empty(), "local artifacts carry no remote provenance");
+    }
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+// 22. `invar check --ci`: remote references are parsed strictly, requests are
+//     built correctly (raw endpoint without a token, contents API with one, the
+//     token never printed), remote use fails closed without --ci or without a
+//     transport, and with a transport the consumer is fetched into memory,
+//     hashed, evaluated, and never written to disk.
+#[test]
+fn ci_resolves_remote_consumer_in_memory() {
+    const C1: &str = "fe73889bf250275711339d065ecc37f21879fc72";
+    let spec = format!("github:Ramesh-35/invar-demo-consumer@{C1}:client.js");
+
+    // Strict parsing.
+    let r = parse_ref(&spec, None).unwrap();
+    assert_eq!((r.owner.as_str(), r.repo.as_str(), r.path.as_str()), ("Ramesh-35", "invar-demo-consumer", "client.js"));
+    assert_eq!(parse_ref("github:o/r@{base}:a.json", Some("main")).unwrap().git_ref, "main");
+    assert!(matches!(parse_ref("github:o/r@{base}:a.json", None), Err(ResolveError::MissingBaseRef(_))));
+    assert!(matches!(parse_ref("github:o@main:a.json", None), Err(ResolveError::BadReference(_))));
+    assert!(matches!(parse_ref("github:o/r@main:../a.json", None), Err(ResolveError::BadReference(_))));
+    assert!(matches!(parse_ref("gitlab:o/r@main:a.json", None), Err(ResolveError::Unsupported(_))));
+
+    // Request construction, and the token never leaks through Debug.
+    let raw_url = format!("https://raw.githubusercontent.com/Ramesh-35/invar-demo-consumer/{C1}/client.js");
+    assert_eq!(github_request(&r, None).url, raw_url);
+    let authed = github_request(&r, Some("SECRET_T"));
+    assert_eq!(
+        authed.url,
+        format!("https://api.github.com/repos/Ramesh-35/invar-demo-consumer/contents/client.js?ref={C1}")
+    );
+    assert!(authed.headers.iter().any(|(k, v)| k == "Authorization" && v == "Bearer SECRET_T"));
+    assert!(!format!("{authed:?}").contains("SECRET_T"));
+
+    // Workspace: local producer, remote consumer.
+    let root = temp_workspace("ci");
+    put(&root, "schema.json", PRODUCER_SCHEMA_P1);
+    let manifest = format!(
+        "[[invariant]]\nkind = \"schema\"\nid = \"ci-remote-consumer\"\nproducer = \"schema.json\"\nconsumer = \"{spec}\"\n"
+    );
+    put(&root, "invar.toml", &manifest);
+    let sections = parse_sections("invar.toml", &manifest).unwrap();
+
+    // Fail closed: no --ci, and --ci without a live transport.
+    let e = evaluate(&sections, &Resolver::local(&root)).unwrap_err().to_string();
+    assert!(e.contains("requires --ci"), "{e}");
+    let mut no_transport = Resolver::local(&root);
+    no_transport.allow_remote = true;
+    let e = evaluate(&sections, &no_transport).unwrap_err().to_string();
+    assert!(e.contains("no live network transport"), "{e}");
+
+    // With a transport: fetched into memory and evaluated.
+    let mock = MockTransport::default().with(&raw_url, CONSUMER_CLIENT_C1);
+    let mut ci = Resolver::local(&root);
+    ci.allow_remote = true;
+    ci.transport = Some(&mock as &dyn Transport);
+    let outcomes = evaluate(&sections, &ci).unwrap();
+    assert_eq!(outcomes.len(), 1);
+    assert_eq!(outcomes[0].residue, vec!["amount_cents".to_string()]);
+    let f = &outcomes[0].provenance[0];
+    assert_eq!(f.reference, spec);
+    assert_eq!(f.bytes, CONSUMER_CLIENT_C1.len());
+    assert_eq!(f.blake3_hex.len(), 64);
+    // Deterministic hash over the same bytes.
+    let again = evaluate(&sections, &ci).unwrap();
+    assert_eq!(again[0].provenance[0].blake3_hex, f.blake3_hex);
+
+    // Never written to disk: the workspace still holds only its two files.
+    let mut names: Vec<String> = std::fs::read_dir(&root)
+        .unwrap()
+        .map(|e| e.unwrap().file_name().to_string_lossy().to_string())
+        .collect();
+    names.sort();
+    assert_eq!(names, vec!["invar.toml".to_string(), "schema.json".to_string()]);
+
+    // A remote miss is an ERROR, never a verdict.
+    let empty = MockTransport::default();
+    ci.transport = Some(&empty as &dyn Transport);
+    let e = evaluate(&sections, &ci).unwrap_err().to_string();
+    assert!(e.contains("HTTP 404"), "{e}");
+    let _ = std::fs::remove_dir_all(&root);
+}
+

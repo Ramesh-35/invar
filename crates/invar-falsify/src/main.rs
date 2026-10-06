@@ -2,8 +2,10 @@
 //!
 //! Exit codes:
 //!   0  execution completed (verdicts may include UNKNOWN unless --strict)
-//!   1  configuration / manifest / dependency error
+//!   1  configuration / manifest / dependency error; for `check`, at least one
+//!      contract VIOLATED
 //!   2  strict epistemic failure: any UNKNOWN under --strict, or a ledger break
+//!   3  `check` could not evaluate the manifest: an ERROR, never a verdict
 
 use std::path::{Path, PathBuf};
 use std::time::Duration;
@@ -12,10 +14,12 @@ use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 
 use invar_falsify::evaluator::{evaluate_case, CaseResult};
-use invar_falsify::invariant::{check_contract, ContractInput, Step};
+use invar_falsify::check::evaluate;
+use invar_falsify::init::{discover, render_manifest};
 use invar_falsify::ledger::Ledger;
 use invar_falsify::manifest::{CompositeConfig, EpistemicStatus, Manifest};
 use invar_falsify::report::{RunReport, ENGINE_VERSION};
+use invar_falsify::resolver::Resolver;
 
 #[derive(Parser)]
 #[command(
@@ -40,6 +44,8 @@ enum Command {
     Verify(VerifyArgs),
     /// Check a cross-repository contract from an invar.toml (CI entrypoint).
     Check(CheckArgs),
+    /// Scan a workspace and propose an invar.toml (heuristic discovery).
+    Init(InitArgs),
     /// Verify and summarize a ledger; point to the adequacy matrix.
     Audit(AuditArgs),
     /// Reconstruct ledger state as known at a bi-temporal coordinate.
@@ -94,6 +100,23 @@ struct CheckArgs {
     config: String,
     #[arg(long)]
     ledger: Option<String>,
+    /// Allow remote github:OWNER/REPO@REF:PATH artifacts (fetched into memory;
+    /// GITHUB_TOKEN and GITHUB_BASE_REF are read from the environment).
+    #[arg(long, default_value_t = false)]
+    ci: bool,
+}
+
+#[derive(Parser)]
+struct InitArgs {
+    /// Workspace root to scan; invar.toml is written here.
+    #[arg(long, default_value = ".")]
+    root: String,
+    /// Overwrite an existing invar.toml.
+    #[arg(long, default_value_t = false)]
+    force: bool,
+    /// Print the proposed manifest instead of writing it.
+    #[arg(long, default_value_t = false)]
+    stdout: bool,
 }
 
 #[derive(Parser)]
@@ -122,6 +145,7 @@ fn main() {
         Command::Report(a) => dispatch(cmd_report(a)),
         Command::Verify(a) => dispatch(cmd_verify(a)),
         Command::Check(a) => dispatch(cmd_check(a)),
+        Command::Init(a) => dispatch(cmd_init(a)),
         Command::Audit(a) => dispatch(cmd_audit(a)),
         Command::Replay(a) => dispatch(cmd_replay(a)),
     };
@@ -302,135 +326,147 @@ fn cmd_verify(args: VerifyArgs) -> Result<i32> {
     }
 }
 
-fn section_get(
-    sections: &[(String, Vec<(String, String)>)],
-    sec: &str,
-    key: &str,
-) -> Option<String> {
-    sections
-        .iter()
-        .find(|(n, _)| n == sec)
-        .and_then(|(_, p)| p.iter().find(|(k, _)| k == key).map(|(_, v)| v.clone()))
-}
-
-fn getk(pairs: &[(String, String)], k: &str) -> Option<String> {
-    pairs.iter().find(|(kk, _)| kk == k).map(|(_, v)| v.clone())
-}
-
-fn parse_step(s: &str) -> Result<Step> {
-    let parts: Vec<&str> = s.split(':').collect();
-    if parts.len() != 3 {
-        anyhow::bail!("step {s:?} must be actor:action:resource");
-    }
-    Ok(Step::new(parts[0].trim(), parts[1].trim(), parts[2].trim()))
-}
-
-fn read_trace(path: &str) -> Result<Vec<Step>> {
-    let raw = std::fs::read_to_string(path).with_context(|| format!("reading trace {path}"))?;
-    let mut steps = Vec::new();
-    for line in raw.lines() {
-        let line = line.trim();
-        if line.is_empty() || line.starts_with('#') {
-            continue;
-        }
-        steps.push(parse_step(line)?);
-    }
-    Ok(steps)
-}
-
-/// `invar check`: the CI entrypoint. Evaluates every `[[invariant]]` block in
-/// invar.toml, dispatching each to its contract checker by `kind`
-/// (schema|event|lock_order). Exits 1 if ANY contract is violated. A legacy
-/// single `[producer]`/`[consumer]` schema form is still accepted when there are
-/// no `[[invariant]]` blocks. It reports INVAR's differential findings; the full
-/// PROVEN_RESIDUE epistemic verdict and the reality gate live in the resolving
-/// path (`reality.rs`, example `real_incident`), which `check` does not fabricate.
+/// `invar check`: the CI entrypoint. Evaluates every `[[invariant]]` block (or
+/// the legacy single schema form) and exits 0 if all contracts hold, 1 if any
+/// is VIOLATED, 2 on a ledger integrity break, and 3 if the manifest could not
+/// be evaluated (an ERROR, never reported as a verdict). Local paths resolve
+/// against the directory holding invar.toml. With `--ci`, remote
+/// `github:OWNER/REPO@REF:PATH` artifacts are fetched into memory, hashed with
+/// BLAKE3 and never written to disk; their provenance is printed. The reality
+/// gate and the PROVEN_RESIDUE verdict stay in the resolving path, not here.
 fn cmd_check(args: CheckArgs) -> Result<i32> {
-    let raw = std::fs::read_to_string(&args.config)
-        .with_context(|| format!("reading {}", args.config))?;
-    let sections = invar_falsify::config::parse_sections(&args.config, &raw)
-        .map_err(|e| anyhow::anyhow!("{e}"))?;
-
-    // Collect [[invariant]] blocks; fall back to a single legacy schema block.
-    let mut blocks: Vec<Vec<(String, String)>> = sections
-        .iter()
-        .filter(|(n, _)| n == "invariant")
-        .map(|(_, p)| p.clone())
-        .collect();
-    if blocks.is_empty() {
-        if let (Some(ps), Some(cs)) = (
-            section_get(&sections, "producer", "schema"),
-            section_get(&sections, "consumer", "source"),
-        ) {
-            blocks.push(vec![
-                ("kind".into(), "schema".into()),
-                ("id".into(), section_get(&sections, "case", "id").unwrap_or_else(|| "schema-0".into())),
-                ("producer".into(), ps),
-                ("consumer".into(), cs),
-            ]);
+    let raw = match std::fs::read_to_string(&args.config) {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("ERROR (not a verdict): reading {}: {e}", args.config);
+            return Ok(3);
         }
-    }
-    if blocks.is_empty() {
-        anyhow::bail!("invar.toml has no [[invariant]] blocks and no [producer]/[consumer] schema form");
-    }
+    };
+    let sections = match invar_falsify::config::parse_sections(&args.config, &raw) {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("ERROR (not a verdict): {e}");
+            return Ok(3);
+        }
+    };
+    let base_dir = Path::new(&args.config)
+        .parent()
+        .filter(|p| !p.as_os_str().is_empty())
+        .map(Path::to_path_buf)
+        .unwrap_or_else(|| PathBuf::from("."));
+    let env = |k: &str| std::env::var(k).ok().filter(|v| !v.is_empty());
+    let resolver = Resolver {
+        base_dir,
+        allow_remote: args.ci,
+        token: if args.ci { env("GITHUB_TOKEN") } else { None },
+        base_ref: env("GITHUB_BASE_REF"),
+        // No live network transport in this build: the zero-dependency build has
+        // no HTTPS client (decision pending, docs/epistemic/STATUS.md). Remote
+        // references therefore fail closed with exit 3, never as a verdict.
+        transport: None,
+    };
+    let outcomes = match evaluate(&sections, &resolver) {
+        Ok(o) => o,
+        Err(e) => {
+            eprintln!("ERROR (not a verdict): {e:#}");
+            return Ok(3);
+        }
+    };
 
-    println!("INVAR check ({} contract(s))", blocks.len());
+    println!(
+        "INVAR check ({} contract(s){})",
+        outcomes.len(),
+        if args.ci { ", --ci" } else { "" }
+    );
     let mut violations = 0usize;
     let mut summaries: Vec<String> = Vec::new();
-    for (idx, b) in blocks.iter().enumerate() {
-        let kind = getk(b, "kind").unwrap_or_default();
-        let id = getk(b, "id").unwrap_or_else(|| format!("inv-{idx}"));
-        let residue = match kind.as_str() {
-            "schema" => {
-                let p = getk(b, "producer").context("schema invariant needs producer = <path>")?;
-                let c = getk(b, "consumer").context("schema invariant needs consumer = <path>")?;
-                let pr = std::fs::read_to_string(&p).with_context(|| format!("reading {p}"))?;
-                let cr = std::fs::read_to_string(&c).with_context(|| format!("reading {c}"))?;
-                check_contract(&ContractInput::Schema { producer_schema: &pr, consumer_source: &cr })
-            }
-            "event" => {
-                let p = getk(b, "producer").context("event invariant needs producer = <path>")?;
-                let c = getk(b, "consumer").context("event invariant needs consumer = <path>")?;
-                let pr = std::fs::read_to_string(&p).with_context(|| format!("reading {p}"))?;
-                let cr = std::fs::read_to_string(&c).with_context(|| format!("reading {c}"))?;
-                check_contract(&ContractInput::Event { producer_payload: &pr, consumer_handler: &cr })
-            }
-            "lock_order" => {
-                let before = parse_step(&getk(b, "before").context("lock_order needs before = actor:action:resource")?)?;
-                let after = parse_step(&getk(b, "after").context("lock_order needs after = actor:action:resource")?)?;
-                let observed = read_trace(&getk(b, "trace").context("lock_order needs trace = <path>")?)?;
-                check_contract(&ContractInput::LockOrder { before, after, observed })
-            }
-            other => anyhow::bail!("unknown invariant kind {other:?} (schema|event|lock_order)"),
-        };
-        if residue.is_empty() {
-            println!("  [HOLDS]    {id} ({kind})");
-            summaries.push(format!("{id}:{kind}=HOLDS"));
+    for o in &outcomes {
+        if o.residue.is_empty() {
+            println!("  [HOLDS]    {} ({})", o.id, o.kind);
+            summaries.push(format!("{}:{}=HOLDS", o.id, o.kind));
         } else {
             violations += 1;
-            println!("  [VIOLATED] {id} ({kind}): {residue:?}");
-            summaries.push(format!("{id}:{kind}=VIOLATED"));
+            println!("  [VIOLATED] {} ({}): {:?}", o.id, o.kind, o.residue);
+            summaries.push(format!("{}:{}=VIOLATED", o.id, o.kind));
+        }
+        for f in &o.provenance {
+            println!(
+                "      fetched {} ({} bytes, blake3 {})",
+                f.reference, f.bytes, f.blake3_hex
+            );
+            summaries.push(format!("fetched {} blake3={}", f.reference, f.blake3_hex));
         }
     }
-
     let code = if violations == 0 {
-        println!("result: ALL {} contract(s) hold", blocks.len());
+        println!("result: ALL {} contract(s) hold", outcomes.len());
         0
     } else {
-        println!("result: {violations} of {} contract(s) VIOLATED", blocks.len());
+        println!("result: {violations} of {} contract(s) VIOLATED", outcomes.len());
         1
     };
 
     if let Some(path) = &args.ledger {
-        let ledger = Ledger::open(path).with_context(|| format!("opening ledger {path}"))?;
+        let ledger = match Ledger::open(path) {
+            Ok(l) => l,
+            Err(e) => {
+                eprintln!("ERROR (not a verdict): opening ledger {path}: {e}");
+                return Ok(3);
+            }
+        };
         let kind = if violations == 0 { "all_hold" } else { "violations" };
-        ledger
-            .append_now(kind, "invar_check", &summaries.join("; "))
-            .context("appending to ledger")?;
-        let n = ledger.verify().context("verifying ledger")?;
-        println!("ledger: {path} ({n} node(s) verified)");
+        if let Err(e) = ledger.append_now(kind, "invar_check", &summaries.join("; ")) {
+            eprintln!("ERROR (not a verdict): appending to ledger: {e}");
+            return Ok(3);
+        }
+        match ledger.verify() {
+            Ok(n) => println!("ledger: {path} ({n} node(s) verified)"),
+            Err(e) => {
+                eprintln!("LEDGER INTEGRITY BREAK: {e}");
+                return Ok(2);
+            }
+        }
     }
     Ok(code)
+}
+
+/// `invar init`: scan a workspace and propose an invar.toml. Discovery is
+/// heuristic; every generated contract is a proposal to review.
+fn cmd_init(args: InitArgs) -> Result<i32> {
+    let root = PathBuf::from(&args.root);
+    if !root.is_dir() {
+        anyhow::bail!("{} is not a directory", args.root);
+    }
+    let d = discover(&root);
+    let manifest = render_manifest(&d);
+    if args.stdout {
+        print!("{manifest}");
+        return Ok(0);
+    }
+    let out = root.join("invar.toml");
+    if out.exists() && !args.force {
+        anyhow::bail!(
+            "{} already exists; pass --force to overwrite or --stdout to print",
+            out.display()
+        );
+    }
+    std::fs::write(&out, &manifest).with_context(|| format!("writing {}", out.display()))?;
+    println!(
+        "INVAR init: scanned {} file(s){}",
+        d.files_scanned,
+        if d.truncated { " (truncated)" } else { "" }
+    );
+    println!("  schemas found      : {}", d.schemas.len());
+    println!("  consumers found    : {}", d.consumers.len());
+    println!(
+        "  contracts proposed : {} (heuristic; review before trusting)",
+        d.proposals.len()
+    );
+    println!(
+        "  inventory only     : {} item(s) found but not yet checkable",
+        d.inventory.len()
+    );
+    println!("  wrote              : {}", out.display());
+    Ok(0)
 }
 
 /// `invar audit`: verify a ledger and summarize its nodes. The adequacy matrix

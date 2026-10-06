@@ -33,8 +33,21 @@ impl ContractKind {
     }
 }
 
+/// Select a sub-document by JSON pointer (e.g. `/components/schemas/Order`
+/// inside an OpenAPI JSON file) and re-serialize it, so the schema checker can
+/// run on one component of a larger spec.
+pub fn select_pointer(json: &str, pointer: &str) -> Result<String, String> {
+    let v: serde_json::Value =
+        serde_json::from_str(json).map_err(|e| format!("not valid JSON: {e}"))?;
+    let sub = v
+        .pointer(pointer)
+        .ok_or_else(|| format!("JSON pointer {pointer:?} not found"))?;
+    serde_json::to_string(sub).map_err(|e| e.to_string())
+}
+
 /// The fields a source reads off `payload`, e.g. `payload.amount_cents`.
-fn payload_reads(source: &str) -> BTreeSet<String> {
+/// Only this access pattern is recognized (not `payload["x"]` or `.get("x")`).
+pub fn payload_reads(source: &str) -> BTreeSet<String> {
     let mut read = BTreeSet::new();
     let bytes = source.as_bytes();
     let needle = "payload.";
