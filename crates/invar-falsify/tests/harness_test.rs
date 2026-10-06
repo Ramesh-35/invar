@@ -31,7 +31,8 @@ use invar_falsify::check::evaluate;
 use invar_falsify::config::parse_sections;
 use invar_falsify::init::{discover, render_manifest};
 use invar_falsify::resolver::{
-    github_request, parse_ref, MockTransport, ResolveError, Resolver, Transport,
+    curl_args, github_request, parse_ref, CurlTransport, MockTransport, ResolveError, Resolver,
+    Transport,
 };
 
 fn temp_workspace(tag: &str) -> std::path::PathBuf {
@@ -734,6 +735,14 @@ fn ci_resolves_remote_consumer_in_memory() {
     );
     assert!(authed.headers.iter().any(|(k, v)| k == "Authorization" && v == "Bearer SECRET_T"));
     assert!(!format!("{authed:?}").contains("SECRET_T"));
+    // The live curl transport never puts the token on the command line (it goes
+    // over stdin), is HTTPS-only, and a missing binary is an error, not a body.
+    let argv = curl_args(&authed);
+    assert!(argv.iter().all(|a| !a.contains("SECRET_T")));
+    assert!(argv.windows(2).any(|w| w[0] == "--proto" && w[1] == "=https"));
+    assert!(argv.windows(2).any(|w| w[0] == "--proto-redir" && w[1] == "=https"));
+    let missing = CurlTransport { program: "/nonexistent/invar-no-curl".into() };
+    assert!(missing.get(&authed).unwrap_err().contains("could not run"));
 
     // Workspace: local producer, remote consumer.
     let root = temp_workspace("ci");

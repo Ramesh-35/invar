@@ -11,9 +11,11 @@
 //! evaluation path is deterministic and testable without a network.
 //!
 //! HONEST SCOPE: this module builds the request (URL + headers) and verifies
-//! and hashes whatever bytes come back. It does not itself open sockets; a
-//! live `Transport` is a separate decision (see docs/epistemic/STATUS.md).
-//! GitLab references are recognized and refused as not yet supported.
+//! and hashes whatever bytes come back. The live transport is `CurlTransport`,
+//! an argv subprocess (no shell) chosen 2026-10-06 because the zero-dependency
+//! build has no HTTPS client. curl is therefore inside the trust boundary, as a
+//! TLS crate would have been. GitLab references are refused as not yet
+//! supported.
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -40,7 +42,7 @@ pub enum ResolveError {
     RemoteRequiresCi(String),
     #[error("{0:?} uses {{base}} but GITHUB_BASE_REF is not set")]
     MissingBaseRef(String),
-    #[error("{0:?}: this build has no live network transport (decision pending, see docs/epistemic/STATUS.md)")]
+    #[error("{0:?}: no live network transport configured")]
     NoTransport(String),
     #[error("fetching {reference}: {reason}")]
     Fetch { reference: String, reason: String },
@@ -148,6 +150,83 @@ pub fn github_request(r: &RemoteRef, token: Option<&str>) -> FetchRequest {
 /// The network seam. Implementations return the response body or a reason.
 pub trait Transport {
     fn get(&self, req: &FetchRequest) -> Result<Vec<u8>, String>;
+}
+
+/// Largest remote artifact accepted (matches `invar init`'s file cap).
+pub const MAX_REMOTE_BYTES: usize = 1_000_000;
+
+/// Live transport through the `curl` binary (founder decision 2026-10-06:
+/// relax "no shell-out" rather than "zero dependencies"). It is an argv
+/// subprocess, never a shell. The body is captured from stdout into memory and
+/// nothing is written to disk. Headers, including any token, are written to
+/// curl's stdin (`-H @-`) so the token never appears in the process list.
+/// HTTPS only (redirects included), bounded size and time, and any non-2xx
+/// response is an error, never a body.
+pub struct CurlTransport {
+    pub program: String,
+}
+
+impl Default for CurlTransport {
+    fn default() -> Self {
+        CurlTransport { program: "curl".into() }
+    }
+}
+
+/// The exact argv passed to curl for a request (no headers, so no token).
+pub fn curl_args(req: &FetchRequest) -> Vec<String> {
+    vec![
+        "--silent".into(),
+        "--show-error".into(),
+        "--fail".into(),
+        "--location".into(),
+        "--proto".into(),
+        "=https".into(),
+        "--proto-redir".into(),
+        "=https".into(),
+        "--max-time".into(),
+        "30".into(),
+        "--max-filesize".into(),
+        MAX_REMOTE_BYTES.to_string(),
+        "-H".into(),
+        "@-".into(),
+        req.url.clone(),
+    ]
+}
+
+impl Transport for CurlTransport {
+    fn get(&self, req: &FetchRequest) -> Result<Vec<u8>, String> {
+        use std::io::Write;
+        use std::process::{Command, Stdio};
+        let mut child = Command::new(&self.program)
+            .args(curl_args(req))
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .map_err(|e| format!("could not run {}: {e}", self.program))?;
+        {
+            let mut stdin = child.stdin.take().ok_or("curl stdin unavailable")?;
+            let headers: String = req
+                .headers
+                .iter()
+                .map(|(k, v)| format!("{k}: {v}\n"))
+                .collect();
+            stdin
+                .write_all(headers.as_bytes())
+                .map_err(|e| format!("writing headers to curl: {e}"))?;
+        }
+        let out = child
+            .wait_with_output()
+            .map_err(|e| format!("waiting for curl: {e}"))?;
+        if !out.status.success() {
+            let msg = String::from_utf8_lossy(&out.stderr).trim().to_string();
+            return Err(format!("curl exited {}: {msg}", out.status.code().unwrap_or(-1)));
+        }
+        if out.stdout.len() > MAX_REMOTE_BYTES {
+            return Err(format!("response exceeds {MAX_REMOTE_BYTES} bytes"));
+        }
+        Ok(out.stdout)
+    }
 }
 
 /// Deterministic transport for tests: URL -> body. Unknown URLs are 404.

@@ -19,7 +19,7 @@ use invar_falsify::init::{discover, render_manifest};
 use invar_falsify::ledger::Ledger;
 use invar_falsify::manifest::{CompositeConfig, EpistemicStatus, Manifest};
 use invar_falsify::report::{RunReport, ENGINE_VERSION};
-use invar_falsify::resolver::Resolver;
+use invar_falsify::resolver::{CurlTransport, Resolver, Transport};
 
 #[derive(Parser)]
 #[command(
@@ -355,15 +355,16 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
         .map(Path::to_path_buf)
         .unwrap_or_else(|| PathBuf::from("."));
     let env = |k: &str| std::env::var(k).ok().filter(|v| !v.is_empty());
+    let curl = CurlTransport::default();
     let resolver = Resolver {
         base_dir,
         allow_remote: args.ci,
         token: if args.ci { env("GITHUB_TOKEN") } else { None },
         base_ref: env("GITHUB_BASE_REF"),
-        // No live network transport in this build: the zero-dependency build has
-        // no HTTPS client (decision pending, docs/epistemic/STATUS.md). Remote
-        // references therefore fail closed with exit 3, never as a verdict.
-        transport: None,
+        // Live transport only under --ci: curl as an argv subprocess (the
+        // zero-dependency build has no HTTPS client). Any fetch failure is an
+        // ERROR (exit 3), never a verdict.
+        transport: if args.ci { Some(&curl as &dyn Transport) } else { None },
     };
     let outcomes = match evaluate(&sections, &resolver) {
         Ok(o) => o,
