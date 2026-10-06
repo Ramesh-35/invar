@@ -135,3 +135,37 @@ remote artifact, which removes the "externality only out-of-band" limit for the
 `--ci` path. Still open: a single constructed demo incident, no run on an
 actual CI runner yet, and `check` does not run the reality gate or the
 composite baseline. The adequacy matrix headline is unchanged.
+
+## Phase 3: GitHub Action and release pipeline (2026-10-06)
+
+Built and committed (`d4a3c93`): `action.yml` (composite) with inputs `config`,
+`base_ref`, `github_token`, `post_comment`, `fail_on_violation` and `version`,
+and outputs `exit_code`, `verdict` and `report`. The PR comment is rendered by
+tested Rust (`check --report-md`): ids and residue taken from scanned repos are
+always escaped inline code, and the report states that a violation is not a
+PROVEN_RESIDUE verdict. An ERROR (exit 3) fails the job even in report-only
+mode and is never presented as a verdict.
+
+Verified in this environment: 23/23 acceptance tests; all three YAML files
+parsed with a real YAML parser; scripts shellcheck-clean and run end to end in
+a simulated runner (release-less source build, live in-process fetch of
+REAL-INCIDENT-001's consumer with the same BLAKE3, every gate branch, and every
+comment branch against a stub `gh`).
+
+NOT yet verified, stated plainly:
+- No GitHub Actions runner has executed any of this. The repository has no
+  remote, and the standing rule is no push without explicit instruction.
+- `.github/workflows/release.yml` and the `action-selftest` job in
+  `.github/workflows/ci.yml` are protected from remote writes; they were handed
+  to the founder to place. Until placed and pushed they are not in the repo.
+- No release binary has been built. The musl target could not be built here
+  (toolchain download blocked) and the macOS targets need a macOS runner, so
+  the first tagged release run is the first real test of all three targets.
+- `cross` cannot build macOS targets: the pipeline uses `cross` for
+  `x86_64-unknown-linux-musl` and native `cargo` on `macos-14` for both Apple
+  targets.
+- The crate license is still `LicenseRef-INVAR-PENDING`; publishing release
+  binaries needs a license decision first.
+
+Primitive D is unchanged (PARTIAL) and the adequacy matrix headline is
+unchanged.
