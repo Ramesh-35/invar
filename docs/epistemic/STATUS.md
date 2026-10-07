@@ -183,3 +183,44 @@ unchanged.
   `0.1.0-alpha` and the NOT ESTABLISHED adequacy.
 - Still unverified until the push: the runner self-test, and the release builds
   for all three targets. Primitive D is unchanged (PARTIAL).
+
+## Runner evidence (2026-10-07)
+
+Pushed by the founder to the private repository `Ramesh-35/invar-platform`
+(`main`). This resolves the first item of "NOT yet verified" in Phase 3 for the
+self-test only.
+
+CI run 37590676958 on commit `8a6daa5` (workflow `invar-falsify CI`, push to
+`main`), both jobs green on `ubuntu-latest`:
+- `falsify`: green.
+- `action-selftest`: the Action (`uses: ./`) resolved the binary on the runner
+  (no release existed yet, so this was the source-build path), fetched the
+  consumer in-process and reported, at 2026-10-07T07:59:42Z:
+  `[VIOLATED] real-incident-001 (schema): ["amount_cents"]`, fetched
+  `github:Ramesh-35/invar-demo-consumer@fe73889bf250275711339d065ecc37f21879fc72:client.js`
+  (229 bytes, BLAKE3
+  `ecd0a60aa8fd380e574fae70e75810da57f3b43c744ec03d492bc3b21c576f69`),
+  byte-identical to the out-of-band copy and the earlier local `--ci` run.
+  The assertion step checked verdict `violated` and both strings in the
+  report. The bogus-SHA control produced `ERROR, not a verdict (exit 3)`
+  and its assertion step checked verdict `error` and exit code 3.
+
+Evidence source: `gh run view` output and log excerpts pasted by the founder;
+this session has no read access to the repository and did not observe the run
+directly.
+
+What this does and does not change:
+- Primitive D: the "not yet run on a CI runner" limit is removed. D stays
+  PARTIAL: one constructed demo incident, not a wild defect, and the reality
+  gate and PROVEN_RESIDUE verdict are still not wired into `check`. Overall
+  adequacy stays NOT ESTABLISHED.
+- The runner output is contract residue, not a PROVEN_RESIDUE verdict.
+- Release: the first two `v0.1.0-alpha` runs (37590691338, 37592065161)
+  failed because a stale `release.yml` packaged `invar-falsify` after the
+  binary was renamed `invar`. They could not publish (publish needs all
+  builds). Fixed in `b4be483`; the tag was moved to `b4be483`. The release
+  builds for all three targets remain unverified until that run is reported.
+- Runner notices, not failures: actions/checkout, cache and upload-artifact v4
+  target Node.js 20 (forced to Node 24), and `ubuntu-latest` moves to Ubuntu
+  26 from 2026-10-19.
+
