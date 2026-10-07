@@ -343,3 +343,19 @@ stub `gh`, not on a runner.
 Evidence source: `gh run list` and `gh release view` output pasted by the
 founder. Adequacy unchanged: D PARTIAL, overall NOT ESTABLISHED.
 
+## v0.1.0-alpha.1 consumed from outside the repository (2026-10-07)
+
+`invar-action-smoke` run 37613226396 on commit `114e7a8` (workflow pinned to
+`uses: Ramesh-35/invar-platform@v0.1.0-alpha.1`), exit 0, 2026-10-07T11:18Z:
+- `invar-v0.1.0-alpha.1-x86_64-unknown-linux-musl.tar.gz: OK` (checksum).
+- `invar: using release v0.1.0-alpha.1 (x86_64-unknown-linux-musl), checksum
+  verified`.
+- `[VIOLATED] real-incident-001 (schema): ["amount_cents"]`; producer BLAKE3
+  `639cf21a...`, consumer BLAKE3 `ecd0a60a...`, both unchanged from every
+  earlier run.
+
+This closes the "no run has consumed `@v0.1.0-alpha.1`" gap above. The
+install log names the tag; the assertion's `--version` check cannot tell
+the two releases apart (both binaries report `0.1.0-alpha`). The new failure
+message itself was not exercised (the download succeeded).
+
