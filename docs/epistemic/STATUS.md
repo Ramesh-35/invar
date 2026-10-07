@@ -301,3 +301,45 @@ a read-only token. Both go away when `invar-platform` is public.
 Adequacy unchanged: D PARTIAL, overall NOT ESTABLISHED. This is distribution
 evidence, not evidence about reality.
 
+## Release v0.1.0-alpha.1 (2026-10-07)
+
+Confirmed green before tagging:
+- `invar-action-smoke` run 37609090956 (attempt 2, the external run recorded
+  above): green.
+- `invar-action-smoke` run 37610639232 on `87fa285` (diagnostic step
+  reverted, workflow back to its original form): green.
+- `invar-platform` CI run 37610640967 on `1b29058` (install-script fix):
+  green, including `action-selftest`.
+
+Release workflow run 37610852839 on annotated tag `v0.1.0-alpha.1`
+(commit `1b29058`), green in 3m49s; published by github-actions[bot] as a
+Pre-release.
+
+| Asset | SHA-256 (GitHub asset digest) | Size |
+|---|---|---|
+| `invar-v0.1.0-alpha.1-x86_64-unknown-linux-musl.tar.gz` | `257d6754d82ac353620d135a0b911a315a9b3a58d6d39641264583469c611b94` | 1.75 MiB |
+| `invar-v0.1.0-alpha.1-x86_64-apple-darwin.tar.gz` | `3915d5d71a8433f0220edd5a3aaa4213f8fe7f2dfe259afc451e048377a579cf` | 1.60 MiB |
+| `invar-v0.1.0-alpha.1-aarch64-apple-darwin.tar.gz` | `6b81ffc9446815211e516c0c1f6b5cdac0b573e3f69338287ea5d8860368aa6b` | 1.49 MiB |
+
+Each tarball ships with a `.sha256` sidecar (120, 114 and 115 bytes). The
+same release.yml steps as v0.1.0-alpha ran: tests, `--locked` builds, musl
+static-linkage check, `--version` smoke test on Linux and Apple Silicon
+(Intel macOS built only, never executed).
+
+What this release changes: only `action/install.sh` (it now reports why a
+release download failed). The `invar` binary's code is unchanged from
+v0.1.0-alpha.
+
+Known inconsistency, stated plainly: `Cargo.toml` still says
+`0.1.0-alpha`, so these binaries report `invar 0.1.0-alpha` while the
+assets are named `v0.1.0-alpha.1`. `release.yml` does not check that the
+tag matches the crate version. To fix in the next release: bump the version
+and add a release step that fails on a mismatch.
+
+Not yet verified: no run has consumed `@v0.1.0-alpha.1` (the smoke repo
+pins `@v0.1.0-alpha`), so the new failure message has run only against a
+stub `gh`, not on a runner.
+
+Evidence source: `gh run list` and `gh release view` output pasted by the
+founder. Adequacy unchanged: D PARTIAL, overall NOT ESTABLISHED.
+
