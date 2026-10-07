@@ -1,6 +1,6 @@
 name: release
 
-# On a version tag, build standalone invar-falsify binaries and publish them to
+# On a version tag, build standalone invar binaries and publish them to
 # a GitHub Release with SHA-256 checksums (the GitHub Action verifies these
 # before use). cross builds the static Linux musl target in Docker. cross has
 # no macOS images, so both Apple targets are built natively on a macOS runner.
@@ -46,21 +46,21 @@ jobs:
       - name: Verify static linkage (Linux musl)
         if: matrix.tool == 'cross'
         run: |
-          file "target/$TARGET/release/invar-falsify"
-          ! ldd "target/$TARGET/release/invar-falsify" 2>/dev/null | grep -q "=>"
+          file "target/$TARGET/release/invar"
+          ! ldd "target/$TARGET/release/invar" 2>/dev/null | grep -q "=>"
       - name: Smoke test (targets this runner can execute)
         if: matrix.target != 'x86_64-apple-darwin'
-        run: "target/$TARGET/release/invar-falsify --version"
+        run: "target/$TARGET/release/invar --version"
       - name: Package with checksum
         run: |
-          asset="invar-falsify-${GITHUB_REF_NAME}-${TARGET}.tar.gz"
-          tar -czf "$asset" -C "target/$TARGET/release" invar-falsify
+          asset="invar-${GITHUB_REF_NAME}-${TARGET}.tar.gz"
+          tar -czf "$asset" -C "target/$TARGET/release" invar
           if command -v sha256sum >/dev/null; then sha256sum "$asset" > "$asset.sha256"
           else shasum -a 256 "$asset" > "$asset.sha256"; fi
       - uses: actions/upload-artifact@v4
         with:
           name: invar-${{ matrix.target }}
-          path: invar-falsify-*.tar.gz*
+          path: invar-*.tar.gz*
 
   publish:
     needs: build
@@ -76,6 +76,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" dist/* \
+          # A tag with a hyphen (v0.1.0-alpha) is a prerelease, never "Latest".
+          pre=()
+          case "$GITHUB_REF_NAME" in *-*) pre=(--prerelease) ;; esac
+          gh release create "$GITHUB_REF_NAME" dist/* "${pre[@]}" \
             --repo "$GITHUB_REPOSITORY" --verify-tag --title "$GITHUB_REF_NAME" \
-            --notes "Standalone invar-falsify binaries with SHA-256 checksums. What INVAR does and does not yet establish: docs/epistemic/STATUS.md."
+            --notes "Standalone invar binaries (MIT OR Apache-2.0) with SHA-256 checksums. What INVAR does and does not yet establish: docs/epistemic/STATUS.md."
