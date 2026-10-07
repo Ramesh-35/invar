@@ -29,7 +29,7 @@ use invar_falsify::reality::{
     RealArtifactProof,
 };
 use invar_falsify::invariant::{check_contract, ContractInput, Step};
-use invar_falsify::check::{evaluate, render_report_md, ContractOutcome, REPORT_MARKER};
+use invar_falsify::check::{evaluate, render_report_md, ContractOutcome, Witness, REPORT_MARKER};
 use invar_falsify::config::parse_sections;
 use invar_falsify::init::{discover, render_manifest};
 use invar_falsify::resolver::{
@@ -830,8 +830,14 @@ fn action_report_and_manifest_are_sound() {
                 bytes: 229,
                 blake3_hex: "ecd0a60aa8fd380e574fae70e75810da57f3b43c744ec03d492bc3b21c576f69".into(),
             }],
+            // Hostile witness values (file names come from the scanned repo).
+            witnesses: vec![Witness {
+                residue: "a|b".into(),
+                sites: vec!["x|y`.js:1".into()],
+                missing_from: Some("@org|s.json /properties".into()),
+            }],
         },
-        ContractOutcome { id: "ok".into(), kind: "event".into(), residue: vec![], provenance: vec![] },
+        ContractOutcome { id: "ok".into(), kind: "event".into(), residue: vec![], provenance: vec![], witnesses: vec![] },
     ];
     let md = render_report_md(&outcomes);
     assert!(md.starts_with(REPORT_MARKER));
@@ -872,5 +878,95 @@ fn action_report_and_manifest_are_sound() {
     assert!(run.contains("--report-md"));
     let gate = std::fs::read_to_string(root.join("action/gate.sh")).unwrap();
     assert!(gate.contains("ERROR, not a verdict") && gate.contains("exit 3"));
+}
+
+// ---------------------------------------------------------------------------
+// Test 24: every violation points at the line that causes it (witnesses).
+// Witnesses explain residue and never change it; REAL-INCIDENT-001's residue
+// and probe hash are untouched.
+// ---------------------------------------------------------------------------
+#[test]
+fn witnesses_locate_each_violation() {
+    let dir = std::env::temp_dir().join(format!("invar-witness-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    let w = |name: &str, body: &str| std::fs::write(dir.join(name), body).unwrap();
+
+    // Schema: amount_cents read on lines 3 and 5; order_id is declared.
+    w("schema.json", PRODUCER_SCHEMA_P1);
+    w("client.js", "// c\nfunction f(payload) {\n  const a = payload.amount_cents;\n  const id = payload.order_id;\n  return payload.amount_cents / 100;\n}\n");
+    // Event: handler reads `ghost` on line 2; producer emits only `id`.
+    w("event.json", r#"{"id": 1}"#);
+    w("handler.js", "on(payload => {\n  use(payload.ghost, payload.id);\n});\n");
+    // Lock order: commit (line 2) precedes acquire (line 4); line 3 is a comment.
+    w("trace.txt", "svc:begin:tx\nsvc:commit:row\n# noise\nsvc:acquire:row\n");
+    // OpenAPI-style pointer: the witness names the pointer path.
+    w("api.json", r#"{"components":{"schemas":{"Order":{"properties":{"order_id":{}}}}}}"#);
+    let cfg = r#"
+[[invariant]]
+kind = "schema"
+id = "orders"
+producer = "schema.json"
+consumer = "client.js"
+
+[[invariant]]
+kind = "event"
+id = "events"
+producer = "event.json"
+consumer = "handler.js"
+
+[[invariant]]
+kind = "lock_order"
+id = "locks"
+before = "svc:acquire:row"
+after = "svc:commit:row"
+trace = "trace.txt"
+
+[[invariant]]
+kind = "schema"
+id = "openapi"
+producer = "api.json"
+pointer = "/components/schemas/Order"
+consumer = "client.js"
+"#;
+    let sections = parse_sections("invar.toml", cfg).unwrap();
+    let out = evaluate(&sections, &Resolver::local(&dir)).unwrap();
+
+    let s = &out[0];
+    assert_eq!(s.residue, vec!["amount_cents".to_string()], "witnesses must not change residue");
+    assert_eq!(s.witnesses.len(), 1);
+    assert_eq!(s.witnesses[0].sites, vec!["client.js:3".to_string(), "client.js:5".to_string()]);
+    assert_eq!(s.witnesses[0].missing_from.as_deref(), Some("schema.json /properties"));
+
+    let e = &out[1];
+    assert_eq!(e.residue, vec!["ghost".to_string()]);
+    assert_eq!(e.witnesses[0].sites, vec!["handler.js:2".to_string()]);
+    assert_eq!(e.witnesses[0].missing_from.as_deref(), Some("event.json (top-level keys)"));
+
+    let l = &out[2];
+    assert_eq!(l.residue.len(), 1);
+    assert!(l.residue[0].starts_with("ORDER_INVERSION"));
+    assert_eq!(l.witnesses[0].sites, vec!["trace.txt:2".to_string(), "trace.txt:4".to_string()]);
+    assert_eq!(l.witnesses[0].missing_from, None);
+
+    let o = &out[3];
+    assert_eq!(o.witnesses[0].missing_from.as_deref(), Some("api.json /components/schemas/Order/properties"));
+
+    let md = render_report_md(&out);
+    assert!(md.contains("`amount_cents` read at `client.js:3`, `client.js:5` · not in `schema.json /properties`"), "{md}");
+    assert!(md.contains(" at `trace.txt:2`, `trace.txt:4`"), "{md}");
+    for row in md.lines().filter(|l| l.starts_with("| `")) {
+        assert_eq!(unescaped_pipes(row), 5, "row must keep 4 columns: {row}");
+    }
+
+    // REAL-INCIDENT-001 bytes: residue and probe hash unchanged by this work.
+    assert_eq!(
+        derive_probe_hash(&differential_residue(PRODUCER_SCHEMA_P1, CONSUMER_CLIENT_C1))
+            .iter()
+            .map(|b| format!("{b:02x}"))
+            .collect::<String>(),
+        "829547e08158a232667735aafbc41ae2b1919fb822f8f55b83905ec88a045ab5"
+    );
+    let _ = std::fs::remove_dir_all(&dir);
 }
 

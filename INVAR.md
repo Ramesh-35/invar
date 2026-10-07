@@ -155,6 +155,8 @@ business decision.
 All future phases are bound by the inimitability constraints
 ([`docs/architecture/INIMITABILITY.md`](docs/architecture/INIMITABILITY.md),
 2026-10-07), each tracked with its true status (HOLDS / PARTIAL / TARGET).
+Ratified additions and their order: [`docs/architecture/ROADMAP.md`](docs/architecture/ROADMAP.md)
+(witness locations, contract lockfile, producer blast radius, expiring waivers).
 
 ### Simplicity Law
 

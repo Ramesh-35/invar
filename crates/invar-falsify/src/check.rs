@@ -8,8 +8,8 @@
 
 use anyhow::{anyhow, bail, Context, Result};
 
-use crate::invariant::{check_contract, select_pointer, ContractInput, Step};
-use crate::resolver::{Fetched, Resolver};
+use crate::invariant::{check_contract, payload_read_sites, select_pointer, ContractInput, Step};
+use crate::resolver::{is_remote, Fetched, Resolver};
 
 pub type Sections = Vec<(String, Vec<(String, String)>)>;
 
@@ -19,6 +19,66 @@ pub struct ContractOutcome {
     pub kind: String,
     pub residue: Vec<String>,
     pub provenance: Vec<Fetched>,
+    /// Where each residue item shows up, so a finding points at a line.
+    pub witnesses: Vec<Witness>,
+}
+
+/// Locates one residue item. `sites` are `file:line` in the consumer source
+/// (schema, event) or the trace (lock_order); `missing_from` names what the
+/// producer side lacks. Witnesses explain a residue; they never change it.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Witness {
+    pub residue: String,
+    pub sites: Vec<String>,
+    pub missing_from: Option<String>,
+}
+
+/// Short display name for an artifact: the path of a remote reference, or the
+/// local path as written in invar.toml.
+pub fn artifact_name(spec: &str) -> String {
+    if is_remote(spec) {
+        spec.rsplit(':').next().unwrap_or(spec).to_string()
+    } else {
+        spec.to_string()
+    }
+}
+
+fn read_witnesses(
+    residue: &[String],
+    consumer_spec: &str,
+    consumer_src: &str,
+    missing_from: &str,
+) -> Vec<Witness> {
+    let name = artifact_name(consumer_spec);
+    let sites = payload_read_sites(consumer_src);
+    residue
+        .iter()
+        .map(|r| Witness {
+            residue: r.clone(),
+            sites: sites
+                .iter()
+                .filter(|(f, _)| f == r)
+                .map(|(_, l)| format!("{name}:{l}"))
+                .collect(),
+            missing_from: Some(missing_from.to_string()),
+        })
+        .collect()
+}
+
+/// 1-based trace lines (comments and blanks counted, as in an editor) where
+/// `step` occurs.
+fn step_lines(trace: &str, step: &Step) -> Vec<usize> {
+    trace
+        .lines()
+        .enumerate()
+        .filter(|(_, l)| {
+            let l = l.trim();
+            !l.is_empty()
+                && !l.starts_with('#')
+                && parse_step(l).map(|s| &s == step).unwrap_or(false)
+        })
+        .map(|(i, _)| i + 1)
+        .collect()
 }
 
 fn getk(pairs: &[(String, String)], k: &str) -> Option<String> {
@@ -107,6 +167,38 @@ fn md_code(s: &str) -> String {
 }
 
 const MAX_RESIDUE_SHOWN: usize = 20;
+const MAX_SITES_SHOWN: usize = 3;
+
+/// One-line location suffix, e.g. " read at `client.js:6` · not in
+/// `schema.json /properties`". Every repo-derived value is escaped code.
+pub fn witness_text(w: &Witness, kind: &str, code: fn(&str) -> String) -> String {
+    let mut s = String::new();
+    if !w.sites.is_empty() {
+        let verb = if kind == "lock_order" {
+            "at"
+        } else {
+            "read at"
+        };
+        let mut shown: Vec<String> = w
+            .sites
+            .iter()
+            .take(MAX_SITES_SHOWN)
+            .map(|x| code(x))
+            .collect();
+        if w.sites.len() > MAX_SITES_SHOWN {
+            shown.push(format!("+{} more", w.sites.len() - MAX_SITES_SHOWN));
+        }
+        s.push_str(&format!(" {verb} {}", shown.join(", ")));
+    }
+    if let Some(m) = &w.missing_from {
+        s.push_str(&format!(" · not in {}", code(m)));
+    }
+    s
+}
+
+fn witness_md(w: &Witness, kind: &str) -> String {
+    witness_text(w, kind, md_code)
+}
 
 /// Markdown report for a PR comment or job summary. States plainly that a
 /// contract violation is not a PROVEN_RESIDUE verdict.
@@ -131,8 +223,15 @@ pub fn render_report_md(outcomes: &[ContractOutcome]) -> String {
         let (result, residue) = if o.residue.is_empty() {
             ("holds", String::new())
         } else {
-            let mut cells: Vec<String> =
-                o.residue.iter().take(MAX_RESIDUE_SHOWN).map(|r| md_code(r)).collect();
+            let mut cells: Vec<String> = o
+                .residue
+                .iter()
+                .take(MAX_RESIDUE_SHOWN)
+                .map(|r| match o.witnesses.iter().find(|w| &w.residue == r) {
+                    Some(w) => format!("{}{}", md_code(r), witness_md(w, &o.kind)),
+                    None => md_code(r),
+                })
+                .collect();
             if o.residue.len() > MAX_RESIDUE_SHOWN {
                 cells.push(format!("+{} more", o.residue.len() - MAX_RESIDUE_SHOWN));
             }
@@ -174,34 +273,77 @@ pub fn evaluate(sections: &Sections, resolver: &Resolver) -> Result<Vec<Contract
         let kind = getk(b, "kind").unwrap_or_default();
         let id = getk(b, "id").unwrap_or_else(|| format!("inv-{idx}"));
         let mut prov = Vec::new();
+        let witnesses: Vec<Witness>;
         let residue = match kind.as_str() {
             "schema" => {
                 let p = getk(b, "producer").context("schema invariant needs producer")?;
                 let c = getk(b, "consumer").context("schema invariant needs consumer")?;
                 let mut pr = fetch(resolver, &p, &mut prov)?;
-                if let Some(ptr) = getk(b, "pointer") {
-                    pr = select_pointer(&pr, &ptr).map_err(|e| anyhow!("{id}: {e}"))?;
+                let ptr = getk(b, "pointer");
+                if let Some(ptr) = &ptr {
+                    pr = select_pointer(&pr, ptr).map_err(|e| anyhow!("{id}: {e}"))?;
                 }
                 let cr = fetch(resolver, &c, &mut prov)?;
-                check_contract(&ContractInput::Schema { producer_schema: &pr, consumer_source: &cr })
+                let r = check_contract(&ContractInput::Schema {
+                    producer_schema: &pr,
+                    consumer_source: &cr,
+                });
+                let missing = format!(
+                    "{} {}/properties",
+                    artifact_name(&p),
+                    ptr.unwrap_or_default()
+                );
+                witnesses = read_witnesses(&r, &c, &cr, &missing);
+                r
             }
             "event" => {
                 let p = getk(b, "producer").context("event invariant needs producer")?;
                 let c = getk(b, "consumer").context("event invariant needs consumer")?;
                 let pr = fetch(resolver, &p, &mut prov)?;
                 let cr = fetch(resolver, &c, &mut prov)?;
-                check_contract(&ContractInput::Event { producer_payload: &pr, consumer_handler: &cr })
+                let r = check_contract(&ContractInput::Event {
+                    producer_payload: &pr,
+                    consumer_handler: &cr,
+                });
+                let missing = format!("{} (top-level keys)", artifact_name(&p));
+                witnesses = read_witnesses(&r, &c, &cr, &missing);
+                r
             }
             "lock_order" => {
                 let before = parse_step(&getk(b, "before").context("lock_order needs before")?)?;
                 let after = parse_step(&getk(b, "after").context("lock_order needs after")?)?;
                 let trace = getk(b, "trace").context("lock_order needs trace")?;
-                let observed = parse_trace(&fetch(resolver, &trace, &mut prov)?)?;
-                check_contract(&ContractInput::LockOrder { before, after, observed })
+                let text = fetch(resolver, &trace, &mut prov)?;
+                let observed = parse_trace(&text)?;
+                let name = artifact_name(&trace);
+                let mut lines: Vec<usize> = step_lines(&text, &after);
+                lines.extend(step_lines(&text, &before));
+                lines.sort_unstable();
+                lines.dedup();
+                let r = check_contract(&ContractInput::LockOrder {
+                    before,
+                    after,
+                    observed,
+                });
+                witnesses = r
+                    .iter()
+                    .map(|x| Witness {
+                        residue: x.clone(),
+                        sites: lines.iter().map(|l| format!("{name}:{l}")).collect(),
+                        missing_from: None,
+                    })
+                    .collect();
+                r
             }
             other => bail!("unknown invariant kind {other:?} (schema|event|lock_order)"),
         };
-        out.push(ContractOutcome { id, kind, residue, provenance: prov });
+        out.push(ContractOutcome {
+            id,
+            kind,
+            residue,
+            provenance: prov,
+            witnesses,
+        });
     }
     Ok(out)
 }

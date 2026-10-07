@@ -14,7 +14,7 @@ use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 
 use invar_falsify::evaluator::{evaluate_case, CaseResult};
-use invar_falsify::check::{evaluate, render_report_md};
+use invar_falsify::check::{evaluate, render_report_md, witness_text};
 use invar_falsify::init::{discover, render_manifest};
 use invar_falsify::ledger::Ledger;
 use invar_falsify::manifest::{CompositeConfig, EpistemicStatus, Manifest};
@@ -391,6 +391,9 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
         } else {
             violations += 1;
             println!("  [VIOLATED] {} ({}): {:?}", o.id, o.kind, o.residue);
+            for w in &o.witnesses {
+                println!("      {}{}", w.residue, witness_text(w, &o.kind, |x| x.to_string()));
+            }
             summaries.push(format!("{}:{}=VIOLATED", o.id, o.kind));
         }
         for f in &o.provenance {

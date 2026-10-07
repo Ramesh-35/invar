@@ -45,15 +45,18 @@ pub fn select_pointer(json: &str, pointer: &str) -> Result<String, String> {
     serde_json::to_string(sub).map_err(|e| e.to_string())
 }
 
-/// The fields a source reads off `payload`, e.g. `payload.amount_cents`.
-/// Only this access pattern is recognized (not `payload["x"]` or `.get("x")`).
-pub fn payload_reads(source: &str) -> BTreeSet<String> {
-    let mut read = BTreeSet::new();
+/// Every `payload.<field>` read in a source, with its 1-based line number, in
+/// source order. Only this access pattern is recognized (not `payload["x"]` or
+/// `.get("x")`).
+pub fn payload_read_sites(source: &str) -> Vec<(String, usize)> {
+    let mut sites = Vec::new();
     let bytes = source.as_bytes();
     let needle = "payload.";
     let mut i = 0usize;
+    let (mut line, mut counted_to) = (1usize, 0usize);
     while let Some(pos) = source[i..].find(needle) {
-        let start = i + pos + needle.len();
+        let at = i + pos;
+        let start = at + needle.len();
         let mut end = start;
         while end < source.len() {
             let c = bytes[end];
@@ -64,11 +67,24 @@ pub fn payload_reads(source: &str) -> BTreeSet<String> {
             }
         }
         if end > start {
-            read.insert(source[start..end].to_string());
+            line += bytes[counted_to..at]
+                .iter()
+                .filter(|&&b| b == b'\n')
+                .count();
+            counted_to = at;
+            sites.push((source[start..end].to_string(), line));
         }
-        i = start.max(i + pos + 1);
+        i = start.max(at + 1);
     }
-    read
+    sites
+}
+
+/// The fields a source reads off `payload`, e.g. `payload.amount_cents`.
+pub fn payload_reads(source: &str) -> BTreeSet<String> {
+    payload_read_sites(source)
+        .into_iter()
+        .map(|(f, _)| f)
+        .collect()
 }
 
 fn json_object_keys(json: &str) -> BTreeSet<String> {
