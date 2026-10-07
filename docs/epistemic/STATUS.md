@@ -259,3 +259,45 @@ NOT yet verified, stated plainly:
 Adequacy is unchanged: D PARTIAL, overall NOT ESTABLISHED. A shipped binary is
 a packaging fact, not evidence about reality.
 
+## Release binary used from outside the repository (2026-10-07)
+
+Private test repository `Ramesh-35/invar-action-smoke` (owned by the founder)
+runs `uses: Ramesh-35/invar-platform@v0.1.0-alpha` on `ubuntu-latest`. The
+manifest pins both sides of REAL-INCIDENT-001 as remote references
+(producer `7c08557...:schema.json`, consumer `fe73889...:client.js`).
+
+Run 37609090956 (commit `9c1d39f`, attempt 2), 2026-10-07T10:49Z:
+- `invar-v0.1.0-alpha-x86_64-unknown-linux-musl.tar.gz: OK` (sidecar
+  checksum verified on the runner; 1,836,046 bytes, matching the published
+  1.75 MiB asset).
+- `invar: using release v0.1.0-alpha (x86_64-unknown-linux-musl), checksum
+  verified`.
+- `[VIOLATED] real-incident-001 (schema): ["amount_cents"]`.
+- The workflow's assertion step (binary installed by the release path,
+  `--version` reports 0.1.0-alpha, verdict `violated`, `amount_cents` and
+  consumer BLAKE3 `ecd0a60a...` in the report) logged no error. The run's
+  final status line was not in the pasted excerpt.
+
+This is the first execution of the Action's binary-download path, and the
+first run of the shipped musl binary on a runner outside this repository.
+
+How it got there (each failure was real and is kept):
+- Attempt 1 failed before INVAR ran: "Unable to resolve action". The private
+  repository's Actions access level was `none`; set to `user`.
+- Attempt 2 (run 37605355380, rerun) fell back to a source build: the
+  fine-grained token lacked read access to `invar-platform` releases (HTTP
+  403, found by a temporary diagnostic step). The assertion step caught the
+  fallback and failed the job, as designed. The token was corrected.
+- Defect found and fixed: `action/install.sh` discarded the download error,
+  so a 403 read as "no release asset". It now prints the reason before
+  falling back. Not yet in a release: `v0.1.0-alpha` still has the old
+  message.
+
+Constraints recorded: GitHub lets only private repositories owned by the same
+user use an Action from a private repository, and a caller's `GITHUB_TOKEN`
+cannot read another private repository's releases, so private consumers need
+a read-only token. Both go away when `invar-platform` is public.
+
+Adequacy unchanged: D PARTIAL, overall NOT ESTABLISHED. This is distribution
+evidence, not evidence about reality.
+

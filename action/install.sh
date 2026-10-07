@@ -19,8 +19,8 @@ mkdir -p "$dest"
 
 if [ -n "$tag" ] && [ -n "$target" ] && [ -n "${INVAR_ACTION_REPO:-}" ] && command -v gh >/dev/null; then
   asset="invar-${tag}-${target}.tar.gz"
-  if gh release download "$tag" --repo "$INVAR_ACTION_REPO" \
-       --pattern "$asset" --pattern "$asset.sha256" --dir "$dest" --clobber 2>/dev/null; then
+  if dl_err=$(gh release download "$tag" --repo "$INVAR_ACTION_REPO" \
+       --pattern "$asset" --pattern "$asset.sha256" --dir "$dest" --clobber 2>&1); then
     if command -v sha256sum >/dev/null; then
       (cd "$dest" && sha256sum -c "$asset.sha256")
     else
@@ -31,7 +31,10 @@ if [ -n "$tag" ] && [ -n "$target" ] && [ -n "${INVAR_ACTION_REPO:-}" ] && comma
     echo "invar: using release $tag ($target), checksum verified"
     exit 0
   fi
-  echo "invar: no release asset $asset for $tag; building from source"
+  # Say why: a token without read access to a private action repo looks
+  # exactly like a missing asset otherwise (found 2026-10-07).
+  echo "invar: release asset $asset for $tag not downloaded: ${dl_err##*$'\n'}"
+  echo "invar: building from source instead"
 fi
 
 cargo build --release --locked -p invar-falsify --manifest-path "$INVAR_ACTION_PATH/Cargo.toml"
