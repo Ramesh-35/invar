@@ -224,3 +224,38 @@ What this does and does not change:
   target Node.js 20 (forced to Node 24), and `ubuntu-latest` moves to Ubuntu
   26 from 2026-10-19.
 
+## Release v0.1.0-alpha (2026-10-07)
+
+Release workflow run 37596752643 on tag `v0.1.0-alpha` (commit `b4be483`),
+green in 3m50s: `cargo test --workspace --locked`, then all three builds, then
+publish. Published by github-actions[bot] as a Pre-release.
+
+| Asset | SHA-256 (GitHub asset digest) | Size |
+|---|---|---|
+| `invar-v0.1.0-alpha-x86_64-unknown-linux-musl.tar.gz` | `28953639e3c6c414ed7521d298124c9a67c3871638259cbc8c719ed5597b4b41` | 1.75 MiB |
+| `invar-v0.1.0-alpha-x86_64-apple-darwin.tar.gz` | `84985680ccc49c899497abd84c2ea471133ffed2bf1a9729a77c5103ee880bd2` | 1.60 MiB |
+| `invar-v0.1.0-alpha-aarch64-apple-darwin.tar.gz` | `c44b3b862d8fff83e62bbfdf67403a2d8b21e3a41d8d166ef3d38e2f13a07c41` | 1.49 MiB |
+
+Each tarball ships with a `.sha256` sidecar (113, 112 and 118 bytes).
+
+Established by the green run (each is a step in `release.yml`):
+- All three targets built with `--locked` after the test job passed.
+- Linux musl: `ldd` found no dynamic dependencies (static), and
+  `invar --version` ran on the runner.
+- aarch64-apple-darwin: `invar --version` ran on the macos-14 runner.
+- x86_64-apple-darwin: built only. The arm64 runner does not execute it, so
+  this binary has not been run anywhere.
+
+NOT yet verified, stated plainly:
+- The sidecar contents were not compared to the digests above in this
+  session. The digests are GitHub's own; the founder can confirm with
+  `gh release download v0.1.0-alpha --pattern '*.sha256'`.
+- The Action's binary download path (`gh release download` plus checksum check
+  in `action/install.sh`) has never run. The self-test uses `uses: ./`, which
+  has no version ref and therefore builds from source.
+- Evidence source: `gh run list` and `gh release view` output pasted by the
+  founder; this session has no read access to the repository.
+
+Adequacy is unchanged: D PARTIAL, overall NOT ESTABLISHED. A shipped binary is
+a packaging fact, not evidence about reality.
+
