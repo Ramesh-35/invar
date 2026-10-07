@@ -57,3 +57,49 @@ jobs:
           path: |
             runs/ci/run_results.json
             runs/ci/EPISTEMIC_REPORT.md
+
+  action-selftest:
+    # Runs this repo's GitHub Action (uses: ./) on a real runner against
+    # REAL-INCIDENT-001: producer schema committed as a fixture, consumer
+    # fetched in-process from GitHub at C1. Asserts the verdict and that the
+    # runner fetched byte-identical content (same BLAKE3 as the out-of-band
+    # copy), and that a bogus SHA is an ERROR (exit 3), never a verdict.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: INVAR on REAL-INCIDENT-001 (expect violated)
+        id: real
+        uses: ./
+        with:
+          config: tests/fixtures/action-selftest/invar.toml
+          post_comment: 'false'
+          fail_on_violation: 'false'
+
+      - name: Assert violated, with in-process provenance
+        env:
+          VERDICT: ${{ steps.real.outputs.verdict }}
+          REPORT: ${{ steps.real.outputs.report }}
+        run: |
+          test "$VERDICT" = violated
+          grep -q 'amount_cents' "$REPORT"
+          grep -q 'ecd0a60aa8fd380e574fae70e75810da57f3b43c744ec03d492bc3b21c576f69' "$REPORT"
+
+      - name: INVAR on a bogus SHA (expect ERROR, not a verdict)
+        id: bogus
+        uses: ./
+        continue-on-error: true
+        with:
+          config: tests/fixtures/action-selftest/bogus.toml
+          post_comment: 'false'
+
+      - name: Assert the error is not reported as a verdict
+        env:
+          VERDICT: ${{ steps.bogus.outputs.verdict }}
+          CODE: ${{ steps.bogus.outputs.exit_code }}
+        run: |
+          test "$VERDICT" = error
+          test "$CODE" = 3

@@ -1,0 +1,81 @@
+name: release
+
+# On a version tag, build standalone invar-falsify binaries and publish them to
+# a GitHub Release with SHA-256 checksums (the GitHub Action verifies these
+# before use). cross builds the static Linux musl target in Docker. cross has
+# no macOS images, so both Apple targets are built natively on a macOS runner.
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --workspace --locked
+
+  build:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { target: x86_64-unknown-linux-musl, os: ubuntu-latest, tool: cross }
+          - { target: x86_64-apple-darwin, os: macos-14, tool: cargo }
+          - { target: aarch64-apple-darwin, os: macos-14, tool: cargo }
+    runs-on: ${{ matrix.os }}
+    env:
+      TARGET: ${{ matrix.target }}
+      TOOL: ${{ matrix.tool }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - name: Install cross
+        if: matrix.tool == 'cross'
+        run: cargo install cross --locked --version 0.2.5
+      - name: Build
+        run: $TOOL build --release --locked -p invar-falsify --target "$TARGET"
+      - name: Verify static linkage (Linux musl)
+        if: matrix.tool == 'cross'
+        run: |
+          file "target/$TARGET/release/invar-falsify"
+          ! ldd "target/$TARGET/release/invar-falsify" 2>/dev/null | grep -q "=>"
+      - name: Smoke test (targets this runner can execute)
+        if: matrix.target != 'x86_64-apple-darwin'
+        run: "target/$TARGET/release/invar-falsify --version"
+      - name: Package with checksum
+        run: |
+          asset="invar-falsify-${GITHUB_REF_NAME}-${TARGET}.tar.gz"
+          tar -czf "$asset" -C "target/$TARGET/release" invar-falsify
+          if command -v sha256sum >/dev/null; then sha256sum "$asset" > "$asset.sha256"
+          else shasum -a 256 "$asset" > "$asset.sha256"; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: invar-${{ matrix.target }}
+          path: invar-falsify-*.tar.gz*
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --repo "$GITHUB_REPOSITORY" --verify-tag --title "$GITHUB_REF_NAME" \
+            --notes "Standalone invar-falsify binaries with SHA-256 checksums. What INVAR does and does not yet establish: docs/epistemic/STATUS.md."
