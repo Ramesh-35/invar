@@ -152,6 +152,10 @@ business decision.
 3. `[TARGET]` **Phase 3+** — only if a REAL-tier residue survives, author the
    core substrate. Not before (DR-003).
 
+All future phases are bound by the inimitability constraints
+([`docs/architecture/INIMITABILITY.md`](docs/architecture/INIMITABILITY.md),
+2026-10-07), each tracked with its true status (HOLDS / PARTIAL / TARGET).
+
 ### Simplicity Law
 
 INVAR is bound by the Simplicity Law
