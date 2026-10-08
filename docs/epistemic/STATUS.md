@@ -480,3 +480,38 @@ code that no spec-diff tool can read. Details and causes:
 docs/falsification/R1-CORPUS.md. The next step is a founder decision.
 Adequacy unchanged: D PARTIAL, overall NOT ESTABLISHED.
 
+## Release v0.1.0-alpha.3 (2026-10-08)
+
+CI run 37753534128 on `d3ce79c`: green. Release run 37753759503 on annotated
+tag `v0.1.0-alpha.3` (`d3ce79c`): green, Pre-release; tag/version guard
+passed. Contents: the engine frozen at `0804555` (YAML specs, broad reads,
+type changes, dual-source producers). Not the alpha.4 engine.
+
+| Asset | SHA-256 (GitHub asset digest) | Size |
+|---|---|---|
+| `invar-v0.1.0-alpha.3-x86_64-unknown-linux-musl.tar.gz` | `7dcefa651fd6b07cf871ac0fb07bfa5ae3877ad8e495f0649e8a65950766e41b` | 1.82 MiB |
+| `invar-v0.1.0-alpha.3-x86_64-apple-darwin.tar.gz` | `4a1529ca25ffc5717238f23d4e5903e0e70dd17bbb0d6bd3cc9344e66b2e678c` | 1.67 MiB |
+| `invar-v0.1.0-alpha.3-aarch64-apple-darwin.tar.gz` | `8247c2b2dc27b828f103c7becd9feda42330f963d12efe0f4fc51808e624320a` | 1.56 MiB |
+
+## Re-scope after R1 (founder directive 2026-10-08)
+
+Declared scope: producers and consumers in Go, Python, JavaScript/TypeScript
+and Rust; producer specs in JSON Schema, OpenAPI and AsyncAPI (JSON or YAML).
+Protobuf is NOT supported (no `.proto` reader exists); listed in the directive
+as in scope, it remains a TARGET.
+
+Engine alpha.4 additions (fingerprint `96d46e3123cf1dca`, 28/28 tests):
+- Contracts touching C, C++, C#, PHP or Swift are SKIPPED with the reason;
+  `invar check` exits 4 when nothing is violated but something was skipped.
+  A skip is never a pass; the Action's gate fails on exit 4.
+- Producer fields are bound to their declaring scope (type, class, or
+  enclosing function). Type changes compare within one scope only; Python
+  class attributes are read at class-body level only, so parameters no
+  longer mask removed keys.
+
+Rerun of all 36 R1 cases (all now tuning data, so not a score): 4 breaks and
+1 control SKIPPED; of the 26 breaks still evaluated, 14 caught, 3 partial, 9
+missed. The R1 verdict stands (FALSIFIED on the miss rate). The narrowed
+scope has not been scored on any case chosen after it was declared; a fresh
+in-scope batch is the only fair test of it.
+

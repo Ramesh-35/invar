@@ -17,6 +17,9 @@ case "${INVAR_EXIT:-}" in
   2)
     echo "::error title=INVAR ledger integrity break::The bi-temporal ledger failed verification."
     exit 2 ;;
+  4)
+    echo "::error title=INVAR not fully evaluated::Some contracts were SKIPPED (language not supported). A skip is not a pass."
+    exit 4 ;;
   *)
     echo "::error title=INVAR could not evaluate::ERROR, not a verdict (exit ${INVAR_EXIT:-unset}). See the 'Run invar check --ci' step log."
     exit 3 ;;

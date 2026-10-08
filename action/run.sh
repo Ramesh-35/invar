@@ -15,6 +15,7 @@ case "$code" in
   0) verdict=hold ;;
   1) verdict=violated ;;
   2) verdict=ledger_break ;;
+  4) verdict=skipped ;;
   *) verdict=error ;;
 esac
 

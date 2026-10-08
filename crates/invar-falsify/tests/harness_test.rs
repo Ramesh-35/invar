@@ -841,8 +841,9 @@ fn action_report_and_manifest_are_sound() {
                 type_change: Some(("string`|".into(), "@int".into(), "x|y.json".into())),
                 read_as: vec!["a`|b".into()],
             }],
+            skipped: None,
         },
-        ContractOutcome { id: "ok".into(), kind: "event".into(), residue: vec![], provenance: vec![], witnesses: vec![] },
+        ContractOutcome { id: "ok".into(), kind: "event".into(), residue: vec![], provenance: vec![], witnesses: vec![], skipped: None },
     ];
     let md = render_report_md(&outcomes);
     assert!(md.starts_with(REPORT_MARKER));
@@ -1021,7 +1022,7 @@ fn producer_formats_yaml_ok_unreadable_is_an_error() {
 // ---------------------------------------------------------------------------
 #[test]
 fn change_scoped_contracts_find_removed_and_retyped_fields() {
-    use invar_falsify::surface::{broad_reads, code_fields};
+    use invar_falsify::surface::{broad_reads, code_fields, field_names};
     let dir = std::env::temp_dir().join(format!("invar-change-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).unwrap();
@@ -1063,8 +1064,8 @@ fn change_scoped_contracts_find_removed_and_retyped_fields() {
     assert_eq!(out[0].residue, vec!["events".to_string()]);
 
     // Extraction units.
-    let py = code_fields("m.py", "class M(Base):\n    is_ok: bool = field(alias=\"isOk\")\n    n: int\n").unwrap();
-    assert!(py.contains_key("isOk") && py.contains_key("n"));
+    let py = field_names(&code_fields("m.py", "class M(Base):\n    is_ok: bool = field(alias=\"isOk\")\n    n: int\n").unwrap());
+    assert!(py.contains("isOk") && py.contains("n"));
     let reads: Vec<String> = broad_reads("x = a?.b + c['d'] + e.get(\"f\")\nG string `json:\"g\"`\nh: int\n")
         .into_iter()
         .map(|(f, _)| f)
@@ -1089,7 +1090,7 @@ fn change_scoped_contracts_find_removed_and_retyped_fields() {
 #[test]
 fn naming_forms_runtime_payloads_and_size_limit() {
     use invar_falsify::resolver::{curl_args_max, HARD_MAX_REMOTE_BYTES, MAX_REMOTE_BYTES};
-    use invar_falsify::surface::{code_fields, name_key};
+    use invar_falsify::surface::{code_fields, field_names, name_key};
     let dir = std::env::temp_dir().join(format!("invar-alpha4-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).unwrap();
@@ -1111,12 +1112,12 @@ fn naming_forms_runtime_payloads_and_size_limit() {
     assert!(md.contains("`cpu_temp` read at `ui.js:1` · not in `v2.py` · naming differs, read as `cpuTemp`"), "{md}");
 
     // Runtime assembly in JS and Go.
-    let js = code_fields("e.js", "res.json({ status: ok, \"total\": n });\nbody.items = list;\n").unwrap();
+    let js = field_names(&code_fields("e.js", "res.json({ status: ok, \"total\": n });\nbody.items = list;\n").unwrap());
     for k in ["status", "total", "items"] {
-        assert!(js.contains_key(k), "js missing {k}: {js:?}");
+        assert!(js.contains(k), "js missing {k}: {js:?}");
     }
-    let go = code_fields("h.go", "m := map[string]any{\n\t\"grid_power\": p,\n}\n").unwrap();
-    assert!(go.contains_key("grid_power"), "{go:?}");
+    let go = field_names(&code_fields("h.go", "m := map[string]any{\n\t\"grid_power\": p,\n}\n").unwrap());
+    assert!(go.contains("grid_power"), "{go:?}");
 
     // Unrelated reads still do not become residue (control).
     w("ui2.js", "const n = data.length; x.map(f);\n");
@@ -1131,5 +1132,50 @@ fn naming_forms_runtime_payloads_and_size_limit() {
     let args = curl_args_max(&req, 12_000_000);
     let i = args.iter().position(|a| a == "--max-filesize").unwrap();
     assert_eq!(args[i + 1], "12000000");
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+// ---------------------------------------------------------------------------
+// Test 28 (alpha.4): fields are bound to their declaring scope, so same-named
+// fields of different types in different structs do not collide, and a
+// function parameter cannot mask a removed field; contracts touching an
+// unsupported language are SKIPPED, never a pass.
+// ---------------------------------------------------------------------------
+#[test]
+fn scoped_fields_and_skipped_languages() {
+    let dir = std::env::temp_dir().join(format!("invar-scope-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    let w = |n: &str, b: &str| std::fs::write(dir.join(n), b).unwrap();
+
+    // Go: `state` keeps its type in PullRequest; an unrelated Option struct
+    // has a `state` of another type. Only the removed `head_branch` is residue.
+    w("old.go", "type PullRequest struct {\n\tState string `json:\"state\"`\n\tHeadBranch string `json:\"head_branch\"`\n}\n");
+    w("new.go", "type PullRequest struct {\n\tState string `json:\"state\"`\n}\ntype EditOption struct {\n\tState *int `json:\"state\"`\n}\n");
+    w("bot.go", "type Hook struct {\n\tState string `json:\"state\"`\n\tHead string `json:\"head_branch\"`\n}\n");
+    let cfg = "[[invariant]]\nkind = \"schema\"\nid = \"g\"\nproducer = \"new.go\"\nproducer_base = \"old.go\"\nconsumer = \"bot.go\"\n";
+    let out = evaluate(&parse_sections("invar.toml", cfg).unwrap(), &Resolver::local(&dir)).unwrap();
+    assert_eq!(out[0].residue, vec!["head_branch".to_string()], "no cross-struct type collision");
+
+    // Python: a dict key is removed; a same-named method parameter remains.
+    w("e1.py", "class E:\n    def __init__(\n        self,\n        line_no: int = 0,\n    ):\n        self.line_no = line_no\n\n    def info(self):\n        return {\"line_no\": self.line_no}\n");
+    w("e2.py", "class E:\n    def __init__(\n        self,\n        line_no: int = 0,\n    ):\n        self.line_no = line_no\n\n    def to_dict(self):\n        return {\"start_line_no\": self.line_no}\n");
+    w("view.vim", "let l:n = l:violation.line_no\n");
+    let cfg = "[[invariant]]\nkind = \"schema\"\nid = \"p\"\nproducer = \"e2.py\"\nproducer_base = \"e1.py\"\nconsumer = \"view.vim\"\n";
+    let out = evaluate(&parse_sections("invar.toml", cfg).unwrap(), &Resolver::local(&dir)).unwrap();
+    assert_eq!(out[0].residue, vec!["line_no".to_string()], "parameter must not mask the removed key");
+
+    // Unsupported language on either side: SKIPPED, nothing fetched.
+    for (producer, consumer) in [("rpc.cpp", "ui.js"), ("new.go", "App.swift"), ("Svc.cs", "ui.js"), ("svc.php", "ui.js")] {
+        let cfg = format!(
+            "[[invariant]]\nkind = \"schema\"\nid = \"s\"\nproducer = \"{producer}\"\nproducer_base = \"{producer}\"\nconsumer = \"{consumer}\"\n"
+        );
+        let out = evaluate(&parse_sections("invar.toml", &cfg).unwrap(), &Resolver::local(&dir)).unwrap();
+        let why = out[0].skipped.as_deref().unwrap_or("");
+        assert!(why.starts_with("language not supported"), "{producer}/{consumer}: {why}");
+        assert!(out[0].residue.is_empty() && out[0].provenance.is_empty());
+        let md = render_report_md(&out);
+        assert!(md.contains("NOT FULLY EVALUATED (1 of 1 skipped)") && md.contains("| SKIPPED |"), "{md}");
+    }
     let _ = std::fs::remove_dir_all(&dir);
 }

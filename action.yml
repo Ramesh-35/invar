@@ -37,10 +37,10 @@ inputs:
 
 outputs:
   exit_code:
-    description: invar check exit code (0 hold, 1 violated, 2 ledger break, 3 error).
+    description: invar check exit code (0 hold, 1 violated, 2 ledger break, 3 error, 4 some contracts skipped).
     value: ${{ steps.check.outputs.exit_code }}
   verdict:
-    description: hold | violated | ledger_break | error
+    description: hold | violated | ledger_break | error | skipped
     value: ${{ steps.check.outputs.verdict }}
   report:
     description: Path to the markdown report (absent on error).

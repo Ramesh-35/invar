@@ -14,16 +14,27 @@
 //! used when a contract names the producer's previous version, where it is
 //! intersected with the fields that actually changed.
 //!
-//! HONEST SCOPE: pattern matching, not parsing. Field sets are file-wide (not
-//! per type), nested paths are flattened to names, and names are matched
-//! exactly (no case or naming-convention folding).
+//! Producer fields are bound to their declaring scope (alpha.4): the Go,
+//! Rust or TypeScript type, the Python class (attributes at class-body level
+//! only, never function parameters), or the enclosing function for payloads
+//! assembled at runtime. A field is "removed" when its name no longer exists
+//! in any scope of the new version; a type change is only compared within the
+//! same scope, so same-named fields of different types do not collide.
+//!
+//! HONEST SCOPE: pattern matching, not parsing. Nested paths are flattened to
+//! names; consumer reads are not scoped (the consumer's types are unknown).
 
 use std::collections::BTreeMap;
 
 use serde_json::Value;
 
-/// Field name -> declared type, if known.
-pub type Fields = BTreeMap<String, Option<String>>;
+/// (scope, field name) -> declared type, if known. Specs use scope "".
+pub type Fields = BTreeMap<(String, String), Option<String>>;
+
+/// The distinct field names, across scopes.
+pub fn field_names(f: &Fields) -> std::collections::BTreeSet<String> {
+    f.keys().map(|(_, n)| n.clone()).collect()
+}
 
 fn is_ident_byte(b: u8) -> bool {
     b.is_ascii_alphanumeric() || b == b'_'
@@ -46,7 +57,7 @@ pub fn spec_fields(v: &Value) -> Fields {
     let mut out = Fields::new();
     if let Some(props) = v.get("properties").and_then(|p| p.as_object()) {
         for (name, p) in props {
-            out.insert(name.clone(), spec_type(p));
+            out.insert((String::new(), name.clone()), spec_type(p));
         }
     }
     out
@@ -86,26 +97,85 @@ pub fn code_fields(path: &str, text: &str) -> Option<Fields> {
         "rs" => rs_fields(text),
         _ => return None,
     };
-    // Payloads assembled at runtime (alpha.4): dict/map/object literal keys
-    // and keyed assignments, for Python, JS/TS and Go. Untyped.
+    // Payloads assembled at runtime: dict/map/object literal keys and keyed
+    // assignments, for Python, JS/TS and Go, scoped to the enclosing
+    // function (Go, Python) or the file (JS/TS). Untyped.
     if matches!(
         ext,
         "py" | "go" | "ts" | "tsx" | "js" | "jsx" | "mjs" | "cjs"
     ) {
-        for key in assembled_keys(text, ext) {
-            f.entry(key).or_insert(None);
+        let scopes = line_scopes(text, ext);
+        for (ln, key) in assembled_keys(text, ext) {
+            let scope = scopes.get(ln).cloned().unwrap_or_default();
+            f.entry((scope, key)).or_insert(None);
         }
     }
     Some(f)
 }
 
+/// Enclosing function per line: Go `func` (by brace depth) and Python
+/// `def`/`class` (by indentation). Other languages: file scope "".
+fn line_scopes(text: &str, ext: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    match ext {
+        "go" => {
+            let (mut scope, mut depth, mut open_at) = (String::new(), 0i64, -1i64);
+            for line in text.lines() {
+                let t = line.trim_start();
+                if t.starts_with("func ") {
+                    let rest = t["func ".len()..].trim_start();
+                    let rest = if rest.starts_with('(') {
+                        rest.find(')')
+                            .map(|i| rest[i + 1..].trim_start())
+                            .unwrap_or("")
+                    } else {
+                        rest
+                    };
+                    if let Some(id) = ident_at(rest, 0) {
+                        scope = id.to_string();
+                        open_at = depth;
+                    }
+                }
+                out.push(scope.clone());
+                depth += line.matches('{').count() as i64 - line.matches('}').count() as i64;
+                if open_at >= 0 && depth <= open_at {
+                    scope.clear();
+                    open_at = -1;
+                }
+            }
+        }
+        "py" => {
+            let mut stack: Vec<(usize, String)> = Vec::new();
+            for line in text.lines() {
+                let t = line.trim();
+                let ind = line.len() - line.trim_start().len();
+                if !t.is_empty() && !t.starts_with('#') {
+                    while stack.last().map(|(i, _)| *i >= ind).unwrap_or(false) {
+                        stack.pop();
+                    }
+                    for kw in ["class ", "def ", "async def "] {
+                        if let Some(rest) = t.strip_prefix(kw) {
+                            if let Some(id) = ident_at(rest, 0) {
+                                stack.push((ind, id.to_string()));
+                            }
+                        }
+                    }
+                }
+                out.push(stack.last().map(|(_, n)| n.clone()).unwrap_or_default());
+            }
+        }
+        _ => out = vec![String::new(); text.lines().count()],
+    }
+    out
+}
+
 /// Keys of payloads built at runtime: `"key": value` in dict/map/object
 /// literals, `x["key"] = value`, and for JS/TS also `key: value` object
 /// members and `x.key = value`. Comments are not stripped (heuristic).
-fn assembled_keys(text: &str, ext: &str) -> Vec<String> {
+fn assembled_keys(text: &str, ext: &str) -> Vec<(usize, String)> {
     let js = matches!(ext, "js" | "jsx" | "mjs" | "cjs" | "ts" | "tsx");
     let mut out = Vec::new();
-    for line in text.lines() {
+    for (ln, line) in text.lines().enumerate() {
         let b = line.as_bytes();
         let mut i = 0;
         while i < b.len() {
@@ -121,7 +191,7 @@ fn assembled_keys(text: &str, ext: &str) -> Vec<String> {
                         && after[1..].trim_start().starts_with('=')
                         && !after[1..].trim_start().starts_with("==");
                     if (is_dict_key || is_assign) && is_field_like(key) {
-                        out.push(key.to_string());
+                        out.push((ln, key.to_string()));
                     }
                     i += len + 2;
                     continue;
@@ -134,7 +204,7 @@ fn assembled_keys(text: &str, ext: &str) -> Vec<String> {
             if let Some(id) = ident_at(t, 0) {
                 let rest = t[id.len()..].trim_start();
                 if rest.starts_with(':') && !rest.starts_with("::") {
-                    out.push(id.to_string());
+                    out.push((ln, id.to_string()));
                 }
             }
             // { key: value, other: value } members after `{` or `,`
@@ -144,7 +214,7 @@ fn assembled_keys(text: &str, ext: &str) -> Vec<String> {
                 if let Some(id) = ident_at(line, pos + 1 + off) {
                     let after = line[pos + 1 + off + id.len()..].trim_start();
                     if after.starts_with(':') && !after.starts_with("::") {
-                        out.push(id.to_string());
+                        out.push((ln, id.to_string()));
                     }
                 }
             }
@@ -157,7 +227,7 @@ fn assembled_keys(text: &str, ext: &str) -> Vec<String> {
                             && !after.starts_with("==")
                             && !after.starts_with("=>")
                         {
-                            out.push(id.to_string());
+                            out.push((ln, id.to_string()));
                         }
                     }
                 }
@@ -201,9 +271,16 @@ fn quoted_after<'a>(s: &'a str, key: &str) -> Option<&'a str> {
 fn go_fields(text: &str) -> Fields {
     let mut out = Fields::new();
     let mut in_struct = 0usize;
+    let mut scope = String::new();
     for line in text.lines() {
         let t = line.trim();
         if t.contains("struct {") || t.ends_with("struct{") {
+            if in_struct == 0 {
+                // `type Name struct {` names the scope; anonymous structs
+                // nested inside keep the outer type's scope.
+                let head = t.strip_prefix("type ").unwrap_or(t);
+                scope = ident_at(head, 0).unwrap_or("").to_string();
+            }
             in_struct += 1;
             continue;
         }
@@ -234,7 +311,7 @@ fn go_fields(text: &str) -> Fields {
             Some("") | None => name.to_string(),
             Some(k) => k.to_string(),
         };
-        out.insert(key, Some(ty.to_string()));
+        out.insert((scope.clone(), key), Some(ty.to_string()));
     }
     out
 }
@@ -260,26 +337,43 @@ fn decl_name_type(t: &str) -> Option<(String, String)> {
 }
 
 fn py_fields(text: &str) -> Fields {
+    // Class attributes only at the class body's own indentation; method
+    // bodies and multi-line signatures (parameters) are deeper and skipped.
     let mut out = Fields::new();
-    let mut class_indent: Option<usize> = None;
+    // (indent, name, is_class, body indent once known)
+    let mut stack: Vec<(usize, String, bool, Option<usize>)> = Vec::new();
     for line in text.lines() {
-        let ind = line.len() - line.trim_start().len();
         let t = line.trim();
-        if t.starts_with("class ") {
-            class_indent = Some(ind);
+        if t.is_empty() || t.starts_with('#') {
             continue;
         }
-        let Some(ci) = class_indent else { continue };
-        if !t.is_empty() && ind <= ci {
-            class_indent = None;
+        let ind = line.len() - line.trim_start().len();
+        while stack.last().map(|e| e.0 >= ind).unwrap_or(false) {
+            stack.pop();
+        }
+        if let Some(top) = stack.last_mut() {
+            if top.3.is_none() {
+                top.3 = Some(ind);
+            }
+        }
+        let header = ["class ", "def ", "async def "]
+            .iter()
+            .find_map(|kw| t.strip_prefix(kw).map(|r| (*kw == "class ", r)));
+        if let Some((is_class, rest)) = header {
+            if let Some(id) = ident_at(rest, 0) {
+                stack.push((ind, id.to_string(), is_class, None));
+            }
             continue;
         }
-        if t.starts_with('#') || t.starts_with("def ") || t.starts_with('@') {
+        let Some((_, cls, true, Some(body))) = stack.last() else {
+            continue;
+        };
+        if ind != *body || t.starts_with('@') {
             continue;
         }
         if let Some((name, ty)) = decl_name_type(t) {
             let key = quoted_after(t, "alias").map(str::to_string).unwrap_or(name);
-            out.insert(key, Some(ty));
+            out.insert((cls.clone(), key), Some(ty));
         }
     }
     out
@@ -287,10 +381,30 @@ fn py_fields(text: &str) -> Fields {
 
 fn ts_fields(text: &str) -> Fields {
     let mut out = Fields::new();
+    let (mut scope, mut depth, mut open_at) = (String::new(), 0i64, -1i64);
     for line in text.lines() {
-        let t = line.trim().trim_start_matches("export ");
+        let t = line
+            .trim()
+            .trim_start_matches("export ")
+            .trim_start_matches("declare ");
+        for kw in ["interface ", "type ", "class "] {
+            if let Some(rest) = t.strip_prefix(kw) {
+                if let Some(id) = ident_at(rest, 0) {
+                    scope = id.to_string();
+                    open_at = depth;
+                }
+            }
+        }
         if let Some((name, ty)) = decl_name_type(t) {
-            out.insert(name, Some(ty.trim_end_matches(['{', ' ']).to_string()));
+            out.insert(
+                (scope.clone(), name),
+                Some(ty.trim_end_matches(['{', ' ']).to_string()),
+            );
+        }
+        depth += line.matches('{').count() as i64 - line.matches('}').count() as i64;
+        if open_at >= 0 && depth <= open_at && line.contains('}') {
+            scope.clear();
+            open_at = -1;
         }
     }
     out
@@ -299,6 +413,7 @@ fn ts_fields(text: &str) -> Fields {
 fn rs_fields(text: &str) -> Fields {
     let mut out = Fields::new();
     let mut pending_rename: Option<String> = None;
+    let mut scope = String::new();
     for line in text.lines() {
         let t = line.trim();
         if t.starts_with("#[serde") {
@@ -309,9 +424,16 @@ fn rs_fields(text: &str) -> Fields {
         }
         let d = t.strip_prefix("pub ").unwrap_or(t);
         let d = d.strip_prefix("pub(crate) ").unwrap_or(d);
+        if let Some(rest) = d.strip_prefix("struct ") {
+            scope = ident_at(rest, 0).unwrap_or("").to_string();
+            continue;
+        }
         if let Some((name, ty)) = decl_name_type(d) {
             if t.ends_with(',') || t.ends_with('{') {
-                out.insert(pending_rename.take().unwrap_or(name), Some(ty));
+                out.insert(
+                    (scope.clone(), pending_rename.take().unwrap_or(name)),
+                    Some(ty),
+                );
                 continue;
             }
         }
@@ -374,18 +496,24 @@ pub fn broad_reads(source: &str) -> Vec<(String, usize)> {
 }
 
 /// What changed between two producer versions: (field, type change if any).
-/// A removed field has `None`; a retyped one has `Some((old, new))`.
+/// A field is removed when its name exists in no scope of `head`; a type
+/// change is reported only within the same scope. Each name appears once.
 pub fn changed_fields(base: &Fields, head: &Fields) -> Vec<(String, Option<(String, String)>)> {
-    let mut out = Vec::new();
-    for (name, old_ty) in base {
-        match head.get(name) {
-            None => out.push((name.clone(), None)),
-            Some(new_ty) => {
-                if let (Some(a), Some(b)) = (old_ty, new_ty) {
-                    if a != b {
-                        out.push((name.clone(), Some((a.clone(), b.clone()))));
-                    }
-                }
+    let head_names = field_names(head);
+    let mut out: Vec<(String, Option<(String, String)>)> = Vec::new();
+    let mut seen = std::collections::BTreeSet::new();
+    for ((scope, name), old_ty) in base {
+        let change = match head.get(&(scope.clone(), name.clone())) {
+            Some(new_ty) => match (old_ty, new_ty) {
+                (Some(a), Some(b)) if a != b => Some(Some((a.clone(), b.clone()))),
+                _ => None,
+            },
+            None if !head_names.contains(name) => Some(None),
+            None => None,
+        };
+        if let Some(c) = change {
+            if seen.insert(name.clone()) {
+                out.push((name.clone(), c));
             }
         }
     }

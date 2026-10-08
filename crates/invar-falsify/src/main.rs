@@ -422,9 +422,14 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
         if args.ci { ", --ci" } else { "" }
     );
     let mut violations = 0usize;
+    let mut skipped = 0usize;
     let mut summaries: Vec<String> = Vec::new();
     for o in &outcomes {
-        if o.residue.is_empty() {
+        if let Some(why) = &o.skipped {
+            skipped += 1;
+            println!("  [SKIPPED]  {} ({}): {why}", o.id, o.kind);
+            summaries.push(format!("{}:{}=SKIPPED", o.id, o.kind));
+        } else if o.residue.is_empty() {
             println!("  [HOLDS]    {} ({})", o.id, o.kind);
             summaries.push(format!("{}:{}=HOLDS", o.id, o.kind));
         } else {
@@ -447,7 +452,15 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
             summaries.push(format!("fetched {} blake3={}", f.reference, f.blake3_hex));
         }
     }
-    let code = if violations == 0 {
+    // Exit 4: nothing violated, but some contracts were skipped (an
+    // unsupported language). A skip is never reported as a pass.
+    let code = if violations == 0 && skipped > 0 {
+        println!(
+            "result: NOT FULLY EVALUATED, {skipped} of {} contract(s) skipped, the rest hold",
+            outcomes.len()
+        );
+        4
+    } else if violations == 0 {
         println!("result: ALL {} contract(s) hold", outcomes.len());
         0
     } else {

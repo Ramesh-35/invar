@@ -10,6 +10,7 @@
 #   MISSED   none found (or INVAR said HOLDS on a real break)
 #   CLEAN    control case ("none" expected) and INVAR reported nothing
 #   FALSE_POSITIVE  control case and INVAR reported residue
+#   SKIPPED  an artifact is in a language INVAR does not read (exit 4)
 #   ERROR    INVAR could not evaluate (exit 3); never counted as a verdict
 # Extra fields INVAR reports beyond the expected set are listed, not hidden.
 #
@@ -35,7 +36,9 @@ for dir in "$root"/corpus-real/*/; do
   out="$("$invar" check --ci --config "$dir/invar.toml" 2>&1)"; code=$?
   found="$(printf '%s\n' "$out" | sed -n 's/.*\[VIOLATED\][^:]*: \[\(.*\)\].*/\1/p' | tr -d '"' | norm | paste -sd, -)"
 
-  if [ "$code" -ge 2 ]; then
+  if [ "$code" -eq 4 ]; then
+    outcome=SKIPPED
+  elif [ "$code" -ge 2 ]; then
     outcome=ERROR
   elif [ "$expected" = "none" ]; then
     if [ -z "$found" ]; then outcome=CLEAN; else outcome=FALSE_POSITIVE; fi

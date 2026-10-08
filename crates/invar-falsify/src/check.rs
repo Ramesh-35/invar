@@ -12,7 +12,9 @@ use std::collections::BTreeMap;
 
 use crate::invariant::{check_contract, payload_read_sites, ContractInput, Step};
 use crate::resolver::{is_remote, Fetched, Resolver};
-use crate::surface::{broad_reads, changed_fields, code_fields, name_key, spec_fields, Fields};
+use crate::surface::{
+    broad_reads, changed_fields, code_fields, field_names, name_key, spec_fields, Fields,
+};
 
 pub type Sections = Vec<(String, Vec<(String, String)>)>;
 
@@ -24,6 +26,23 @@ pub struct ContractOutcome {
     pub provenance: Vec<Fetched>,
     /// Where each residue item shows up, so a finding points at a line.
     pub witnesses: Vec<Witness>,
+    /// Set when the contract was not evaluated because an artifact is in a
+    /// language INVAR does not read. A skip is never a pass.
+    pub skipped: Option<String>,
+}
+
+/// Languages INVAR does not read (alpha.4 scope: Go, Python, JS/TS, Rust).
+fn unsupported_language(spec: &str) -> Option<&'static str> {
+    let name = artifact_name(spec);
+    let ext = name.rsplit('.').next().unwrap_or("").to_ascii_lowercase();
+    Some(match ext.as_str() {
+        "c" | "h" => "C",
+        "cc" | "cpp" | "cxx" | "hpp" | "hh" => "C++",
+        "cs" => "C#",
+        "php" => "PHP",
+        "swift" => "Swift",
+        _ => return None,
+    })
 }
 
 /// Locates one residue item. `sites` are `file:line` in the consumer source
@@ -157,9 +176,9 @@ fn schema_outcome(
         let cr = fetch(resolver, &c, prov)?;
         let defined: serde_json::Value = if is_code(&p) {
             let f = source_fields(id, &p, &pr, None)?;
-            let props: serde_json::Map<String, serde_json::Value> = f
-                .keys()
-                .map(|k| (k.clone(), serde_json::json!({})))
+            let props: serde_json::Map<String, serde_json::Value> = field_names(&f)
+                .into_iter()
+                .map(|k| (k, serde_json::json!({})))
                 .collect();
             serde_json::json!({ "properties": props })
         } else {
@@ -392,10 +411,16 @@ fn witness_md(w: &Witness, kind: &str) -> String {
 /// contract violation is not a PROVEN_RESIDUE verdict.
 pub fn render_report_md(outcomes: &[ContractOutcome]) -> String {
     let violated = outcomes.iter().filter(|o| !o.residue.is_empty()).count();
+    let skipped = outcomes.iter().filter(|o| o.skipped.is_some()).count();
     let mut s = String::new();
     s.push_str(REPORT_MARKER);
     s.push('\n');
-    if violated == 0 {
+    if violated == 0 && skipped > 0 {
+        s.push_str(&format!(
+            "### INVAR contract check: NOT FULLY EVALUATED ({skipped} of {} skipped)\n\n",
+            outcomes.len()
+        ));
+    } else if violated == 0 {
         s.push_str(&format!(
             "### INVAR contract check: ALL HOLD ({} contract(s))\n\n",
             outcomes.len()
@@ -408,7 +433,9 @@ pub fn render_report_md(outcomes: &[ContractOutcome]) -> String {
     }
     s.push_str("| Contract | Kind | Result | Residue |\n|---|---|---|---|\n");
     for o in outcomes {
-        let (result, residue) = if o.residue.is_empty() {
+        let (result, residue) = if let Some(why) = &o.skipped {
+            ("SKIPPED", md_code(why))
+        } else if o.residue.is_empty() {
             ("holds", String::new())
         } else {
             let mut cells: Vec<String> = o
@@ -461,6 +488,29 @@ pub fn evaluate(sections: &Sections, resolver: &Resolver) -> Result<Vec<Contract
         let kind = getk(b, "kind").unwrap_or_default();
         let id = getk(b, "id").unwrap_or_else(|| format!("inv-{idx}"));
         let mut prov = Vec::new();
+        if kind == "schema" || kind == "event" {
+            let unsupported = [
+                "producer",
+                "producer_base",
+                "producer_code",
+                "producer_code_base",
+                "consumer",
+            ]
+            .iter()
+            .filter_map(|k| getk(b, k))
+            .find_map(|spec| unsupported_language(&spec).map(|lang| (lang, artifact_name(&spec))));
+            if let Some((lang, name)) = unsupported {
+                out.push(ContractOutcome {
+                    id,
+                    kind,
+                    residue: Vec::new(),
+                    provenance: Vec::new(),
+                    witnesses: Vec::new(),
+                    skipped: Some(format!("language not supported ({lang}: {name})")),
+                });
+                continue;
+            }
+        }
         let witnesses: Vec<Witness>;
         let residue = match kind.as_str() {
             "schema" => {
@@ -517,6 +567,7 @@ pub fn evaluate(sections: &Sections, resolver: &Resolver) -> Result<Vec<Contract
             residue,
             provenance: prov,
             witnesses,
+            skipped: None,
         });
     }
     Ok(out)
