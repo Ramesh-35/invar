@@ -11,7 +11,7 @@ use serde::Serialize;
 use crate::evaluator::{CaseResult, LegState};
 use crate::manifest::{EpistemicStatus, EvidenceTier};
 
-pub const ENGINE_VERSION: &str = "invar-falsify 0.1.0-alpha";
+pub const ENGINE_VERSION: &str = concat!("invar-falsify ", env!("CARGO_PKG_VERSION"));
 
 #[derive(Debug, Clone, Serialize)]
 pub struct RunReport {

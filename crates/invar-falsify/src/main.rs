@@ -24,7 +24,7 @@ use invar_falsify::resolver::{CurlTransport, Resolver, Transport};
 #[derive(Parser)]
 #[command(
     name = "invar",
-    version = "0.1.0-alpha",
+    version,
     about = "Deterministic falsification harness for the INVAR category-residue hypothesis."
 )]
 struct Cli {
