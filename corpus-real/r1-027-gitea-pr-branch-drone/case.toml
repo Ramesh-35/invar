@@ -1,0 +1,21 @@
+[case]
+id = "r1-027"
+title = "Gitea PR webhook dropped base_branch/head_branch; Drone pipelines got empty branches"
+source = "https://github.com/harness/harness/pull/2320"
+source_kind = "pr"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "field_removed"
+batch = "3"
+
+[expected]
+residue = "base_branch, head_branch"
+evidence = "the pull request webhook payload does not include the pull_request.base_branch or pull_request.head_branch properties"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"          # no published JSON/YAML spec for this payload
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

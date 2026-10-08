@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-031"
+producer = "github:bitcoin/bitcoin@63d0b930f821132badd804822a46232a5f98bbef:src/rpc/blockchain.cpp"
+producer_base = "github:bitcoin/bitcoin@fdb41e08c4a4fb2743f8ca7c4b8dac52a460e864:src/rpc/blockchain.cpp"
+consumer = "github:janoside/btc-rpc-explorer@7c0846dfdb8cd9c6e8c1a30a93419db3cfdea2b0:views/node-details.pug"

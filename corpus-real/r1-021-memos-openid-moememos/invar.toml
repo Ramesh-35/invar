@@ -1,0 +1,9 @@
+[[invariant]]
+kind = "schema"
+id = "r1-021"
+producer = "github:usememos/memos@33d9c13b7efcdbf903d5d994c0c748fe0bd2f4ec:api/v1/swagger.yaml"
+producer_base = "github:usememos/memos@42bd9b194ba2902405fae133643f531c56477eb9:api/v1/swagger.yaml"
+producer_code = "github:usememos/memos@33d9c13b7efcdbf903d5d994c0c748fe0bd2f4ec:api/v1/user.go"
+producer_code_base = "github:usememos/memos@42bd9b194ba2902405fae133643f531c56477eb9:api/v1/user.go"
+pointer = "/definitions/v1.User"
+consumer = "github:mudkipme/MoeMemos@c1c4616eea80e119658c635ea9dd47f1f50035bd:MoeMemos/Model/User.swift"

@@ -460,3 +460,23 @@ Total real cases: 15 of 30; thresholds not yet applicable. Disclosure: the
 batch 2 descriptions were read before the engine was written; see
 docs/falsification/R1-CORPUS.md. Adequacy unchanged.
 
+## R1 verdict at 30 real cases (2026-10-08)
+
+Engine alpha.4 (naming forms, runtime-assembled producer payloads, 5 MB
+default fetch limit configurable to 50 MB), tuned on batches 1 and 2, frozen
+at `8f331ca` (fingerprint `88844f1512e83e06`) before batch 3 was sourced.
+
+Batch 3 (held out, 15 real breaks, 3 controls): INVAR caught 4 outright and 2
+partially; 7 missed; 2 errors (C++ producers). Controls: 2 clean, 1 error.
+openapi-diff, where it could run: caught 2 (including r1-021, which INVAR
+missed), missed 2, errored on 2.
+
+Across all 30 real breaks: held-out scores (each batch run by the engine
+frozen before it) catch 8 of 30 (+2 partial); the current engine catches 13
+of 30 (+3 partial). **The locked R1 test is FALSIFIED on the miss-rate
+criterion**: INVAR misses 47% to 73% of real breaks, against a 20% bar. The
+baseline criterion does not trigger: most INVAR catches came from producer
+code that no spec-diff tool can read. Details and causes:
+docs/falsification/R1-CORPUS.md. The next step is a founder decision.
+Adequacy unchanged: D PARTIAL, overall NOT ESTABLISHED.
+

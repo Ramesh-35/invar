@@ -1,0 +1,21 @@
+[case]
+id = "r1-036"
+title = "Control: Bitcoin Core added the fees object to mempool entries; btc-rpc-explorer unaffected (producer is C++)"
+source = "https://github.com/bitcoin/bitcoin/commit/6f8b3453f8a3d0b885b17feb78375318277b63ce"
+source_kind = "commit"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "other"
+batch = "3"
+
+[expected]
+residue = "none"
+evidence = "Additive; old fields kept"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"          # no published JSON/YAML spec for this payload
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

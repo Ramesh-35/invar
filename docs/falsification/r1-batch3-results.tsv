@@ -1,0 +1,38 @@
+case	real	expected	invar_residue	outcome	extra	oasdiff	openapi_diff	buf_breaking	schema_registry	semgrep	ai_reviewer
+r1-000-constructed-demo	false	amount_cents	amountcents	CAUGHT	-	not_applicable	not_applicable	not_applicable	not_run	not_run	not_run
+r1-001-immich-duration-type	true	duration	duration	CAUGHT	-	not_run	error	not_applicable	not_applicable	not_run	not_run
+r1-002-firefly-piggybank-account	true	account_id, account_name	accountid,accountname	CAUGHT	-	not_run	partial	not_applicable	not_applicable	not_run	not_run
+r1-003-docker-virtualsize-checkmk	true	VirtualSize	-	MISSED	-	not_run	missed	not_applicable	not_applicable	not_run	not_run
+r1-004-docker-containerconfig-portainer	true	ContainerConfig, Container	-	MISSED	-	not_run	missed	not_applicable	not_applicable	not_run	not_run
+r1-005-cometbft-finalize-block-cosmjs	true	begin_block_events, end_block_events	beginblockevents,delivertx,endblockevents,txresult,txsresults	CAUGHT	delivertx,txresult,txsresults	not_run	missed	not_applicable	not_applicable	not_run	not_run
+r1-006-control-immich-createdat	true	none	-	CLEAN	-	not_run	error	not_applicable	not_applicable	not_run	not_run
+r1-007-mealie-isfood-aiomealie	true	isFood, disableAmount	isfood	PARTIAL	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-008-frigate-temperatures-hass	true	temperatures	temperatures	CAUGHT	-	not_run	not_run	not_applicable	not_applicable	not_run	not_run
+r1-009-authentik-writeonly-terraform	true	auth, auth_password	auth,authpassword	CAUGHT	-	not_run	error	not_applicable	not_applicable	not_run	not_run
+r1-010-romm-filesize-homepage	true	FILESIZE	filesize	CAUGHT	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-011-evcc-gridpower-homepage	true	gridPower	-	MISSED	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-012-cargo-audit-warnings-auditcheck	true	advisory	advisory	CAUGHT	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-013-podman-created-toolbox	true	Created	created	CAUGHT	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-014-trivy-root-object-defectdojo	true	root:array->object	-	MISSED	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-015-gitleaks-v8-defectdojo	true	rule, file, lineNumber, offender, line, commitMessage, commit, author, email, date, tags, leakURL	author,commit,commitmessage,date,email,file,leakurl,line,linenumber,offender,rule,tags	CAUGHT	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-016-npm7-audit-auditci	true	advisories	-	MISSED	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-017-control-romm-stats-added	true	none	-	CLEAN	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-018-control-gitleaks-link	true	none	-	CLEAN	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-019-grocy-qufactor-pygrocy	true	qu_factor_purchase_to_stock	qufactorpurchasetostock	CAUGHT	-	not_run	error	not_applicable	not_applicable	not_run	not_run
+r1-020-syncthing-type-int-tray	true	type	-	MISSED	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-021-memos-openid-moememos	true	openId	-	MISSED	-	not_run	caught	not_applicable	not_applicable	not_run	not_run
+r1-022-uptimekuma-version-api	true	version	version	CAUGHT	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-023-syncthing-pending-android	true	pendingDevices, pendingFolders	pendingdevices	PARTIAL	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-024-fortitude-row-nvimlint	true	row	-	MISSED	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-025-sqlfluff3-lineno-ale	true	line_no, line_pos	-	MISSED	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-026-ansiblelint-positions-ale	true	lines	-	MISSED	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-027-gitea-pr-branch-drone	true	base_branch, head_branch	basebranch,headbranch,labels,mergeable,state	CAUGHT	labels,mergeable,state	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-028-proselint016-flycheck	true	data, errors, check, start, end, severity	column,end,errors,line,severity,start	PARTIAL	column,line	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-029-lnd-chains-rtl	true	chains	chains	CAUGHT	-	not_run	caught	not_applicable	not_applicable	not_run	not_run
+r1-030-cln-msat-lnbits	true	channel_sat, msatoshi_sent, msatoshi	-	MISSED	-	not_run	missed	not_applicable	not_applicable	not_run	not_run
+r1-031-bitcoin-warnings-explorer	true	warnings	-	ERROR	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-032-sonarr4-languageprofile-bazarr	true	languageProfileId	-	MISSED	-	not_run	missed	not_applicable	not_applicable	not_run	not_run
+r1-033-bitcoin-mempool-fee-explorer	true	fee	-	ERROR	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-034-control-grocy-battery	true	none	-	CLEAN	-	not_run	error	not_applicable	not_applicable	not_run	not_run
+r1-035-control-sqlfluff-name	true	none	-	CLEAN	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-036-control-bitcoin-fees-added	true	none	-	ERROR	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run

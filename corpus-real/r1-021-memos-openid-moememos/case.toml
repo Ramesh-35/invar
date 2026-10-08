@@ -1,0 +1,22 @@
+[case]
+id = "r1-021"
+title = "Memos 0.15 removed openId from the user; MoeMemos (Swift) decoding failed"
+source = "https://github.com/mudkipme/MoeMemos/issues/119"
+source_kind = "issue"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "field_removed"
+batch = "3"
+
+[expected]
+residue = "openId"
+evidence = "Adapt to 0.15.0 please; fix: compatibility with 0.15"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "caught"
+openapi_diff_note = "openapi-diff 0.24.1 flagged breaking response changes on endpoints returning v1.User (does not name openId)"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

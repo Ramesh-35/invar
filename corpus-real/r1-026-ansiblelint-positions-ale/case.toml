@@ -1,0 +1,21 @@
+[case]
+id = "r1-026"
+title = "ansible-lint 6.11 moved location.lines to positions; ALE broke"
+source = "https://github.com/dense-analysis/ale/pull/4492"
+source_kind = "pr"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "field_renamed"
+batch = "3"
+
+[expected]
+residue = "lines"
+evidence = "Issue locations can have either a positions or a lines member, rather than just a lines member as it was before"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"          # no published JSON/YAML spec for this payload
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

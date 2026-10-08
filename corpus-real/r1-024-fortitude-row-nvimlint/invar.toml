@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-024"
+producer = "github:PlasmaFAIR/fortitude@0eda11975096517b16bf30bf683011f83a24e55e:crates/fortitude_linter/src/diagnostics/message/json.rs"
+producer_base = "github:PlasmaFAIR/fortitude@b9bc04fec845c94660734731e34f33541a9e8304:crates/fortitude_linter/src/diagnostics/message/json.rs"
+consumer = "github:mfussenegger/nvim-lint@0370fe965697aa8f04252a1562441bdc13723cd1:lua/lint/linters/fortitude.lua"

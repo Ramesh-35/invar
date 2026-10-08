@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-020"
+producer = "github:syncthing/syncthing@77970d5113a938e742cf5aa3f5f15fde1f0d3d3b:lib/model/model.go"
+producer_base = "github:syncthing/syncthing@2b8ee4c7a5e16998ea49b0f3b015503fee7e5e6e:lib/model/model.go"
+consumer = "github:Martchus/syncthingtray@7ace62021d032dc1e668ee75f034db8a583600cb:syncthingconnector/syncthingconnection_requests.cpp"

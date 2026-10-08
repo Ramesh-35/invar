@@ -1,0 +1,7 @@
+[[invariant]]
+kind = "schema"
+id = "r1-030"
+producer = "github:ElementsProject/lightning@780f32dfc683ccf0eb18110223679ddd2989c3c5:doc/schemas/listfunds.schema.json"
+producer_base = "github:ElementsProject/lightning@67f23c19f763c2820714409a67b17eb8d6c6336b:doc/schemas/listfunds.schema.json"
+pointer = "/properties/channels/items"
+consumer = "github:lnbits/lnbits@ca41a92bd9136aa3256029213274500a8918af03:lnbits/wallets/cln.py"

@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-035"
+producer = "github:sqlfluff/sqlfluff@4b644e030c891a8f702aa0d3b5c8d15055979989:src/sqlfluff/core/errors.py"
+producer_base = "github:sqlfluff/sqlfluff@19e2682fc76f983d141cfb2ed1a52206ae7c806b:src/sqlfluff/core/errors.py"
+consumer = "github:dense-analysis/ale@c8e914604963063b7bb827e9b6f5a6ca741dad60:ale_linters/sql/sqlfluff.vim"

@@ -1,0 +1,21 @@
+[case]
+id = "r1-033"
+title = "Bitcoin Core 23 dropped mempool entry fee; btc-rpc-explorer read undefined (producer is C++)"
+source = "https://github.com/janoside/btc-rpc-explorer/commit/16ab63160250bd5b478c2c0ed5b5c050e91990a5"
+source_kind = "commit"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "field_removed"
+batch = "3"
+
+[expected]
+residue = "fee"
+evidence = "Fix for deprecation in Bitcoin Core 23: getmempoolentry.fee"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"          # no published JSON/YAML spec for this payload
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

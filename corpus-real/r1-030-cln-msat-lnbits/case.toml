@@ -1,0 +1,22 @@
+[case]
+id = "r1-030"
+title = "Core Lightning removed non-msat fields; lnbits CLN wallet broke (code producer is C, spec only)"
+source = "https://github.com/lnbits/lnbits/pull/1671"
+source_kind = "pr"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "field_removed"
+batch = "3"
+
+[expected]
+residue = "channel_sat, msatoshi_sent, msatoshi"
+evidence = "fix cln wallet for msat migration; the schemas never defined these fields"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "missed"
+openapi_diff_note = "listfunds schema identical at both commits"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

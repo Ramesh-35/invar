@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-028"
+producer = "github:amperser/proselint@02e85a8fe89e33f2e786cee33985741be7ecef0c:proselint/log.py"
+producer_base = "github:amperser/proselint@0e1feba9a4b1b7bc702bdddc1ebbcfcfb6836307:proselint/tools.py"
+consumer = "github:flycheck/flycheck@1eafe2911d50c9f58efce81ff8abea59495e1ff3:flycheck.el"

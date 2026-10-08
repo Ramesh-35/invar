@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-026"
+producer = "github:ansible/ansible-lint@fd71b3f681a4bb2f2ee458dd4aad335dc3d25f22:src/ansiblelint/formatters/__init__.py"
+producer_base = "github:ansible/ansible-lint@5c1f48359dc8329e52619d1b45eacfe9ad1b3cd9:src/ansiblelint/formatters/__init__.py"
+consumer = "github:dense-analysis/ale@b0ba31f88e09c033630ac15ae07143af7f658072:ale_linters/ansible/ansible_lint.vim"

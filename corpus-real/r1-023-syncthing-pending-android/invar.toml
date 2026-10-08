@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-023"
+producer = "github:syncthing/syncthing@7502997e7e3d1269694a1c7b2aa3231232516538:lib/config/config.pb.go"
+producer_base = "github:syncthing/syncthing@4470cd5aaaa85e91190e6bbe6834cea18ad26804:lib/config/config.pb.go"
+consumer = "github:syncthing/syncthing-android@9ba2dd09df721c3026c9bcf824b3caaa7c7e2adf:app/src/main/java/com/nutomic/syncthingandroid/service/RestApi.java"

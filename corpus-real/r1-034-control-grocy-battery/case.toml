@@ -1,0 +1,22 @@
+[case]
+id = "r1-034"
+title = "Control: Grocy added battery to /batteries; pygrocy unaffected"
+source = "https://github.com/grocy/grocy/commit/7d4a9602abb5f6dc64ba51c50eaef6c1eb13d106"
+source_kind = "commit"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "other"
+batch = "3"
+
+[expected]
+residue = "none"
+evidence = "Additive; spec not updated; no consumer fix"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "error"
+openapi_diff_note = "openapi-diff 0.24.1 rejected the base spec (unresolved token)"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

@@ -1,0 +1,21 @@
+[case]
+id = "r1-025"
+title = "sqlfluff 3 renamed line_no/line_pos; ALE sqlfluff linter broke"
+source = "https://github.com/dense-analysis/ale/pull/4743"
+source_kind = "pr"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "field_renamed"
+batch = "3"
+
+[expected]
+residue = "line_no, line_pos"
+evidence = "the original fields of line_pos and line_no have been renamed to start_line_pos and start_line_no"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"          # no published JSON/YAML spec for this payload
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

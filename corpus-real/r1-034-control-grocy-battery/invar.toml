@@ -1,0 +1,7 @@
+[[invariant]]
+kind = "schema"
+id = "r1-034"
+producer = "github:grocy/grocy@7d4a9602abb5f6dc64ba51c50eaef6c1eb13d106:grocy.openapi.json"
+producer_base = "github:grocy/grocy@eb370dad1e0996cd28fe212bd3f3fd2745166943:grocy.openapi.json"
+pointer = "/components/schemas/CurrentBatteryResponse"
+consumer = "github:SebRut/pygrocy@9b9bd71ddf12eb71012c7c1e1ab6b75acf4fb723:pygrocy/grocy_api_client.py"

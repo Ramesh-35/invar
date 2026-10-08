@@ -52,7 +52,7 @@ checked against the primary source. The two quantified anchors it relies on:
 
 | # | Phase | Status |
 |---|---|---|
-| R1 | Real-tier falsification corpus, head-to-head vs baselines | IN PROGRESS: 15 breaks + 3 controls of 30; held-out batch 2: INVAR 4/10 (docs/falsification/R1-CORPUS.md) |
+| R1 | Real-tier falsification corpus, head-to-head vs baselines | **FALSIFIED (miss rate)** at 30 real breaks: INVAR misses 47% to 73% vs a 20% bar; baseline criterion not triggered. Next step: founder decision (docs/falsification/R1-CORPUS.md) |
 | R2 | Consumer-only contract lockfile `invar.lock` | TARGET |
 | R3 | Producer-side blast radius from consumers' lockfiles | TARGET |
 | R4 | Release and Action supply-chain hardening | TARGET |

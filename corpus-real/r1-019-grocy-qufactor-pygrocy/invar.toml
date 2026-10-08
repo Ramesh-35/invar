@@ -1,0 +1,7 @@
+[[invariant]]
+kind = "schema"
+id = "r1-019"
+producer = "github:grocy/grocy@0229d187aedfe50446ad42887810e70ba0b86109:grocy.openapi.json"
+producer_base = "github:grocy/grocy@dea6f3f820f215907aa943331e0d3841220a1e20:grocy.openapi.json"
+pointer = "/components/schemas/Product"
+consumer = "github:SebRut/pygrocy@6d5dae76efbcf0abe06baafaaf4461bcb66db541:pygrocy/grocy_api_client.py"

@@ -1,0 +1,7 @@
+[[invariant]]
+kind = "schema"
+id = "r1-032"
+producer = "github:Sonarr/Sonarr@89b0b04e08ce171e177933a1c46ea9e3856b87da:src/Sonarr.Api.V3/openapi.json"
+producer_base = "github:Sonarr/Sonarr@52760e0908fa9852ed8a770f1916bb582eb8c8b4:src/Sonarr.Api.V3/openapi.json"
+pointer = "/components/schemas/SeriesResource"
+consumer = "github:morpheus65535/bazarr@fca1c9656eaee17393849aa2b115d26e7e6a859a:bazarr/sonarr/sync/parser.py"

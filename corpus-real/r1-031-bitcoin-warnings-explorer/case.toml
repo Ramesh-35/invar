@@ -1,0 +1,21 @@
+[case]
+id = "r1-031"
+title = "Bitcoin Core 28 warnings became an array; btc-rpc-explorer node page errored (producer is C++)"
+source = "https://github.com/janoside/btc-rpc-explorer/commit/01585b7825afe0eb3e8f6cf39e9e135a20c8c2dd"
+source_kind = "commit"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "type_changed"
+batch = "3"
+
+[expected]
+residue = "warnings"
+evidence = "getblockchaininfo.warnings is now an array"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"          # no published JSON/YAML spec for this payload
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

@@ -1,0 +1,21 @@
+[case]
+id = "r1-023"
+title = "Syncthing 1.13 moved pendingDevices/pendingFolders out of config; syncthing-android crashed"
+source = "https://github.com/syncthing/syncthing-android/pull/1678"
+source_kind = "pr"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "field_removed"
+batch = "3"
+
+[expected]
+residue = "pendingDevices, pendingFolders"
+evidence = "Ignoring devices is broken since syncthing/syncthing#6443 and causes crashes"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"          # no published JSON/YAML spec for this payload
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

@@ -1,0 +1,9 @@
+[[invariant]]
+kind = "schema"
+id = "r1-029"
+producer = "github:lightningnetwork/lnd@0c893c66fb9c0fee664808769ecd6a61af51d140:lnrpc/rpc.swagger.json"
+producer_base = "github:lightningnetwork/lnd@f63ab4beda36de82d9e73d4fc7cf3d7226153041:lnrpc/rpc.swagger.json"
+producer_code = "github:lightningnetwork/lnd@0c893c66fb9c0fee664808769ecd6a61af51d140:rpcserver.go"
+producer_code_base = "github:lightningnetwork/lnd@f63ab4beda36de82d9e73d4fc7cf3d7226153041:rpcserver.go"
+pointer = "/definitions/lnrpcGetInfoResponse"
+consumer = "github:Ride-The-Lightning/RTL@98ec638bd94a1f8c437cc8fd840dcf346c770f34:angular/main.fc7a7c60f2fdb2372e25.js"

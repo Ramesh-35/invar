@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-022"
+producer = "github:louislam/uptime-kuma@be26bb75d9a54debad31a3914bbf072bc929cc7c:server/client.js"
+producer_base = "github:louislam/uptime-kuma@6bece8796e3d7cdb1642a1dc0a90603afb6c6f21:server/client.js"
+consumer = "github:lucasheld/uptime-kuma-api@75a0b57eea1b8fe6fc558767db7c65dc98145a6f:uptime_kuma_api/api.py"
