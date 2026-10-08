@@ -743,7 +743,10 @@ fn ci_resolves_remote_consumer_in_memory() {
     assert!(argv.iter().all(|a| !a.contains("SECRET_T")));
     assert!(argv.windows(2).any(|w| w[0] == "--proto" && w[1] == "=https"));
     assert!(argv.windows(2).any(|w| w[0] == "--proto-redir" && w[1] == "=https"));
-    let missing = CurlTransport { program: "/nonexistent/invar-no-curl".into() };
+    let missing = CurlTransport {
+        program: "/nonexistent/invar-no-curl".into(),
+        ..CurlTransport::default()
+    };
     assert!(missing.get(&authed).unwrap_err().contains("could not run"));
 
     // Workspace: local producer, remote consumer.
@@ -836,6 +839,7 @@ fn action_report_and_manifest_are_sound() {
                 sites: vec!["x|y`.js:1".into()],
                 missing_from: Some("@org|s.json /properties".into()),
                 type_change: Some(("string`|".into(), "@int".into(), "x|y.json".into())),
+                read_as: vec!["a`|b".into()],
             }],
         },
         ContractOutcome { id: "ok".into(), kind: "event".into(), residue: vec![], provenance: vec![], witnesses: vec![] },
@@ -1075,3 +1079,57 @@ fn change_scoped_contracts_find_removed_and_retyped_fields() {
     let _ = std::fs::remove_dir_all(&dir);
 }
 
+
+// ---------------------------------------------------------------------------
+// Test 27 (alpha.4): naming forms match across case and `_`/`-`; payloads
+// assembled at runtime (dict/map/object literal keys, keyed assignments) are
+// part of a code producer's surface; the remote size limit is configurable
+// within a hard ceiling.
+// ---------------------------------------------------------------------------
+#[test]
+fn naming_forms_runtime_payloads_and_size_limit() {
+    use invar_falsify::resolver::{curl_args_max, HARD_MAX_REMOTE_BYTES, MAX_REMOTE_BYTES};
+    use invar_falsify::surface::{code_fields, name_key};
+    let dir = std::env::temp_dir().join(format!("invar-alpha4-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    let w = |n: &str, b: &str| std::fs::write(dir.join(n), b).unwrap();
+
+    assert_eq!(name_key("is_food"), name_key("isFood"));
+    assert_eq!(name_key("IsFood"), name_key("is-food"));
+    assert_ne!(name_key("is_food"), name_key("is_foods"));
+
+    // Python producer drops a dict key; consumer reads it in camelCase.
+    w("v1.py", "def stats():\n    out = {\"uptime\": 1, \"cpu_temp\": t()}\n    out[\"disk_free\"] = d()\n    return out\n");
+    w("v2.py", "def stats():\n    out = {\"uptime\": 1}\n    out[\"disk_free\"] = d()\n    return out\n");
+    w("ui.js", "const t = data.cpuTemp;\nconst u = data.uptime;\n");
+    let cfg = "[[invariant]]\nkind = \"schema\"\nid = \"p\"\nproducer = \"v2.py\"\nproducer_base = \"v1.py\"\nconsumer = \"ui.js\"\n";
+    let out = evaluate(&parse_sections("invar.toml", cfg).unwrap(), &Resolver::local(&dir)).unwrap();
+    assert_eq!(out[0].residue, vec!["cpu_temp".to_string()]);
+    assert_eq!(out[0].witnesses[0].read_as, vec!["cpuTemp".to_string()]);
+    let md = render_report_md(&out);
+    assert!(md.contains("`cpu_temp` read at `ui.js:1` · not in `v2.py` · naming differs, read as `cpuTemp`"), "{md}");
+
+    // Runtime assembly in JS and Go.
+    let js = code_fields("e.js", "res.json({ status: ok, \"total\": n });\nbody.items = list;\n").unwrap();
+    for k in ["status", "total", "items"] {
+        assert!(js.contains_key(k), "js missing {k}: {js:?}");
+    }
+    let go = code_fields("h.go", "m := map[string]any{\n\t\"grid_power\": p,\n}\n").unwrap();
+    assert!(go.contains_key("grid_power"), "{go:?}");
+
+    // Unrelated reads still do not become residue (control).
+    w("ui2.js", "const n = data.length; x.map(f);\n");
+    let cfg = "[[invariant]]\nkind = \"schema\"\nid = \"q\"\nproducer = \"v2.py\"\nproducer_base = \"v1.py\"\nconsumer = \"ui2.js\"\n";
+    let out = evaluate(&parse_sections("invar.toml", cfg).unwrap(), &Resolver::local(&dir)).unwrap();
+    assert!(out[0].residue.is_empty());
+
+    // Size limit: default 5 MB, explicit value reaches curl, hard ceiling 50 MB.
+    assert_eq!(MAX_REMOTE_BYTES, 5_000_000);
+    assert_eq!(HARD_MAX_REMOTE_BYTES, 50_000_000);
+    let req = github_request(&parse_ref("github:o/r@main:a.json", None).unwrap(), None);
+    let args = curl_args_max(&req, 12_000_000);
+    let i = args.iter().position(|a| a == "--max-filesize").unwrap();
+    assert_eq!(args[i + 1], "12000000");
+    let _ = std::fs::remove_dir_all(&dir);
+}

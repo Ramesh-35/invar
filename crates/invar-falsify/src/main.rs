@@ -13,8 +13,8 @@ use std::time::Duration;
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 
-use invar_falsify::evaluator::{evaluate_case, CaseResult};
 use invar_falsify::check::{evaluate, render_report_md, witness_text};
+use invar_falsify::evaluator::{evaluate_case, CaseResult};
 use invar_falsify::init::{discover, render_manifest};
 use invar_falsify::ledger::Ledger;
 use invar_falsify::manifest::{CompositeConfig, EpistemicStatus, Manifest};
@@ -175,11 +175,7 @@ fn now_us() -> i64 {
         .unwrap_or(0)
 }
 
-fn build_report(
-    manifest_path: &str,
-    composite_path: &str,
-    timeout: Duration,
-) -> Result<RunReport> {
+fn build_report(manifest_path: &str, composite_path: &str, timeout: Duration) -> Result<RunReport> {
     let manifest = Manifest::load(manifest_path)
         .with_context(|| format!("loading manifest {manifest_path}"))?;
     let composite = CompositeConfig::load(composite_path)
@@ -229,8 +225,14 @@ fn cmd_validate(args: ValidateArgs) -> Result<i32> {
 }
 
 fn cmd_report(args: ReportArgs) -> Result<i32> {
-    let report = build_report(&args.manifest, &args.composite, Duration::from_secs(args.timeout))?;
-    let results_json = report.to_results_json().context("serializing run results")?;
+    let report = build_report(
+        &args.manifest,
+        &args.composite,
+        Duration::from_secs(args.timeout),
+    )?;
+    let results_json = report
+        .to_results_json()
+        .context("serializing run results")?;
     let repl = RunReport::replicability_hash(&results_json);
     if args.format == "json" {
         println!("{results_json}");
@@ -241,13 +243,19 @@ fn cmd_report(args: ReportArgs) -> Result<i32> {
 }
 
 fn cmd_run(args: RunArgs) -> Result<i32> {
-    let report = build_report(&args.manifest, &args.composite, Duration::from_secs(args.timeout))?;
+    let report = build_report(
+        &args.manifest,
+        &args.composite,
+        Duration::from_secs(args.timeout),
+    )?;
     let out_dir = PathBuf::from(&args.output);
     std::fs::create_dir_all(&out_dir)
         .with_context(|| format!("creating output directory {}", out_dir.display()))?;
 
     // 1. Write the machine artifact, then hash exactly those bytes.
-    let results_json = report.to_results_json().context("serializing run results")?;
+    let results_json = report
+        .to_results_json()
+        .context("serializing run results")?;
     let results_path = out_dir.join("run_results.json");
     std::fs::write(&results_path, &results_json)
         .with_context(|| format!("writing {}", results_path.display()))?;
@@ -312,11 +320,13 @@ fn cmd_verify(args: VerifyArgs) -> Result<i32> {
     if !Path::new(&args.ledger).exists() {
         anyhow::bail!("ledger file does not exist: {}", args.ledger);
     }
-    let ledger = Ledger::open(&args.ledger)
-        .with_context(|| format!("opening ledger {}", args.ledger))?;
+    let ledger =
+        Ledger::open(&args.ledger).with_context(|| format!("opening ledger {}", args.ledger))?;
     match ledger.verify() {
         Ok(count) => {
-            let mode = ledger.journal_mode().unwrap_or_else(|_| "unknown".to_string());
+            let mode = ledger
+                .journal_mode()
+                .unwrap_or_else(|_| "unknown".to_string());
             println!(
                 "ledger OK: {count} node(s), bi-temporal BLAKE3 chain intact, journal_mode={mode}"
             );
@@ -358,7 +368,32 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
         .map(Path::to_path_buf)
         .unwrap_or_else(|| PathBuf::from("."));
     let env = |k: &str| std::env::var(k).ok().filter(|v| !v.is_empty());
-    let curl = CurlTransport::default();
+    // `[check] max_remote_mb = N` raises or lowers the remote size limit.
+    let max_bytes = match sections
+        .iter()
+        .find(|(n, _)| n == "check")
+        .and_then(|(_, p)| p.iter().find(|(k, _)| k == "max_remote_mb"))
+    {
+        None => invar_falsify::resolver::MAX_REMOTE_BYTES,
+        Some((_, v)) => match v.trim().parse::<usize>() {
+            Ok(mb)
+                if mb >= 1 && mb * 1_000_000 <= invar_falsify::resolver::HARD_MAX_REMOTE_BYTES =>
+            {
+                mb * 1_000_000
+            }
+            _ => {
+                eprintln!(
+                    "ERROR (not a verdict): [check] max_remote_mb must be a whole number from 1 to {}",
+                    invar_falsify::resolver::HARD_MAX_REMOTE_BYTES / 1_000_000
+                );
+                return Ok(3);
+            }
+        },
+    };
+    let curl = CurlTransport {
+        max_bytes,
+        ..CurlTransport::default()
+    };
     let resolver = Resolver {
         base_dir,
         allow_remote: args.ci,
@@ -367,7 +402,11 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
         // Live transport only under --ci: curl as an argv subprocess (the
         // zero-dependency build has no HTTPS client). Any fetch failure is an
         // ERROR (exit 3), never a verdict.
-        transport: if args.ci { Some(&curl as &dyn Transport) } else { None },
+        transport: if args.ci {
+            Some(&curl as &dyn Transport)
+        } else {
+            None
+        },
     };
     let outcomes = match evaluate(&sections, &resolver) {
         Ok(o) => o,
@@ -392,7 +431,11 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
             violations += 1;
             println!("  [VIOLATED] {} ({}): {:?}", o.id, o.kind, o.residue);
             for w in &o.witnesses {
-                println!("      {}{}", w.residue, witness_text(w, &o.kind, |x| x.to_string()));
+                println!(
+                    "      {}{}",
+                    w.residue,
+                    witness_text(w, &o.kind, |x| x.to_string())
+                );
             }
             summaries.push(format!("{}:{}=VIOLATED", o.id, o.kind));
         }
@@ -408,7 +451,10 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
         println!("result: ALL {} contract(s) hold", outcomes.len());
         0
     } else {
-        println!("result: {violations} of {} contract(s) VIOLATED", outcomes.len());
+        println!(
+            "result: {violations} of {} contract(s) VIOLATED",
+            outcomes.len()
+        );
         1
     };
 
@@ -427,7 +473,11 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
                 return Ok(3);
             }
         };
-        let kind = if violations == 0 { "all_hold" } else { "violations" };
+        let kind = if violations == 0 {
+            "all_hold"
+        } else {
+            "violations"
+        };
         if let Err(e) = ledger.append_now(kind, "invar_check", &summaries.join("; ")) {
             eprintln!("ERROR (not a verdict): appending to ledger: {e}");
             return Ok(3);
@@ -490,8 +540,8 @@ fn cmd_audit(args: AuditArgs) -> Result<i32> {
     if !Path::new(&args.ledger).exists() {
         anyhow::bail!("ledger file does not exist: {}", args.ledger);
     }
-    let ledger = Ledger::open(&args.ledger)
-        .with_context(|| format!("opening ledger {}", args.ledger))?;
+    let ledger =
+        Ledger::open(&args.ledger).with_context(|| format!("opening ledger {}", args.ledger))?;
     let count = match ledger.verify() {
         Ok(c) => c,
         Err(e) => {
@@ -499,10 +549,15 @@ fn cmd_audit(args: AuditArgs) -> Result<i32> {
             return Ok(2);
         }
     };
-    let mode = ledger.journal_mode().unwrap_or_else(|_| "unknown".to_string());
+    let mode = ledger
+        .journal_mode()
+        .unwrap_or_else(|_| "unknown".to_string());
     let nodes = ledger.replay_as_of(i64::MAX, i64::MAX)?;
     println!("INVAR audit");
-    println!("  ledger        : {} ({count} node(s) verified, journal_mode={mode})", args.ledger);
+    println!(
+        "  ledger        : {} ({count} node(s) verified, journal_mode={mode})",
+        args.ledger
+    );
     for n in &nodes {
         println!(
             "  - id={} kind={} subject={} t_v={} t_r={}",
@@ -520,8 +575,8 @@ fn cmd_replay(args: ReplayArgs) -> Result<i32> {
     if !Path::new(&args.ledger).exists() {
         anyhow::bail!("ledger file does not exist: {}", args.ledger);
     }
-    let ledger = Ledger::open(&args.ledger)
-        .with_context(|| format!("opening ledger {}", args.ledger))?;
+    let ledger =
+        Ledger::open(&args.ledger).with_context(|| format!("opening ledger {}", args.ledger))?;
     let tv = args.as_of_tv.unwrap_or(i64::MAX);
     let nodes = ledger
         .replay_as_of(args.as_of_tr, tv)

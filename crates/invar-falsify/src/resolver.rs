@@ -30,7 +30,10 @@ pub struct RemoteRef {
 
 impl RemoteRef {
     pub fn canonical(&self) -> String {
-        format!("github:{}/{}@{}:{}", self.owner, self.repo, self.git_ref, self.path)
+        format!(
+            "github:{}/{}@{}:{}",
+            self.owner, self.repo, self.git_ref, self.path
+        )
     }
 }
 
@@ -56,8 +59,7 @@ pub enum ResolveError {
 
 fn ok_name(s: &str) -> bool {
     !s.is_empty()
-        && s
-            .chars()
+        && s.chars()
             .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '.' || c == '-')
 }
 
@@ -65,8 +67,7 @@ fn ok_path_like(s: &str) -> bool {
     !s.is_empty()
         && !s.starts_with('/')
         && s.split('/').all(|seg| !seg.is_empty() && seg != "..")
-        && s
-            .chars()
+        && s.chars()
             .all(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | '.' | '-' | '/'))
 }
 
@@ -152,8 +153,12 @@ pub trait Transport {
     fn get(&self, req: &FetchRequest) -> Result<Vec<u8>, String>;
 }
 
-/// Largest remote artifact accepted (matches `invar init`'s file cap).
-pub const MAX_REMOTE_BYTES: usize = 1_000_000;
+/// Default largest remote artifact accepted (5 MB; alpha.4 raised it from
+/// 1 MB after a real 1.8 MB OpenAPI spec). Override per manifest with
+/// `[check] max_remote_mb`, up to `HARD_MAX_REMOTE_BYTES`.
+pub const MAX_REMOTE_BYTES: usize = 5_000_000;
+/// Ceiling no manifest can raise (bounds memory and fetch time).
+pub const HARD_MAX_REMOTE_BYTES: usize = 50_000_000;
 
 /// Live transport through the `curl` binary (founder decision 2026-10-06:
 /// relax "no shell-out" rather than "zero dependencies"). It is an argv
@@ -164,16 +169,26 @@ pub const MAX_REMOTE_BYTES: usize = 1_000_000;
 /// response is an error, never a body.
 pub struct CurlTransport {
     pub program: String,
+    pub max_bytes: usize,
 }
 
 impl Default for CurlTransport {
     fn default() -> Self {
-        CurlTransport { program: "curl".into() }
+        CurlTransport {
+            program: "curl".into(),
+            max_bytes: MAX_REMOTE_BYTES,
+        }
     }
 }
 
-/// The exact argv passed to curl for a request (no headers, so no token).
+/// The exact argv passed to curl for a request (no headers, so no token),
+/// at the default size limit.
 pub fn curl_args(req: &FetchRequest) -> Vec<String> {
+    curl_args_max(req, MAX_REMOTE_BYTES)
+}
+
+/// As `curl_args`, with an explicit size limit.
+pub fn curl_args_max(req: &FetchRequest, max_bytes: usize) -> Vec<String> {
     vec![
         "--silent".into(),
         "--show-error".into(),
@@ -186,7 +201,7 @@ pub fn curl_args(req: &FetchRequest) -> Vec<String> {
         "--max-time".into(),
         "30".into(),
         "--max-filesize".into(),
-        MAX_REMOTE_BYTES.to_string(),
+        max_bytes.to_string(),
         "-H".into(),
         "@-".into(),
         req.url.clone(),
@@ -198,7 +213,7 @@ impl Transport for CurlTransport {
         use std::io::Write;
         use std::process::{Command, Stdio};
         let mut child = Command::new(&self.program)
-            .args(curl_args(req))
+            .args(curl_args_max(req, self.max_bytes))
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
@@ -220,10 +235,13 @@ impl Transport for CurlTransport {
             .map_err(|e| format!("waiting for curl: {e}"))?;
         if !out.status.success() {
             let msg = String::from_utf8_lossy(&out.stderr).trim().to_string();
-            return Err(format!("curl exited {}: {msg}", out.status.code().unwrap_or(-1)));
+            return Err(format!(
+                "curl exited {}: {msg}",
+                out.status.code().unwrap_or(-1)
+            ));
         }
-        if out.stdout.len() > MAX_REMOTE_BYTES {
-            return Err(format!("response exceeds {MAX_REMOTE_BYTES} bytes"));
+        if out.stdout.len() > self.max_bytes {
+            return Err(format!("response exceeds {} bytes", self.max_bytes));
         }
         Ok(out.stdout)
     }
@@ -237,7 +255,8 @@ pub struct MockTransport {
 
 impl MockTransport {
     pub fn with(mut self, url: &str, body: &str) -> Self {
-        self.bodies.insert(url.to_string(), body.as_bytes().to_vec());
+        self.bodies
+            .insert(url.to_string(), body.as_bytes().to_vec());
         self
     }
 }
@@ -289,12 +308,19 @@ impl<'a> Resolver<'a> {
     pub fn resolve(&self, spec: &str) -> Result<Resolved, ResolveError> {
         if !is_remote(spec) {
             let p = Path::new(spec);
-            let full = if p.is_absolute() { p.to_path_buf() } else { self.base_dir.join(p) };
+            let full = if p.is_absolute() {
+                p.to_path_buf()
+            } else {
+                self.base_dir.join(p)
+            };
             let text = std::fs::read_to_string(&full).map_err(|e| ResolveError::Io {
                 path: full.display().to_string(),
                 reason: e.to_string(),
             })?;
-            return Ok(Resolved { text, provenance: None });
+            return Ok(Resolved {
+                text,
+                provenance: None,
+            });
         }
         if !self.allow_remote {
             return Err(ResolveError::RemoteRequiresCi(spec.to_string()));
@@ -311,7 +337,8 @@ impl<'a> Resolver<'a> {
         })?;
         let blake3_hex = blake3::hash(&bytes).to_hex().to_string();
         let n = bytes.len();
-        let text = String::from_utf8(bytes).map_err(|_| ResolveError::NotUtf8(reference.clone()))?;
+        let text =
+            String::from_utf8(bytes).map_err(|_| ResolveError::NotUtf8(reference.clone()))?;
         Ok(Resolved {
             text,
             provenance: Some(Fetched {

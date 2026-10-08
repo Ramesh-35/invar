@@ -78,13 +78,110 @@ fn spec_type(p: &Value) -> Option<String> {
 /// `None` (the caller reports an error, never an empty surface).
 pub fn code_fields(path: &str, text: &str) -> Option<Fields> {
     let ext = path.rsplit('.').next().unwrap_or("");
-    Some(match ext {
+    let mut f = match ext {
         "go" => go_fields(text),
         "py" => py_fields(text),
         "ts" | "tsx" => ts_fields(text),
+        "js" | "jsx" | "mjs" | "cjs" => Fields::new(),
         "rs" => rs_fields(text),
         _ => return None,
-    })
+    };
+    // Payloads assembled at runtime (alpha.4): dict/map/object literal keys
+    // and keyed assignments, for Python, JS/TS and Go. Untyped.
+    if matches!(
+        ext,
+        "py" | "go" | "ts" | "tsx" | "js" | "jsx" | "mjs" | "cjs"
+    ) {
+        for key in assembled_keys(text, ext) {
+            f.entry(key).or_insert(None);
+        }
+    }
+    Some(f)
+}
+
+/// Keys of payloads built at runtime: `"key": value` in dict/map/object
+/// literals, `x["key"] = value`, and for JS/TS also `key: value` object
+/// members and `x.key = value`. Comments are not stripped (heuristic).
+fn assembled_keys(text: &str, ext: &str) -> Vec<String> {
+    let js = matches!(ext, "js" | "jsx" | "mjs" | "cjs" | "ts" | "tsx");
+    let mut out = Vec::new();
+    for line in text.lines() {
+        let b = line.as_bytes();
+        let mut i = 0;
+        while i < b.len() {
+            let c = b[i];
+            if c == b'"' || c == b'\'' {
+                if let Some(len) = line[i + 1..].find(c as char) {
+                    let key = &line[i + 1..i + 1 + len];
+                    let after = line[i + 2 + len..].trim_start();
+                    let is_dict_key = after.starts_with(':') && !after.starts_with("::");
+                    let is_assign = i > 0
+                        && b[i - 1] == b'['
+                        && after.starts_with(']')
+                        && after[1..].trim_start().starts_with('=')
+                        && !after[1..].trim_start().starts_with("==");
+                    if (is_dict_key || is_assign) && is_field_like(key) {
+                        out.push(key.to_string());
+                    }
+                    i += len + 2;
+                    continue;
+                }
+            }
+            i += 1;
+        }
+        if js {
+            let t = line.trim();
+            if let Some(id) = ident_at(t, 0) {
+                let rest = t[id.len()..].trim_start();
+                if rest.starts_with(':') && !rest.starts_with("::") {
+                    out.push(id.to_string());
+                }
+            }
+            // { key: value, other: value } members after `{` or `,`
+            for (pos, _) in line.match_indices(['{', ',']) {
+                let rest = &line[pos + 1..];
+                let off = rest.len() - rest.trim_start().len();
+                if let Some(id) = ident_at(line, pos + 1 + off) {
+                    let after = line[pos + 1 + off + id.len()..].trim_start();
+                    if after.starts_with(':') && !after.starts_with("::") {
+                        out.push(id.to_string());
+                    }
+                }
+            }
+            // x.key = value
+            for (pos, _) in line.match_indices('.') {
+                if pos > 0 && is_ident_byte(b[pos - 1]) {
+                    if let Some(id) = ident_at(line, pos + 1) {
+                        let after = line[pos + 1 + id.len()..].trim_start();
+                        if after.starts_with('=')
+                            && !after.starts_with("==")
+                            && !after.starts_with("=>")
+                        {
+                            out.push(id.to_string());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    out
+}
+
+fn is_field_like(s: &str) -> bool {
+    !s.is_empty()
+        && s.len() <= 64
+        && s.bytes()
+            .all(|b| is_ident_byte(b) || b == b'-' || b == b'.')
+        && !s.bytes().next().map(|b| b.is_ascii_digit()).unwrap_or(true)
+}
+
+/// Naming-form key: case and `_`/`-` separators removed, so `is_food`,
+/// `isFood`, `IsFood` and `is-food` match (alpha.4).
+pub fn name_key(s: &str) -> String {
+    s.chars()
+        .filter(|c| *c != '_' && *c != '-')
+        .flat_map(|c| c.to_lowercase())
+        .collect()
 }
 
 /// Text of the first `key:"value"` in a Go struct tag.

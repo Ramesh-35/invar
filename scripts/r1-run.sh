@@ -19,7 +19,10 @@ set -uo pipefail
 invar="${1:-invar}"
 root="$(cd "$(dirname "$0")/.." && pwd)"
 get() { sed -n "s/^$2 *= *\"\(.*\)\".*/\1/p" "$1" | head -n1; }
-norm() { tr ',' '\n' | sed 's/^ *//; s/ *$//' | sed '/^$/d' | sort -u; }
+# Names compare by naming form: case and `_`/`-` ignored (is_food == isFood),
+# matching the engine from alpha.4. Applied to every batch; earlier exact-name
+# scores are kept in docs/falsification/*.tsv.
+norm() { tr ',' '\n' | sed 's/^ *//; s/ *$//' | sed '/^$/d' | tr '[:upper:]' '[:lower:]' | tr -d '_-' | sort -u; }
 
 printf 'case\treal\texpected\tinvar_residue\toutcome\textra\toasdiff\topenapi_diff\tbuf_breaking\tschema_registry\tsemgrep\tai_reviewer\n'
 for dir in "$root"/corpus-real/*/; do

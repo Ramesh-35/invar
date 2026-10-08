@@ -12,7 +12,7 @@ use std::collections::BTreeMap;
 
 use crate::invariant::{check_contract, payload_read_sites, ContractInput, Step};
 use crate::resolver::{is_remote, Fetched, Resolver};
-use crate::surface::{broad_reads, changed_fields, code_fields, spec_fields, Fields};
+use crate::surface::{broad_reads, changed_fields, code_fields, name_key, spec_fields, Fields};
 
 pub type Sections = Vec<(String, Vec<(String, String)>)>;
 
@@ -36,6 +36,9 @@ pub struct Witness {
     pub missing_from: Option<String>,
     /// For a retyped field: (old type, new type, where).
     pub type_change: Option<(String, String, String)>,
+    /// Forms the consumer reads this field under when they differ from the
+    /// producer's name only by case or `_`/`-` (e.g. `isFood` for `is_food`).
+    pub read_as: Vec<String>,
 }
 
 /// Short display name for an artifact: the path of a remote reference, or the
@@ -67,11 +70,12 @@ fn read_witnesses(
                 .collect(),
             missing_from: Some(missing_from.to_string()),
             type_change: None,
+            read_as: Vec::new(),
         })
         .collect()
 }
 
-const CODE_EXTS: [&str; 5] = ["go", "py", "ts", "tsx", "rs"];
+const CODE_EXTS: [&str; 9] = ["go", "py", "ts", "tsx", "rs", "js", "jsx", "mjs", "cjs"];
 
 fn is_code(spec: &str) -> bool {
     let ext = artifact_name(spec)
@@ -203,16 +207,24 @@ fn schema_outcome(
     let mut residue = Vec::new();
     let mut witnesses = Vec::new();
     for (name, (tc, where_)) in &changed {
-        let sites: Vec<String> = reads
-            .iter()
-            .filter(|(f, _)| f == name)
-            .map(|(_, l)| format!("{cname}:{l}"))
-            .collect();
-        if sites.is_empty() {
+        let key = name_key(name);
+        let matched: Vec<&(String, usize)> =
+            reads.iter().filter(|(f, _)| name_key(f) == key).collect();
+        if matched.is_empty() {
             continue;
         }
-        let mut dedup = sites;
+        let mut dedup: Vec<String> = matched
+            .iter()
+            .map(|(_, l)| format!("{cname}:{l}"))
+            .collect();
         dedup.dedup();
+        let mut read_as: Vec<String> = matched
+            .iter()
+            .map(|(f, _)| f.clone())
+            .filter(|f| f != name)
+            .collect();
+        read_as.sort();
+        read_as.dedup();
         residue.push(name.clone());
         witnesses.push(Witness {
             residue: name.clone(),
@@ -223,6 +235,7 @@ fn schema_outcome(
                 None
             },
             type_change: tc.clone().map(|(a, b2)| (a, b2, where_.clone())),
+            read_as,
         });
     }
     Ok((residue, witnesses))
@@ -356,6 +369,10 @@ pub fn witness_text(w: &Witness, kind: &str, code: fn(&str) -> String) -> String
     if let Some(m) = &w.missing_from {
         s.push_str(&format!(" · not in {}", code(m)));
     }
+    if !w.read_as.is_empty() {
+        let forms: Vec<String> = w.read_as.iter().map(|x| code(x)).collect();
+        s.push_str(&format!(" · naming differs, read as {}", forms.join(", ")));
+    }
     if let Some((from, to, place)) = &w.type_change {
         s.push_str(&format!(
             " · type {} -> {} in {}",
@@ -487,6 +504,7 @@ pub fn evaluate(sections: &Sections, resolver: &Resolver) -> Result<Vec<Contract
                         sites: lines.iter().map(|l| format!("{name}:{l}")).collect(),
                         missing_from: None,
                         type_change: None,
+                        read_as: Vec::new(),
                     })
                     .collect();
                 r
