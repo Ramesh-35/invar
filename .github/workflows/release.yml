@@ -17,6 +17,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Tag must match the crate version
+        run: |
+          v=$(grep -m1 '^version' crates/invar-falsify/Cargo.toml | cut -d'"' -f2)
+          if [ "$GITHUB_REF_NAME" != "v$v" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match crate version v$v"
+            exit 1
+          fi
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo test --workspace --locked
 
