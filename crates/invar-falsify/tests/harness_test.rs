@@ -970,3 +970,27 @@ consumer = "client.js"
     let _ = std::fs::remove_dir_all(&dir);
 }
 
+// ---------------------------------------------------------------------------
+// Test 25: a producer that is not a JSON object is an ERROR, never a verdict.
+// Before this, a YAML producer read as "defines nothing": HOLDS when the
+// consumer had no recognised reads, invented residue when it had some.
+// ---------------------------------------------------------------------------
+#[test]
+fn non_json_producer_is_an_error_not_a_verdict() {
+    let dir = std::env::temp_dir().join(format!("invar-nonjson-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    std::fs::write(dir.join("spec.yaml"), "openapi: 3.0.0\nproperties:\n  a: {}\n").unwrap();
+    std::fs::write(dir.join("list.json"), "[1, 2]").unwrap();
+    std::fs::write(dir.join("c.js"), "f(payload.a)\n").unwrap();
+    for (kind, producer) in [("schema", "spec.yaml"), ("event", "spec.yaml"), ("schema", "list.json")] {
+        let cfg = format!(
+            "[[invariant]]\nkind = \"{kind}\"\nid = \"x\"\nproducer = \"{producer}\"\nconsumer = \"c.js\"\n"
+        );
+        let sections = parse_sections("invar.toml", &cfg).unwrap();
+        let err = evaluate(&sections, &Resolver::local(&dir)).expect_err("must not be a verdict");
+        assert!(format!("{err:#}").contains("is not a JSON object"), "{kind}/{producer}: {err:#}");
+    }
+    let _ = std::fs::remove_dir_all(&dir);
+}
+

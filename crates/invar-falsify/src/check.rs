@@ -65,6 +65,19 @@ fn read_witnesses(
         .collect()
 }
 
+/// Schema and event producers must be JSON objects. Anything else (YAML,
+/// protobuf, a typo) is an evaluation ERROR: reading it as "defines nothing"
+/// would report HOLDS or invent residue (found by R1, 2026-10-08).
+fn require_json_object(id: &str, spec: &str, text: &str) -> Result<()> {
+    match serde_json::from_str::<serde_json::Value>(text) {
+        Ok(v) if v.is_object() => Ok(()),
+        _ => bail!(
+            "{id}: producer {} is not a JSON object (YAML and other formats are not supported yet)",
+            artifact_name(spec)
+        ),
+    }
+}
+
 /// 1-based trace lines (comments and blanks counted, as in an editor) where
 /// `step` occurs.
 fn step_lines(trace: &str, step: &Step) -> Vec<usize> {
@@ -283,6 +296,7 @@ pub fn evaluate(sections: &Sections, resolver: &Resolver) -> Result<Vec<Contract
                 if let Some(ptr) = &ptr {
                     pr = select_pointer(&pr, ptr).map_err(|e| anyhow!("{id}: {e}"))?;
                 }
+                require_json_object(&id, &p, &pr)?;
                 let cr = fetch(resolver, &c, &mut prov)?;
                 let r = check_contract(&ContractInput::Schema {
                     producer_schema: &pr,
@@ -300,6 +314,7 @@ pub fn evaluate(sections: &Sections, resolver: &Resolver) -> Result<Vec<Contract
                 let p = getk(b, "producer").context("event invariant needs producer")?;
                 let c = getk(b, "consumer").context("event invariant needs consumer")?;
                 let pr = fetch(resolver, &p, &mut prov)?;
+                require_json_object(&id, &p, &pr)?;
                 let cr = fetch(resolver, &c, &mut prov)?;
                 let r = check_contract(&ContractInput::Event {
                     producer_payload: &pr,
