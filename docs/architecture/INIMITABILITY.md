@@ -55,7 +55,7 @@ be tested against real incidents, not an established fact.
 
 | Obligation | Status | Evidence / gap |
 |---|---|---|
-| On violation, post a residue table; refresh the same comment, never spam | PARTIAL | implemented (`comment.sh`, marker comment, PATCH-or-POST) and tested against a stub `gh`; has never run on a real pull request (every runner run used `post_comment: false` on push) |
+| On violation, post a residue table; refresh the same comment, never spam | HOLDS | live on `invar-action-smoke` PR #1, 2026-10-07/08: one comment posted, then refreshed to ALL HOLD and back to VIOLATED, never duplicated (STATUS.md) |
 | Ids and residue always escaped inline code (no mentions, links, HTML; pipes escaped) | HOLDS | `md_code`, test 23 |
 | Errors never shown as verdicts | HOLDS | exit 3, runner run 37590676958 |
 

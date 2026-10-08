@@ -359,3 +359,34 @@ install log names the tag; the assertion's `--version` check cannot tell
 the two releases apart (both binaries report `0.1.0-alpha`). The new failure
 message itself was not exercised (the download succeeded).
 
+## PR comment path, live (2026-10-07/08)
+
+`invar-action-smoke` PR #1 (branch `invar-pr-test`), workflow
+`invar (pull request)` using `Ramesh-35/invar-platform@v0.1.0-alpha.1` with
+`post_comment: 'true'`, `fail_on_violation: 'true'` and the workflow's own
+token (`pull-requests: write`). Contract: producer schema pinned to
+REAL-INCIDENT-001's P1, consumer `pr/client.js` on the PR branch.
+
+| Push | Commit | Run | Check | Comment 6036978332 |
+|---|---|---|---|---|
+| 1, reads `amount_cents` | `9dfe6ab` | 37614304630 | red | posted, `VIOLATED (1 of 1)` (2026-10-07T11:29:49Z) |
+| 2, reads `amount_micro_units` | `29d4c19` | 37740968482 | green | same comment updated, `ALL HOLD (1 contract(s))` (2026-10-08T07:03:18Z) |
+| 3, reads `amount_cents` again | `fa5d0bd` | 37741819357 | red | same comment updated, `VIOLATED (1 of 1)` (2026-10-08T07:12:17Z) |
+
+One comment throughout: created once, refreshed in place, never duplicated,
+and a stale VIOLATED comment did not outlive the fix. The red checks are the
+gate failing on a violation, by design (`At least one cross-repository
+contract is VIOLATED`).
+
+Also observed on a runner for the first time: the install script's new
+failure message, `not downloaded: release not found`, then a source build.
+The workflow token cannot read `invar-platform`'s private releases; GitHub
+reports that as "release not found", so the message is accurate but does not
+name the access cause. Finding: the Action uses one token both to download
+the binary and to comment, which forces either a broadened token or a source
+build in private consumers. A separate download-token input is the fix.
+
+Not verified: rendering was checked by heading text; the table's appearance
+on the PR page was not inspected in this session. This run used the
+`alpha.1` binary, so its comments carry no line locations.
+
