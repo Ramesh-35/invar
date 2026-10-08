@@ -1,0 +1,28 @@
+# One real historical cross-repository break. Copy this folder, fill every
+# field from the public source, never from what INVAR reports.
+[case]
+id = "r1-NNN"
+title = ""
+# Public evidence that a consumer actually broke: issue, PR, postmortem, commit.
+source = ""
+source_kind = ""        # issue | pr | postmortem | commit
+admitted = ""           # YYYY-MM-DD
+# "true" only for breaks that happened in the wild. Constructed cases never
+# count toward the 30.
+real = "true"
+break_kind = ""         # field_removed | field_renamed | type_changed | enum_value_removed | other
+
+[expected]
+# What truly broke, from the source (comma-separated field names), or "none"
+# for a control case where nothing broke.
+residue = ""
+evidence = ""
+
+[baseline]
+# Filled by running each tool on the same pinned commits. Never inferred.
+# caught | missed | not_applicable | not_run
+oasdiff = "not_run"
+buf_breaking = "not_run"
+schema_registry = "not_run"
+semgrep = "not_run"
+ai_reviewer = "not_run"

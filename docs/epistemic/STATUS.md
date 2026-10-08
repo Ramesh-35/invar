@@ -390,3 +390,19 @@ Not verified: rendering was checked by heading text; the table's appearance
 on the PR page was not inspected in this session. This run used the
 `alpha.1` binary, so its comments carry no line locations.
 
+
+
+## Roadmap re-grounded and locked (2026-10-08)
+
+The founder adopted the external research report "INVAR: What We Are
+Missing" (October 2026) as binding. Order and "Do not build" list:
+docs/architecture/ROADMAP.md. CUDA thesis retired. New labels:
+`SOURCED (vendor study, not about contracts)` for AI-defect figures;
+`UNVERIFIED` for incident-share figures not backed by Azure HotOS '19 or
+SOSP '21. Report citations were not re-verified in this repository and are
+labelled SOURCED (external report) until checked.
+
+Critical path is R1, the real-tier corpus. Known limit stated before it runs:
+the consumer side of schema and event contracts recognizes only
+`payload.<field>` reads. Real consumers rarely use that exact name, so R1 is
+expected to expose misses; they will be recorded, not hidden.

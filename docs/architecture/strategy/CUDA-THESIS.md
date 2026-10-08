@@ -1,4 +1,10 @@
-# The "CUDA Thesis" (Strategic Positioning)
+# The "CUDA Thesis" (Strategic Positioning): RETIRED 2026-10-08
+
+> **RETIRED.** Founder directive 2026-10-08, on the October 2026 research
+> report: CUDA's moat came from hardware margins, closed tuned libraries,
+> compatibility guarantees and an installed base. A contract checker over open
+> formats has none of these. The thesis does not hold and must not be cited.
+> Kept below unchanged as history. Current strategy: docs/architecture/ROADMAP.md.
 
 > **Classification: `[STRATEGIC HYPOTHESIS]`.** This entire document is a
 > positioning bet about *how INVAR could matter if the category residue is real*.

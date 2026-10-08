@@ -1,0 +1,21 @@
+# Harness self-test. REAL-INCIDENT-001 is a constructed demo, so it does not
+# count toward the 30 real cases.
+[case]
+id = "r1-000"
+title = "REAL-INCIDENT-001: producer renamed amount_cents to amount_micro_units"
+source = "docs/epistemic/REAL-INCIDENT-001.md"
+source_kind = "commit"
+admitted = "2026-10-08"
+real = "false"
+break_kind = "field_renamed"
+
+[expected]
+residue = "amount_cents"
+evidence = "consumer client.js reads payload.amount_cents; producer schema properties no longer define it"
+
+[baseline]
+oasdiff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_run"
+semgrep = "not_run"
+ai_reviewer = "not_run"

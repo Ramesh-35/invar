@@ -1,0 +1,6 @@
+# Pin both sides to the commits named in case.toml.
+[[invariant]]
+kind = "schema"
+id = "r1-NNN"
+producer = "github:OWNER/REPO@COMMIT:PATH"
+consumer = "github:OWNER/REPO@COMMIT:PATH"

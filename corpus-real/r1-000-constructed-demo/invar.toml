@@ -1,0 +1,5 @@
+[[invariant]]
+kind = "schema"
+id = "r1-000"
+producer = "github:Ramesh-35/invar-demo-producer@7c0855709970092b4f913093f0b57a70923e0b1a:schema.json"
+consumer = "github:Ramesh-35/invar-demo-consumer@fe73889bf250275711339d065ecc37f21879fc72:client.js"
