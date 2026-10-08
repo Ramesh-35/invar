@@ -1,0 +1,21 @@
+[case]
+id = "r1-003"
+title = "Docker API 1.44 omitted ImageSummary.VirtualSize; Checkmk inventory raised KeyError"
+source = "https://checkmk.com/werk/16340"
+source_kind = "postmortem"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "field_removed"
+
+[expected]
+residue = "VirtualSize"
+evidence = "Werk 16340: docker_node_images: KeyError: 'VirtualSize'. Note: swagger still defined VirtualSize at the breaking commit"
+
+[baseline]
+oasdiff = "not_run"          # release download blocked in this environment
+openapi_diff = "missed"
+openapi_diff_note = "spec changed (description, example) but openapi-diff 0.24.1 found no breaking difference; the property was still defined"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

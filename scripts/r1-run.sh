@@ -21,7 +21,7 @@ root="$(cd "$(dirname "$0")/.." && pwd)"
 get() { sed -n "s/^$2 *= *\"\(.*\)\".*/\1/p" "$1" | head -n1; }
 norm() { tr ',' '\n' | sed 's/^ *//; s/ *$//' | sed '/^$/d' | sort -u; }
 
-printf 'case\treal\texpected\tinvar_residue\toutcome\textra\toasdiff\tbuf_breaking\tschema_registry\tsemgrep\tai_reviewer\n'
+printf 'case\treal\texpected\tinvar_residue\toutcome\textra\toasdiff\topenapi_diff\tbuf_breaking\tschema_registry\tsemgrep\tai_reviewer\n'
 for dir in "$root"/corpus-real/*/; do
   name="$(basename "$dir")"
   [ "$name" = "_template" ] && continue
@@ -50,7 +50,7 @@ for dir in "$root"/corpus-real/*/; do
   fi
 
   printf '%s\t%s\t%s\t%s\t%s\t%s' "$name" "${real:-?}" "$expected" "${found:--}" "$outcome" "${extra:--}"
-  for t in oasdiff buf_breaking schema_registry semgrep ai_reviewer; do
+  for t in oasdiff openapi_diff buf_breaking schema_registry semgrep ai_reviewer; do
     printf '\t%s' "$(get "$case_file" "$t")"
   done
   printf '\n'

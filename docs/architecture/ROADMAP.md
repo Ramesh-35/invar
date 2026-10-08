@@ -52,7 +52,7 @@ checked against the primary source. The two quantified anchors it relies on:
 
 | # | Phase | Status |
 |---|---|---|
-| R1 | Real-tier falsification corpus, head-to-head vs baselines | IN PROGRESS: spec and harness (docs/falsification/R1-CORPUS.md) |
+| R1 | Real-tier falsification corpus, head-to-head vs baselines | IN PROGRESS: 5 breaks + 1 control of 30; INVAR 0/5 (docs/falsification/R1-CORPUS.md) |
 | R2 | Consumer-only contract lockfile `invar.lock` | TARGET |
 | R3 | Producer-side blast radius from consumers' lockfiles | TARGET |
 | R4 | Release and Action supply-chain hardening | TARGET |

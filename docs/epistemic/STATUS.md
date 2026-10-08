@@ -406,3 +406,35 @@ Critical path is R1, the real-tier corpus. Known limit stated before it runs:
 the consumer side of schema and event contracts recognizes only
 `payload.<field>` reads. Real consumers rarely use that exact name, so R1 is
 expected to expose misses; they will be recorded, not hidden.
+
+## Release v0.1.0-alpha.2 (2026-10-08)
+
+CI run 37742923843 on `fe0af65`: green. Release run 37743250048 on annotated
+tag `v0.1.0-alpha.2` (`fe0af65`): green, published as a Pre-release. The new
+"tag must match the crate version" step passed (crate `0.1.0-alpha.2`). The
+version is now derived from Cargo.toml in the CLI and run reports.
+
+| Asset | SHA-256 (GitHub asset digest) | Size |
+|---|---|---|
+| `invar-v0.1.0-alpha.2-x86_64-unknown-linux-musl.tar.gz` | `19d0019ab32c5c43e5783e1322a412f29869548822650b1b06926a49940fa83d` | 1.76 MiB |
+| `invar-v0.1.0-alpha.2-x86_64-apple-darwin.tar.gz` | `d0f971752309ec1ddd4ea35255bb75cd3958ed17c0f008685c7082f007e62f59` | 1.61 MiB |
+| `invar-v0.1.0-alpha.2-aarch64-apple-darwin.tar.gz` | `01e8a94740b1b94703de16a2822c91b3170cad1810414b35bf035cecdfdc68f6` | 1.50 MiB |
+
+Contents: witness locations (`0bcc0e0`). Not yet consumed by any run outside
+this repository. Evidence source: output pasted by the founder.
+
+## R1 batch 1 (2026-10-08)
+
+Five real cross-repository breaks and one control, sourced from public git
+history and issue pages and re-verified here (docs/falsification/R1-CORPUS.md,
+raw results in docs/falsification/r1-batch1-results.tsv). INVAR caught 0 of
+5 (1 MISSED, 4 ERROR because the producers publish YAML); openapi-diff 0.24.1
+caught 0 of 5 outright (1 partial, 3 missed, 1 error). In 3 of 5 cases the
+producer's published spec still declared the removed fields at the breaking
+commit, so no spec-reading tool could catch them. None of the five consumers
+reads fields as `payload.<field>`. A fail-open defect (non-JSON producer read
+as "defines nothing") was found and fixed. Five cases are not enough to apply
+the locked thresholds (they apply at 30), and selection bias is likely; the
+direction of the evidence is nonetheless negative for INVAR as built.
+Adequacy unchanged: D PARTIAL, overall NOT ESTABLISHED.
+

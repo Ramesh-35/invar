@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-005"
+producer = "github:cometbft/cometbft@c5c2aafad22abadad697b45685af7736ca722277:rpc/openapi/openapi.yaml"
+pointer = "/components/schemas/BlockResultsResponse/properties/result"
+consumer = "github:cosmos/cosmjs@fcd79e92c5b7e71b6217412603758d35552345c3:packages/tendermint-rpc/src/comet38/adaptor/responses.ts"

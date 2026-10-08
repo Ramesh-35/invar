@@ -1,0 +1,21 @@
+[case]
+id = "r1-005"
+title = "CometBFT 0.38 replaced begin/end_block_events with finalize_block_events; cosmjs returned empty events"
+source = "https://github.com/cosmos/cosmjs/pull/1612"
+source_kind = "pr"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "field_renamed"
+
+[expected]
+residue = "begin_block_events, end_block_events"
+evidence = "swap outputs appear in FinalizeBlockEvents instead of EndBlockEvents now. Caveats: silent failure (|| []); consumer written after the change; openapi.yaml still listed the old fields at the breaking commit"
+
+[baseline]
+oasdiff = "not_run"          # release download blocked in this environment
+openapi_diff = "missed"
+openapi_diff_note = "rpc/openapi/openapi.yaml identical at pre and breaking commits; nothing for any spec diff to find"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

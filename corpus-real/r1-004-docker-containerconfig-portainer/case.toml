@@ -1,0 +1,21 @@
+[case]
+id = "r1-004"
+title = "Docker API 1.45 removed ImageInspect.ContainerConfig/Container; Portainer image details crashed"
+source = "https://github.com/portainer/portainer/issues/11504"
+source_kind = "issue"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "field_removed"
+
+[expected]
+residue = "ContainerConfig, Container"
+evidence = "Cannot read properties of undefined (reading 'Entrypoint') (portainer #12052). Note: swagger still defined both at the breaking commit"
+
+[baseline]
+oasdiff = "not_run"          # release download blocked in this environment
+openapi_diff = "missed"
+openapi_diff_note = "api/swagger.yaml identical at pre and breaking commits; nothing for any spec diff to find"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

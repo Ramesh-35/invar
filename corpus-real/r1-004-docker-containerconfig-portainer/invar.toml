@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-004"
+producer = "github:moby/moby@03cddc62f4bcd48fbc3a31dd94f2bf84e44840dd:api/swagger.yaml"
+pointer = "/definitions/ImageInspect"
+consumer = "github:portainer/portainer@d336a14e502316e09deabb34c558ff6dcf8f0c2c:app/docker/models/imageDetails.js"

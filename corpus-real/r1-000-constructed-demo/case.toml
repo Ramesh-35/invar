@@ -15,6 +15,7 @@ evidence = "consumer client.js reads payload.amount_cents; producer schema prope
 
 [baseline]
 oasdiff = "not_applicable"
+openapi_diff = "not_applicable"
 buf_breaking = "not_applicable"
 schema_registry = "not_run"
 semgrep = "not_run"

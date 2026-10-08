@@ -20,8 +20,10 @@ evidence = ""
 
 [baseline]
 # Filled by running each tool on the same pinned commits. Never inferred.
-# caught | missed | not_applicable | not_run
+# caught | partial | missed | error | not_applicable | not_run
+# (error = the tool could not evaluate; partial = flagged the change, not the broken field)
 oasdiff = "not_run"
+openapi_diff = "not_run"
 buf_breaking = "not_run"
 schema_registry = "not_run"
 semgrep = "not_run"
