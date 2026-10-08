@@ -24,5 +24,7 @@ pub mod ledger;
 pub mod manifest;
 pub mod provenance;
 pub mod reality;
+pub mod yaml;
 pub mod report;
 pub mod resolver;
+pub mod surface;

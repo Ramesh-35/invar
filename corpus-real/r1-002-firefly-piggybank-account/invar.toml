@@ -2,5 +2,6 @@
 kind = "schema"
 id = "r1-002"
 producer = "github:firefly-iii/api-docs@cd5afb12da5a6cb7804a3c697cc98019f895f97e:firefly-iii-6.2.0-v1.yaml"
+producer_base = "github:firefly-iii/api-docs@d24833713c20f38694fbb508bf33929936bacc43:firefly-iii-6.2.0-v1.yaml"
 pointer = "/components/schemas/PiggyBank"
 consumer = "github:dreautall/waterfly-iii@8aabb3109ba4c9d2cd3854fe90c9ae859fff5f67:lib/generated/swagger_fireflyiii_api/firefly_iii.models.swagger.g.dart"

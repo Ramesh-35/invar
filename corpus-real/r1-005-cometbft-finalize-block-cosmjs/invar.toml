@@ -2,5 +2,8 @@
 kind = "schema"
 id = "r1-005"
 producer = "github:cometbft/cometbft@c5c2aafad22abadad697b45685af7736ca722277:rpc/openapi/openapi.yaml"
+producer_base = "github:cometbft/cometbft@001cd50fc7430851d57cf074866446df36febd13:rpc/openapi/openapi.yaml"
+producer_code = "github:cometbft/cometbft@c5c2aafad22abadad697b45685af7736ca722277:rpc/core/types/responses.go"
+producer_code_base = "github:cometbft/cometbft@001cd50fc7430851d57cf074866446df36febd13:rpc/core/types/responses.go"
 pointer = "/components/schemas/BlockResultsResponse/properties/result"
 consumer = "github:cosmos/cosmjs@fcd79e92c5b7e71b6217412603758d35552345c3:packages/tendermint-rpc/src/comet38/adaptor/responses.ts"

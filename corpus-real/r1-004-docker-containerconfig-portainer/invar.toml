@@ -2,5 +2,8 @@
 kind = "schema"
 id = "r1-004"
 producer = "github:moby/moby@03cddc62f4bcd48fbc3a31dd94f2bf84e44840dd:api/swagger.yaml"
+producer_base = "github:moby/moby@40c681355e6f2dd754a4c2fdd8f54ec0ca2d8811:api/swagger.yaml"
+producer_code = "github:moby/moby@03cddc62f4bcd48fbc3a31dd94f2bf84e44840dd:api/types/types.go"
+producer_code_base = "github:moby/moby@40c681355e6f2dd754a4c2fdd8f54ec0ca2d8811:api/types/types.go"
 pointer = "/definitions/ImageInspect"
 consumer = "github:portainer/portainer@d336a14e502316e09deabb34c558ff6dcf8f0c2c:app/docker/models/imageDetails.js"

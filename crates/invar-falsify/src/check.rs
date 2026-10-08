@@ -8,8 +8,11 @@
 
 use anyhow::{anyhow, bail, Context, Result};
 
-use crate::invariant::{check_contract, payload_read_sites, select_pointer, ContractInput, Step};
+use std::collections::BTreeMap;
+
+use crate::invariant::{check_contract, payload_read_sites, ContractInput, Step};
 use crate::resolver::{is_remote, Fetched, Resolver};
+use crate::surface::{broad_reads, changed_fields, code_fields, spec_fields, Fields};
 
 pub type Sections = Vec<(String, Vec<(String, String)>)>;
 
@@ -31,6 +34,8 @@ pub struct Witness {
     pub residue: String,
     pub sites: Vec<String>,
     pub missing_from: Option<String>,
+    /// For a retyped field: (old type, new type, where).
+    pub type_change: Option<(String, String, String)>,
 }
 
 /// Short display name for an artifact: the path of a remote reference, or the
@@ -61,21 +66,166 @@ fn read_witnesses(
                 .map(|(_, l)| format!("{name}:{l}"))
                 .collect(),
             missing_from: Some(missing_from.to_string()),
+            type_change: None,
         })
         .collect()
 }
 
-/// Schema and event producers must be JSON objects. Anything else (YAML,
-/// protobuf, a typo) is an evaluation ERROR: reading it as "defines nothing"
-/// would report HOLDS or invent residue (found by R1, 2026-10-08).
-fn require_json_object(id: &str, spec: &str, text: &str) -> Result<()> {
-    match serde_json::from_str::<serde_json::Value>(text) {
-        Ok(v) if v.is_object() => Ok(()),
-        _ => bail!(
-            "{id}: producer {} is not a JSON object (YAML and other formats are not supported yet)",
-            artifact_name(spec)
-        ),
+const CODE_EXTS: [&str; 5] = ["go", "py", "ts", "tsx", "rs"];
+
+fn is_code(spec: &str) -> bool {
+    let ext = artifact_name(spec)
+        .rsplit('.')
+        .next()
+        .unwrap_or("")
+        .to_string();
+    CODE_EXTS.contains(&ext.as_str())
+}
+
+/// Parse a spec producer (JSON, or YAML by extension or as a fallback),
+/// select `pointer`, and require a JSON object. Anything else is an
+/// evaluation ERROR: reading it as "defines nothing" would report HOLDS or
+/// invent residue (found by R1, 2026-10-08).
+fn load_object(
+    id: &str,
+    spec: &str,
+    text: &str,
+    pointer: Option<&str>,
+) -> Result<serde_json::Value> {
+    let name = artifact_name(spec);
+    let is_yaml = name.ends_with(".yaml") || name.ends_with(".yml");
+    let parsed = if is_yaml {
+        crate::yaml::parse_yaml(text).map_err(|e| anyhow!("{id}: producer {name}: {e}"))?
+    } else {
+        match serde_json::from_str::<serde_json::Value>(text) {
+            Ok(v) => v,
+            Err(_) => crate::yaml::parse_yaml(text).map_err(|_| {
+                anyhow!("{id}: producer {name} is not a JSON object (and not readable as YAML)")
+            })?,
+        }
+    };
+    let v = match pointer {
+        Some(ptr) => parsed
+            .pointer(ptr)
+            .cloned()
+            .ok_or_else(|| anyhow!("{id}: JSON pointer {ptr:?} not found in {name}"))?,
+        None => parsed,
+    };
+    if !v.is_object() {
+        bail!("{id}: producer {name} is not a JSON object");
     }
+    Ok(v)
+}
+
+/// Fields one producer source provides: spec `properties` or code fields.
+fn source_fields(id: &str, spec: &str, text: &str, pointer: Option<&str>) -> Result<Fields> {
+    if is_code(spec) {
+        code_fields(&artifact_name(spec), text)
+            .ok_or_else(|| anyhow!("{id}: cannot read fields from {}", artifact_name(spec)))
+    } else {
+        Ok(spec_fields(&load_object(id, spec, text, pointer)?))
+    }
+}
+
+/// Schema contract. Without a base version: the strict check (consumer
+/// `payload.<field>` reads the producer does not define). With a base version
+/// (`producer_base`, and/or `producer_code` + `producer_code_base`): the
+/// change-scoped check, residue = fields removed or retyped between base and
+/// head that the consumer reads by any recognised pattern.
+fn schema_outcome(
+    id: &str,
+    b: &[(String, String)],
+    resolver: &Resolver,
+    prov: &mut Vec<Fetched>,
+) -> Result<(Vec<String>, Vec<Witness>)> {
+    let p = getk(b, "producer").context("schema invariant needs producer")?;
+    let c = getk(b, "consumer").context("schema invariant needs consumer")?;
+    let ptr = getk(b, "pointer");
+    let base = getk(b, "producer_base");
+    let code = getk(b, "producer_code");
+    let code_base = getk(b, "producer_code_base");
+    if code.is_some() != code_base.is_some() {
+        bail!("{id}: producer_code and producer_code_base must be given together");
+    }
+    let pr = fetch(resolver, &p, prov)?;
+
+    if base.is_none() && code.is_none() {
+        let cr = fetch(resolver, &c, prov)?;
+        let defined: serde_json::Value = if is_code(&p) {
+            let f = source_fields(id, &p, &pr, None)?;
+            let props: serde_json::Map<String, serde_json::Value> = f
+                .keys()
+                .map(|k| (k.clone(), serde_json::json!({})))
+                .collect();
+            serde_json::json!({ "properties": props })
+        } else {
+            load_object(id, &p, &pr, ptr.as_deref())?
+        };
+        let r = check_contract(&ContractInput::Schema {
+            producer_schema: &defined.to_string(),
+            consumer_source: &cr,
+        });
+        let missing = format!(
+            "{} {}/properties",
+            artifact_name(&p),
+            ptr.unwrap_or_default()
+        );
+        return Ok((r.clone(), read_witnesses(&r, &c, &cr, &missing)));
+    }
+
+    // Change-scoped: collect what changed in each producer source.
+    let mut changed: BTreeMap<String, (Option<(String, String)>, String)> = BTreeMap::new();
+    let mut add = |head_spec: &str, head: &Fields, base: &Fields, where_: String| {
+        for (name, tc) in changed_fields(base, head) {
+            changed.entry(name).or_insert((tc, where_.clone()));
+        }
+        let _ = head_spec;
+    };
+    if let Some(bs) = &base {
+        let br = fetch(resolver, bs, prov)?;
+        let head_f = source_fields(id, &p, &pr, ptr.as_deref())?;
+        let base_f = source_fields(id, bs, &br, ptr.as_deref())?;
+        let where_ = format!("{} {}", artifact_name(&p), ptr.clone().unwrap_or_default())
+            .trim()
+            .to_string();
+        add(&p, &head_f, &base_f, where_);
+    }
+    if let (Some(cs), Some(cbs)) = (&code, &code_base) {
+        let cr_head = fetch(resolver, cs, prov)?;
+        let cr_base = fetch(resolver, cbs, prov)?;
+        let head_f = source_fields(id, cs, &cr_head, None)?;
+        let base_f = source_fields(id, cbs, &cr_base, None)?;
+        add(cs, &head_f, &base_f, artifact_name(cs));
+    }
+    let cr = fetch(resolver, &c, prov)?;
+    let reads = broad_reads(&cr);
+    let cname = artifact_name(&c);
+    let mut residue = Vec::new();
+    let mut witnesses = Vec::new();
+    for (name, (tc, where_)) in &changed {
+        let sites: Vec<String> = reads
+            .iter()
+            .filter(|(f, _)| f == name)
+            .map(|(_, l)| format!("{cname}:{l}"))
+            .collect();
+        if sites.is_empty() {
+            continue;
+        }
+        let mut dedup = sites;
+        dedup.dedup();
+        residue.push(name.clone());
+        witnesses.push(Witness {
+            residue: name.clone(),
+            sites: dedup,
+            missing_from: if tc.is_none() {
+                Some(where_.clone())
+            } else {
+                None
+            },
+            type_change: tc.clone().map(|(a, b2)| (a, b2, where_.clone())),
+        });
+    }
+    Ok((residue, witnesses))
 }
 
 /// 1-based trace lines (comments and blanks counted, as in an editor) where
@@ -206,6 +356,14 @@ pub fn witness_text(w: &Witness, kind: &str, code: fn(&str) -> String) -> String
     if let Some(m) = &w.missing_from {
         s.push_str(&format!(" · not in {}", code(m)));
     }
+    if let Some((from, to, place)) = &w.type_change {
+        s.push_str(&format!(
+            " · type {} -> {} in {}",
+            code(from),
+            code(to),
+            code(place)
+        ));
+    }
     s
 }
 
@@ -289,32 +447,14 @@ pub fn evaluate(sections: &Sections, resolver: &Resolver) -> Result<Vec<Contract
         let witnesses: Vec<Witness>;
         let residue = match kind.as_str() {
             "schema" => {
-                let p = getk(b, "producer").context("schema invariant needs producer")?;
-                let c = getk(b, "consumer").context("schema invariant needs consumer")?;
-                let mut pr = fetch(resolver, &p, &mut prov)?;
-                let ptr = getk(b, "pointer");
-                if let Some(ptr) = &ptr {
-                    pr = select_pointer(&pr, ptr).map_err(|e| anyhow!("{id}: {e}"))?;
-                }
-                require_json_object(&id, &p, &pr)?;
-                let cr = fetch(resolver, &c, &mut prov)?;
-                let r = check_contract(&ContractInput::Schema {
-                    producer_schema: &pr,
-                    consumer_source: &cr,
-                });
-                let missing = format!(
-                    "{} {}/properties",
-                    artifact_name(&p),
-                    ptr.unwrap_or_default()
-                );
-                witnesses = read_witnesses(&r, &c, &cr, &missing);
+                let (r, w) = schema_outcome(&id, b, resolver, &mut prov)?;
+                witnesses = w;
                 r
             }
             "event" => {
                 let p = getk(b, "producer").context("event invariant needs producer")?;
                 let c = getk(b, "consumer").context("event invariant needs consumer")?;
-                let pr = fetch(resolver, &p, &mut prov)?;
-                require_json_object(&id, &p, &pr)?;
+                let pr = load_object(&id, &p, &fetch(resolver, &p, &mut prov)?, None)?.to_string();
                 let cr = fetch(resolver, &c, &mut prov)?;
                 let r = check_contract(&ContractInput::Event {
                     producer_payload: &pr,
@@ -346,6 +486,7 @@ pub fn evaluate(sections: &Sections, resolver: &Resolver) -> Result<Vec<Contract
                         residue: x.clone(),
                         sites: lines.iter().map(|l| format!("{name}:{l}")).collect(),
                         missing_from: None,
+                        type_change: None,
                     })
                     .collect();
                 r

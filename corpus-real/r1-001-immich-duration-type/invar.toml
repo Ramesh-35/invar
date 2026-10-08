@@ -2,5 +2,6 @@
 kind = "schema"
 id = "r1-001"
 producer = "github:immich-app/immich@b5546647912b9d2f443c4dad1a1d0fc3fb3a299f:open-api/immich-openapi-specs.json"
+producer_base = "github:immich-app/immich@97c62136b724cce4708bc73fb9bddfd016fefd28:open-api/immich-openapi-specs.json"
 pointer = "/components/schemas/AssetResponseDto"
 consumer = "github:simulot/immich-go@cc928edbce49216584647e5f756a2af6478bb7ea:immich/asset.go"

@@ -835,6 +835,7 @@ fn action_report_and_manifest_are_sound() {
                 residue: "a|b".into(),
                 sites: vec!["x|y`.js:1".into()],
                 missing_from: Some("@org|s.json /properties".into()),
+                type_change: Some(("string`|".into(), "@int".into(), "x|y.json".into())),
             }],
         },
         ContractOutcome { id: "ok".into(), kind: "event".into(), residue: vec![], provenance: vec![], witnesses: vec![] },
@@ -971,26 +972,106 @@ consumer = "client.js"
 }
 
 // ---------------------------------------------------------------------------
-// Test 25: a producer that is not a JSON object is an ERROR, never a verdict.
-// Before this, a YAML producer read as "defines nothing": HOLDS when the
-// consumer had no recognised reads, invented residue when it had some.
+// Test 25: producers are JSON or YAML objects; anything else is an ERROR,
+// never a verdict. (Before R1 batch 1, a YAML producer was silently read as
+// "defines nothing".)
 // ---------------------------------------------------------------------------
 #[test]
-fn non_json_producer_is_an_error_not_a_verdict() {
-    let dir = std::env::temp_dir().join(format!("invar-nonjson-{}", std::process::id()));
+fn producer_formats_yaml_ok_unreadable_is_an_error() {
+    let dir = std::env::temp_dir().join(format!("invar-formats-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).unwrap();
-    std::fs::write(dir.join("spec.yaml"), "openapi: 3.0.0\nproperties:\n  a: {}\n").unwrap();
-    std::fs::write(dir.join("list.json"), "[1, 2]").unwrap();
-    std::fs::write(dir.join("c.js"), "f(payload.a)\n").unwrap();
-    for (kind, producer) in [("schema", "spec.yaml"), ("event", "spec.yaml"), ("schema", "list.json")] {
+    let w = |n: &str, b: &str| std::fs::write(dir.join(n), b).unwrap();
+    w("spec.yaml", "openapi: 3.0.0\ncomponents:\n  schemas:\n    Order:\n      properties:\n        id: {type: string}\n        total:\n          type: integer\n");
+    w("c.js", "f(payload.id, payload.gone)\n");
+    w("list.json", "[1, 2]");
+    w("prose.txt", "just a sentence, not a spec\n");
+    w("anchors.yaml", "a: &x 1\nb: *x\n");
+
+    // YAML producer with a pointer: evaluated like JSON.
+    let ok = "[[invariant]]\nkind = \"schema\"\nid = \"y\"\nproducer = \"spec.yaml\"\npointer = \"/components/schemas/Order\"\nconsumer = \"c.js\"\n";
+    let out = evaluate(&parse_sections("invar.toml", ok).unwrap(), &Resolver::local(&dir)).unwrap();
+    assert_eq!(out[0].residue, vec!["gone".to_string()]);
+
+    for (kind, producer, needle) in [
+        ("schema", "list.json", "is not a JSON object"),
+        ("event", "list.json", "is not a JSON object"),
+        ("schema", "prose.txt", "is not a JSON object"),
+        ("schema", "anchors.yaml", "anchors and aliases"),
+    ] {
         let cfg = format!(
             "[[invariant]]\nkind = \"{kind}\"\nid = \"x\"\nproducer = \"{producer}\"\nconsumer = \"c.js\"\n"
         );
-        let sections = parse_sections("invar.toml", &cfg).unwrap();
-        let err = evaluate(&sections, &Resolver::local(&dir)).expect_err("must not be a verdict");
-        assert!(format!("{err:#}").contains("is not a JSON object"), "{kind}/{producer}: {err:#}");
+        let err = evaluate(&parse_sections("invar.toml", &cfg).unwrap(), &Resolver::local(&dir))
+            .expect_err("must not be a verdict");
+        assert!(format!("{err:#}").contains(needle), "{kind}/{producer}: {err:#}");
     }
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+// ---------------------------------------------------------------------------
+// Test 26: change-scoped schema contracts. With a base version, residue is
+// the fields removed or retyped between base and head that the consumer
+// reads by any recognised pattern; unrelated property access is not residue.
+// Producers may be a spec (JSON/YAML) and/or code (Go, Python, TS, Rust).
+// ---------------------------------------------------------------------------
+#[test]
+fn change_scoped_contracts_find_removed_and_retyped_fields() {
+    use invar_falsify::surface::{broad_reads, code_fields};
+    let dir = std::env::temp_dir().join(format!("invar-change-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    let w = |n: &str, b: &str| std::fs::write(dir.join(n), b).unwrap();
+
+    // Spec: `legacy` removed, `size` retyped, `extra` added.
+    w("base.yaml", "properties:\n  id: {type: string}\n  legacy: {type: string}\n  size: {type: string}\n");
+    w("head.yaml", "properties:\n  id: {type: string}\n  size: {type: integer}\n  extra: {type: string}\n");
+    // Consumer reads through several styles, plus lots of unrelated access.
+    w(
+        "client.py",
+        "def f(data):\n    a = data[\"legacy\"]\n    b = data.get('size')\n    n = len(data.items())\n    return data.id, a.upper(), b\n",
+    );
+    let cfg = "[[invariant]]\nkind = \"schema\"\nid = \"s\"\nproducer = \"head.yaml\"\nproducer_base = \"base.yaml\"\nconsumer = \"client.py\"\n";
+    let out = evaluate(&parse_sections("invar.toml", cfg).unwrap(), &Resolver::local(&dir)).unwrap();
+    assert_eq!(out[0].residue, vec!["legacy".to_string(), "size".to_string()], "only changed fields the consumer reads");
+    let size = out[0].witnesses.iter().find(|w| w.residue == "size").unwrap();
+    assert_eq!(size.sites, vec!["client.py:3".to_string()]);
+    assert_eq!(size.type_change.as_ref().map(|t| (t.0.as_str(), t.1.as_str())), Some(("string", "integer")));
+    let md = render_report_md(&out);
+    assert!(md.contains("`legacy` read at `client.py:2` · not in `head.yaml`"), "{md}");
+    assert!(md.contains("· type `string` -> `integer` in `head.yaml`"), "{md}");
+
+    // Code producer (Go): tag rename is a removal of the old JSON name.
+    w("old.go", "type Report struct {\n\tWarnings []string `json:\"warnings\"`\n\tCount int `json:\"count,omitempty\"`\n\tName string\n}\n");
+    w("new.go", "type Report struct {\n\tFindings []string `json:\"findings\"`\n\tCount string `json:\"count\"`\n\tName string\n}\n");
+    w("consumer.ts", "const r = JSON.parse(out);\nfor (const x of r.warnings) use(x);\nlet c: number = r.count;\n");
+    let cfg = "[[invariant]]\nkind = \"schema\"\nid = \"g\"\nproducer = \"new.go\"\nproducer_base = \"old.go\"\nconsumer = \"consumer.ts\"\n";
+    let out = evaluate(&parse_sections("invar.toml", cfg).unwrap(), &Resolver::local(&dir)).unwrap();
+    assert_eq!(out[0].residue, vec!["count".to_string(), "warnings".to_string()]);
+
+    // Dual source: spec unchanged, code changed. The code catches it.
+    w("same.yaml", "properties:\n  events: {type: array}\n");
+    w("v1.rs", "pub struct R {\n    #[serde(rename = \"events\")]\n    pub evs: Vec<E>,\n}\n");
+    w("v2.rs", "pub struct R {\n    #[serde(rename = \"final_events\")]\n    pub evs: Vec<E>,\n}\n");
+    w("reader.js", "const e = data.events || [];\n");
+    let cfg = "[[invariant]]\nkind = \"schema\"\nid = \"d\"\nproducer = \"same.yaml\"\nproducer_base = \"same.yaml\"\nproducer_code = \"v2.rs\"\nproducer_code_base = \"v1.rs\"\nconsumer = \"reader.js\"\n";
+    let out = evaluate(&parse_sections("invar.toml", cfg).unwrap(), &Resolver::local(&dir)).unwrap();
+    assert_eq!(out[0].residue, vec!["events".to_string()]);
+
+    // Extraction units.
+    let py = code_fields("m.py", "class M(Base):\n    is_ok: bool = field(alias=\"isOk\")\n    n: int\n").unwrap();
+    assert!(py.contains_key("isOk") && py.contains_key("n"));
+    let reads: Vec<String> = broad_reads("x = a?.b + c['d'] + e.get(\"f\")\nG string `json:\"g\"`\nh: int\n")
+        .into_iter()
+        .map(|(f, _)| f)
+        .collect();
+    for want in ["b", "d", "f", "g", "h"] {
+        assert!(reads.iter().any(|r| r == want), "missing {want} in {reads:?}");
+    }
+
+    // Half a code pair is a configuration ERROR, never a verdict.
+    let cfg = "[[invariant]]\nkind = \"schema\"\nid = \"h\"\nproducer = \"same.yaml\"\nproducer_code = \"v2.rs\"\nconsumer = \"reader.js\"\n";
+    assert!(evaluate(&parse_sections("invar.toml", cfg).unwrap(), &Resolver::local(&dir)).is_err());
     let _ = std::fs::remove_dir_all(&dir);
 }
 

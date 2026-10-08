@@ -1,0 +1,8 @@
+case	real	expected	invar_residue	outcome	extra	oasdiff	openapi_diff	buf_breaking	schema_registry	semgrep	ai_reviewer
+r1-000-constructed-demo	false	amount_cents	amount_cents	CAUGHT	-	not_applicable	not_applicable	not_applicable	not_run	not_run	not_run
+r1-001-immich-duration-type	true	duration	duration	CAUGHT	-	not_run	error	not_applicable	not_applicable	not_run	not_run
+r1-002-firefly-piggybank-account	true	account_id, account_name	account_id,account_name	CAUGHT	-	not_run	partial	not_applicable	not_applicable	not_run	not_run
+r1-003-docker-virtualsize-checkmk	true	VirtualSize	-	MISSED	-	not_run	missed	not_applicable	not_applicable	not_run	not_run
+r1-004-docker-containerconfig-portainer	true	ContainerConfig, Container	-	MISSED	-	not_run	missed	not_applicable	not_applicable	not_run	not_run
+r1-005-cometbft-finalize-block-cosmjs	true	begin_block_events, end_block_events	begin_block_events,end_block_events,tx_result,txs_results	CAUGHT	tx_result,txs_results	not_run	missed	not_applicable	not_applicable	not_run	not_run
+r1-006-control-immich-createdat	true	none	-	CLEAN	-	not_run	error	not_applicable	not_applicable	not_run	not_run

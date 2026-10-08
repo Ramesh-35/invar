@@ -2,5 +2,8 @@
 kind = "schema"
 id = "r1-003"
 producer = "github:moby/moby@913b0f51cab18a56247a950f5f1e75ca79b63039:api/swagger.yaml"
+producer_base = "github:moby/moby@88f4bf4ae4bace73608b73df9fb974081d2bed1a:api/swagger.yaml"
+producer_code = "github:moby/moby@913b0f51cab18a56247a950f5f1e75ca79b63039:api/types/image_summary.go"
+producer_code_base = "github:moby/moby@88f4bf4ae4bace73608b73df9fb974081d2bed1a:api/types/image_summary.go"
 pointer = "/definitions/ImageSummary"
 consumer = "github:Checkmk/checkmk@1819bbd088750f71eed98b7c6d7a9406e271c64e:cmk/base/plugins/agent_based/inventory_docker_node_images.py"
