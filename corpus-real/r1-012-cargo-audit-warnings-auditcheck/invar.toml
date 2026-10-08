@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-012"
+producer = "github:rustsec/rustsec@bd7a34815c776e325df10f504838c68066ad13e1:src/warning.rs"
+producer_base = "github:rustsec/rustsec@c73512f6f771847d0ceb874cea3e9bb75cbce78e:src/warning.rs"
+consumer = "github:actions-rs/audit-check@35fc20ed69accd1e8bf0a64c1a1eab581f5869a0:src/interfaces.ts"

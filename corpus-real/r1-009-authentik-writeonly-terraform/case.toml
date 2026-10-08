@@ -1,0 +1,22 @@
+[case]
+id = "r1-009"
+title = "authentik made SMS stage credentials write-only; terraform provider refresh failed"
+source = "https://github.com/goauthentik/terraform-provider-authentik/pull/968"
+source_kind = "pr"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "field_removed"
+batch = "2"
+
+[expected]
+residue = "auth, auth_password"
+evidence = "no value given for required property auth"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "error"
+openapi_diff_note = "openapi-diff 0.24.1 was killed (out of memory/time) on the 1.8 MB schema.yml"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

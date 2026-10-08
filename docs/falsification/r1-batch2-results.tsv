@@ -1,0 +1,20 @@
+case	real	expected	invar_residue	outcome	extra	oasdiff	openapi_diff	buf_breaking	schema_registry	semgrep	ai_reviewer
+r1-000-constructed-demo	false	amount_cents	amount_cents	CAUGHT	-	not_applicable	not_applicable	not_applicable	not_run	not_run	not_run
+r1-001-immich-duration-type	true	duration	duration	CAUGHT	-	not_run	error	not_applicable	not_applicable	not_run	not_run
+r1-002-firefly-piggybank-account	true	account_id, account_name	account_id,account_name	CAUGHT	-	not_run	partial	not_applicable	not_applicable	not_run	not_run
+r1-003-docker-virtualsize-checkmk	true	VirtualSize	-	MISSED	-	not_run	missed	not_applicable	not_applicable	not_run	not_run
+r1-004-docker-containerconfig-portainer	true	ContainerConfig, Container	-	MISSED	-	not_run	missed	not_applicable	not_applicable	not_run	not_run
+r1-005-cometbft-finalize-block-cosmjs	true	begin_block_events, end_block_events	begin_block_events,end_block_events,tx_result,txs_results	CAUGHT	tx_result,txs_results	not_run	missed	not_applicable	not_applicable	not_run	not_run
+r1-006-control-immich-createdat	true	none	-	CLEAN	-	not_run	error	not_applicable	not_applicable	not_run	not_run
+r1-007-mealie-isfood-aiomealie	true	isFood, disableAmount	is_food	MISSED	is_food	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-008-frigate-temperatures-hass	true	temperatures	-	MISSED	-	not_run	not_run	not_applicable	not_applicable	not_run	not_run
+r1-009-authentik-writeonly-terraform	true	auth, auth_password	-	ERROR	-	not_run	error	not_applicable	not_applicable	not_run	not_run
+r1-010-romm-filesize-homepage	true	FILESIZE	FILESIZE	CAUGHT	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-011-evcc-gridpower-homepage	true	gridPower	-	MISSED	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-012-cargo-audit-warnings-auditcheck	true	advisory	advisory	CAUGHT	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-013-podman-created-toolbox	true	Created	Created	CAUGHT	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-014-trivy-root-object-defectdojo	true	root:array->object	-	MISSED	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-015-gitleaks-v8-defectdojo	true	rule, file, lineNumber, offender, line, commitMessage, commit, author, email, date, tags, leakURL	author,commit,commitMessage,date,email,file,leakURL,line,lineNumber,offender,rule,tags	CAUGHT	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-016-npm7-audit-auditci	true	advisories	-	ERROR	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-017-control-romm-stats-added	true	none	-	CLEAN	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-018-control-gitleaks-link	true	none	-	CLEAN	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run

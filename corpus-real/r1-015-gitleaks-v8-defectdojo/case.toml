@@ -1,0 +1,21 @@
+[case]
+id = "r1-015"
+title = "gitleaks v8 renamed and retyped report fields; DefectDojo parser raised KeyError"
+source = "https://github.com/DefectDojo/django-DefectDojo/commit/df82f1de7846555fa01f45eef677213e6227b043"
+source_kind = "commit"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "field_renamed"
+batch = "2"
+
+[expected]
+residue = "rule, file, lineNumber, offender, line, commitMessage, commit, author, email, date, tags, leakURL"
+evidence = "Support version 8 of gitleaks (#5625). Expected = renamed/removed fields the consumer file reads"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"          # no published JSON/YAML spec for this payload
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

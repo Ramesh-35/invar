@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-007"
+producer = "github:mealie-recipes/mealie@245ca5fe3b94d697e6ce54e1549da821c2c30639:mealie/schema/household/group_shopping_list.py"
+producer_base = "github:mealie-recipes/mealie@efc0d317240770df951da9cb397a4df01a08b727:mealie/schema/household/group_shopping_list.py"
+consumer = "github:joostlek/python-mealie@0413fb701a79e3090f19d930e6d83466a98e9889:src/aiomealie/models.py"

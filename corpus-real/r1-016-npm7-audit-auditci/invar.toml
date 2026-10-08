@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-016"
+producer = "github:npm/cli@59d937387d510d3f5b09390d601d53ab66a63d37:lib/audit.js"
+producer_base = "github:npm/cli@873665e2c7f400c5de1962135f2510acc304b599:lib/install/audit.js"
+consumer = "github:IBM/audit-ci@041cec64ef07344bfb1370416427b1320255813e:lib/Model.js"

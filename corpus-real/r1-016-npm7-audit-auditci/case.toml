@@ -1,0 +1,21 @@
+[case]
+id = "r1-016"
+title = "npm 7 audit --json replaced advisories with vulnerabilities; audit-ci needed npm 7 support"
+source = "https://github.com/IBM/audit-ci/commit/58f1665beef1bc76ef19c242d25b34e61010c4d5"
+source_kind = "commit"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "field_removed"
+batch = "2"
+
+[expected]
+residue = "advisories"
+evidence = "#175 - Add NPM 7 support. Weaker evidence: no user report readable"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"          # no published JSON/YAML spec for this payload
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

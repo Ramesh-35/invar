@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-013"
+producer = "github:containers/podman@50157b2d3366ec52bbbbd468ed3d1633ed95bd24:cmd/podman/images/list.go"
+producer_base = "github:containers/podman@957e7a533efe2d314640afac9d3b31cc752edd80:cmd/podman/images/list.go"
+consumer = "github:containers/toolbox@e7722078310a79b08ad0095b1980c95db2094197:src/cmd/list.go"

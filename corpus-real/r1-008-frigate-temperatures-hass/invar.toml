@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-008"
+producer = "github:blakeblackshear/frigate@3297cab3474396ed3006d98c7773149a41f24a79:frigate/stats/util.py"
+producer_base = "github:blakeblackshear/frigate@fc3545310c9e3e9892f796d7f6ff5309adc2f39a:frigate/stats/util.py"
+consumer = "github:blakeblackshear/frigate-hass-integration@a4a1d6ba8da3aacaee79253e6fc71548dd7573a6:custom_components/frigate/sensor.py"

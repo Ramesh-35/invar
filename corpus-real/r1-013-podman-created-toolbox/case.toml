@@ -1,0 +1,21 @@
+[case]
+id = "r1-013"
+title = "podman images JSON Created changed from string to int64; toolbox broke"
+source = "https://github.com/containers/toolbox/commit/8168e0f58ce7bc13d4328a172e62f3142faeceba"
+source_kind = "commit"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "type_changed"
+batch = "2"
+
+[expected]
+residue = "Created"
+evidence = "Since Podman 2.1 the field Created of podman images --format json no longer holds a string"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"          # no published JSON/YAML spec for this payload
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-015"
+producer = "github:gitleaks/gitleaks@93f292c3dfa2649ef91f8925b623e79546fa992e:report/finding.go"
+producer_base = "github:gitleaks/gitleaks@780fb4a8f1d319ba78cf6c50f229ade05b5d2dea:scan/leak.go"
+consumer = "github:DefectDojo/django-DefectDojo@c537f9495b0b0c4d5e92d311f85e593aa7459ad4:dojo/tools/gitleaks/parser.py"

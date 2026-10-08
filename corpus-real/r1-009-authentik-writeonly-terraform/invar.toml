@@ -1,0 +1,9 @@
+[[invariant]]
+kind = "schema"
+id = "r1-009"
+producer = "github:goauthentik/authentik@77d2e24442c3eb6e88010f40aa569a8bfb584f99:schema.yml"
+producer_base = "github:goauthentik/authentik@054dedf16bac421f1e4a70b0e51527e5853257c6:schema.yml"
+producer_code = "github:goauthentik/authentik@77d2e24442c3eb6e88010f40aa569a8bfb584f99:authentik/stages/authenticator_sms/api.py"
+producer_code_base = "github:goauthentik/authentik@054dedf16bac421f1e4a70b0e51527e5853257c6:authentik/stages/authenticator_sms/api.py"
+pointer = "/components/schemas/AuthenticatorSMSStage"
+consumer = "github:goauthentik/terraform-provider-authentik@fce0446e1604785da91082b24e2e5c3d1caa9bc9:pkg/provider/resource_stage_authenticator_sms.go"

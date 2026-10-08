@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-011"
+producer = "github:evcc-io/evcc@9dcb1fa0a7c08dd926b79309aa1f676a5fc6c8aa:core/site.go"
+producer_base = "github:evcc-io/evcc@c8c1220ad15957b9b65a5da8964479267435bb6b:core/site.go"
+consumer = "github:gethomepage/homepage@1e556e105d9a1e49a00913c7499bbd07e59825a3:src/widgets/evcc/component.jsx"

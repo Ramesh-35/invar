@@ -1,0 +1,21 @@
+[case]
+id = "r1-007"
+title = "Mealie removed isFood/disableAmount; aiomealie (Home Assistant) failed to deserialize"
+source = "https://github.com/home-assistant/core/issues/149840"
+source_kind = "issue"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "field_removed"
+batch = "2"
+
+[expected]
+residue = "isFood, disableAmount"
+evidence = "mashumaro.exceptions.MissingField: Field is_food of type bool is missing in ShoppingItem instance"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"          # no published JSON/YAML spec for this payload
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

@@ -10,7 +10,7 @@ outcome.
 | Item | State |
 |---|---|
 | Case format and runner (`corpus-real/`, `scripts/r1-run.sh`) | built; all six outcomes exercised on test cases |
-| Real cases admitted | **5 breaks + 1 control, of 30** (batch 1, 2026-10-08) |
+| Real cases admitted | **15 breaks + 3 controls, of 30** (batch 1: 5 + 1; batch 2: 10 + 2) |
 | Baselines run | openapi-diff 0.24.1 (npm). oasdiff not run: its release download is blocked here. buf, schema registry, Semgrep, AI reviewer: not run |
 
 `r1-000` is REAL-INCIDENT-001, a constructed demo kept as a harness
@@ -125,4 +125,59 @@ R2: it is (a) reading YAML producers, (b) recognising real consumer read
 styles (`x.field`, `x["field"]`, struct field tags), (c) modelling type
 changes, and (d) deciding whether INVAR should read the producer's
 implementation, not only its published spec. Each needs founder direction.
+
+## Engine overhaul (tuned on batch 1 only)
+
+Founder directive 2026-10-08: YAML specs, broad consumer reads, type
+changes, dual-source producers (published spec plus producer code). Built
+and tuned against batch 1, then frozen at commit `0804555` (engine
+fingerprint `6e973b22dfaa18b1`) before batch 2 was run.
+
+Disclosure: the batch 2 case descriptions were read before the engine was
+written (the sourcing agents returned early). The engine design was fixed
+from batch 1 and the directive's list before any code, and no rule was
+added for a batch-2-only pattern. Examples of patterns deliberately NOT
+added: case-insensitive or camelCase/snake_case name matching, Go struct
+fields without tags on the consumer side, JS producers, structural (root
+type) changes. A reader can check this against the commit.
+
+Batch 1 after tuning (not a score, the engine was fitted to it): 3 of 5
+caught (r1-001 as a type change, r1-002, r1-005 via producer code), 2 missed
+(r1-003, r1-004: the fields stayed in both spec and code and were dropped
+only at runtime), control clean. r1-005 also flags `tx_result` and
+`txs_results`, whose Go type names changed; a Go type-name change is not
+necessarily a JSON change, so these are possible false alarms.
+
+## Batch 2 results (held out, frozen engine)
+
+| Case | Break | INVAR | Note |
+|---|---|---|---|
+| r1-007 Mealie to aiomealie | `isFood`, `disableAmount` removed | MISSED | flagged `is_food` at the right three lines (the producer's Python name; the consumer's alias is `isFood`); `disableAmount` lives in a different producer file. Scored MISSED by the exact-name rule |
+| r1-008 Frigate to HA integration | `temperatures` moved | MISSED | producer builds the dict in code, no declared fields |
+| r1-009 authentik to terraform provider | `auth`, `auth_password` write-only | ERROR | the 1.8 MB spec exceeds INVAR's 1 MB fetch limit |
+| r1-010 RomM to homepage | `FILESIZE` renamed | **CAUGHT** | producer TypedDict |
+| r1-011 evcc to homepage | `gridPower` nested | MISSED | key names are Go constants, not struct fields |
+| r1-012 cargo-audit to audit-check | `advisory` restructured | **CAUGHT** | producer Rust struct |
+| r1-013 podman to toolbox | `Created` string to int64 | **CAUGHT** | type change from producer Go struct |
+| r1-014 Trivy to DefectDojo | root array to object | MISSED | structural change, no field changed |
+| r1-015 gitleaks v8 to DefectDojo | 12 fields renamed | **CAUGHT** | all 12, no extras |
+| r1-016 npm 7 to audit-ci | `advisories` replaced | ERROR | producer is JavaScript, not readable |
+| r1-017 control, RomM adds fields | none | CLEAN | |
+| r1-018 control, gitleaks adds `Link` | none | CLEAN | |
+
+**Held-out score: INVAR caught 4 of 10 real breaks (2 errors, 4 misses);
+both controls clean, no extra residue anywhere in batch 2.** openapi-diff
+was applicable to one case and was killed on the 1.8 MB spec; 8 of the 10
+producers publish no usable JSON or YAML spec for the payload, so no
+spec-diff tool could have run on them.
+
+Still 15 real cases of 30, so the locked thresholds do not apply yet; on
+this batch INVAR misses 60% (including errors), well above the 20% bar.
+
+### What batch 2 says about the next engine version (to be scored on batch 3)
+- Name forms: producer `is_food` vs consumer alias `isFood` (r1-007).
+- Size: specs over 1 MB (r1-009) need a higher or configurable limit.
+- Producers that build payloads dynamically (dicts, Go constants, JS) are
+  invisible to declared-field extraction (r1-008, r1-011, r1-016).
+- Structural changes (root type) are outside a field-set model (r1-014).
 

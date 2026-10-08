@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-017"
+producer = "github:rommapp/romm@9b95e85deedd73e78f3ff7b660072539f206687a:backend/endpoints/responses/stats.py"
+producer_base = "github:rommapp/romm@3ebeb10b1c6c6263aebd6def0d52353f128d7364:backend/endpoints/responses/stats.py"
+consumer = "github:gethomepage/homepage@a6639b04b9f8d2f7af755b585a403eafdfcc1ee9:src/widgets/romm/component.jsx"

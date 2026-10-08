@@ -1,0 +1,21 @@
+[case]
+id = "r1-014"
+title = "Trivy JSON root changed from array to object; DefectDojo parser silently imported nothing"
+source = "https://github.com/DefectDojo/django-DefectDojo/commit/a1dc2be31c0ea902a771e88fb0deaf1c9ddeda3d"
+source_kind = "commit"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "other"
+batch = "2"
+
+[expected]
+residue = "root:array->object"
+evidence = "Support new Trivy JSON report (#4833) / Fixes #4832. Structural change: no field removed; the array moved under Results"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"          # no published JSON/YAML spec for this payload
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

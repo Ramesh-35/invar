@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-014"
+producer = "github:aquasecurity/trivy@e3628437058e89819aa6c6711553a5769315407c:pkg/report/writer.go"
+producer_base = "github:aquasecurity/trivy@097b8d4881143022276717beb9230e2bd4954621:pkg/report/writer.go"
+consumer = "github:DefectDojo/django-DefectDojo@23270101f20e0b2547c65e3f51932488f51fb7a8:dojo/tools/trivy/parser.py"

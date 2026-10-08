@@ -438,3 +438,25 @@ the locked thresholds (they apply at 30), and selection bias is likely; the
 direction of the evidence is nonetheless negative for INVAR as built.
 Adequacy unchanged: D PARTIAL, overall NOT ESTABLISHED.
 
+## Live witness locations and the engine overhaul (2026-10-08)
+
+`invar-action-smoke` PR #1 on `@v0.1.0-alpha.2` (run 37749259452): the
+refreshed comment 6036978332 reads `` `amount_cents` read at
+`pr/client.js:3` · not in `schema.json /properties` ``. First line-level
+location on a real PR.
+
+Engine overhaul (founder directive 2026-10-08), tuned on R1 batch 1 and
+frozen at `0804555` (fingerprint `6e973b22dfaa18b1`) before batch 2: YAML
+specs (zero-dependency reader, matches PyYAML on 397 files), broad consumer
+reads, type changes, change-scoped checking against `producer_base`, and
+dual-source producers (published spec plus producer code). Not released.
+
+R1 batch 2, held out (10 real breaks, 2 controls): INVAR caught 4 of 10
+(gitleaks v8, all 12 fields; podman `Created` type change; RomM; cargo-audit),
+missed 4, errored on 2 (a 1.8 MB spec over the 1 MB fetch limit; a
+JavaScript producer). Both controls clean; no extra residue. 8 of 10
+producers publish no usable spec, so the catches came from producer code.
+Total real cases: 15 of 30; thresholds not yet applicable. Disclosure: the
+batch 2 descriptions were read before the engine was written; see
+docs/falsification/R1-CORPUS.md. Adequacy unchanged.
+
