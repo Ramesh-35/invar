@@ -1,9 +1,9 @@
 name: release
 
 # On a version tag, build standalone invar binaries and publish them to
-# a GitHub Release with SHA-256 checksums (the GitHub Action verifies these
-# before use). cross builds the static Linux musl target in Docker. cross has
-# no macOS images, so both Apple targets are built natively on a macOS runner.
+# a GitHub Release with SHA-256 checksums and SSH signatures (the GitHub
+# Action verifies both before use; the trusted key is action/release-signers).
+# cross builds the static Linux musl target in Docker. cross has no macOS images, so both Apple targets are built natively on a macOS runner.
 
 on:
   push:
@@ -75,10 +75,30 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           path: dist
           merge-multiple: true
+      - name: Sign each binary archive (SSH signature, namespace invar-release)
+        env:
+          SIGNING_KEY: ${{ secrets.INVAR_RELEASE_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "$SIGNING_KEY" ]; then
+            echo "::error::INVAR_RELEASE_SIGNING_KEY is not set; refusing to publish unsigned binaries"
+            exit 1
+          fi
+          key="$RUNNER_TEMP/release-key"
+          (umask 077; printf '%s\n' "$SIGNING_KEY" > "$key")
+          trap 'rm -f "$key"' EXIT
+          for f in dist/*.tar.gz; do
+            ssh-keygen -Y sign -f "$key" -n invar-release "$f"
+            # Self-check against the committed public key, so a release never
+            # ships a signature the Action would reject.
+            ssh-keygen -Y verify -f action/release-signers -I invar-release \
+              -n invar-release -s "$f.sig" < "$f"
+          done
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -88,4 +108,4 @@ jobs:
           case "$GITHUB_REF_NAME" in *-*) pre=(--prerelease) ;; esac
           gh release create "$GITHUB_REF_NAME" dist/* "${pre[@]}" \
             --repo "$GITHUB_REPOSITORY" --verify-tag --title "$GITHUB_REF_NAME" \
-            --notes "Standalone invar binaries (MIT OR Apache-2.0) with SHA-256 checksums. What INVAR does and does not yet establish: docs/epistemic/STATUS.md."
+            --notes "Standalone invar binaries (MIT OR Apache-2.0) with SHA-256 checksums and SSH signatures. What INVAR does and does not yet establish: docs/epistemic/STATUS.md."
