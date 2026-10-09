@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-073"
+producer = "github:TypeStrong/typedoc@feafd98f86b87c354604a2f9c2dba526ccde6205:src/lib/models/reflections/abstract.ts"
+producer_base = "github:TypeStrong/typedoc@dd15e08a6b3ee5b23227ff37716c506af8b2d126:src/lib/models/reflections/abstract.ts"
+consumer = "github:milesj/docusaurus-plugin-typedoc-api@6bc16e4a4e8955d4130d302e85da0c68e6e02851:packages/plugin/src/components/MemberSignatureTitle.tsx"

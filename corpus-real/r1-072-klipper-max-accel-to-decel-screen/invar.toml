@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-072"
+producer = "github:Klipper3d/klipper@0105aa330f2a4865b01cbbc548cba1322be5371e:klippy/toolhead.py"
+producer_base = "github:Klipper3d/klipper@18de421c4acbdb00946df35dfb412dedb159abca:klippy/toolhead.py"
+consumer = "github:KlipperScreen/KlipperScreen@e62b0ac4adeb875464fe70684bf9057824ebea2d:panels/limits.py"

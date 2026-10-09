@@ -643,3 +643,15 @@ in-scope batch is the only fair test of it.
   "using release v0.1.0-alpha.8 (x86_64-unknown-linux-musl), checksum and
   signature verified". The PR-token gap found on alpha.7 is closed. Evidence
   rung: real, Linux only; macOS and the refusal paths remain stub-tested.
+
+## R1 batch 6 and D1 detection rules (2026-10-09)
+
+- Batch 6: 15 real in-scope breaks + 3 controls, held out, no exclusions.
+  alpha.8 engine: caught 9 of 15; 2 NOT EVALUATED; 4 silent misses; controls
+  3 of 3 clean. Combined held-out (batches 4 to 6): 22 of 40 caught, 45%
+  missed. R1 remains FALSIFIED.
+- D1 (TypeScript Omit in new types; Python unannotated class fields), spec
+  and engine frozen before batch 6: identical result on batch 6 (no
+  applicable case). Tuning effect only: batch 5 from 7 to 9 of 15. No change
+  on any other case or control across all 85 cases. Engine 0.1.0-alpha.9
+  (not tagged).

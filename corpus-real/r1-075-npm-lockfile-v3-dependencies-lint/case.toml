@@ -1,0 +1,21 @@
+[case]
+id = "r1-075"
+title = "npm lockfile v3 dropped the top-level dependencies tree; lockfile-lint read it"
+source = "https://github.com/lirantal/lockfile-lint/commit/c7817c68cb2bcfeb471a55e39a44e3f8cbf69b4f"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "other"
+batch = "6"
+
+[expected]
+residue = "dependencies"
+evidence = "Behavioural: dropped when lockfileVersion is 3 or more; key still in code"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

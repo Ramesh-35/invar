@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-071"
+producer = "github:Arksine/moonraker@f3ae6da635ecb27a6dc111080add504a0938d8dc:moonraker/plugins/update_manager.py"
+producer_base = "github:Arksine/moonraker@e9ab5fb480135285d750935202c22874f384ff1c:moonraker/plugins/update_manager.py"
+consumer = "github:fluidd-core/fluidd@2b283e46d255bed9aa021c8381534ec80aa2b428:src/store/version/getters.ts"

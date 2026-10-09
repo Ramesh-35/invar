@@ -1,0 +1,21 @@
+[case]
+id = "r1-076"
+title = "Woodpecker 2.0 renamed link_url to forge_url; terraform provider read repo.Link"
+source = "https://github.com/Kichiyaki/terraform-provider-woodpecker/commit/014265dc570d3fb0a07c4bdfa61497263bf9d404"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "field_renamed"
+batch = "6"
+
+[expected]
+residue = "link_url"
+evidence = "Consumer reads the Go field (SDK), not the JSON key"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

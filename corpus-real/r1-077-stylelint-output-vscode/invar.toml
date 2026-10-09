@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-077"
+producer = "github:stylelint/stylelint@f557581d935f1b37ceb312d590b746122b560699:lib/prepareReturnValue.mjs"
+producer_base = "github:stylelint/stylelint@9130739fe875226dc42842910e49aa0b739d3ec9:lib/prepareReturnValue.mjs"
+consumer = "github:stylelint/vscode-stylelint@9306e31471a33aca7f258ceae0b77e1321412615:src/utils/stylelint/process-linter-result.ts"

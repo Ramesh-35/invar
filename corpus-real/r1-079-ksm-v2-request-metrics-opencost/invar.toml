@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-079"
+producer = "github:kubernetes/kube-state-metrics@f8bcc024791126e1a8b3f7d07e4392a5373b66e7:internal/store/pod.go"
+producer_base = "github:kubernetes/kube-state-metrics@957e2b82e42ec367efe5a25f253f5e967c133704:internal/store/pod.go"
+consumer = "github:opencost/opencost@f386a3b61b38689d48b2b57383fb88569cc6d8c4:pkg/costmodel/costmodel.go"

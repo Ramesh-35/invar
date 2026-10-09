@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-082"
+producer = "github:gravitl/netmaker@e92f524fbea7d41c0713f63c238f33ebe4522b90:models/api_node.go"
+producer_base = "github:gravitl/netmaker@d1c51aed245a49c6d60eb4019fa8ebaae3a1cc47:models/api_node.go"
+consumer = "github:gravitl/netmaker-ui@e7fab547d897649a01760bdaea7d814674d653ab:src/route/nodes/netid/nodeId/NodeId.tsx"

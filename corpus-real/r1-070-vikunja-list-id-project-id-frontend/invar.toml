@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-070"
+producer = "github:go-vikunja/vikunja@869d4a336cb122df894acf040e02b6b2ba786fdb:pkg/models/tasks.go"
+producer_base = "github:go-vikunja/vikunja@80266d138380ca79895600076e906e446e102be1:pkg/models/tasks.go"
+consumer = "github:go-vikunja/frontend@ee732684bc149b2d388eb1c344f08e1c921a368e:src/models/task.ts"

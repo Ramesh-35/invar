@@ -382,3 +382,52 @@ Still silent after A1: request-side changes with no field mention
 (r1-051, r1-060), an envelope added around a field (r1-053), a key kept only
 for older schema versions (r1-054), and a default format switch (r1-059).
 Results: r1-batch5-alpha5.tsv, r1-batch5-a1.tsv.
+
+## Batch 6: held out, in scope (2026-10-09)
+
+D1 detection rules frozen at 10:09:07Z (D1-SPEC.md, sha256 05015a40...b279)
+and the D1 engine frozen at 10:13:01Z, both before batch 6 was sourced. Same
+admission rules as batches 4 and 5; all 18 candidates passed (pinned files
+fetched, change and consumer read confirmed); none excluded. Two weak cases
+admitted and labelled (r1-077, r1-081). Concentration: home-assistant 2,
+Klipper 2 (one control), opencost as consumer 2.
+
+| Case | Break | alpha.8 engine | D1 engine |
+|---|---|---|---|
+| r1-068 Home Assistant to frontend | otbr/info fields moved under a keyed dict | MISSED | MISSED |
+| r1-069 Home Assistant to frontend | log fields moved under log_message | NOT EVALUATED | NOT EVALUATED |
+| r1-070 Vikunja to frontend | `list_id` renamed `project_id` | CAUGHT | CAUGHT |
+| r1-071 Moonraker to fluidd | `client` key became the repo name | NOT EVALUATED | NOT EVALUATED |
+| r1-072 Klipper to KlipperScreen | `max_accel_to_decel` removed | CAUGHT | CAUGHT |
+| r1-073 TypeDoc to docusaurus plugin | `kindString` removed | CAUGHT | CAUGHT |
+| r1-074 ESLint to typescript-eslint | `nodeType` removed | CAUGHT | CAUGHT |
+| r1-075 npm to lockfile-lint | top-level `dependencies` dropped in v3 | MISSED | MISSED |
+| r1-076 Woodpecker to terraform provider | `link_url` renamed `forge_url` (read via Go SDK field) | MISSED | MISSED |
+| r1-077 Stylelint to vscode-stylelint | `output` removed (weak) | CAUGHT | CAUGHT |
+| r1-078 go-ethereum to hardhat | `totalDifficulty` removed | CAUGHT | CAUGHT |
+| r1-079 kube-state-metrics to opencost | request metric names removed | MISSED | MISSED |
+| r1-080 kubelet to opencost | `container_name`, `pod_name` labels removed | CAUGHT | CAUGHT |
+| r1-081 Terraform to terraform-json | `unlinked` removed (weak) | CAUGHT | CAUGHT |
+| r1-082 Netmaker to netmaker-ui | `macaddress` moved to Host | CAUGHT, plus 9 other fields that also moved to Host and that the consumer reads | same |
+| r1-083 control, Klipper adds idle_timeout | none | CLEAN | CLEAN |
+| r1-084 control, esbuild adds `original` | none | CLEAN | CLEAN |
+| r1-085 control, Alertmanager adds routeLabels | none | CLEAN | CLEAN |
+
+**Batch 6 (frozen alpha.8 engine): caught 9 of 15, 2 NOT EVALUATED, 4 silent
+misses (27%). Not caught: 6 of 15 (40%). Controls 3 of 3 clean.**
+
+**D1 on held-out data: no measurable effect.** Batch 6 contains no TypeScript
+`Omit` in a new type and no Python unannotated class field, so neither rule
+applied; the result is identical. D1's only measured effect is on tuning data
+(batch 5: r1-052 and r1-054 now CAUGHT). It is untested on held-out data, not
+shown to help or hurt.
+
+**Combined in-scope held-out detection (batches 4, 5, 6, each on the engine
+frozen before it): caught 22 of 40, 45% missed.** R1 remains FALSIFIED
+(bar: 20%).
+
+Still out of reach in batch 6: fields moved under a new key or envelope
+(r1-068, r1-069, r1-071), a default format version switch (r1-075), a consumer
+reading the Go field name of an SDK rather than the JSON key (r1-076), and
+metric names inside PromQL strings that changed form (r1-079).
+Results: r1-batch6-alpha8.tsv, r1-batch6-d1.tsv, r1-batch5-d1.tsv.

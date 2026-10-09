@@ -379,6 +379,9 @@ fn py_fields(text: &str) -> Fields {
         if let Some((name, ty)) = decl_name_type(t) {
             let key = quoted_after(t, "alias").map(str::to_string).unwrap_or(name);
             out.insert((cls.clone(), key), Some(ty));
+        } else if let Some((name, callee)) = py_assigned_field(t) {
+            // D1 rule 2: `name = models.CharField(...)`, `x = FooSerializer()`.
+            out.insert((cls.clone(), name), Some(callee));
         }
     }
     out
@@ -576,6 +579,98 @@ pub fn mention_lines(source: &str, name: &str) -> Vec<usize> {
         if hit {
             out.push(ln + 1);
         }
+    }
+    out
+}
+
+/// D1 rule 2: a Python class-body `name = Callee(...)` whose callee ends in
+/// Field, Serializer, Column or ForeignKey; returns (name, callee's last
+/// segment). ALL_CAPS names and dunders are not fields.
+fn py_assigned_field(t: &str) -> Option<(String, String)> {
+    let name = ident_at(t, 0)?;
+    if name.starts_with("__") || !name.bytes().any(|b| b.is_ascii_lowercase()) {
+        return None;
+    }
+    let rest = t[name.len()..].trim_start().strip_prefix('=')?;
+    if rest.starts_with('=') {
+        return None;
+    }
+    let rest = rest.trim_start();
+    let end = rest.find('(')?;
+    let callee = &rest[..end];
+    if callee.is_empty() || !callee.bytes().all(|b| is_ident_byte(b) || b == b'.') {
+        return None;
+    }
+    let last = callee.rsplit('.').next().unwrap_or(callee);
+    ["Field", "Serializer", "Column", "ForeignKey"]
+        .iter()
+        .any(|s| last.ends_with(s))
+        .then(|| (name.to_string(), last.to_string()))
+}
+
+/// D1 rule 1: TypeScript `type T = Omit<..., "a" | "b">` (possibly nested or
+/// spread over lines): (T, omitted fields) for each such alias.
+pub fn ts_omissions(text: &str) -> Vec<(String, Vec<String>)> {
+    let mut out = Vec::new();
+    let lines: Vec<&str> = text.lines().collect();
+    let mut i = 0;
+    while i < lines.len() {
+        let t = lines[i].trim().trim_start_matches("export ").trim_start_matches("declare ");
+        let Some(rest) = t.strip_prefix("type ") else {
+            i += 1;
+            continue;
+        };
+        let Some(name) = ident_at(rest, 0) else {
+            i += 1;
+            continue;
+        };
+        // The statement runs to the first line ending in ';' (or 40 lines).
+        let mut stmt = String::new();
+        let mut j = i;
+        while j < lines.len() && j < i + 40 {
+            stmt.push_str(lines[j]);
+            stmt.push(' ');
+            if lines[j].trim_end().ends_with(';') {
+                break;
+            }
+            j += 1;
+        }
+        if let Some(eq) = stmt.find('=') {
+            if let Some(pos) = stmt[eq..].find("Omit<") {
+                let body = &stmt[eq + pos + 5..];
+                let (mut depth, mut last_comma, mut end) = (1i32, None, None);
+                for (k, c) in body.char_indices() {
+                    match c {
+                        '<' => depth += 1,
+                        '>' if k > 0 && body.as_bytes()[k - 1] == b'=' => {}
+                        '>' => {
+                            depth -= 1;
+                            if depth == 0 {
+                                end = Some(k);
+                                break;
+                            }
+                        }
+                        ',' if depth == 1 => last_comma = Some(k),
+                        _ => {}
+                    }
+                }
+                if let (Some(c), Some(e)) = (last_comma, end) {
+                    let keys: Vec<String> = body[c + 1..e]
+                        .split('|')
+                        .filter_map(|k| {
+                            let k = k.trim();
+                            let q = k.chars().next()?;
+                            (q == '"' || q == '\'').then(|| k.trim_matches(q).to_string())
+                        })
+                        .filter(|k| !k.is_empty())
+                        .collect();
+                    if !keys.is_empty() {
+                        out.push((name.to_string(), keys));
+                    }
+                }
+            }
+        }
+        i = j.max(i) + 1;
     }
     out
 }

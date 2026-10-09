@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-068"
+producer = "github:home-assistant/core@054242ff0fe419ba2ccf7ef2b58481297bc25b1a:homeassistant/components/otbr/websocket_api.py"
+producer_base = "github:home-assistant/core@14ec7e5f7655e21fa15c9fe6136ca008f72cd5df:homeassistant/components/otbr/websocket_api.py"
+consumer = "github:home-assistant/frontend@ef3758da5545fec9a776d3cea6ee4dd265a373ac:src/panels/config/integrations/integration-panels/thread/thread-config-panel.ts"

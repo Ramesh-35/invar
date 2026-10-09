@@ -1,0 +1,21 @@
+[case]
+id = "r1-077"
+title = "Stylelint 17 removed LinterResult.output; vscode-stylelint read it as a fallback"
+source = "https://github.com/stylelint/vscode-stylelint/commit/2bd3309f540e9889109c2643e6e342c23c898978"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "field_removed"
+batch = "6"
+
+[expected]
+residue = "output"
+evidence = "Weak: consumer read output only as a fallback after report"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

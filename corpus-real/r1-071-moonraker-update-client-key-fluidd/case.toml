@@ -1,0 +1,21 @@
+[case]
+id = "r1-071"
+title = "Moonraker keyed version_info by repo name instead of client; fluidd read the client key"
+source = "https://github.com/fluidd-core/fluidd/commit/5fbcb63053a4b8316085ea3f066ee247189625bb"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "other"
+batch = "6"
+
+[expected]
+residue = "client"
+evidence = "Key became the client's repo name; request side also changed"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

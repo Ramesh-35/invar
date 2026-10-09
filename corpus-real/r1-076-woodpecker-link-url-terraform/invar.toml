@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-076"
+producer = "github:woodpecker-ci/woodpecker@342b25826c93f76ec72ecf7d0d5b6e1e05485f50:server/model/repo.go"
+producer_base = "github:woodpecker-ci/woodpecker@451b71dcd43c7f8c615c0e958e1177a83b6b4fbd:server/model/repo.go"
+consumer = "github:Kichiyaki/terraform-provider-woodpecker@1763f24888e11751e73c2293b942af8a31d4bfc2:internal/models.go"

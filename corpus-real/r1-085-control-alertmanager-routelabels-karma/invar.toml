@@ -1,0 +1,7 @@
+[[invariant]]
+kind = "schema"
+id = "r1-085"
+producer = "github:prometheus/alertmanager@fe610eac3258f20b58d74d2e7500be995dfb2589:api/v2/openapi.yaml"
+producer_base = "github:prometheus/alertmanager@79e2677298be05e9440daa6c6f9950f3b8eedabf:api/v2/openapi.yaml"
+pointer = "/definitions/alertGroup"
+consumer = "github:prymitive/karma@6a545eff75ef47bf66d6a035b5ea33a104dd16d1:internal/mapper/v017/api.go"

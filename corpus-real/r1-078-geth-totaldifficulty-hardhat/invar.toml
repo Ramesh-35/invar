@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-078"
+producer = "github:ethereum/go-ethereum@40fd887df6812033f96941181549693d2cd5444d:internal/ethapi/api.go"
+producer_base = "github:ethereum/go-ethereum@db6ae7fa1249b29ad44fd52db751fef572ae43ae:internal/ethapi/api.go"
+consumer = "github:NomicFoundation/hardhat@c6efe1d749a3906144a5f63bc1182f8d2250cf2d:packages/hardhat-core/src/internal/core/jsonrpc/types/output/block.ts"

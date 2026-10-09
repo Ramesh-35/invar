@@ -1,0 +1,21 @@
+[case]
+id = "r1-078"
+title = "go-ethereum removed totalDifficulty from block JSON; hardhat required it"
+source = "https://github.com/NomicFoundation/hardhat/commit/cc6023b94dfcb2e224aac7c3ba255a8dc720a985"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "field_removed"
+batch = "6"
+
+[expected]
+residue = "totalDifficulty"
+evidence = ""
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

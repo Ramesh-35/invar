@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-083"
+producer = "github:Klipper3d/klipper@d5c031bc1326f38f7528ac83a6ed046b6d48bca5:klippy/extras/idle_timeout.py"
+producer_base = "github:Klipper3d/klipper@2cbb8959780f545a0dc410ae91c49452abd0d5e5:klippy/extras/idle_timeout.py"
+consumer = "github:KlipperScreen/KlipperScreen@30b8795a6aec17e66262f560d0e95daaae919e12:screen.py"

@@ -1,0 +1,21 @@
+[case]
+id = "r1-082"
+title = "Netmaker moved macaddress from node to host; netmaker-ui read node.macaddress"
+source = "https://github.com/gravitl/netmaker-ui/commit/ab1c889cde873b926bf1e62524702ce26471f3cc"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "other"
+batch = "6"
+
+[expected]
+residue = "macaddress"
+evidence = "Moved to the Host model in another file"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

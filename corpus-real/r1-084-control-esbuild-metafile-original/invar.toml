@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-084"
+producer = "github:evanw/esbuild@92343786415fe8e8e5ad145fd24e8955fab2c142:internal/bundler/bundler.go"
+producer_base = "github:evanw/esbuild@d59ca10826dad14816ea00deddf93234c7eb614e:internal/bundler/bundler.go"
+consumer = "github:btd/esbuild-visualizer@b28bc694b6f5391038366cfa543cdffc28d9068c:plugin/index.ts"

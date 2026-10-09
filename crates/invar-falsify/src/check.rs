@@ -14,7 +14,7 @@ use crate::invariant::{check_contract, payload_read_sites, ContractInput, Step};
 use crate::resolver::{is_remote, Fetched, Resolver};
 use crate::surface::{
     broad_reads, changed_fields, code_fields, field_names, mention_lines, moved_fields, name_key,
-    spec_fields, Fields,
+    spec_fields, ts_omissions, Fields,
 };
 
 pub type Sections = Vec<(String, Vec<(String, String)>)>;
@@ -229,6 +229,7 @@ fn schema_outcome(
     // Change-scoped: collect what changed in each producer source.
     let mut changed: BTreeMap<String, (Option<(String, String)>, String)> = BTreeMap::new();
     let mut moved: Vec<(String, String, Vec<String>, String)> = Vec::new();
+    let mut omitted: Vec<(String, String)> = Vec::new();
     let mut add = |head_spec: &str, head: &Fields, base: &Fields, where_: String| {
         for (name, tc) in changed_fields(base, head) {
             changed.entry(name).or_insert((tc, where_.clone()));
@@ -246,6 +247,7 @@ fn schema_outcome(
             .trim()
             .to_string();
         add(&p, &head_f, &base_f, where_);
+        omitted.extend(new_omissions(&p, &pr, &br, &base_f));
     }
     if let (Some(cs), Some(cbs)) = (&code, &code_base) {
         let cr_head = fetch(resolver, cs, prov)?;
@@ -253,6 +255,10 @@ fn schema_outcome(
         let head_f = source_fields(id, cs, &cr_head, None)?;
         let base_f = source_fields(id, cbs, &cr_base, None)?;
         add(cs, &head_f, &base_f, artifact_name(cs));
+        omitted.extend(new_omissions(cs, &cr_head, &cr_base, &base_f));
+    }
+    for (name, where_) in omitted {
+        changed.entry(name).or_insert((None, where_));
     }
     let cr = fetch(resolver, &c, prov)?;
     let reads = broad_reads(&cr);
@@ -317,6 +323,35 @@ fn schema_outcome(
         }
     }
     Ok((residue, witnesses, unevaluated))
+}
+
+/// D1 rule 1: fields that a TypeScript type introduced at head leaves out
+/// with `Omit`, and that the producer declared at base: (field, where).
+fn new_omissions(spec: &str, head: &str, base: &str, base_f: &Fields) -> Vec<(String, String)> {
+    let name = artifact_name(spec);
+    if !(name.ends_with(".ts") || name.ends_with(".tsx")) {
+        return Vec::new();
+    }
+    let declared = field_names(base_f);
+    let mut out = Vec::new();
+    for (t, keys) in ts_omissions(head) {
+        let introduced = !base.lines().any(|l| {
+            let l = l.trim().trim_start_matches("export ").trim_start_matches("declare ");
+            l.strip_prefix("type ")
+                .and_then(|r| r.strip_prefix(t.as_str()))
+                .map(|r| !r.starts_with(|c: char| c.is_ascii_alphanumeric() || c == '_'))
+                .unwrap_or(false)
+        });
+        if !introduced {
+            continue;
+        }
+        for k in keys {
+            if declared.contains(&k) && !out.iter().any(|(n, _)| n == &k) {
+                out.push((k, format!("{name} (Omit in {t})")));
+            }
+        }
+    }
+    out
 }
 
 /// 1-based trace lines (comments and blanks counted, as in an editor) where

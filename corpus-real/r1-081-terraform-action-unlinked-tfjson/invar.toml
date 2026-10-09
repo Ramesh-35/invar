@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-081"
+producer = "github:hashicorp/terraform@871451122f0c4cf031f5234adda1a7b8f1e464c3:internal/command/jsonprovider/schema.go"
+producer_base = "github:hashicorp/terraform@6847e763ded3d8ba9fb67854e55d93c45ed04afa:internal/command/jsonprovider/schema.go"
+consumer = "github:hashicorp/terraform-json@2eaedbecab678d315fab0b4ec89f650a913641fb:schemas.go"

@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-074"
+producer = "github:eslint/eslint@4bf739fb533e59f7f0a66b65f7bc80be0f37d8db:lib/linter/file-report.js"
+producer_base = "github:eslint/eslint@8257b5729d6a26f88b079aa389df4ecea4451a80:lib/linter/file-report.js"
+consumer = "github:typescript-eslint/typescript-eslint@94d0361fa761e6a2515fdb57f264033407de05e3:packages/rule-tester/src/RuleTester.ts"

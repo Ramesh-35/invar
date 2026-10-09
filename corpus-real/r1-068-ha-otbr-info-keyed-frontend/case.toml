@@ -1,0 +1,21 @@
+[case]
+id = "r1-068"
+title = "Home Assistant otbr/info became keyed by extended address; frontend read the flat fields"
+source = "https://github.com/home-assistant/frontend/pull/21172"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "other"
+batch = "6"
+
+[expected]
+residue = "active_dataset_tlvs,border_agent_id,channel,extended_address,url"
+evidence = "Fields moved one level down (dict keyed by extended address); also request side"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

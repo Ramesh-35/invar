@@ -1,0 +1,21 @@
+[case]
+id = "r1-073"
+title = "TypeDoc 0.24 JSON dropped kindString; docusaurus-plugin-typedoc-api read it"
+source = "https://github.com/milesj/docusaurus-plugin-typedoc-api/commit/a06d10f35976f9c3e536311b4e53ac7cf378cfff"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "field_removed"
+batch = "6"
+
+[expected]
+residue = "kindString"
+evidence = ""
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

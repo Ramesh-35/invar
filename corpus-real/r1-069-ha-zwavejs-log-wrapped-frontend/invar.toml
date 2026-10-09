@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-069"
+producer = "github:home-assistant/core@1e18011603e5b8b790ff58d4929fadef890ac314:homeassistant/components/zwave_js/api.py"
+producer_base = "github:home-assistant/core@06c2e541c458813e9d0a9a256e78ac49c95d28ab:homeassistant/components/zwave_js/api.py"
+consumer = "github:home-assistant/frontend@9fbd594f37581f75e8c6a93914b36e30d15e1f04:src/panels/config/integrations/integration-panels/zwave_js/zwave_js-logs.ts"

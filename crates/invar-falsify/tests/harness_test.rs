@@ -1355,3 +1355,31 @@ fn a1_states_blind_spots() {
     assert_eq!((tc.0.as_str(), tc.1.as_str()), ("integer", "integer|null"));
     let _ = std::fs::remove_dir_all(&dir);
 }
+
+// ---------------------------------------------------------------------------
+// 32. D1: a TypeScript type introduced at head that Omits a field removes it;
+// Python unannotated class fields (`x = SomethingField()`) are fields.
+// ---------------------------------------------------------------------------
+#[test]
+fn d1_omit_and_python_assigned_fields() {
+    let dir = std::env::temp_dir().join(format!("invar-d1-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    let w = |n: &str, b: &str| std::fs::write(dir.join(n), b).unwrap();
+    let run = |cfg: &str| evaluate(&parse_sections("invar.toml", cfg).unwrap(), &Resolver::local(&dir)).unwrap();
+
+    let base = "type Modify<T, R> = Omit<T, keyof R> & R;\ninterface State31 {\n  isHealNetworkActive: boolean;\n  homeId: number;\n}\ntype Old = Omit<State31, \"homeId\">;\n";
+    w("s1.ts", base);
+    w("s2.ts", &format!("{base}type State32 = Omit<\n  Modify<State31, {{ isRebuildingRoutes: boolean }}>,\n  \"isHealNetworkActive\"\n>;\n"));
+    w("c.py", "active = state.get(\"isHealNetworkActive\")\nhid = state[\"homeId\"]\n");
+    let out = run("[[invariant]]\nkind = \"schema\"\nid = \"o\"\nproducer = \"s2.ts\"\nproducer_base = \"s1.ts\"\nconsumer = \"c.py\"\n");
+    assert_eq!(out[0].residue, ["isHealNetworkActive"], "only the Omit in the new type counts");
+    assert!(out[0].witnesses[0].missing_from.as_deref().unwrap().contains("Omit in State32"));
+
+    w("m1.py", "class DeviceSerializer(Serializer):\n    device_role = NestedDeviceRoleSerializer()\n    name = serializers.CharField(max_length=64)\n    MAX = Limit(3)\n");
+    w("m2.py", "class DeviceSerializer(Serializer):\n    role = NestedDeviceRoleSerializer()\n    name = serializers.CharField(max_length=64)\n    MAX = Limit(3)\n");
+    w("u.py", "dev = api_result[\"device_role\"]\n");
+    let out = run("[[invariant]]\nkind = \"schema\"\nid = \"p\"\nproducer = \"m2.py\"\nproducer_base = \"m1.py\"\nconsumer = \"u.py\"\n");
+    assert_eq!(out[0].residue, ["device_role"]);
+    let _ = std::fs::remove_dir_all(&dir);
+}

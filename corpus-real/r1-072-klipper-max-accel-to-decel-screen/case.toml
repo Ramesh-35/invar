@@ -1,0 +1,21 @@
+[case]
+id = "r1-072"
+title = "Klipper toolhead status dropped max_accel_to_decel; KlipperScreen read it"
+source = "https://github.com/KlipperScreen/KlipperScreen/commit/b7cbbee4d1ab2c64a4dc2e07ee7200f8dc6385b0"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "field_removed"
+batch = "6"
+
+[expected]
+residue = "max_accel_to_decel"
+evidence = "Replaced by minimum_cruise_ratio; consumer reads through a dynamic key"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

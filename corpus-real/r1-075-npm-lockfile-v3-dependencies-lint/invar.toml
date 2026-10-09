@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-075"
+producer = "github:npm/cli@9609e9eed87c735f0319ac0af265f4d406cbf800:workspaces/arborist/lib/shrinkwrap.js"
+producer_base = "github:npm/cli@97c32ed24d8fa2edcdbb9448839a1f1c9d8fb86f:workspaces/arborist/lib/shrinkwrap.js"
+consumer = "github:lirantal/lockfile-lint@dc5e71b7e13a6c9ad3b6033a99178c623d6fd870:packages/lockfile-lint-api/src/ParseLockfile.js"
