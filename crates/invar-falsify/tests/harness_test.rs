@@ -1414,3 +1414,57 @@ fn e1_envelope_relocation() {
     assert_eq!(out[0].residue, ["url"]);
     let _ = std::fs::remove_dir_all(&dir);
 }
+
+// ---------------------------------------------------------------------------
+// 34. F1: a default version/format selector that changed value turns a
+// would-be HOLDS into NOT FULLY EVALUATED; it never claims VIOLATED, and
+// adds nothing when there is residue.
+// ---------------------------------------------------------------------------
+#[test]
+fn f1_default_switch_is_stated_never_silent() {
+    let dir = std::env::temp_dir().join(format!("invar-f1-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    let w = |n: &str, b: &str| std::fs::write(dir.join(n), b).unwrap();
+    let run = |cfg: &str| evaluate(&parse_sections("invar.toml", cfg).unwrap(), &Resolver::local(&dir)).unwrap();
+
+    // Assignment form (r1-075 shape): the field survives, the default flips.
+    w("w1.js", "const defaultLockfileVersion = 2\nmodule.exports = { dependencies: tree(), lockfileVersion }\n");
+    w("w2.js", "const defaultLockfileVersion = 3\nmodule.exports = { dependencies: tree(), lockfileVersion }\n");
+    w("r.js", "check(lock.dependencies)\n");
+    let out = run("[[invariant]]\nkind = \"schema\"\nid = \"f\"\nproducer = \"w2.js\"\nproducer_base = \"w1.js\"\nconsumer = \"r.js\"\n");
+    assert!(out[0].residue.is_empty() && !out[0].violated(), "{:?}", out[0]);
+    assert_eq!(out[0].unevaluated.len(), 1, "{:?}", out[0].unevaluated);
+    assert!(out[0].unevaluated[0].contains("default selector 'defaultlockfileversion' changed 2 -> 3"), "{}", out[0].unevaluated[0]);
+
+    // Quoted-key form (r1-099 shape): a second emitted version appears while
+    // the old line survives.
+    w("q1.rs", "pub struct D { pub rrname: String }\nfn log(js: &mut J) { js.set_uint(\"version\", 2); }\n");
+    w("q2.rs", "pub struct D { pub rrname: String }\nfn log(js: &mut J) { js.set_uint(\"version\", 2); }\nfn log3(jb: &mut J) { jb.set_int(\"version\", 3); }\n");
+    w("fmt.ts", "lines.push(dns.rrname);\n");
+    let out = run("[[invariant]]\nkind = \"schema\"\nid = \"q\"\nproducer = \"q2.rs\"\nproducer_base = \"q1.rs\"\nconsumer = \"fmt.ts\"\n");
+    assert!(out[0].residue.is_empty());
+    assert!(out[0].unevaluated[0].contains("'version' changed 2 -> 3"), "{:?}", out[0].unevaluated);
+
+    // defaultValue form (r1-100 shape), boolean flip across pattern kinds.
+    w("v1.ts", "interface Q { state: string }\nconst q = { v8format: schema.boolean({ defaultValue: false }) };\n");
+    w("v2.ts", "interface Q { state: string }\nconst { v8format = true } = req.query;\n");
+    w("t.go", "s.State = payload.state\n");
+    let out = run("[[invariant]]\nkind = \"schema\"\nid = \"v\"\nproducer = \"v2.ts\"\nproducer_base = \"v1.ts\"\nconsumer = \"t.go\"\n");
+    assert!(out[0].unevaluated.iter().any(|u| u.contains("'v8format' changed false -> true")), "{:?}", out[0].unevaluated);
+
+    // Control: no selector change, no F1 noise.
+    w("c1.js", "const defaultLockfileVersion = 3\nexports.total = 1\n");
+    w("c2.js", "const defaultLockfileVersion = 3\nexports.total = 2\n");
+    let out = run("[[invariant]]\nkind = \"schema\"\nid = \"c\"\nproducer = \"c2.js\"\nproducer_base = \"c1.js\"\nconsumer = \"r.js\"\n");
+    assert!(out[0].unevaluated.is_empty() && out[0].residue.is_empty(), "{:?}", out[0]);
+
+    // With residue, F1 adds nothing: VIOLATED stands alone.
+    w("x1.py", "class S:\n    api_version = 1\n    total: int\n");
+    w("x2.py", "class S:\n    api_version = 2\n");
+    w("u.py", "t = d[\"total\"]\n");
+    let out = run("[[invariant]]\nkind = \"schema\"\nid = \"x\"\nproducer = \"x2.py\"\nproducer_base = \"x1.py\"\nconsumer = \"u.py\"\n");
+    assert_eq!(out[0].residue, ["total"]);
+    assert!(out[0].unevaluated.is_empty(), "{:?}", out[0].unevaluated);
+    let _ = std::fs::remove_dir_all(&dir);
+}

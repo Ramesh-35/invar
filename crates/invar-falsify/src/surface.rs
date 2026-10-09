@@ -24,7 +24,7 @@
 //! HONEST SCOPE: pattern matching, not parsing. Nested paths are flattened to
 //! names; consumer reads are not scoped (the consumer's types are unknown).
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use serde_json::Value;
 
@@ -808,6 +808,150 @@ pub fn relocated_keys(base: &str, head: &str, ext: &str) -> Vec<(String, String,
             .map(str::to_string)
             .collect();
         out.push((k.clone(), bmin, hmin, new));
+    }
+    out
+}
+
+/// F1: the value literal at the start of `s`, normalized: an integer, `true`,
+/// `false`, or a quoted integer / `v` + integer (quotes and the `v` stripped).
+fn selector_value(s: &str) -> Option<String> {
+    let b = s.as_bytes();
+    let first = *b.first()?;
+    if first == b'"' || first == b'\'' {
+        let q = first as char;
+        let end = s[1..].find(q)?;
+        let inner = &s[1..1 + end];
+        let digits = inner.strip_prefix(['v', 'V']).unwrap_or(inner);
+        return (!digits.is_empty() && digits.bytes().all(|c| c.is_ascii_digit()))
+            .then(|| digits.to_string());
+    }
+    if first.is_ascii_digit() {
+        let n = b.iter().take_while(|c| c.is_ascii_digit()).count();
+        let next = b.get(n);
+        return next
+            .is_none_or(|&c| !(c.is_ascii_alphanumeric() || c == b'_' || c == b'.'))
+            .then(|| s[..n].to_string());
+    }
+    for word in ["true", "false"] {
+        if s.starts_with(word)
+            && b.get(word.len())
+                .is_none_or(|&c| !(c.is_ascii_alphanumeric() || c == b'_'))
+        {
+            return Some(word.to_string());
+        }
+    }
+    None
+}
+
+/// F1 selector extraction (spec docs/falsification/F1-SPEC.md): per line,
+/// (name, value) pairs where the name contains `version` or `format`
+/// (case-insensitive), by four textual patterns: assignment (`name = v`,
+/// `name: v`, `name: Type = v`), `defaultValue` on the same line, a call
+/// argument (`name(v`, version names only), and a quoted key (`"name", v` or
+/// `"name": v`). Lines opening as comments are ignored. Returns
+/// lowercased name -> set of normalized values.
+pub fn default_selectors(text: &str) -> BTreeMap<String, BTreeSet<String>> {
+    let is_sel = |n: &str| {
+        let l = n.to_ascii_lowercase();
+        l.contains("version") || l.contains("format")
+    };
+    let mut out: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+    for raw in text.lines() {
+        let t = raw.trim_start();
+        if t.starts_with("//") || t.starts_with('#') || t.starts_with('*') || t.starts_with("/*")
+        {
+            continue;
+        }
+        let b = raw.as_bytes();
+        let ident = |c: u8| c.is_ascii_alphanumeric() || c == b'_';
+        let mut push = |name: &str, v: Option<String>| {
+            if let Some(v) = v {
+                out.entry(name.to_ascii_lowercase()).or_default().insert(v);
+            }
+        };
+        let mut i = 0;
+        while i < raw.len() {
+            let c = b[i];
+            if c == b'"' || c == b'\'' {
+                // Quoted key: `"name", v` or `"name": v`.
+                let Some(end) = raw[i + 1..].find(c as char) else {
+                    i += 1;
+                    continue;
+                };
+                let key = &raw[i + 1..i + 1 + end];
+                if is_sel(key) && key.bytes().all(ident) {
+                    let rest = raw[i + 2 + end..].trim_start();
+                    if let Some(r) = rest.strip_prefix([',', ':']) {
+                        push(key, selector_value(r.trim_start()));
+                    }
+                }
+                i += 2 + end;
+                continue;
+            }
+            if ident(c) && !c.is_ascii_digit() && (i == 0 || !ident(b[i - 1])) {
+                let mut j = i;
+                while j < raw.len() && ident(b[j]) {
+                    j += 1;
+                }
+                let name = &raw[i..j];
+                if is_sel(name) {
+                    let rest = &raw[j..];
+                    // Call argument, version names only (`.format(` is string
+                    // formatting in half the corpus's languages).
+                    if name.to_ascii_lowercase().contains("version") {
+                        if let Some(r) = rest.strip_prefix('(') {
+                            push(name, selector_value(r.trim_start()));
+                        }
+                    }
+                    // `defaultValue: v` / `defaultValue = v` on the same line.
+                    if let Some(p) = rest.find("defaultValue") {
+                        let r = rest[p + "defaultValue".len()..].trim_start();
+                        if let Some(r) = r.strip_prefix([':', '=']) {
+                            push(name, selector_value(r.trim_start()));
+                        }
+                    }
+                    // Assignment: `= v`, `: v`, or `: Type = v` (never `==`).
+                    let r = rest.trim_start();
+                    if let Some(r1) = r.strip_prefix('=') {
+                        if !r1.starts_with(['=', '>']) {
+                            push(name, selector_value(r1.trim_start()));
+                        }
+                    } else if let Some(r1) = r.strip_prefix(':') {
+                        let rt = r1.trim_start();
+                        if selector_value(rt).is_some() {
+                            push(name, selector_value(rt));
+                        } else if let Some(ep) = r1.find('=') {
+                            let after = &r1[ep + 1..];
+                            if !after.starts_with(['=', '>'])
+                                && !r1[..ep].contains([';', ',', '(', ')'])
+                            {
+                                push(name, selector_value(after.trim_start()));
+                            }
+                        }
+                    }
+                }
+                i = j;
+                continue;
+            }
+            i += 1;
+        }
+    }
+    out
+}
+
+/// F1: selectors whose head value set gained a value absent at base:
+/// (name, base values, new values). Names on only one side never count.
+pub fn selector_switches(base: &str, head: &str) -> Vec<(String, String, String)> {
+    let b = default_selectors(base);
+    let h = default_selectors(head);
+    let mut out = Vec::new();
+    for (name, hv) in &h {
+        let Some(bv) = b.get(name) else { continue };
+        let new: Vec<String> = hv.difference(bv).cloned().collect();
+        if !new.is_empty() {
+            let old: Vec<String> = bv.iter().cloned().collect();
+            out.push((name.clone(), old.join("|"), new.join("|")));
+        }
     }
     out
 }

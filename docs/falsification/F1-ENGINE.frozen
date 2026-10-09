@@ -1,0 +1,5 @@
+2026-10-09T12:05:33Z
+84bd5340300233d3fd4e84313df1a65a6cf79b21551fc1d8c20a8919d437c02e  invar-f1/target/release/invar (v0.1.0-alpha.11, F1)
+ff88777939eef4cda73253e95cf04186f1127d54c547e11592b87bf8b5a6f90a  invar-e1/target/release/invar (v0.1.0-alpha.10 engine, reference)
+f1 src d3e6a841b0acf632
+tuning sweep (batches 1-7, 105 cases): exactly r1-059, r1-075, r1-099, r1-100 flip MISSED -> UNEVALUATED; zero other outcome changes

@@ -669,3 +669,18 @@ in-scope batch is the only fair test of it.
 - Finding: rules written from earlier misses have not recurred in fresh
   batches; the recurring miss is a default version/format switch (4 cases in
   batches 5 to 7). Engine 0.1.0-alpha.10 (not tagged).
+
+## 2026-10-09 (later): F1 default-switch rule built; tuning sweep clean; batch 8 next
+
+- F1 spec frozen and committed (docs/falsification/F1-SPEC.md, hash in
+  F1-SPEC.frozen) before any batch 8 case was sourced.
+- v0.1.0-alpha.11 engine built with F1: a default version or format selector
+  whose value set gains a new value between base and head turns a would-be
+  HOLDS into NOT FULLY EVALUATED. F1 never claims VIOLATED. 34 tests green.
+- Tuning sweep, all 105 corpus cases (batches 1 to 7 plus controls), alpha.10
+  engine versus F1 engine: exactly the four known default-switch misses flip
+  MISSED -> UNEVALUATED (r1-059, r1-075, r1-099, r1-100). Zero other outcome
+  changes; no control flipped; the one preexisting control FALSE_POSITIVE is
+  identical in both engines. Evidence rung: tuning data. D1 and E1 also
+  looked exact on tuning data and changed nothing held out; the only score
+  that counts for F1 is batch 8, not yet sourced.

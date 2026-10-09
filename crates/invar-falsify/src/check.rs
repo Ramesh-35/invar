@@ -14,7 +14,7 @@ use crate::invariant::{check_contract, payload_read_sites, ContractInput, Step};
 use crate::resolver::{is_remote, Fetched, Resolver};
 use crate::surface::{
     broad_reads, changed_fields, code_fields, field_names, mention_lines, moved_fields, name_key,
-    relocated_keys, spec_fields, ts_omissions, Fields,
+    relocated_keys, selector_switches, spec_fields, ts_omissions, Fields,
 };
 
 pub type Sections = Vec<(String, Vec<(String, String)>)>;
@@ -231,6 +231,7 @@ fn schema_outcome(
     let mut moved: Vec<(String, String, Vec<String>, String)> = Vec::new();
     let mut omitted: Vec<(String, String)> = Vec::new();
     let mut relocs: Vec<(String, String, Vec<String>)> = Vec::new();
+    let mut switches: Vec<(String, String, String, String)> = Vec::new();
     let mut add = |head_spec: &str, head: &Fields, base: &Fields, where_: String| {
         for (name, tc) in changed_fields(base, head) {
             changed.entry(name).or_insert((tc, where_.clone()));
@@ -250,6 +251,9 @@ fn schema_outcome(
         add(&p, &head_f, &base_f, where_);
         omitted.extend(new_omissions(&p, &pr, &br, &base_f));
         relocs.extend(relocations(&p, &pr, &br));
+        for (n, old, new) in selector_switches(&br, &pr) {
+            switches.push((n, old, new, artifact_name(&p)));
+        }
     }
     if let (Some(cs), Some(cbs)) = (&code, &code_base) {
         let cr_head = fetch(resolver, cs, prov)?;
@@ -259,6 +263,9 @@ fn schema_outcome(
         add(cs, &head_f, &base_f, artifact_name(cs));
         omitted.extend(new_omissions(cs, &cr_head, &cr_base, &base_f));
         relocs.extend(relocations(cs, &cr_head, &cr_base));
+        for (n, old, new) in selector_switches(&cr_base, &cr_head) {
+            switches.push((n, old, new, artifact_name(cs)));
+        }
     }
     for (name, where_) in omitted {
         changed.entry(name).or_insert((None, where_));
@@ -332,6 +339,17 @@ fn schema_outcome(
             unevaluated.push(format!(
                 "{name} moved from {from} to {} in {where_}; consumer use at {cname}:{l} not evaluated",
                 to.join(", ")
+            ));
+        }
+    }
+    // F1: a default version or format selector changed while every field
+    // literal survived. Textual analysis cannot tell which output path the
+    // consumer now receives, so the honest verdict is "not evaluated",
+    // never HOLDS and never VIOLATED. With residue, F1 adds nothing.
+    if residue.is_empty() && !reads.is_empty() {
+        for (name, old, new, where_) in &switches {
+            unevaluated.push(format!(
+                "default selector '{name}' changed {old} -> {new} in {where_}; emission of the fields read in {cname} not evaluated"
             ));
         }
     }
