@@ -135,3 +135,25 @@ Falsified if no third party consumes the JSON or SARIF within 12 months.
 Also not now: more configuration options (ship a closed set, R5); an
 enterprise governance tier before R1 passes; new contract kinds before real
 evidence for the existing three.
+
+## R2 invar.lock: built (v0.1.0-alpha.5, 2026-10-08)
+
+Evidence rung: built and tested (30 tests, synthetic) plus one real replay
+(Erigon `totalDifficulty` to Otterscan, VIOLATED at the right read sites).
+Not measured on held-out data; the lock does not change the R1 detection rate.
+
+- `invar lock` writes `invar.lock` beside `invar.toml`: per contract the
+  producer reference, BLAKE3 of its bytes, `recorded_at` (t_r), and the slice:
+  each producer field the consumer reads, bound to its declaring type
+  (`Type.field`), with its type and acceptance day (t_v). Exit 3 LOCK_DRIFT
+  when the bindings would change.
+- `invar lock --update` accepts a reviewed producer change; waivers are kept.
+- `invar check` compares the live producer with the slice (replaces
+  `producer_base`); residue is reported as `Type.field`.
+- Waivers (`field`, `owner`, `reason`, `expires`) live in `invar.lock`, show as
+  `WAIVED (N days remaining)`, fail the check (exit 1) from `expires`, and may
+  run at most 90 days.
+- `invar mcp`: read-only stdio MCP server, tools `check` and `contract`.
+- `invar fix --suggest`: a unified diff only for a 1:1 remove-plus-add in the
+  same type; never writes, refuses in CI.
+- Exit 1 is VIOLATED only. Reference: `docs/reference/INVAR-LOCK.md`.

@@ -530,3 +530,16 @@ in-scope batch is the only fair test of it.
 - Source hash of commit 0dd1361 recomputed on the Mac: 3d7a023adc247ee5, equal to the
   sources that built the batch 4 binary (sha256 2d5d79e3...8115, rebuilt
   byte-identical).
+
+## v0.1.0-alpha.5: R2 invar.lock built (2026-10-09)
+
+- Built and tested in the cloud container (30 tests pass, synthetic) plus one
+  real replay (Erigon `totalDifficulty` to Otterscan through a lock). Not
+  measured on held-out data; detection is unchanged by the lock.
+- Without an invar.lock, results on all 49 corpus cases are identical to
+  alpha.4, except r1-023: its consumer is Java, now SKIPPED (founder
+  directive 2026-10-09: Java, Kotlin, Ruby join C, C++, C#, PHP, Swift as
+  unsupported). Its earlier PARTIAL came from reading Java as plain text; that
+  partial catch is given up for an honest SKIPPED.
+- Exit 1 means VIOLATED only; `invar lock` drift is exit 3 (LOCK_DRIFT);
+  waivers capped at 90 days. Reference: docs/reference/INVAR-LOCK.md.

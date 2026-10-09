@@ -842,8 +842,9 @@ fn action_report_and_manifest_are_sound() {
                 read_as: vec!["a`|b".into()],
             }],
             skipped: None,
+            ..Default::default()
         },
-        ContractOutcome { id: "ok".into(), kind: "event".into(), residue: vec![], provenance: vec![], witnesses: vec![], skipped: None },
+        ContractOutcome { id: "ok".into(), kind: "event".into(), ..Default::default() },
     ];
     let md = render_report_md(&outcomes);
     assert!(md.starts_with(REPORT_MARKER));
@@ -1166,7 +1167,7 @@ fn scoped_fields_and_skipped_languages() {
     assert_eq!(out[0].residue, vec!["line_no".to_string()], "parameter must not mask the removed key");
 
     // Unsupported language on either side: SKIPPED, nothing fetched.
-    for (producer, consumer) in [("rpc.cpp", "ui.js"), ("new.go", "App.swift"), ("Svc.cs", "ui.js"), ("svc.php", "ui.js")] {
+    for (producer, consumer) in [("rpc.cpp", "ui.js"), ("new.go", "App.swift"), ("Svc.cs", "ui.js"), ("svc.php", "ui.js"), ("Order.java", "ui.js"), ("new.go", "Client.kt"), ("api.rb", "ui.js")] {
         let cfg = format!(
             "[[invariant]]\nkind = \"schema\"\nid = \"s\"\nproducer = \"{producer}\"\nproducer_base = \"{producer}\"\nconsumer = \"{consumer}\"\n"
         );
@@ -1177,5 +1178,138 @@ fn scoped_fields_and_skipped_languages() {
         let md = render_report_md(&out);
         assert!(md.contains("NOT FULLY EVALUATED (1 of 1 skipped)") && md.contains("| SKIPPED |"), "{md}");
     }
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+// ---------------------------------------------------------------------------
+// 29. R2 invar.lock: the locked slice replaces producer_base; Type.field
+// residue; waivers show days left and fail once expired; dates are strict;
+// the file round-trips and re-locking an unchanged producer rewrites nothing.
+// ---------------------------------------------------------------------------
+#[test]
+fn lockfile_slice_waivers_and_roundtrip() {
+    use invar_falsify::check::evaluate_with;
+    use invar_falsify::lock::{self, parse_date, Lock, Waiver};
+    let dir = std::env::temp_dir().join(format!("invar-lock-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    let w = |n: &str, b: &str| std::fs::write(dir.join(n), b).unwrap();
+    w("api.json", r#"{"components":{"schemas":{"Order":{"properties":{"amount_cents":{"type":"integer"},"currency":{"type":"string"},"note":{"type":"string"}}}}}}"#);
+    w("order.go", "type Order struct {\n\tAmountCents int64 `json:\"amount_cents\"`\n}\ntype Refund struct {\n\tAmountCents string `json:\"amount_cents\"`\n}\n");
+    w("client.js", "const a = order.amount_cents;\nconst c = order.currency;\n");
+    let cfg = "[[invariant]]\nkind = \"schema\"\nid = \"orders\"\nproducer = \"api.json\"\npointer = \"/components/schemas/Order\"\nproducer_code = \"order.go\"\nconsumer = \"client.js\"\n";
+    let sections = parse_sections("invar.toml", cfg).unwrap();
+    let r = Resolver::local(&dir);
+    let day = parse_date("2026-10-08").unwrap();
+
+    let l = lock::compute(&sections, &r, &Lock::default(), day).unwrap();
+    let shown: Vec<String> = l.contracts[0].bindings.iter().map(|b| format!("{} {}", b.source, b.display())).collect();
+    assert_eq!(shown, ["code Order.amount_cents", "code Refund.amount_cents", "spec Order.amount_cents", "spec Order.currency"], "unread `note` is not bound");
+    let text = lock::render(&l).unwrap();
+    assert_eq!(lock::parse("invar.lock", &text).unwrap(), l, "round-trip");
+    let again = lock::compute(&sections, &r, &l, day + 3).unwrap();
+    assert_eq!(again, l, "unchanged producer: same t_r and t_v");
+    assert!(lock::diff(&l, &again).is_empty());
+
+    // Unchanged producer holds. Producer retypes Order.amount_cents (not Refund's).
+    let out = evaluate_with(&sections, &r, Some(&l), day).unwrap();
+    assert!(out[0].residue.is_empty() && out[0].notes[0].starts_with("producer unchanged"));
+    w("order.go", "type Order struct {\n\tAmountCents string `json:\"amount_cents\"`\n}\ntype Refund struct {\n\tAmountCents string `json:\"amount_cents\"`\n}\n");
+    let out = evaluate_with(&sections, &r, Some(&l), day).unwrap();
+    assert_eq!(out[0].residue, ["Order.amount_cents"]);
+    assert_eq!(out[0].witnesses[0].type_change.as_ref().map(|t| (t.0.as_str(), t.1.as_str())), Some(("int64", "string")));
+
+    // Waiver: active -> WAIVED with days left, holds; expired -> violated.
+    let mut lw = l.clone();
+    lw.waivers.push(Waiver { contract: "orders".into(), field: "Order.amount_cents".into(), owner: "nikhil".into(), reason: "migration #42".into(), expires: "2026-11-01".into() });
+    let out = evaluate_with(&sections, &r, Some(&lw), day).unwrap();
+    assert!(!out[0].violated() && out[0].waived[0].3 == 24, "{:?}", out[0]);
+    assert!(render_report_md(&out).contains("WAIVED `Order.amount_cents` (24 days remaining"));
+    let out = evaluate_with(&sections, &r, Some(&lw), parse_date("2026-11-01").unwrap()).unwrap();
+    assert!(out[0].violated() && out[0].expired.len() == 1, "expires day fails closed");
+    assert!(render_report_md(&out).contains("WAIVER EXPIRED"));
+    // 90-day cap: 91 days away is rejected (an ERROR), 90 is allowed.
+    let mut capped = lw.clone();
+    capped.waivers[0].expires = lock::format_date(day + 91);
+    assert!(evaluate_with(&sections, &r, Some(&capped), day).is_err(), "over the 90-day cap");
+    capped.waivers[0].expires = lock::format_date(day + 90);
+    assert!(evaluate_with(&sections, &r, Some(&capped), day).is_ok());
+    lw.waivers[0].contract = "nope".into();
+    assert!(evaluate_with(&sections, &r, Some(&lw), day).is_err(), "waiver for unknown contract");
+
+    // The lock replaces producer_base; a different producer in invar.toml is an error.
+    let moved = cfg.replace("api.json", "api2.json");
+    w("api2.json", "{}");
+    assert!(evaluate_with(&parse_sections("invar.toml", &moved).unwrap(), &r, Some(&l), day).is_err());
+
+    // Strict dates and file errors.
+    for bad in ["2026-02-30", "2026-13-01", "26-10-08", "2026-10-8"] {
+        assert!(parse_date(bad).is_none(), "{bad}");
+    }
+    assert_eq!(lock::format_date(day), "2026-10-08");
+    assert!(lock::parse("x", "[lock]\nformat = \"9\"\n").is_err());
+    assert!(lock::parse("x", "[lock]\nformat = \"1\"\n[[waiver]]\ncontract = \"a\"\nfield = \"f\"\nowner = \"o\"\nreason = \"\"\nexpires = \"2026-01-01\"\n").is_err(), "empty reason");
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+// ---------------------------------------------------------------------------
+// 30. R2.1/R2.2: `invar fix --suggest` proposes a patch only for a 1:1 rename
+// in the same type; `invar mcp` answers check/contract read-only.
+// ---------------------------------------------------------------------------
+#[test]
+fn fix_suggest_and_mcp_server() {
+    use invar_falsify::lock::{self, parse_date, Lock};
+    use invar_falsify::mcp::Server;
+    let dir = std::env::temp_dir().join(format!("invar-fix-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    let w = |n: &str, b: &str| std::fs::write(dir.join(n), b).unwrap();
+    w("order.go", "type Order struct {\n\tAmountCents int64 `json:\"amount_cents\"`\n\tCurrency string `json:\"currency\"`\n}\n");
+    w("client.js", "const t = 0; // amount_cents_total stays\nconst a = order.amount_cents;\n");
+    let cfg = "[[invariant]]\nkind = \"schema\"\nid = \"orders\"\nproducer = \"order.go\"\nconsumer = \"client.js\"\n";
+    w("invar.toml", cfg);
+    let sections = parse_sections("invar.toml", cfg).unwrap();
+    let r = Resolver::local(&dir);
+    let day = parse_date("2026-10-08").unwrap();
+    let l = lock::compute(&sections, &r, &Lock::default(), day).unwrap();
+    std::fs::write(dir.join("invar.lock"), lock::render(&l).unwrap()).unwrap();
+
+    let run = |go: &str| {
+        w("order.go", go);
+        let res = lock::check_contract(&l.contracts[0], "order.go", None, None, "client.js", &r, &mut Vec::new()).unwrap();
+        let residue: Vec<(String, bool)> = res.witnesses.iter().map(|x| (x.residue.clone(), x.missing_from.is_some() && x.type_change.is_none())).collect();
+        invar_falsify::fix::suggest(&l.contracts[0], &res.live_members, &residue, "client.js", &std::fs::read_to_string(dir.join("client.js")).unwrap())
+    };
+    let s = run("type Order struct {\n\tAmountMinor int64 `json:\"amount_minor\"`\n\tCurrency string `json:\"currency\"`\n}\n");
+    assert_eq!(s[0].rename_to.as_deref(), Some("amount_minor"));
+    let p = s[0].patch.as_deref().unwrap();
+    assert!(p.contains("@@ -2 +2 @@\n-const a = order.amount_cents;\n+const a = order.amount_minor;"), "{p}");
+    assert!(!p.contains("amount_cents_total stays\n+"), "whole identifiers only");
+    let s = run("type Order struct {\n\tAmountMinor int64 `json:\"amount_minor\"`\n\tCurrency string `json:\"currency\"`\n\tTax int `json:\"tax\"`\n}\n");
+    assert!(s[0].rename_to.is_none() && s[0].note.as_deref().unwrap().contains("not a 1:1 rename"), "two additions: ambiguous");
+    let s = run("type Order struct {\n\tAmountCents string `json:\"amount_cents\"`\n\tCurrency string `json:\"currency\"`\n}\n");
+    assert!(s[0].patch.is_none() && s[0].note.as_deref().unwrap().starts_with("type change"));
+
+    // MCP: initialize, list, both tools, unknown method; notifications get no reply.
+    let server = Server { config: dir.join("invar.toml"), transport: None, token: None, today: day };
+    let input = concat!(
+        r#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05"}}"#, "\n",
+        r#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#, "\n",
+        r#"{"jsonrpc":"2.0","id":2,"method":"tools/list"}"#, "\n",
+        r#"{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"check"}}"#, "\n",
+        r#"{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"contract"}}"#, "\n",
+        r#"{"jsonrpc":"2.0","id":5,"method":"nope"}"#, "\n",
+    );
+    let mut out = Vec::new();
+    server.serve(input.as_bytes(), &mut out).unwrap();
+    let replies: Vec<serde_json::Value> = String::from_utf8(out).unwrap().lines().map(|l| serde_json::from_str(l).unwrap()).collect();
+    assert_eq!(replies.len(), 5, "no reply to a notification");
+    assert_eq!(replies[0]["result"]["protocolVersion"], "2024-11-05");
+    assert_eq!(replies[1]["result"]["tools"].as_array().unwrap().len(), 2);
+    let check = &replies[2]["result"]["structuredContent"];
+    assert_eq!(check["result"], "violated", "{check}");
+    assert_eq!(check["contracts"][0]["residue"][0]["field"], "Order.amount_cents");
+    assert!(replies[3]["result"]["structuredContent"]["contracts"][0]["bindings"].as_array().unwrap().iter().any(|b| b["field"] == "Order.amount_cents"));
+    assert_eq!(replies[4]["error"]["code"], -32601);
     let _ = std::fs::remove_dir_all(&dir);
 }

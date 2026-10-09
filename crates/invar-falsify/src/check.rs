@@ -18,7 +18,7 @@ use crate::surface::{
 
 pub type Sections = Vec<(String, Vec<(String, String)>)>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct ContractOutcome {
     pub id: String,
     pub kind: String,
@@ -29,10 +29,24 @@ pub struct ContractOutcome {
     /// Set when the contract was not evaluated because an artifact is in a
     /// language INVAR does not read. A skip is never a pass.
     pub skipped: Option<String>,
+    /// Residue covered by an active waiver: (field, owner, reason, days left).
+    pub waived: Vec<(String, String, String, i64)>,
+    /// Waivers past their `expires` date: (field, owner). Each fails the check.
+    pub expired: Vec<(String, String)>,
+    /// Facts about the evaluation that are not residue (lock state).
+    pub notes: Vec<String>,
 }
 
-/// Languages INVAR does not read (alpha.4 scope: Go, Python, JS/TS, Rust).
-fn unsupported_language(spec: &str) -> Option<&'static str> {
+impl ContractOutcome {
+    /// Violated: unwaived residue, or an expired waiver.
+    pub fn violated(&self) -> bool {
+        !self.residue.is_empty() || !self.expired.is_empty()
+    }
+}
+
+/// Languages INVAR does not read (scope: Go, Python, JS/TS, Rust); a contract
+/// naming one is SKIPPED, never an ERROR or a pass.
+pub(crate) fn unsupported_language(spec: &str) -> Option<&'static str> {
     let name = artifact_name(spec);
     let ext = name.rsplit('.').next().unwrap_or("").to_ascii_lowercase();
     Some(match ext.as_str() {
@@ -41,8 +55,19 @@ fn unsupported_language(spec: &str) -> Option<&'static str> {
         "cs" => "C#",
         "php" => "PHP",
         "swift" => "Swift",
+        "java" => "Java",
+        "kt" | "kts" => "Kotlin",
+        "rb" => "Ruby",
         _ => return None,
     })
+}
+
+/// First artifact in an unsupported language, as "language not supported (..)".
+pub(crate) fn unsupported_language_of(specs: &[&str]) -> Option<String> {
+    specs
+        .iter()
+        .filter(|s| !s.is_empty())
+        .find_map(|s| unsupported_language(s).map(|l| format!("language not supported ({l}: {})", artifact_name(s))))
 }
 
 /// Locates one residue item. `sites` are `file:line` in the consumer source
@@ -96,7 +121,7 @@ fn read_witnesses(
 
 const CODE_EXTS: [&str; 9] = ["go", "py", "ts", "tsx", "rs", "js", "jsx", "mjs", "cjs"];
 
-fn is_code(spec: &str) -> bool {
+pub(crate) fn is_code(spec: &str) -> bool {
     let ext = artifact_name(spec)
         .rsplit('.')
         .next()
@@ -109,7 +134,7 @@ fn is_code(spec: &str) -> bool {
 /// select `pointer`, and require a JSON object. Anything else is an
 /// evaluation ERROR: reading it as "defines nothing" would report HOLDS or
 /// invent residue (found by R1, 2026-10-08).
-fn load_object(
+pub(crate) fn load_object(
     id: &str,
     spec: &str,
     text: &str,
@@ -276,7 +301,7 @@ fn step_lines(trace: &str, step: &Step) -> Vec<usize> {
         .collect()
 }
 
-fn getk(pairs: &[(String, String)], k: &str) -> Option<String> {
+pub(crate) fn getk(pairs: &[(String, String)], k: &str) -> Option<String> {
     pairs.iter().find(|(kk, _)| kk == k).map(|(_, v)| v.clone())
 }
 
@@ -332,6 +357,10 @@ pub fn gather_blocks(sections: &Sections) -> Result<Vec<Vec<(String, String)>>> 
         bail!("invar.toml has no [[invariant]] blocks and no [producer]/[consumer] schema form");
     }
     Ok(blocks)
+}
+
+pub(crate) fn fetch_text(resolver: &Resolver, spec: &str, prov: &mut Vec<Fetched>) -> Result<String> {
+    fetch(resolver, spec, prov)
 }
 
 fn fetch(resolver: &Resolver, spec: &str, prov: &mut Vec<Fetched>) -> Result<String> {
@@ -410,7 +439,7 @@ fn witness_md(w: &Witness, kind: &str) -> String {
 /// Markdown report for a PR comment or job summary. States plainly that a
 /// contract violation is not a PROVEN_RESIDUE verdict.
 pub fn render_report_md(outcomes: &[ContractOutcome]) -> String {
-    let violated = outcomes.iter().filter(|o| !o.residue.is_empty()).count();
+    let violated = outcomes.iter().filter(|o| o.violated()).count();
     let skipped = outcomes.iter().filter(|o| o.skipped.is_some()).count();
     let mut s = String::new();
     s.push_str(REPORT_MARKER);
@@ -433,10 +462,25 @@ pub fn render_report_md(outcomes: &[ContractOutcome]) -> String {
     }
     s.push_str("| Contract | Kind | Result | Residue |\n|---|---|---|---|\n");
     for o in outcomes {
+        let mut extra: Vec<String> = o
+            .expired
+            .iter()
+            .map(|(f, owner)| format!("**WAIVER EXPIRED** {} (owner {})", md_code(f), md_code(owner)))
+            .collect();
+        extra.extend(o.waived.iter().map(|(f, owner, _, left)| {
+            format!(
+                "WAIVED {} ({left} day{} remaining, owner {})",
+                md_code(f),
+                if *left == 1 { "" } else { "s" },
+                md_code(owner)
+            )
+        }));
         let (result, residue) = if let Some(why) = &o.skipped {
             ("SKIPPED", md_code(why))
+        } else if !o.violated() {
+            (if o.waived.is_empty() { "holds" } else { "holds, WAIVED" }, extra.join(", "))
         } else if o.residue.is_empty() {
-            ("holds", String::new())
+            ("**VIOLATED**", extra.join(", "))
         } else {
             let mut cells: Vec<String> = o
                 .residue
@@ -450,6 +494,7 @@ pub fn render_report_md(outcomes: &[ContractOutcome]) -> String {
             if o.residue.len() > MAX_RESIDUE_SHOWN {
                 cells.push(format!("+{} more", o.residue.len() - MAX_RESIDUE_SHOWN));
             }
+            cells.extend(extra);
             ("**VIOLATED**", cells.join(", "))
         };
         s.push_str(&format!(
@@ -480,9 +525,30 @@ pub fn render_report_md(outcomes: &[ContractOutcome]) -> String {
     s
 }
 
-/// Evaluate every contract declared in the manifest.
+/// Evaluate every contract declared in the manifest (no lock, no waivers).
 pub fn evaluate(sections: &Sections, resolver: &Resolver) -> Result<Vec<ContractOutcome>> {
+    evaluate_with(sections, resolver, None, 0)
+}
+
+/// Evaluate with an `invar.lock`: a locked schema contract is checked against
+/// its locked slice (not `producer_base`), and waivers apply as of `today`
+/// (a day number, see `lock::today_utc`).
+pub fn evaluate_with(
+    sections: &Sections,
+    resolver: &Resolver,
+    lock: Option<&crate::lock::Lock>,
+    today: i64,
+) -> Result<Vec<ContractOutcome>> {
     let blocks = gather_blocks(sections)?;
+    if let Some(l) = lock {
+        let ids: Vec<String> = blocks.iter().filter_map(|b| getk(b, "id")).collect();
+        for w in &l.waivers {
+            if !ids.contains(&w.contract) {
+                bail!("invar.lock: waiver for unknown contract {:?}", w.contract);
+            }
+        }
+        crate::lock::validate_waivers(&l.waivers, today)?;
+    }
     let mut out = Vec::with_capacity(blocks.len());
     for (idx, b) in blocks.iter().enumerate() {
         let kind = getk(b, "kind").unwrap_or_default();
@@ -507,17 +573,38 @@ pub fn evaluate(sections: &Sections, resolver: &Resolver) -> Result<Vec<Contract
                     provenance: Vec::new(),
                     witnesses: Vec::new(),
                     skipped: Some(format!("language not supported ({lang}: {name})")),
+                    ..Default::default()
                 });
                 continue;
             }
         }
         let witnesses: Vec<Witness>;
+        let mut notes: Vec<String> = Vec::new();
         let residue = match kind.as_str() {
-            "schema" => {
-                let (r, w) = schema_outcome(&id, b, resolver, &mut prov)?;
-                witnesses = w;
-                r
-            }
+            "schema" => match lock.and_then(|l| l.contracts.iter().find(|c| c.id == id)) {
+                Some(entry) => {
+                    let r = crate::lock::check_contract(
+                        entry,
+                        &getk(b, "producer").context("schema invariant needs producer")?,
+                        getk(b, "pointer").as_deref(),
+                        getk(b, "producer_code").as_deref(),
+                        &getk(b, "consumer").context("schema invariant needs consumer")?,
+                        resolver,
+                        &mut prov,
+                    )?;
+                    notes = r.notes;
+                    witnesses = r.witnesses;
+                    r.residue
+                }
+                None => {
+                    if lock.is_some() {
+                        notes.push("not in invar.lock; run `invar lock --update` to lock it".into());
+                    }
+                    let (r, w) = schema_outcome(&id, b, resolver, &mut prov)?;
+                    witnesses = w;
+                    r
+                }
+            },
             "event" => {
                 let p = getk(b, "producer").context("event invariant needs producer")?;
                 let c = getk(b, "consumer").context("event invariant needs consumer")?;
@@ -561,14 +648,45 @@ pub fn evaluate(sections: &Sections, resolver: &Resolver) -> Result<Vec<Contract
             }
             other => bail!("unknown invariant kind {other:?} (schema|event|lock_order)"),
         };
-        out.push(ContractOutcome {
+        let mut o = ContractOutcome {
             id,
             kind,
             residue,
             provenance: prov,
             witnesses,
-            skipped: None,
-        });
+            notes,
+            ..Default::default()
+        };
+        if let Some(l) = lock {
+            apply_waivers(&mut o, &l.waivers, today);
+        }
+        out.push(o);
     }
     Ok(out)
+}
+
+/// Move waived residue out of `residue`; record expired waivers (which fail
+/// the contract) and active waivers that match nothing (which can go).
+pub fn apply_waivers(o: &mut ContractOutcome, waivers: &[crate::lock::Waiver], today: i64) {
+    for w in waivers.iter().filter(|w| w.contract == o.id) {
+        let left = w.days_left(today);
+        if left <= 0 {
+            o.expired.push((w.field.clone(), w.owner.clone()));
+            continue;
+        }
+        let before = o.residue.len();
+        let mut kept = Vec::new();
+        for r in std::mem::take(&mut o.residue) {
+            if w.covers(&r) {
+                o.waived.push((r, w.owner.clone(), w.reason.clone(), left));
+            } else {
+                kept.push(r);
+            }
+        }
+        o.residue = kept;
+        if o.residue.len() == before {
+            o.notes.push(format!("waiver for {} matches no residue; it can be removed", w.field));
+        }
+    }
+    o.witnesses.retain(|x| !o.waived.iter().any(|(f, ..)| f == &x.residue));
 }

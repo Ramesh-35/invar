@@ -5,7 +5,10 @@
 //!   1  configuration / manifest / dependency error; for `check`, at least one
 //!      contract VIOLATED
 //!   2  strict epistemic failure: any UNKNOWN under --strict, or a ledger break
-//!   3  `check` could not evaluate the manifest: an ERROR, never a verdict
+//!   3  `check` could not evaluate the manifest: an ERROR, never a verdict;
+//!      `lock`: LOCK_DRIFT (invar.lock would change) or an error; `lock`,
+//!      `mcp` and `fix` never use 1, which means VIOLATED
+//!   4  `check`: nothing violated, but some contracts were SKIPPED
 
 use std::path::{Path, PathBuf};
 use std::time::Duration;
@@ -13,7 +16,8 @@ use std::time::Duration;
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 
-use invar_falsify::check::{evaluate, render_report_md, witness_text};
+use invar_falsify::check::{evaluate_with, render_report_md, witness_text};
+use invar_falsify::lock;
 use invar_falsify::evaluator::{evaluate_case, CaseResult};
 use invar_falsify::init::{discover, render_manifest};
 use invar_falsify::ledger::Ledger;
@@ -44,6 +48,12 @@ enum Command {
     Verify(VerifyArgs),
     /// Check a cross-repository contract from an invar.toml (CI entrypoint).
     Check(CheckArgs),
+    /// Record the producer fields this repo reads in invar.lock.
+    Lock(LockArgs),
+    /// Read-only MCP server on stdio (tools: check, contract).
+    Mcp(McpArgs),
+    /// Suggest consumer patches for unambiguous field renames (never writes).
+    Fix(FixArgs),
     /// Scan a workspace and propose an invar.toml (heuristic discovery).
     Init(InitArgs),
     /// Verify and summarize a ledger; point to the adequacy matrix.
@@ -110,6 +120,34 @@ struct CheckArgs {
 }
 
 #[derive(Parser)]
+struct LockArgs {
+    #[arg(long, default_value = "invar.toml")]
+    config: String,
+    /// Accept a reviewed producer change: rewrite invar.lock from the live
+    /// producer (waivers are kept).
+    #[arg(long, default_value_t = false)]
+    update: bool,
+}
+
+#[derive(Parser)]
+struct McpArgs {
+    #[arg(long, default_value = "invar.toml")]
+    config: String,
+    /// Read local files only (no github: fetches).
+    #[arg(long, default_value_t = false)]
+    offline: bool,
+}
+
+#[derive(Parser)]
+struct FixArgs {
+    #[arg(long, default_value = "invar.toml")]
+    config: String,
+    /// Print suggestions as unified diffs. The only mode: fix never writes.
+    #[arg(long, default_value_t = false)]
+    suggest: bool,
+}
+
+#[derive(Parser)]
 struct InitArgs {
     /// Workspace root to scan; invar.toml is written here.
     #[arg(long, default_value = ".")]
@@ -148,6 +186,9 @@ fn main() {
         Command::Report(a) => dispatch(cmd_report(a)),
         Command::Verify(a) => dispatch(cmd_verify(a)),
         Command::Check(a) => dispatch(cmd_check(a)),
+        Command::Lock(a) => dispatch_r2(cmd_lock(a)),
+        Command::Mcp(a) => dispatch_r2(cmd_mcp(a)),
+        Command::Fix(a) => dispatch_r2(cmd_fix(a)),
         Command::Init(a) => dispatch(cmd_init(a)),
         Command::Audit(a) => dispatch(cmd_audit(a)),
         Command::Replay(a) => dispatch(cmd_replay(a)),
@@ -157,6 +198,18 @@ fn main() {
 
 /// Map a handler result to a process exit code. Handlers return the intended
 /// code on success; any surfaced error is a code-1 (config/dependency) failure.
+/// R2 commands keep exit 1 for VIOLATED only: their errors exit 3 (for
+/// `invar lock`, 3 also means LOCK_DRIFT: the lock is not confirmed current).
+fn dispatch_r2(result: Result<i32>) -> i32 {
+    match result {
+        Ok(code) => code,
+        Err(e) => {
+            eprintln!("ERROR (not a verdict): {e:#}");
+            3
+        }
+    }
+}
+
 fn dispatch(result: Result<i32>) -> i32 {
     match result {
         Ok(code) => code,
@@ -362,33 +415,14 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
             return Ok(3);
         }
     };
-    let base_dir = Path::new(&args.config)
-        .parent()
-        .filter(|p| !p.as_os_str().is_empty())
-        .map(Path::to_path_buf)
-        .unwrap_or_else(|| PathBuf::from("."));
+    let base_dir = base_dir_of(&args.config);
     let env = |k: &str| std::env::var(k).ok().filter(|v| !v.is_empty());
-    // `[check] max_remote_mb = N` raises or lowers the remote size limit.
-    let max_bytes = match sections
-        .iter()
-        .find(|(n, _)| n == "check")
-        .and_then(|(_, p)| p.iter().find(|(k, _)| k == "max_remote_mb"))
-    {
-        None => invar_falsify::resolver::MAX_REMOTE_BYTES,
-        Some((_, v)) => match v.trim().parse::<usize>() {
-            Ok(mb)
-                if mb >= 1 && mb * 1_000_000 <= invar_falsify::resolver::HARD_MAX_REMOTE_BYTES =>
-            {
-                mb * 1_000_000
-            }
-            _ => {
-                eprintln!(
-                    "ERROR (not a verdict): [check] max_remote_mb must be a whole number from 1 to {}",
-                    invar_falsify::resolver::HARD_MAX_REMOTE_BYTES / 1_000_000
-                );
-                return Ok(3);
-            }
-        },
+    let max_bytes = match max_remote_bytes(&sections) {
+        Ok(m) => m,
+        Err(e) => {
+            eprintln!("ERROR (not a verdict): {e}");
+            return Ok(3);
+        }
     };
     let curl = CurlTransport {
         max_bytes,
@@ -408,7 +442,22 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
             None
         },
     };
-    let outcomes = match evaluate(&sections, &resolver) {
+    let lock_path = base_dir_of(&args.config).join("invar.lock");
+    let lock_file = if lock_path.exists() {
+        match std::fs::read_to_string(&lock_path)
+            .map_err(anyhow::Error::from)
+            .and_then(|t| lock::parse(&lock_path.display().to_string(), &t))
+        {
+            Ok(l) => Some(l),
+            Err(e) => {
+                eprintln!("ERROR (not a verdict): {e:#}");
+                return Ok(3);
+            }
+        }
+    } else {
+        None
+    };
+    let outcomes = match evaluate_with(&sections, &resolver, lock_file.as_ref(), lock::today_utc()) {
         Ok(o) => o,
         Err(e) => {
             eprintln!("ERROR (not a verdict): {e:#}");
@@ -429,12 +478,15 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
             skipped += 1;
             println!("  [SKIPPED]  {} ({}): {why}", o.id, o.kind);
             summaries.push(format!("{}:{}=SKIPPED", o.id, o.kind));
-        } else if o.residue.is_empty() {
+        } else if !o.violated() {
             println!("  [HOLDS]    {} ({})", o.id, o.kind);
             summaries.push(format!("{}:{}=HOLDS", o.id, o.kind));
         } else {
             violations += 1;
             println!("  [VIOLATED] {} ({}): {:?}", o.id, o.kind, o.residue);
+            for (f, owner) in &o.expired {
+                println!("      waiver EXPIRED: {f} (owner {owner}); renew or remove it in invar.lock");
+            }
             for w in &o.witnesses {
                 println!(
                     "      {}{}",
@@ -443,6 +495,12 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
                 );
             }
             summaries.push(format!("{}:{}=VIOLATED", o.id, o.kind));
+        }
+        for (f, owner, reason, left) in &o.waived {
+            println!("      WAIVED {f} ({left} day(s) remaining, owner {owner}): {reason}");
+        }
+        for n in &o.notes {
+            println!("      note: {n}");
         }
         for f in &o.provenance {
             println!(
@@ -601,6 +659,164 @@ fn cmd_replay(args: ReplayArgs) -> Result<i32> {
             "  - id={} kind={} subject={} t_v={} t_r={}",
             n.id, n.kind, n.subject, n.valid_time_us, n.transaction_time_us
         );
+    }
+    Ok(0)
+}
+
+fn base_dir_of(config: &str) -> PathBuf {
+    Path::new(config)
+        .parent()
+        .filter(|p| !p.as_os_str().is_empty())
+        .map(Path::to_path_buf)
+        .unwrap_or_else(|| PathBuf::from("."))
+}
+
+/// `[check] max_remote_mb = N` (1 to the hard cap) or the default.
+fn max_remote_bytes(sections: &[(String, Vec<(String, String)>)]) -> Result<usize, String> {
+    use invar_falsify::resolver::{HARD_MAX_REMOTE_BYTES, MAX_REMOTE_BYTES};
+    match sections
+        .iter()
+        .find(|(n, _)| n == "check")
+        .and_then(|(_, p)| p.iter().find(|(k, _)| k == "max_remote_mb"))
+    {
+        None => Ok(MAX_REMOTE_BYTES),
+        Some((_, v)) => match v.trim().parse::<usize>() {
+            Ok(mb) if mb >= 1 && mb * 1_000_000 <= HARD_MAX_REMOTE_BYTES => Ok(mb * 1_000_000),
+            _ => Err(format!(
+                "[check] max_remote_mb must be a whole number from 1 to {}",
+                HARD_MAX_REMOTE_BYTES / 1_000_000
+            )),
+        },
+    }
+}
+
+/// `invar lock`: write invar.lock beside invar.toml. Without `--update` it
+/// creates the file, or confirms it is current; it never overwrites a lock
+/// whose bindings would change (that is a reviewed `--update`).
+fn cmd_lock(args: LockArgs) -> Result<i32> {
+    let raw = std::fs::read_to_string(&args.config)
+        .with_context(|| format!("reading {}", args.config))?;
+    let sections = invar_falsify::config::parse_sections(&args.config, &raw)?;
+    let base_dir = base_dir_of(&args.config);
+    let lock_path = base_dir.join("invar.lock");
+    let prev = if lock_path.exists() {
+        lock::parse(
+            &lock_path.display().to_string(),
+            &std::fs::read_to_string(&lock_path)?,
+        )?
+    } else {
+        lock::Lock::default()
+    };
+    let curl = CurlTransport {
+        max_bytes: max_remote_bytes(&sections).map_err(anyhow::Error::msg)?,
+        ..CurlTransport::default()
+    };
+    let resolver = Resolver {
+        base_dir,
+        allow_remote: true,
+        token: std::env::var("GITHUB_TOKEN").ok().filter(|v| !v.is_empty()),
+        base_ref: None,
+        transport: Some(&curl as &dyn Transport),
+    };
+    lock::validate_waivers(&prev.waivers, lock::today_utc())?;
+    let next = lock::compute(&sections, &resolver, &prev, lock::today_utc())?;
+    let changes = lock::diff(&prev, &next);
+    let exists = lock_path.exists();
+    if exists && changes.is_empty() {
+        println!("invar.lock is current ({} contract(s))", next.contracts.len());
+        return Ok(0);
+    }
+    for c in &changes {
+        println!("  {c}");
+    }
+    if exists && !args.update {
+        println!("LOCK_DRIFT: invar.lock would change; review the lines above, then run `invar lock --update`");
+        return Ok(3);
+    }
+    std::fs::write(&lock_path, lock::render(&next)?)
+        .with_context(|| format!("writing {}", lock_path.display()))?;
+    let n: usize = next.contracts.iter().map(|c| c.bindings.len()).sum();
+    println!(
+        "wrote {} ({} contract(s), {n} binding(s))",
+        lock_path.display(),
+        next.contracts.len()
+    );
+    Ok(0)
+}
+
+/// `invar mcp`: serve `check` and `contract` over stdio until EOF.
+fn cmd_mcp(args: McpArgs) -> Result<i32> {
+    let curl = CurlTransport::default();
+    let server = invar_falsify::mcp::Server {
+        config: PathBuf::from(&args.config),
+        transport: if args.offline { None } else { Some(&curl as &dyn Transport) },
+        token: std::env::var("GITHUB_TOKEN").ok().filter(|v| !v.is_empty()),
+        today: lock::today_utc(),
+    };
+    let stdin = std::io::stdin();
+    server.serve(stdin.lock(), std::io::stdout())?;
+    Ok(0)
+}
+
+/// `invar fix --suggest`: for each locked contract, propose a consumer patch
+/// where a bound field was renamed 1:1 in its type. Prints only.
+fn cmd_fix(args: FixArgs) -> Result<i32> {
+    if !args.suggest {
+        anyhow::bail!("`invar fix` only suggests: run `invar fix --suggest` (it never writes files)");
+    }
+    if std::env::var("CI").map(|v| v == "true" || v == "1").unwrap_or(false) {
+        anyhow::bail!("`invar fix --suggest` is for local review and does not run in CI");
+    }
+    let raw = std::fs::read_to_string(&args.config)
+        .with_context(|| format!("reading {}", args.config))?;
+    let sections = invar_falsify::config::parse_sections(&args.config, &raw)?;
+    let base_dir = base_dir_of(&args.config);
+    let lock_file = invar_falsify::mcp::load_lock(Path::new(&args.config))?
+        .context("no invar.lock beside invar.toml; run `invar lock` first")?;
+    let curl = CurlTransport::default();
+    let resolver = Resolver {
+        base_dir,
+        allow_remote: true,
+        token: std::env::var("GITHUB_TOKEN").ok().filter(|v| !v.is_empty()),
+        base_ref: None,
+        transport: Some(&curl as &dyn Transport),
+    };
+    let mut any = false;
+    for b in invar_falsify::check::gather_blocks(&sections)? {
+        let get = |k: &str| b.iter().find(|(kk, _)| kk == k).map(|(_, v)| v.clone());
+        let Some(id) = get("id") else { continue };
+        let Some(entry) = lock_file.contracts.iter().find(|c| c.id == id) else { continue };
+        let (producer, consumer) = (get("producer").unwrap_or_default(), get("consumer").unwrap_or_default());
+        let r = lock::check_contract(
+            entry,
+            &producer,
+            get("pointer").as_deref(),
+            get("producer_code").as_deref(),
+            &consumer,
+            &resolver,
+            &mut Vec::new(),
+        )?;
+        if r.residue.is_empty() {
+            continue;
+        }
+        let text = resolver.resolve(&consumer).map_err(|e| anyhow::anyhow!("{e}"))?.text;
+        let residue: Vec<(String, bool)> = r
+            .witnesses
+            .iter()
+            .map(|w| (w.residue.clone(), w.missing_from.is_some() && w.type_change.is_none()))
+            .collect();
+        let name = invar_falsify::check::artifact_name(&consumer);
+        for s in invar_falsify::fix::suggest(entry, &r.live_members, &residue, &name, &text) {
+            any = true;
+            match (&s.rename_to, &s.patch) {
+                (Some(to), Some(p)) => println!("# {id}: {} renamed to {to}\n{p}", s.residue),
+                (Some(to), None) => println!("# {id}: {} renamed to {to}; {}", s.residue, s.note.unwrap_or_default()),
+                _ => println!("# {id}: {}: no suggestion ({})", s.residue, s.note.unwrap_or_default()),
+            }
+        }
+    }
+    if !any {
+        println!("no residue in locked contracts: nothing to suggest");
     }
     Ok(0)
 }

@@ -18,10 +18,13 @@
 pub mod check;
 pub mod config;
 pub mod evaluator;
+pub mod fix;
 pub mod init;
 pub mod invariant;
 pub mod ledger;
+pub mod lock;
 pub mod manifest;
+pub mod mcp;
 pub mod provenance;
 pub mod reality;
 pub mod yaml;
