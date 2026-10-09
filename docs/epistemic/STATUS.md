@@ -602,5 +602,13 @@ in-scope batch is the only fair test of it.
   - aarch64-apple-darwin: 516b603ee083de6b76cf4e35eacf5b329b9d58e5d65d9b825716c071d548285d (sig 3cd423df...a2c)
   - x86_64-apple-darwin: 1ea4fd639b9f6f86b6545d5f490c26bf094b4a7fac34e9be8c92f2fbfde5a576 (sig 97f91add...1d1)
   - x86_64-unknown-linux-musl: fdfa220c6e39b46fb6478f395a1461102a7bb551a8f731a4b921cc4c66f3a1d3 (sig 597353ab...60b)
-- The Action's verify path is tested only against a stub release so far; a
-  live run against this release is pending.
+- Live verification (2026-10-09): smoke repo run 37912445920 (workflow
+  invar-release.yml, token INVAR_TOKEN) downloaded the alpha.7 musl archive,
+  checked its SHA-256 ("OK") and its SSH signature: "invar: using release
+  v0.1.0-alpha.7 (x86_64-unknown-linux-musl), checksum and signature
+  verified". Evidence rung: real, one run, Linux only; the macOS paths and the
+  refusal paths are tested on a stub only.
+- Found: the smoke repo's PR workflow (invar-pr.yml) uses the default token,
+  which cannot read this private repo's releases, so it builds from source
+  every time ("release not found", run on 5d37337). The Action uses one token
+  for both downloading and commenting; a separate download token is next.
