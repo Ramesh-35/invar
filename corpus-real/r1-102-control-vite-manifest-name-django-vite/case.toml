@@ -1,0 +1,21 @@
+[case]
+id = "r1-102"
+title = "Control: Vite manifest added name; django-vite unaffected"
+source = "https://github.com/vitejs/vite/commit/6d6ae10f5d80a9c9b6737377333424fe76652b81"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "other"
+batch = "7"
+
+[expected]
+residue = "none"
+evidence = "Additive"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

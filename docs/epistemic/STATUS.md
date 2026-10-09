@@ -655,3 +655,17 @@ in-scope batch is the only fair test of it.
   applicable case). Tuning effect only: batch 5 from 7 to 9 of 15. No change
   on any other case or control across all 85 cases. Engine 0.1.0-alpha.9
   (not tagged).
+
+## R1 batch 7 and E1 envelope rule (2026-10-09)
+
+- Batch 7: 15 real in-scope breaks + 3 controls, held out, no exclusions.
+  alpha.8, D1 and E1 engines all identical: caught 8 of 15; 2 NOT EVALUATED;
+  5 silent misses; controls 2 clean, 1 NOT EVALUATED. Combined held-out
+  (batches 4 to 7): 30 of 55 caught, 45% missed. R1 remains FALSIFIED.
+- E1 (fields moved into a new envelope in Python/JS/TS/Go literals), spec and
+  engine frozen before batch 7: no applicable case in batch 7. Tuning effect
+  only (batch 6: r1-069 caught, r1-068 partial); no other change on any of
+  103 cases. D1 likewise untested on held-out data after two batches.
+- Finding: rules written from earlier misses have not recurred in fresh
+  batches; the recurring miss is a default version/format switch (4 cases in
+  batches 5 to 7). Engine 0.1.0-alpha.10 (not tagged).

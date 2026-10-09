@@ -1,0 +1,7 @@
+[[invariant]]
+kind = "schema"
+id = "r1-101"
+producer = "github:gotify/server@7bf80ee6f18b6f75b96d54da51b7612f88fba426:docs/spec.json"
+producer_base = "github:gotify/server@a44418265af48d80ee8e993609e891e74277ec02:docs/spec.json"
+pointer = "/definitions/Application"
+consumer = "github:gotify/cli@091c68721f12ddf9488aae609eb16bdc035b9899:command/initialize.go"

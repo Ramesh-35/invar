@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-091"
+producer = "github:vercel/next.js@b522b94cce523631b5d2aa5d86e437f51ae029ac:packages/next/build/webpack/plugins/middleware-plugin.ts"
+producer_base = "github:vercel/next.js@481950c34b9c7b2eeb051eb4dc966d0ed3bb9605:packages/next/build/webpack/plugins/middleware-plugin.ts"
+consumer = "github:netlify/next-runtime@e24534a4d42e3d9b8d1c1735fa8951410d6a9e47:packages/runtime/src/helpers/edge.ts"

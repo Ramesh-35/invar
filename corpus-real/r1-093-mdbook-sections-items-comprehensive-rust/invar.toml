@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-093"
+producer = "github:rust-lang/mdBook@800fb54aeb2ed5132d584de635c377b951cc8133:crates/mdbook-core/src/book.rs"
+producer_base = "github:rust-lang/mdBook@45e700db009b35ba670c5b738235af50d3a39b93:crates/mdbook-core/src/book.rs"
+consumer = "github:google/comprehensive-rust@90e9146eafc380bee72cb77f9a0e2732d4e98656:mdbook-course/src/course.rs"

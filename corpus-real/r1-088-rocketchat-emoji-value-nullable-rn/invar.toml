@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-088"
+producer = "github:RocketChat/fuselage@fbaee98c80864bf399de3bd1b2da9756429e5c98:packages/message-parser/src/definitions.ts"
+producer_base = "github:RocketChat/fuselage@875702a939b13056451db68b5a2780ae59d98d9e:packages/message-parser/src/definitions.ts"
+consumer = "github:RocketChat/Rocket.Chat.ReactNative@bf7473c39b20dfdc0e6712f519522f1bccba4aea:app/containers/markdown/new/Emoji.tsx"

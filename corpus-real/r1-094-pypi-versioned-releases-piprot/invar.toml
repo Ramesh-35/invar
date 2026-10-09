@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-094"
+producer = "github:pypi/warehouse@de96b45297c9ee1aa2ff86b60123ea69448cff19:warehouse/legacy/api/json.py"
+producer_base = "github:pypi/warehouse@8af303bd5b80fd8f2a0477469b245e441cbd7932:warehouse/legacy/api/json.py"
+consumer = "github:sesh/piprot@dc1057d95b97dd706c4c8bbe8e3733dfaaf472b8:piprot/piprot.py"

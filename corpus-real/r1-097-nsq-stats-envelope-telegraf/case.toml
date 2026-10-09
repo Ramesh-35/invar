@@ -1,0 +1,21 @@
+[case]
+id = "r1-097"
+title = "nsq 1.0 removed the {status_code, status_txt, data} envelope from /stats; telegraf decoded data"
+source = "https://github.com/influxdata/telegraf/commit/0a6541dfa8fc9ffec6b332f49a92e1e67767bef1"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "other"
+batch = "7"
+
+[expected]
+residue = "data"
+evidence = "Envelope removed (fields moved up)"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

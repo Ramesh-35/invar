@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-089"
+producer = "github:matrix-org/sliding-sync@ca6ceb28da789ca1d8288aad0a4a0088c64b0293:sync3/response.go"
+producer_base = "github:matrix-org/sliding-sync@3143b60c9fcc00a001bc2092f19771eea23c5786:sync3/response.go"
+consumer = "github:ruma/ruma@e37d064306af4338c1924eae803b39baacdf410e:crates/ruma-client-api/src/sync/sync_events/v4.rs"

@@ -1,0 +1,7 @@
+[[invariant]]
+kind = "schema"
+id = "r1-086"
+producer = "github:pi-hole/FTL@4686e534e5c010d0fde2088e70d8681da18c8dac:src/api/docs/content/specs/info.yaml"
+producer_base = "github:pi-hole/FTL@e8a844755d94200fb40092291e64a9f8f07b8881:src/api/docs/content/specs/info.yaml"
+pointer = "/components/schemas/ftl/properties/ftl/properties/database/properties/domains"
+consumer = "github:pi-hole/web@f046636be315f78c0ce372f59e6bb82c4ee2195e:scripts/js/footer.js"

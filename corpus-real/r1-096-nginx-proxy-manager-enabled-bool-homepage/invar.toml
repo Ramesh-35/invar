@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-096"
+producer = "github:NginxProxyManager/nginx-proxy-manager@4572b205c912db498706e9a3e8f1891c94129c88:backend/models/proxy_host.js"
+producer_base = "github:NginxProxyManager/nginx-proxy-manager@dfe2588523a602dd275fb6aadebfe37701dcbb36:backend/models/proxy_host.js"
+consumer = "github:gethomepage/homepage@cf9109384ee30937dff7c1a5872184ddf69ed21d:src/widgets/npm/component.jsx"

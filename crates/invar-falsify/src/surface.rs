@@ -674,3 +674,140 @@ pub fn ts_omissions(text: &str) -> Vec<(String, Vec<String>)> {
     }
     out
 }
+
+/// E1 rule 1: keys of dict/object/map literals with the path of literal keys
+/// that enclose them, e.g. ("log_message", "message"). A container opened
+/// under a non-literal key contributes "*". Python, JS/TS and Go only.
+pub fn key_paths(text: &str, ext: &str) -> Vec<(String, String)> {
+    let js = matches!(ext, "js" | "jsx" | "mjs" | "cjs" | "ts" | "tsx");
+    let py = ext == "py";
+    if !(js || py || ext == "go") {
+        return Vec::new();
+    }
+    let mut out = Vec::new();
+    // (opener, segment)
+    let mut stack: Vec<(u8, String)> = Vec::new();
+    let mut pending: Option<String> = None;
+    let path = |st: &Vec<(u8, String)>| {
+        st.iter()
+            .map(|(_, s)| s.as_str())
+            .filter(|s| !s.is_empty())
+            .collect::<Vec<_>>()
+            .join(".")
+    };
+    for line in text.lines() {
+        let b = line.as_bytes();
+        let mut i = 0;
+        while i < b.len() {
+            let c = b[i];
+            if (py && c == b'#') || ((js || ext == "go") && c == b'/' && b.get(i + 1) == Some(&b'/')) {
+                break;
+            }
+            let in_obj = stack.last().map(|(o, _)| *o == b'{').unwrap_or(false);
+            let after_colon = |j: usize| {
+                let r = line[j..].trim_start();
+                r.starts_with(':') && !r.starts_with("::")
+            };
+            if c == b'"' || c == b'\'' || c == b'`' {
+                let Some(len) = line[i + 1..].find(c as char) else { break };
+                let s = &line[i + 1..i + 1 + len];
+                let end = i + 2 + len;
+                if in_obj && is_field_like(s) && after_colon(end) {
+                    out.push((path(&stack), s.to_string()));
+                    pending = Some(s.to_string());
+                } else {
+                    pending = None;
+                }
+                i = end;
+                continue;
+            }
+            if c.is_ascii_alphabetic() || c == b'_' || c == b'$' {
+                let start = i;
+                while i < b.len() && (is_ident_byte(b[i]) || b[i] == b'$') {
+                    i += 1;
+                }
+                let id = &line[start..i];
+                if in_obj && after_colon(i) {
+                    if js {
+                        out.push((path(&stack), id.to_string()));
+                        pending = Some(id.to_string());
+                    } else {
+                        pending = Some("*".into());
+                    }
+                }
+                continue;
+            }
+            match c {
+                b'[' if js && in_obj && line[i..].contains("]:") && pending.is_none() => {
+                    // computed key `[k]: {`
+                    if let Some(e) = line[i..].find("]:") {
+                        i += e + 1;
+                        pending = Some("*".into());
+                        continue;
+                    }
+                }
+                b'[' if pending.is_some() && {
+                    let r = line[i + 1..].trim_start();
+                    r.starts_with(']') || r.split(']').next().map(|t| t.bytes().all(|x| is_ident_byte(x) || x == b'.')).unwrap_or(false) && r.contains(']') && !r.starts_with('{')
+                } && ext == "go" =>
+                {
+                    // Go type syntax like map[string]any or []T: not a container.
+                    if let Some(e) = line[i..].find(']') {
+                        i += e + 1;
+                        continue;
+                    }
+                }
+                b'{' | b'[' | b'(' => {
+                    let seg = if c == b'(' { String::new() } else { pending.take().unwrap_or_default() };
+                    stack.push((c, seg));
+                }
+                b'}' | b']' | b')' => {
+                    let open = match c { b'}' => b'{', b']' => b'[', _ => b'(' };
+                    if let Some(pos) = stack.iter().rposition(|(o, _)| *o == open) {
+                        stack.truncate(pos);
+                    }
+                    pending = None;
+                }
+                b',' | b';' | b'=' => pending = None,
+                _ => {}
+            }
+            i += 1;
+        }
+    }
+    out
+}
+
+/// E1 rule 2: keys whose head paths share none of their base paths and sit
+/// deeper at head: (key, base path, head path, new path segments).
+pub fn relocated_keys(base: &str, head: &str, ext: &str) -> Vec<(String, String, String, Vec<String>)> {
+    use std::collections::{BTreeMap, BTreeSet};
+    let index = |t: &str| {
+        let mut m: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+        for (p, k) in key_paths(t, ext) {
+            m.entry(k).or_default().insert(p);
+        }
+        m
+    };
+    let depth = |p: &str| if p.is_empty() { 0 } else { p.split('.').count() };
+    let (b, h) = (index(base), index(head));
+    let mut out = Vec::new();
+    for (k, bp) in &b {
+        let Some(hp) = h.get(k) else { continue };
+        if !bp.is_disjoint(hp) {
+            continue;
+        }
+        let bmin = bp.iter().min_by_key(|p| depth(p)).cloned().unwrap_or_default();
+        let hmin = hp.iter().min_by_key(|p| depth(p)).cloned().unwrap_or_default();
+        if depth(&hmin) <= depth(&bmin) {
+            continue;
+        }
+        let bsegs: BTreeSet<&str> = bmin.split('.').collect();
+        let new: Vec<String> = hmin
+            .split('.')
+            .filter(|s| !s.is_empty() && !bsegs.contains(s))
+            .map(str::to_string)
+            .collect();
+        out.push((k.clone(), bmin, hmin, new));
+    }
+    out
+}

@@ -14,7 +14,7 @@ use crate::invariant::{check_contract, payload_read_sites, ContractInput, Step};
 use crate::resolver::{is_remote, Fetched, Resolver};
 use crate::surface::{
     broad_reads, changed_fields, code_fields, field_names, mention_lines, moved_fields, name_key,
-    spec_fields, ts_omissions, Fields,
+    relocated_keys, spec_fields, ts_omissions, Fields,
 };
 
 pub type Sections = Vec<(String, Vec<(String, String)>)>;
@@ -230,6 +230,7 @@ fn schema_outcome(
     let mut changed: BTreeMap<String, (Option<(String, String)>, String)> = BTreeMap::new();
     let mut moved: Vec<(String, String, Vec<String>, String)> = Vec::new();
     let mut omitted: Vec<(String, String)> = Vec::new();
+    let mut relocs: Vec<(String, String, Vec<String>)> = Vec::new();
     let mut add = |head_spec: &str, head: &Fields, base: &Fields, where_: String| {
         for (name, tc) in changed_fields(base, head) {
             changed.entry(name).or_insert((tc, where_.clone()));
@@ -248,6 +249,7 @@ fn schema_outcome(
             .to_string();
         add(&p, &head_f, &base_f, where_);
         omitted.extend(new_omissions(&p, &pr, &br, &base_f));
+        relocs.extend(relocations(&p, &pr, &br));
     }
     if let (Some(cs), Some(cbs)) = (&code, &code_base) {
         let cr_head = fetch(resolver, cs, prov)?;
@@ -256,6 +258,7 @@ fn schema_outcome(
         let base_f = source_fields(id, cbs, &cr_base, None)?;
         add(cs, &head_f, &base_f, artifact_name(cs));
         omitted.extend(new_omissions(cs, &cr_head, &cr_base, &base_f));
+        relocs.extend(relocations(cs, &cr_head, &cr_base));
     }
     for (name, where_) in omitted {
         changed.entry(name).or_insert((None, where_));
@@ -263,6 +266,16 @@ fn schema_outcome(
     let cr = fetch(resolver, &c, prov)?;
     let reads = broad_reads(&cr);
     let cname = artifact_name(&c);
+    // E1 rule 3: a relocated key counts unless the consumer already mentions
+    // a new path segment (it reads the new envelope).
+    for (key, where_, new_segs) in relocs {
+        let adapted = new_segs
+            .iter()
+            .any(|s| s != "*" && !mention_lines(&cr, s).is_empty());
+        if !adapted {
+            changed.entry(key).or_insert((None, where_));
+        }
+    }
     let mut residue = Vec::new();
     let mut witnesses = Vec::new();
     for (name, (tc, where_)) in &changed {
@@ -323,6 +336,20 @@ fn schema_outcome(
         }
     }
     Ok((residue, witnesses, unevaluated))
+}
+
+/// E1: keys of runtime payloads that moved into a new envelope:
+/// (key, "file: moved from A to B", new path segments).
+fn relocations(spec: &str, head: &str, base: &str) -> Vec<(String, String, Vec<String>)> {
+    let name = artifact_name(spec);
+    let ext = name.rsplit('.').next().unwrap_or("");
+    relocated_keys(base, head, ext)
+        .into_iter()
+        .map(|(k, bp, hp, new)| {
+            let from = if bp.is_empty() { "the top level".to_string() } else { bp };
+            (k, format!("{name}: moved from {from} to {hp}"), new)
+        })
+        .collect()
 }
 
 /// D1 rule 1: fields that a TypeScript type introduced at head leaves out

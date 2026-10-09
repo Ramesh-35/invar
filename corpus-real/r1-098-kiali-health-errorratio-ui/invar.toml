@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-098"
+producer = "github:kiali/kiali@4d1484d5554bd1fc5b8e3e5ac12778bd90df7c0c:models/health.go"
+producer_base = "github:kiali/kiali@4da76eca3c00c03853a9c5ac0cabb0fbbb06aa84:models/health.go"
+consumer = "github:kiali/kiali-ui@c16c4db7ed2f33803d1d2bbcd8db6269ea03bedf:src/types/Health.ts"

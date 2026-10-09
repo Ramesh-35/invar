@@ -1,0 +1,21 @@
+[case]
+id = "r1-095"
+title = "pytest exitstatus became an IntEnum; pytest-xdist forwarded it over execnet"
+source = "https://github.com/pytest-dev/pytest-xdist/commit/fb40056950a0c7e008de03fb83c13ac2dbe52bd8"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "type_changed"
+batch = "7"
+
+[expected]
+residue = "exitstatus"
+evidence = "In-process hook value the consumer puts on the wire; weak fit to the data-contract definition"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

@@ -431,3 +431,57 @@ Still out of reach in batch 6: fields moved under a new key or envelope
 reading the Go field name of an SDK rather than the JSON key (r1-076), and
 metric names inside PromQL strings that changed form (r1-079).
 Results: r1-batch6-alpha8.tsv, r1-batch6-d1.tsv, r1-batch5-d1.tsv.
+
+## Batch 7: held out, in scope (2026-10-09)
+
+E1 envelope rule frozen at 10:43:30Z (E1-SPEC.md, sha256 612ed487...43e4)
+and the E1 engine (which includes D1) frozen at 10:46:26Z, both before batch 7
+was sourced; the sourcing prompts did not mention envelopes. Same admission
+rules; all 18 candidates passed; none excluded. Labelled: r1-095 (in-process
+hook value the consumer serialises; weak fit), r1-096 (homepage was also a
+consumer in batch 2). Concentration: telegraf is the consumer in 3 cases (one
+control), Next.js the producer in 2.
+
+Scored on three engines: alpha.8 (released), D1, E1. **All three gave
+identical results on every case.**
+
+| Case | Break | Result (all engines) |
+|---|---|---|
+| r1-086 Pi-hole FTL to web | domain counts integer to object | CAUGHT |
+| r1-087 Misskey to MiPAC | `emojis` removed | CAUGHT |
+| r1-088 Rocket.Chat parser to RN client | emoji `value` optional | CAUGHT |
+| r1-089 sliding-sync to ruma | `lists` array to map | CAUGHT |
+| r1-090 Bitwarden clients to vaultwarden | KDF params moved (request side) | CAUGHT, plus `kdfMemory`, `kdfParallelism` (also moved) |
+| r1-091 Next.js to netlify next-runtime | `regexp` replaced by `matchers[].regexp` | MISSED (name still present inside the new type) |
+| r1-092 Next.js to opennextjs-aws | `skipTrailingSlashRedirect` dropped by an allowlist elsewhere | NOT EVALUATED |
+| r1-093 mdBook to comprehensive-rust | `sections` renamed `items` | CAUGHT |
+| r1-094 PyPI to piprot | `releases` only on the unversioned endpoint | NOT EVALUATED |
+| r1-095 pytest to pytest-xdist | `exitstatus` int to IntEnum (in-process) | MISSED |
+| r1-096 Nginx Proxy Manager to homepage | `enabled` 0/1 to boolean via a conversion list | MISSED |
+| r1-097 nsq to telegraf | `{status_code, status_txt, data}` envelope removed | CAUGHT, plus `status_code`, `status_txt` (also removed) |
+| r1-098 Kiali to kiali-ui | `requestCount`, `requestErrorCount` removed | CAUGHT |
+| r1-099 Suricata to evebox | DNS v3 default moves `rrname`, `rrtype` into `queries[]` | MISSED (default version flip) |
+| r1-100 Kibana to telegraf | status default switches `state` to `level` | MISSED (default format flip) |
+| r1-101 control, Gotify adds lastUsed | none | CLEAN |
+| r1-102 control, Vite manifest adds name | none | NOT EVALUATED (A1 noise) |
+| r1-103 control, nsq adds message_bytes | none | CLEAN |
+
+**Batch 7: caught 8 of 15, 2 NOT EVALUATED, 5 silent misses (33%).
+Controls: 2 clean, 1 NOT EVALUATED, none VIOLATED.**
+
+**Combined in-scope held-out detection (batches 4 to 7, each on the engine
+frozen before it): caught 30 of 55, 45% missed.** R1 remains FALSIFIED.
+
+**D1 and E1 on held-out data: no measurable effect, in two consecutive
+batches.** Neither batch 6 nor batch 7 contained a case either rule applies
+to. Both are measured only on tuning data (D1: r1-052, r1-054; E1: r1-069
+caught, r1-068 partial). The pattern behind them did not recur.
+
+**What did recur: default version or format switches.** The producer keeps
+both shapes in code and flips which one is the default: r1-059 (batch 5),
+r1-075 (batch 6), r1-099 and r1-100 (batch 7). Four cases across three held-out
+batches, all missed. A second recurring cause: the old name still exists
+elsewhere in the new shape (r1-091, r1-068 `url`, r1-044).
+
+Results: r1-batch7-alpha8.tsv, r1-batch7-d1.tsv, r1-batch7-e1.tsv,
+r1-batch6-e1.tsv.

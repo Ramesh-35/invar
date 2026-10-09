@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-097"
+producer = "github:nsqio/nsq@2d7f2332e9dcd98088d83541b2d18806f77864d3:internal/http_api/api_response.go"
+producer_base = "github:nsqio/nsq@866aa081d499a389e372955ed83911bd8742a939:internal/http_api/api_response.go"
+consumer = "github:influxdata/telegraf@8ecc58639a15b6f3ecec85d0e7197c6102c143c0:plugins/inputs/nsq/nsq.go"

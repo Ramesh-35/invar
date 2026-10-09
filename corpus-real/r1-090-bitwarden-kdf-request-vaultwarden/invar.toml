@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-090"
+producer = "github:bitwarden/clients@4b73198ce51fa9e1f10ef70643065a31c1384887:libs/common/src/models/request/kdf.request.ts"
+producer_base = "github:bitwarden/clients@6001980dc5550b805518e7d1d027215124315a6e:libs/common/src/models/request/kdf.request.ts"
+consumer = "github:dani-garcia/vaultwarden@0182567a622dba0203ca2c73ee37ba810540c37d:src/api/core/accounts.rs"

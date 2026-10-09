@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-099"
+producer = "github:OISF/suricata@575e5b471f6845d312a14ae51a275d3957efad50:rust/src/dns/log.rs"
+producer_base = "github:OISF/suricata@9ecc3573a7eaf2ecf8e5a1e60f019c5e40eb73de:rust/src/dns/log.rs"
+consumer = "github:jasonish/evebox@8881d6c904636d6ecc857cbcee9e42fc475505e0:webapp/src/formatters.ts"

@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-092"
+producer = "github:vercel/next.js@45f0c79076d3e8280666aaeaab77eeebb12049b4:packages/next/src/build/index.ts"
+producer_base = "github:vercel/next.js@6ff2d98c3823974991b4f98ddc066559f1b3de44:packages/next/src/build/index.ts"
+consumer = "github:opennextjs/opennextjs-aws@2f3eacf229c713e144eb05ef1a8fb92e040c1cbc:packages/open-next/src/core/routing/matcher.ts"

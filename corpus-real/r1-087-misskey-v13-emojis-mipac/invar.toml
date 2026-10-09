@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-087"
+producer = "github:misskey-dev/misskey@b2d6561bc6ed2e15f1c66a879ad1eadbffcbee8f:packages/backend/src/models/schema/note.ts"
+producer_base = "github:misskey-dev/misskey@fcfcb8da1df5dfbbafb41b971b92e366c21b1f33:packages/backend/src/models/schema/note.ts"
+consumer = "github:yupix/MiPAC@e07ef9340417451ee26d6928c206506cf5939bb6:mipac/models/note.py"

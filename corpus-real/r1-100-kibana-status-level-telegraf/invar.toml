@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-100"
+producer = "github:elastic/kibana@dfea0fee21d93e73926092e32105d9e66fcc8c6e:src/core/server/status/routes/status.ts"
+producer_base = "github:elastic/kibana@4e9e7a867136090078b7464a323dbc16145e34fc:src/core/server/status/routes/status.ts"
+consumer = "github:influxdata/telegraf@c5527d97ded79fc6885906ea5319039b249a211c:plugins/inputs/kibana/kibana.go"

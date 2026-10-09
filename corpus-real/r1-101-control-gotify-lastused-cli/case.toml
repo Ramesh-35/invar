@@ -1,0 +1,21 @@
+[case]
+id = "r1-101"
+title = "Control: Gotify Application added lastUsed; gotify/cli unaffected"
+source = "https://github.com/gotify/server/commit/7bf80ee6f18b6f75b96d54da51b7612f88fba426"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "other"
+batch = "7"
+
+[expected]
+residue = "none"
+evidence = "Additive"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_run"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

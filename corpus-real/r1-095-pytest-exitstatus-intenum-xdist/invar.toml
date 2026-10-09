@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-095"
+producer = "github:pytest-dev/pytest@2b92fee1c315469c3f257673a508e51a1f1a6230:src/_pytest/main.py"
+producer_base = "github:pytest-dev/pytest@240828d91245bd39d058f9d29ad5f2360e95368d:src/_pytest/main.py"
+consumer = "github:pytest-dev/pytest-xdist@407d6e16e2046180d83860cf6b0c8251764daf64:src/xdist/remote.py"

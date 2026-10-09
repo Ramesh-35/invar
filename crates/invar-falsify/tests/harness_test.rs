@@ -1383,3 +1383,34 @@ fn d1_omit_and_python_assigned_fields() {
     assert_eq!(out[0].residue, ["device_role"]);
     let _ = std::fs::remove_dir_all(&dir);
 }
+
+// ---------------------------------------------------------------------------
+// 33. E1: a key moved into a new envelope is residue unless the consumer
+// already mentions the new envelope key.
+// ---------------------------------------------------------------------------
+#[test]
+fn e1_envelope_relocation() {
+    let dir = std::env::temp_dir().join(format!("invar-e1-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    let w = |n: &str, b: &str| std::fs::write(dir.join(n), b).unwrap();
+    let run = |cfg: &str| evaluate(&parse_sections("invar.toml", cfg).unwrap(), &Resolver::local(&dir)).unwrap();
+    w("a1.py", "def forward(msg):\n    send({\n        \"level\": msg.level,\n        \"message\": msg.text,\n    })\n");
+    w("a2.py", "def forward(msg):\n    send({\n        \"type\": \"log_message\",\n        \"log_message\": {\n            \"level\": msg.level,\n            \"message\": msg.text,\n        },\n    })\n");
+    w("old.ts", "lines.push(log.message);\n");
+    w("new.ts", "lines.push(update.log_message.message);\n");
+    let cfg = |c: &str| format!("[[invariant]]\nkind = \"schema\"\nid = \"e\"\nproducer = \"a2.py\"\nproducer_base = \"a1.py\"\nconsumer = \"{c}\"\n");
+    let out = run(&cfg("old.ts"));
+    assert_eq!(out[0].residue, ["message"], "{:?}", out[0]);
+    assert!(out[0].witnesses[0].missing_from.as_deref().unwrap().contains("moved from the top level to log_message"));
+    let out = run(&cfg("new.ts"));
+    assert!(out[0].residue.is_empty(), "consumer already reads the envelope: {:?}", out[0]);
+
+    // Keyed by a variable (Python): the new segment is "*".
+    w("b1.py", "def info(d):\n    return {\"url\": d.url, \"channel\": d.channel}\n");
+    w("b2.py", "def info(d, ext):\n    return {ext: {\"url\": d.url, \"channel\": d.channel}}\n");
+    w("c.ts", "const u = info.url;\n");
+    let out = run("[[invariant]]\nkind = \"schema\"\nid = \"k\"\nproducer = \"b2.py\"\nproducer_base = \"b1.py\"\nconsumer = \"c.ts\"\n");
+    assert_eq!(out[0].residue, ["url"]);
+    let _ = std::fs::remove_dir_all(&dir);
+}

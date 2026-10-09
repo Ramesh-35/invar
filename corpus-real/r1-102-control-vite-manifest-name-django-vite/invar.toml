@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-102"
+producer = "github:vitejs/vite@6d6ae10f5d80a9c9b6737377333424fe76652b81:packages/vite/src/node/plugins/manifest.ts"
+producer_base = "github:vitejs/vite@1cc88c13d8bbe48d037d27a4f26a85dd825daae6:packages/vite/src/node/plugins/manifest.ts"
+consumer = "github:MrBin99/django-vite@fc86d0ffed251a2777158394868b1ce314ae3a2b:django_vite/core/asset_loader.py"

@@ -1,0 +1,21 @@
+[case]
+id = "r1-093"
+title = "mdBook renamed Book.sections to items; comprehensive-rust preprocessor read book.sections"
+source = "https://github.com/google/comprehensive-rust/commit/1576198889203ef33ab07037e887a134d1923f62"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "field_renamed"
+batch = "7"
+
+[expected]
+residue = "sections"
+evidence = ""
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"
