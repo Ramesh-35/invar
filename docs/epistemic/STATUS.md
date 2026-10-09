@@ -627,3 +627,12 @@ in-scope batch is the only fair test of it.
 - Tested on the founder's Mac workspace with a stub release and stub gh:
   tag pin (warning + verified binary), matching SHA (verified binary),
   non-matching SHA (source build). Not yet run live.
+
+### v0.1.0-alpha.8 published (2026-10-09)
+
+- CI run 37913736150 passed on 0a7de0b (includes the new pinned-actions job);
+  tag v0.1.0-alpha.8 on 0a7de0b947e6aa34fc79f9ab726a478e64768b57; release run
+  37913969514 passed (built and signed with SHA-pinned actions).
+- Tag-protection ruleset NOT active: GitHub returned 403 "Upgrade to GitHub
+  Pro or make this repository public to enable this feature." Tags can still
+  be moved by the owner account; SHA pinning is the defence that works today.
