@@ -10,17 +10,31 @@ on:
     branches: [master, main]
   pull_request:
 
+# Least privilege: CI only reads the repository.
+permissions:
+  contents: read
+
 jobs:
+  pinned-actions:
+    # Every third-party action is pinned to a full commit SHA (tags are
+    # mutable: tj-actions/changed-files, CVE-2025-30066).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - run: bash scripts/check-pins.sh
+
   falsify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
+        with:
+          toolchain: stable
 
       - name: Cache cargo
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
             ~/.cargo/registry
@@ -51,7 +65,7 @@ jobs:
         run: cargo run -p invar-falsify --locked -- verify --ledger runs/ci/ledger.db
 
       - name: Upload run artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: falsification-run
           path: |
@@ -66,10 +80,12 @@ jobs:
     # copy), and that a bogus SHA is an ERROR (exit 3), never a verdict.
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
+        with:
+          toolchain: stable
 
       - name: INVAR on REAL-INCIDENT-001 (expect violated)
         id: real
