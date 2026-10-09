@@ -44,7 +44,7 @@ use anyhow::{anyhow, bail, Context, Result};
 
 use crate::check::{artifact_name, fetch_text, getk, is_code, load_object, Sections, Witness};
 use crate::resolver::{Fetched, Resolver};
-use crate::surface::{broad_reads, code_fields, name_key, spec_fields, Fields};
+use crate::surface::{broad_reads, code_fields, mention_lines, name_key, spec_fields, Fields};
 
 pub const LOCK_FORMAT: &str = "1";
 
@@ -720,6 +720,8 @@ fn same_artifact(spec: &str) -> String {
 
 /// Result of checking one contract against its lock entry.
 pub struct LockedResult {
+    /// A1: changed or moved bindings INVAR saw but did not evaluate.
+    pub unevaluated: Vec<String>,
     /// Live fields of each type the lock binds, for `invar fix --suggest`.
     pub live_members: Vec<(String, String, Vec<String>)>,
     pub residue: Vec<String>,
@@ -750,7 +752,8 @@ pub fn check_contract(
         );
     }
     let live = producer_surface(&entry.id, producer, pointer, code, resolver, prov)?;
-    let reads = consumer_reads(consumer, &fetch_text(resolver, consumer, prov)?);
+    let consumer_text = fetch_text(resolver, consumer, prov)?;
+    let reads = consumer_reads(consumer, &consumer_text);
     let cname = artifact_name(consumer);
     let mut notes = Vec::new();
     let unchanged = live.blake3 == entry.blake3 && live.blake3_code == entry.blake3_code;
@@ -769,12 +772,48 @@ pub fn check_contract(
     };
     let (spec_names, code_names) = (names_in("spec"), names_in("code"));
     let mut residue = Vec::new();
+    let mut unevaluated: Vec<String> = Vec::new();
     let mut witnesses = Vec::new();
     let mut seen = BTreeSet::new();
     for b in &entry.bindings {
+        let live_ty = live
+            .surface
+            .get(&(b.source.clone(), b.scope.clone(), b.field.clone()));
+        let in_source = live
+            .surface
+            .keys()
+            .any(|(s, _, f)| s == &b.source && f == &b.field);
         let Some(sites) = reads.get(&name_key(&b.field)) else {
-            continue; // the consumer no longer reads it: nothing depends on it
+            // A1 rule 1: no recognised read, but a changed binding the
+            // consumer still mentions is stated, not dropped.
+            let changed = match live_ty {
+                Some(t) => matches!((&b.ty, t), (Some(a), Some(n)) if a != n),
+                None => !in_source,
+            };
+            if let (true, Some(l)) = (changed, mention_lines(&consumer_text, &b.field).first()) {
+                unevaluated.push(format!(
+                    "{} changed; mentioned at {cname}:{l}, not evaluated (pattern not read)",
+                    b.display()
+                ));
+            }
+            continue;
         };
+        // A1 rule 2: left its type but exists in another type: moved.
+        if live_ty.is_none() && in_source && !b.scope.is_empty() {
+            let to: Vec<String> = live
+                .surface
+                .keys()
+                .filter(|(s, sc, f)| s == &b.source && f == &b.field && sc != &b.scope)
+                .map(|(_, sc, _)| if sc.is_empty() { "(unscoped)".to_string() } else { sc.clone() })
+                .collect();
+            unevaluated.push(format!(
+                "{} moved to {}; consumer read at {cname}:{} not evaluated",
+                b.display(),
+                to.join(", "),
+                sites[0].1
+            ));
+            continue;
+        }
         let where_ = if b.source == "spec" {
             format!(
                 "{} {}",
@@ -859,7 +898,10 @@ pub fn check_contract(
             unbound.into_iter().take(5).collect::<Vec<_>>().join(", ")
         ));
     }
+    unevaluated.sort();
+    unevaluated.dedup();
     Ok(LockedResult {
+        unevaluated,
         live_members: members_of(&live.surface, &entry.bindings),
         residue,
         witnesses,

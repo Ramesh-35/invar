@@ -53,6 +53,8 @@ pub fn outcome_json(o: &ContractOutcome) -> Value {
         "skipped"
     } else if o.violated() {
         "violated"
+    } else if !o.unevaluated.is_empty() {
+        "not_evaluated"
     } else if !o.waived.is_empty() {
         "holds_waived"
     } else {
@@ -74,6 +76,7 @@ pub fn outcome_json(o: &ContractOutcome) -> Value {
             "field": f, "owner": owner, "reason": reason, "days_remaining": left
         })).collect::<Vec<_>>(),
         "expired_waivers": o.expired.iter().map(|(f, owner)| json!({"field": f, "owner": owner})).collect::<Vec<_>>(),
+        "not_evaluated": o.unevaluated,
         "notes": o.notes,
         "fetched": o.provenance.iter().map(|p| json!({"ref": p.reference, "bytes": p.bytes, "blake3": p.blake3_hex})).collect::<Vec<_>>(),
     })
@@ -98,7 +101,10 @@ impl Server<'_> {
         let lock = load_lock(&self.config)?;
         let outcomes = evaluate_with(&sections, &self.resolver(), lock.as_ref(), self.today)?;
         let violated = outcomes.iter().filter(|o| o.violated()).count();
-        let skipped = outcomes.iter().filter(|o| o.skipped.is_some()).count();
+        let skipped = outcomes
+            .iter()
+            .filter(|o| o.skipped.is_some() || (!o.violated() && !o.unevaluated.is_empty()))
+            .count();
         let result = if violated > 0 {
             "violated"
         } else if skipped > 0 {

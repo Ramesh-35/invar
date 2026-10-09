@@ -330,3 +330,55 @@ separate mechanism: request-side writes, destructuring reads, nullability,
 and fields that move but keep their names. R1 stays FALSIFIED on the
 miss-rate criterion; this batch is evidence about the in-scope rate, not a
 reversal. Results: `r1-batch4-results.tsv`.
+
+## Batch 5: held out, in scope (2026-10-09)
+
+Sourced after v0.1.0-alpha.5 was published and after the A1 spec was frozen
+(A1-SPEC.md, sha256 88133c41...0ebe5, 2026-10-09T07:58:08Z); batch 5 cases
+were first read after that time. Same admission rules as batch 4. All 18
+candidates returned by three sourcing agents passed rules 1 and 2 (pinned
+files fetched, change and consumer read confirmed); none was excluded.
+Concentration: AdGuard Home appears in 3 cases, zwave-js-server in 2.
+
+Scored first on the frozen alpha.5 engine (the released code), then on the
+A1 engine built only from the frozen spec.
+
+| Case | Break | alpha.5 | A1 | openapi-diff |
+|---|---|---|---|---|
+| r1-050 zigbee2mqtt to frontend | `permit_join_timeout` removed | MISSED | NOT EVALUATED (destructuring read stated) | n/a |
+| r1-051 AdGuard to adguardhome-sync | set_rules body text to JSON (request side) | MISSED | MISSED | missed |
+| r1-052 zwave-js-server to python | device class CCs only below schema 36 | MISSED | NOT EVALUATED (via "moved", noisy: 7 sites) | n/a |
+| r1-053 paperless-ngx to paperless-gpt | `status` moved into pagination envelope | MISSED | MISSED | n/a |
+| r1-054 zwave-js-server to python | `isHealNetworkActive` renamed for schema 32 | MISSED | MISSED | n/a |
+| r1-055 gopls to vscode-go | `Vulns` removed | CAUGHT | CAUGHT | n/a |
+| r1-056 Poetry to micropipenv | `files` moved to packages | MISSED | NOT EVALUATED (moved, stated) | n/a |
+| r1-057 Turborepo to vercel | `pipeline` renamed `tasks` | CAUGHT | CAUGHT | n/a |
+| r1-058 rust-analyzer to coc-rust-analyzer | `cargoExtraArgs` removed | CAUGHT | CAUGHT | n/a |
+| r1-059 deno_lockfile to esbuild_deno_loader | `specifiers` moved (v4 default) | MISSED | MISSED | n/a |
+| r1-060 NetBox to ansible_modules | `device_role` renamed (request side) | MISSED | MISSED | n/a |
+| r1-061 nuclei to faraday_plugins | `matched`, `templateID` renamed | CAUGHT | CAUGHT | n/a |
+| r1-062 Glances 4 to python-glances-api | `rx`, `tx` removed | CAUGHT, extra `time_since_update` | same | n/a |
+| r1-063 AdGuard to python-adguardhome | `rulesCount` to `rules_count` | CAUGHT | CAUGHT | error |
+| r1-064 grype to scan-action | `fixedInVersion`, `links` replaced | CAUGHT, extras `description`, `severity`, `version` | same | n/a |
+| r1-065 control, AdGuard safesearch additive | none | FALSE_POSITIVE (`$ref` not resolved) | same | false positive |
+| r1-066 control, coverage.py adds regions | none | CLEAN | NOT EVALUATED (moved noise) | n/a |
+| r1-067 control, grype adds ignoredMatches | none | CLEAN | CLEAN | n/a |
+
+**Detection (frozen alpha.5): caught 7 of 15, missed 8 (53%).** Combined
+in-scope held-out (batch 4 on alpha.4, batch 5 on alpha.5): caught 13 of 25,
+48% missed. R1 remains FALSIFIED; batch 5 was harder than batch 4.
+
+**A1 (stated blind spots), measured on batch 5:** silent misses (a real break
+reported HOLDS) fell from 8 of 15 (53%) to 5 of 15 (33%). Detection is
+unchanged (7 of 15): A1 states, it does not catch. Cost: 1 of 3 controls
+became NOT EVALUATED, and the "moved" rule is noisy where producers refactor
+types or functions (r1-052 lists 7 sites, r1-066 is a control). Contracts
+reported NOT EVALUATED: 4 of 18 in batch 5; 7 of 68 across all batches (including the constructed demo).
+
+On tuning data (batches 1 to 4, read before A1): r1-040 now CAUGHT
+(nullability), r1-037, r1-038 and r1-014 NOT EVALUATED; no control changed.
+
+Still silent after A1: request-side changes with no field mention
+(r1-051, r1-060), an envelope added around a field (r1-053), a key kept only
+for older schema versions (r1-054), and a default format switch (r1-059).
+Results: r1-batch5-alpha5.tsv, r1-batch5-a1.tsv.

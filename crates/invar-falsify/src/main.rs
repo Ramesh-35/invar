@@ -478,6 +478,13 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
             skipped += 1;
             println!("  [SKIPPED]  {} ({}): {why}", o.id, o.kind);
             summaries.push(format!("{}:{}=SKIPPED", o.id, o.kind));
+        } else if !o.violated() && !o.unevaluated.is_empty() {
+            skipped += 1;
+            println!("  [NOT EVALUATED] {} ({}): {} site(s)", o.id, o.kind, o.unevaluated.len());
+            for u in &o.unevaluated {
+                println!("      {u}");
+            }
+            summaries.push(format!("{}:{}=NOT_EVALUATED", o.id, o.kind));
         } else if !o.violated() {
             println!("  [HOLDS]    {} ({})", o.id, o.kind);
             summaries.push(format!("{}:{}=HOLDS", o.id, o.kind));
@@ -514,7 +521,7 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
     // unsupported language). A skip is never reported as a pass.
     let code = if violations == 0 && skipped > 0 {
         println!(
-            "result: NOT FULLY EVALUATED, {skipped} of {} contract(s) skipped, the rest hold",
+            "result: NOT FULLY EVALUATED, {skipped} of {} contract(s) skipped or not evaluated, the rest hold",
             outcomes.len()
         );
         4

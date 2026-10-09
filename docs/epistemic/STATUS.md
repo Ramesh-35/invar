@@ -554,3 +554,18 @@ in-scope batch is the only fair test of it.
   - x86_64-apple-darwin: 3347552d2ec58c910686ecb4bccfba38fa34ebcd801867e16f9ee52333e2d272 (1.82 MiB)
   - x86_64-unknown-linux-musl: c0aa794fb320ac6314867e4300e4ea89bd65a1efcc4c51dad27c8bdd13b92c8f (1.98 MiB)
 - Release notes: docs/releases/v0.1.0-alpha.5.md.
+
+## R1 batch 5 and A1 stated blind spots (2026-10-09)
+
+- Batch 5: 15 real in-scope breaks + 3 controls, held out, no exclusions.
+  Frozen alpha.5: caught 7 of 15 (53% missed); controls 2 clean, 1 false
+  positive (spec `$ref` not resolved). Combined in-scope held-out: 13 of 25
+  caught (48% missed). R1 remains FALSIFIED.
+- A1 spec frozen 2026-10-09T07:58:08Z before batch 5 was read
+  (docs/falsification/A1-SPEC.md). A1 on batch 5: silent misses 8 to 5 of 15
+  (53% to 33%); detection unchanged; 1 control turned NOT EVALUATED;
+  "moved" rule noisy on refactors. Evidence rung: real, held out, n = 15.
+- Exit 4 now also means NOT EVALUATED (A1), not only SKIPPED; the runner
+  scores it UNEVALUATED, distinct from MISSED and SKIPPED.
+- invar.lock format 1 frozen with a compatibility promise
+  (docs/reference/INVAR-LOCK.md). Engine version 0.1.0-alpha.6 (not tagged).

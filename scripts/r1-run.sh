@@ -11,6 +11,7 @@
 #   CLEAN    control case ("none" expected) and INVAR reported nothing
 #   FALSE_POSITIVE  control case and INVAR reported residue
 #   SKIPPED  an artifact is in a language INVAR does not read (exit 4)
+#   UNEVALUATED  INVAR stated it saw but did not evaluate the change (A1, exit 4)
 #   ERROR    INVAR could not evaluate (exit 3); never counted as a verdict
 # Extra fields INVAR reports beyond the expected set are listed, not hidden.
 #
@@ -36,7 +37,9 @@ for dir in "$root"/corpus-real/*/; do
   out="$("$invar" check --ci --config "$dir/invar.toml" 2>&1)"; code=$?
   found="$(printf '%s\n' "$out" | sed -n 's/.*\[VIOLATED\][^:]*: \[\(.*\)\].*/\1/p' | tr -d '"' | norm | paste -sd, -)"
 
-  if [ "$code" -eq 4 ]; then
+  if [ "$code" -eq 4 ] && printf '%s' "$out" | grep -q '\[NOT EVALUATED\]'; then
+    outcome=UNEVALUATED
+  elif [ "$code" -eq 4 ]; then
     outcome=SKIPPED
   elif [ "$code" -ge 2 ]; then
     outcome=ERROR

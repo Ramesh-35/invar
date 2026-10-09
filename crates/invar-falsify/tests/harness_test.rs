@@ -1176,7 +1176,7 @@ fn scoped_fields_and_skipped_languages() {
         assert!(why.starts_with("language not supported"), "{producer}/{consumer}: {why}");
         assert!(out[0].residue.is_empty() && out[0].provenance.is_empty());
         let md = render_report_md(&out);
-        assert!(md.contains("NOT FULLY EVALUATED (1 of 1 skipped)") && md.contains("| SKIPPED |"), "{md}");
+        assert!(md.contains("NOT FULLY EVALUATED (1 of 1 not evaluated)") && md.contains("| SKIPPED |"), "{md}");
     }
     let _ = std::fs::remove_dir_all(&dir);
 }
@@ -1311,5 +1311,47 @@ fn fix_suggest_and_mcp_server() {
     assert_eq!(check["contracts"][0]["residue"][0]["field"], "Order.amount_cents");
     assert!(replies[3]["result"]["structuredContent"]["contracts"][0]["bindings"].as_array().unwrap().iter().any(|b| b["field"] == "Order.amount_cents"));
     assert_eq!(replies[4]["error"]["code"], -32601);
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+// ---------------------------------------------------------------------------
+// 31. A1 stated blind spots: a changed field the consumer only mentions is NOT
+// EVALUATED (not HOLDS); a field moved between types is NOT EVALUATED;
+// nullability is part of a spec type.
+// ---------------------------------------------------------------------------
+#[test]
+fn a1_states_blind_spots() {
+    let dir = std::env::temp_dir().join(format!("invar-a1-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    let w = |n: &str, b: &str| std::fs::write(dir.join(n), b).unwrap();
+    let run = |cfg: &str| evaluate(&parse_sections("invar.toml", cfg).unwrap(), &Resolver::local(&dir)).unwrap();
+
+    // Destructuring read of a removed field: not a recognised read, but stated.
+    w("old.ts", "interface Info {\n  permit_join_timeout: number;\n  version: string;\n}\n");
+    w("new.ts", "interface Info {\n  version: string;\n}\n");
+    w("ui.tsx", "const { permit_join_timeout: t } = info;\n");
+    let out = run("[[invariant]]\nkind = \"schema\"\nid = \"d\"\nproducer = \"new.ts\"\nproducer_base = \"old.ts\"\nconsumer = \"ui.tsx\"\n");
+    assert!(out[0].residue.is_empty() && !out[0].violated());
+    assert_eq!(out[0].unevaluated.len(), 1, "{:?}", out[0]);
+    assert!(out[0].unevaluated[0].contains("permit_join_timeout changed; mentioned at ui.tsx:1"));
+    assert!(render_report_md(&out).contains("NOT EVALUATED"));
+
+    // Moved between types: stated, not residue.
+    w("m1.go", "type Meta struct {\n\tFiles []string `json:\"files\"`\n}\ntype Pkg struct {\n\tName string `json:\"name\"`\n}\n");
+    w("m2.go", "type Meta struct {\n\tHash string `json:\"hash\"`\n}\ntype Pkg struct {\n\tName string `json:\"name\"`\n\tFiles []string `json:\"files\"`\n}\n");
+    w("c.py", "x = lock[\"metadata\"][\"files\"]\n");
+    let out = run("[[invariant]]\nkind = \"schema\"\nid = \"m\"\nproducer = \"m2.go\"\nproducer_base = \"m1.go\"\nconsumer = \"c.py\"\n");
+    assert!(out[0].residue.is_empty());
+    assert!(out[0].unevaluated.iter().any(|u| u.starts_with("files moved from Meta to Pkg")), "{:?}", out[0].unevaluated);
+
+    // Nullability is a type change.
+    w("s1.json", r#"{"properties":{"limit":{"type":"integer"}}}"#);
+    w("s2.json", r#"{"properties":{"limit":{"type":"integer","nullable":true}}}"#);
+    w("r.py", "if data[\"limit\"] > 0:\n    pass\n");
+    let out = run("[[invariant]]\nkind = \"schema\"\nid = \"n\"\nproducer = \"s2.json\"\nproducer_base = \"s1.json\"\nconsumer = \"r.py\"\n");
+    assert_eq!(out[0].residue, ["limit"]);
+    let tc = out[0].witnesses[0].type_change.clone().unwrap();
+    assert_eq!((tc.0.as_str(), tc.1.as_str()), ("integer", "integer|null"));
     let _ = std::fs::remove_dir_all(&dir);
 }

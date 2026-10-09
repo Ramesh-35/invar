@@ -77,12 +77,17 @@ fn spec_type(p: &Value) -> Option<String> {
             .join("|"),
         _ => return None,
     };
+    let mut ty = base.clone();
     if base == "array" {
         if let Some(items) = p.get("items").and_then(spec_type) {
-            return Some(format!("array<{items}>"));
+            ty = format!("array<{items}>");
         }
     }
-    Some(base)
+    // A1 rule 3: nullability is part of the type (OpenAPI 3.0 `nullable`).
+    if p.get("nullable").and_then(Value::as_bool) == Some(true) && !ty.contains("null") {
+        ty.push_str("|null");
+    }
+    Some(ty)
 }
 
 /// Code-extracted fields, chosen by file extension. Unknown extensions give
@@ -515,6 +520,61 @@ pub fn changed_fields(base: &Fields, head: &Fields) -> Vec<(String, Option<(Stri
             if seen.insert(name.clone()) {
                 out.push((name.clone(), c));
             }
+        }
+    }
+    out
+}
+
+/// A1 rule 2: fields that left their type but still exist in another type:
+/// (name, from scope, to scopes). Unscoped (spec) fields cannot move.
+pub fn moved_fields(base: &Fields, head: &Fields) -> Vec<(String, String, Vec<String>)> {
+    let mut out: Vec<(String, String, Vec<String>)> = Vec::new();
+    for (scope, name) in base.keys() {
+        if scope.is_empty() || head.contains_key(&(scope.clone(), name.clone())) {
+            continue;
+        }
+        let to: Vec<String> = head
+            .keys()
+            .filter(|(s, n)| n == name && s != scope)
+            .map(|(s, _)| if s.is_empty() { "(unscoped)".to_string() } else { s.clone() })
+            .collect();
+        if !to.is_empty() && !out.iter().any(|(n, _, _)| n == name) {
+            out.push((name.clone(), scope.clone(), to));
+        }
+    }
+    out
+}
+
+/// A1 rule 1: 1-based lines where `name` appears in the consumer as a whole
+/// identifier or as a quoted string, compared by naming form.
+pub fn mention_lines(source: &str, name: &str) -> Vec<usize> {
+    let key = name_key(name);
+    let mut out = Vec::new();
+    for (ln, line) in source.lines().enumerate() {
+        let b = line.as_bytes();
+        let mut hit = false;
+        let mut i = 0;
+        while i < b.len() && !hit {
+            let c = b[i];
+            if c == b'"' || c == b'\'' || c == b'`' {
+                if let Some(len) = line[i + 1..].find(c as char) {
+                    hit = name_key(&line[i + 1..i + 1 + len]) == key;
+                    i += len + 2;
+                    continue;
+                }
+            }
+            if c.is_ascii_alphabetic() || c == b'_' {
+                let start = i;
+                while i < b.len() && is_ident_byte(b[i]) {
+                    i += 1;
+                }
+                hit = name_key(&line[start..i]) == key;
+                continue;
+            }
+            i += 1;
+        }
+        if hit {
+            out.push(ln + 1);
         }
     }
     out

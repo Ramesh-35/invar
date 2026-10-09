@@ -10,7 +10,7 @@ the type that declares it. It replaces `producer_base`.
 |---|---|---|
 | `invar lock` | Fetch each schema contract's producer (spec and/or code) and consumer; write the fields the consumer reads (the slice). If a lock exists and its bindings would change, print the changes and stop. | 0 written or current; 3 LOCK_DRIFT (would change) or error |
 | `invar lock --update` | Accept a reviewed producer change: rewrite the lock. Waivers are kept. | 0; 3 error |
-| `invar check` | If `invar.lock` exists, each locked contract is checked against its slice: a bound field that no longer exists in any type of its source, or whose type changed in the same type, is residue, reported as `Type.field`. | 0 hold, 1 violated or waiver expired, 3 error, 4 skipped |
+| `invar check` | If `invar.lock` exists, each locked contract is checked against its slice: a bound field that no longer exists in any type of its source, or whose type changed in the same type, is residue, reported as `Type.field`. | 0 hold, 1 violated or waiver expired, 3 error, 4 skipped or not evaluated |
 | `invar mcp` | Read-only MCP server on stdio. Tools: `check` (as above, JSON, skips stated) and `contract` (the lock: bindings, hashes, waivers with days left). `--offline` reads local files only. | |
 | `invar fix --suggest` | For each missing bound field, a unified diff of the consumer when the field's type lost exactly that field and gained exactly one other, in every source. Otherwise a reason. Never writes; refuses when `CI` is set. | 0; 3 error |
 
@@ -56,6 +56,22 @@ Rules:
   no residue is noted as removable.
 - Reads of producer fields the lock does not bind are noted, not failed:
   run `invar lock --update` to bind them.
+
+## Compatibility promise (format 1, frozen 2026-10-09)
+
+- Every later INVAR release reads format 1 locks and gives the same
+  bindings. A new format gets a new number; format 1 is never redefined.
+- New optional keys may be added to format 1 only if older INVAR versions can
+  ignore them without changing a verdict; anything else is a new format.
+- `invar lock` writes the newest format; it never silently rewrites an
+  existing format 1 lock to another format without `--update`.
+
+## A1: stated blind spots (alpha.6)
+
+With a lock, a bound field that changed but that the consumer only mentions
+outside a recognised read, or a bound field that moved to another type, is
+reported NOT EVALUATED with its site. A contract with no residue but such a
+site exits 4 (NOT FULLY EVALUATED), never 0.
 
 ## Honest scope
 

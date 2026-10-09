@@ -13,7 +13,8 @@ use std::collections::BTreeMap;
 use crate::invariant::{check_contract, payload_read_sites, ContractInput, Step};
 use crate::resolver::{is_remote, Fetched, Resolver};
 use crate::surface::{
-    broad_reads, changed_fields, code_fields, field_names, name_key, spec_fields, Fields,
+    broad_reads, changed_fields, code_fields, field_names, mention_lines, moved_fields, name_key,
+    spec_fields, Fields,
 };
 
 pub type Sections = Vec<(String, Vec<(String, String)>)>;
@@ -35,6 +36,10 @@ pub struct ContractOutcome {
     pub expired: Vec<(String, String)>,
     /// Facts about the evaluation that are not residue (lock state).
     pub notes: Vec<String>,
+    /// A1: sites INVAR saw but did not evaluate (a changed field mentioned
+    /// outside a recognised read, or a field moved between types). With no
+    /// residue, these make the contract NOT FULLY EVALUATED, never HOLDS.
+    pub unevaluated: Vec<String>,
 }
 
 impl ContractOutcome {
@@ -185,7 +190,7 @@ fn schema_outcome(
     b: &[(String, String)],
     resolver: &Resolver,
     prov: &mut Vec<Fetched>,
-) -> Result<(Vec<String>, Vec<Witness>)> {
+) -> Result<(Vec<String>, Vec<Witness>, Vec<String>)> {
     let p = getk(b, "producer").context("schema invariant needs producer")?;
     let c = getk(b, "consumer").context("schema invariant needs consumer")?;
     let ptr = getk(b, "pointer");
@@ -218,14 +223,18 @@ fn schema_outcome(
             artifact_name(&p),
             ptr.unwrap_or_default()
         );
-        return Ok((r.clone(), read_witnesses(&r, &c, &cr, &missing)));
+        return Ok((r.clone(), read_witnesses(&r, &c, &cr, &missing), Vec::new()));
     }
 
     // Change-scoped: collect what changed in each producer source.
     let mut changed: BTreeMap<String, (Option<(String, String)>, String)> = BTreeMap::new();
+    let mut moved: Vec<(String, String, Vec<String>, String)> = Vec::new();
     let mut add = |head_spec: &str, head: &Fields, base: &Fields, where_: String| {
         for (name, tc) in changed_fields(base, head) {
             changed.entry(name).or_insert((tc, where_.clone()));
+        }
+        for (name, from, to) in moved_fields(base, head) {
+            moved.push((name, from, to, where_.clone()));
         }
         let _ = head_spec;
     };
@@ -282,7 +291,32 @@ fn schema_outcome(
             read_as,
         });
     }
-    Ok((residue, witnesses))
+    // A1 rule 1: a changed field the consumer mentions but INVAR did not
+    // count as a read. A1 rule 2: a field that moved between types and that
+    // the consumer reads or mentions. Both are stated, never silent.
+    let mut unevaluated = Vec::new();
+    for name in changed.keys().filter(|n| !residue.contains(n)) {
+        let lines = mention_lines(&cr, name);
+        if let Some(l) = lines.first() {
+            let more = if lines.len() > 1 { format!(" (+{} more)", lines.len() - 1) } else { String::new() };
+            unevaluated.push(format!(
+                "{name} changed; mentioned at {cname}:{l}{more}, not evaluated (pattern not read)"
+            ));
+        }
+    }
+    for (name, from, to, where_) in &moved {
+        if residue.contains(name) || changed.contains_key(name) {
+            continue;
+        }
+        let lines = mention_lines(&cr, name);
+        if let Some(l) = lines.first() {
+            unevaluated.push(format!(
+                "{name} moved from {from} to {} in {where_}; consumer use at {cname}:{l} not evaluated",
+                to.join(", ")
+            ));
+        }
+    }
+    Ok((residue, witnesses, unevaluated))
 }
 
 /// 1-based trace lines (comments and blanks counted, as in an editor) where
@@ -440,13 +474,16 @@ fn witness_md(w: &Witness, kind: &str) -> String {
 /// contract violation is not a PROVEN_RESIDUE verdict.
 pub fn render_report_md(outcomes: &[ContractOutcome]) -> String {
     let violated = outcomes.iter().filter(|o| o.violated()).count();
-    let skipped = outcomes.iter().filter(|o| o.skipped.is_some()).count();
+    let skipped = outcomes
+        .iter()
+        .filter(|o| o.skipped.is_some() || (!o.violated() && !o.unevaluated.is_empty()))
+        .count();
     let mut s = String::new();
     s.push_str(REPORT_MARKER);
     s.push('\n');
     if violated == 0 && skipped > 0 {
         s.push_str(&format!(
-            "### INVAR contract check: NOT FULLY EVALUATED ({skipped} of {} skipped)\n\n",
+            "### INVAR contract check: NOT FULLY EVALUATED ({skipped} of {} not evaluated)\n\n",
             outcomes.len()
         ));
     } else if violated == 0 {
@@ -477,6 +514,10 @@ pub fn render_report_md(outcomes: &[ContractOutcome]) -> String {
         }));
         let (result, residue) = if let Some(why) = &o.skipped {
             ("SKIPPED", md_code(why))
+        } else if !o.violated() && !o.unevaluated.is_empty() {
+            let mut cells: Vec<String> = o.unevaluated.iter().map(|u| md_code(u)).collect();
+            cells.extend(extra);
+            ("NOT EVALUATED", cells.join(", "))
         } else if !o.violated() {
             (if o.waived.is_empty() { "holds" } else { "holds, WAIVED" }, extra.join(", "))
         } else if o.residue.is_empty() {
@@ -580,6 +621,7 @@ pub fn evaluate_with(
         }
         let witnesses: Vec<Witness>;
         let mut notes: Vec<String> = Vec::new();
+        let mut unevaluated: Vec<String> = Vec::new();
         let residue = match kind.as_str() {
             "schema" => match lock.and_then(|l| l.contracts.iter().find(|c| c.id == id)) {
                 Some(entry) => {
@@ -593,6 +635,7 @@ pub fn evaluate_with(
                         &mut prov,
                     )?;
                     notes = r.notes;
+                    unevaluated = r.unevaluated;
                     witnesses = r.witnesses;
                     r.residue
                 }
@@ -600,8 +643,9 @@ pub fn evaluate_with(
                     if lock.is_some() {
                         notes.push("not in invar.lock; run `invar lock --update` to lock it".into());
                     }
-                    let (r, w) = schema_outcome(&id, b, resolver, &mut prov)?;
+                    let (r, w, u) = schema_outcome(&id, b, resolver, &mut prov)?;
                     witnesses = w;
+                    unevaluated = u;
                     r
                 }
             },
@@ -655,6 +699,7 @@ pub fn evaluate_with(
             provenance: prov,
             witnesses,
             notes,
+            unevaluated,
             ..Default::default()
         };
         if let Some(l) = lock {
