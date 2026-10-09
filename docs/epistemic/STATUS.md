@@ -636,3 +636,10 @@ in-scope batch is the only fair test of it.
 - Tag-protection ruleset NOT active: GitHub returned 403 "Upgrade to GitHub
   Pro or make this repository public to enable this feature." Tags can still
   be moved by the owner account; SHA pinning is the defence that works today.
+- Live verification (2026-10-09): smoke repo commit 55fca03 pins the Action by
+  SHA 0a7de0b947e6aa34fc79f9ab726a478e64768b57. Both workflows took the
+  signed release path with no tag warning: invar-release.yml run 37915003884
+  and invar-pr.yml run 37915007540 (release_token = INVAR_TOKEN), each
+  "using release v0.1.0-alpha.8 (x86_64-unknown-linux-musl), checksum and
+  signature verified". The PR-token gap found on alpha.7 is closed. Evidence
+  rung: real, Linux only; macOS and the refusal paths remain stub-tested.
