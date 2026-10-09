@@ -569,3 +569,13 @@ in-scope batch is the only fair test of it.
   scores it UNEVALUATED, distinct from MISSED and SKIPPED.
 - invar.lock format 1 frozen with a compatibility promise
   (docs/reference/INVAR-LOCK.md). Engine version 0.1.0-alpha.6 (not tagged).
+
+### v0.1.0-alpha.6 published (2026-10-09)
+
+- Tag v0.1.0-alpha.6 on 3931715; release run 37905838753 passed; prerelease;
+  release notes from docs/releases/v0.1.0-alpha.6.md. CI run 37905203994
+  passed on 3931715 before the tag was pushed.
+- Asset digests (sha256, as reported by GitHub):
+  - aarch64-apple-darwin: 601266866222b910d6b3c49e146c8f672a5150466faab70609ad2cee27db8b3a (1.70 MiB)
+  - x86_64-apple-darwin: ea42430c83ccca51497674b4aa8d59e633960fe89a5633aed5c2717881cc2789 (1.83 MiB)
+  - x86_64-unknown-linux-musl: bcd135fe721e355411639e0a746282f69ab07e5bf7894aa5e920ecef8ec7617d (1.99 MiB)
