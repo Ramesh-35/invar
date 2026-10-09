@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-055"
+producer = "github:golang/tools@cf5aad9d898a74d0f6cd041af86762f1122b926a:gopls/internal/vulncheck/types.go"
+producer_base = "github:golang/tools@33355ea86cd1c998790126844ca29a3e45e8dd93:gopls/internal/govulncheck/types.go"
+consumer = "github:golang/vscode-go@9c57ee2b06b2da4f58155679f59b6161bd13ab2c:src/goVulncheck.ts"

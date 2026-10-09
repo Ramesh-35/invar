@@ -1,0 +1,21 @@
+[case]
+id = "r1-051"
+title = "AdGuard Home 0.107.14 made set_rules take a JSON body {rules}; adguardhome-sync sent plain text (request side)"
+source = "https://github.com/bakito/adguardhome-sync/commit/ff104f543d6d333eb853a2fe5776b7ad37682882"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "other"
+batch = "5"
+
+[expected]
+residue = "rules"
+evidence = "Request body text to JSON object; spec not updated (still text/plain at head); code moved files between pins"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "missed"          # flagged other paths; set_rules spec unchanged (stale)
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

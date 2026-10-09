@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-067"
+producer = "github:anchore/grype@f86fd7eb38d1cc060174478d29f51999be4ea132:grype/presenter/models/document.go"
+producer_base = "github:anchore/grype@e6831d9444cffa166d90d9da14850d10c085afc7:grype/presenter/models/document.go"
+consumer = "github:anchore/scan-action@29650585b24434ac0d1a03697fe4b82199ee61ec:index.js"

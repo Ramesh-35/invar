@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-057"
+producer = "github:vercel/turborepo@12acb89df72769c85418672bcd409cc4c5de12e2:crates/turborepo-lib/src/turbo_json/mod.rs"
+producer_base = "github:vercel/turborepo@396319b5ee8c88e594b596376455dd78c84b8d9f:crates/turborepo-lib/src/turbo_json/mod.rs"
+consumer = "github:vercel/vercel@4337ea0654c4ee2c91c4464540f879d43da6696f:packages/fs-detectors/src/monorepos/get-monorepo-default-settings.ts"

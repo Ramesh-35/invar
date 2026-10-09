@@ -1,0 +1,9 @@
+[[invariant]]
+kind = "schema"
+id = "r1-063"
+producer = "github:AdguardTeam/AdGuardHome@e2c26ec554e4cf38b424fc02c1369a6768ef78ab:openapi/openapi.yaml"
+producer_base = "github:AdguardTeam/AdGuardHome@8c89973365e660d47fa5fce88113414011961acb:openapi/openapi.yaml"
+producer_code = "github:AdguardTeam/AdGuardHome@e2c26ec554e4cf38b424fc02c1369a6768ef78ab:home/control_filtering.go"
+producer_code_base = "github:AdguardTeam/AdGuardHome@8c89973365e660d47fa5fce88113414011961acb:home/filter.go"
+pointer = "/definitions/Filter"
+consumer = "github:frenck/python-adguardhome@4ec0afe7223f07dd5cf7c0a52b1e84ae906db386:adguardhome/filtering.py"

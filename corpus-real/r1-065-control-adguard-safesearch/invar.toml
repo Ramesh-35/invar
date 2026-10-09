@@ -1,0 +1,7 @@
+[[invariant]]
+kind = "schema"
+id = "r1-065"
+producer = "github:AdguardTeam/AdGuardHome@df61741f605c7d0551047ddf03dfc14f0b39f8e5:openapi/openapi.yaml"
+producer_base = "github:AdguardTeam/AdGuardHome@143616ca6e302aff0e5374d34c1d85fbd11ab544:openapi/openapi.yaml"
+pointer = "/paths/~1safesearch~1status/get/responses/200/content/application~1json/schema"
+consumer = "github:frenck/python-adguardhome@271a3d45ff5320d7c1a138993aa27b98b71b208b:src/adguardhome/safesearch.py"

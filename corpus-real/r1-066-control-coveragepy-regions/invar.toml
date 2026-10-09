@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-066"
+producer = "github:nedbat/coveragepy@dba64067d3ff135dc37b60ad3e085c62b14e0cef:coverage/jsonreport.py"
+producer_base = "github:nedbat/coveragepy@84d9d3edea9e700d748322ac13b719cb377509aa:coverage/jsonreport.py"
+consumer = "github:py-cov-action/python-coverage-comment-action@3f62072e5c11d0d81d0bbb0ddfa748ec5a1eedd2:coverage_comment/coverage.py"

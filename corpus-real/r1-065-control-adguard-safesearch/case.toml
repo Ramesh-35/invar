@@ -1,0 +1,21 @@
+[case]
+id = "r1-065"
+title = "Control: AdGuard Home safesearch/status kept enabled and added per-engine booleans; python-adguardhome unaffected"
+source = "https://github.com/AdguardTeam/AdGuardHome/commit/df61741f605c7d0551047ddf03dfc14f0b39f8e5"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "other"
+batch = "5"
+
+[expected]
+residue = "none"
+evidence = "Additive; head schema is a $ref to SafeSearchConfig"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "false_positive"          # flagged safesearch/status response as breaking ($ref)
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

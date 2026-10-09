@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-050"
+producer = "github:Koenkk/zigbee2mqtt@7d63a87aad954225c77156d22576939b1ffe7d6c:lib/extension/bridge.ts"
+producer_base = "github:Koenkk/zigbee2mqtt@f44ea32bcad1a1cfc9f96d196f88febe5c792337:lib/extension/bridge.ts"
+consumer = "github:nurikk/zigbee2mqtt-frontend@ed5a73b65a2170f6a7c6d420285252b265c20343:src/components/navbar/StartStopJoinButton.tsx"

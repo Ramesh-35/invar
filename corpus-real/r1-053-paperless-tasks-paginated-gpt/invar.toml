@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-053"
+producer = "github:paperless-ngx/paperless-ngx@d6e45093e85c912dc2cfb8de18abf68fe9558b2a:src/documents/views.py"
+producer_base = "github:paperless-ngx/paperless-ngx@dbce3936045feba4489df1ff6f86870fc6fd39b9:src/documents/views.py"
+consumer = "github:icereed/paperless-gpt@de833eb66d9a0a8b2bb7946af14751fb41e25f97:ocr.go"

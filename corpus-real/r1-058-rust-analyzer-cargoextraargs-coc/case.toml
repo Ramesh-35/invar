@@ -1,0 +1,21 @@
+[case]
+id = "r1-058"
+title = "rust-analyzer dropped cargoExtraArgs from runnables; coc-rust-analyzer read it"
+source = "https://github.com/fannheyward/coc-rust-analyzer/commit/1410329b4625f3b6b02bb96675ec5313ba0fab25"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "field_removed"
+batch = "5"
+
+[expected]
+residue = "cargoExtraArgs"
+evidence = "cargo_extra_args (camelCase on the wire) removed, PR #17547"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

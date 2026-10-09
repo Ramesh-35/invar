@@ -1,0 +1,9 @@
+[[invariant]]
+kind = "schema"
+id = "r1-051"
+producer = "github:AdguardTeam/AdGuardHome@30244f361f80af5e82fb29ca7735c718f41b13b5:openapi/openapi.yaml"
+producer_base = "github:AdguardTeam/AdGuardHome@083991fb21d9024e3863677f4e52ef199e9781f7:openapi/openapi.yaml"
+producer_code = "github:AdguardTeam/AdGuardHome@30244f361f80af5e82fb29ca7735c718f41b13b5:internal/filtering/http.go"
+producer_code_base = "github:AdguardTeam/AdGuardHome@083991fb21d9024e3863677f4e52ef199e9781f7:internal/filtering/controlfiltering.go"
+pointer = "/paths/~1filtering~1set_rules/post/requestBody"
+consumer = "github:bakito/adguardhome-sync@ec3b5d7956d512210135c67cb6688ec7f30d54fe:pkg/client/client.go"

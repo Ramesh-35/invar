@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-052"
+producer = "github:zwave-js/zwave-js-server@2c5c89998d2bd26a513ef6294cde30701487416a:src/lib/state.ts"
+producer_base = "github:zwave-js/zwave-js-server@de9ca64abeb7722198ca25d46242ee932734df60:src/lib/state.ts"
+consumer = "github:home-assistant-libs/zwave-js-server-python@e899ba973844033bf2ac994fa8af5d4e28df2dba:zwave_js_server/model/device_class.py"

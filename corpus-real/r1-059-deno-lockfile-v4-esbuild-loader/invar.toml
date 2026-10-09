@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-059"
+producer = "github:denoland/deno_lockfile@edbd6037091b9165f2a76f2c6c049b6b0da13462:src/lib.rs"
+producer_base = "github:denoland/deno_lockfile@81e09e974adc5acdf91e1f15cc90057a0eb0a245:src/lib.rs"
+consumer = "github:lucacasonato/esbuild_deno_loader@ccd8992c690deee821d6b7a7efeaf599722c394c:src/loader_portable.ts"

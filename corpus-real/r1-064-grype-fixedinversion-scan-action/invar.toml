@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-064"
+producer = "github:anchore/grype@1849d7eaeaff5bbbd0c849e3ff5457b83dcdd594:grype/presenter/models/vulnerability.go"
+producer_base = "github:anchore/grype@3b13c46dc171ec4d5b454aae0694e3586f450bb9:grype/presenter/models/vulnerability.go"
+consumer = "github:anchore/scan-action@5fd84ca5e1a54de328741a0cc1a478d1e4940d27:index.js"

@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-062"
+producer = "github:nicolargo/glances@255b57a18ad0f2322d25041a86511aa7d1c68df9:glances/plugins/network/__init__.py"
+producer_base = "github:nicolargo/glances@bd5e297a0e552e2c497181ae38ffd731a09c360f:glances/plugins/network/__init__.py"
+consumer = "github:home-assistant-ecosystem/python-glances-api@3b6e557d1994672cc55d79b337a3587001326f74:glances_api/__init__.py"

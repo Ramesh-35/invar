@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-060"
+producer = "github:netbox-community/netbox@0bb86f1e7d4e0c48dce5ccb40f529ce656cfa5c4:netbox/dcim/api/serializers.py"
+producer_base = "github:netbox-community/netbox@79030ecab2be4ad83a5a60834fc11b0b4e164b99:netbox/dcim/api/serializers.py"
+consumer = "github:netbox-community/ansible_modules@4211b713c07d45c69f14c94dc1894cbb813589a5:plugins/modules/netbox_device.py"

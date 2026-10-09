@@ -1,0 +1,21 @@
+[case]
+id = "r1-053"
+title = "paperless-ngx paginated /api/tasks; paperless-gpt read a top-level status"
+source = "https://github.com/icereed/paperless-gpt/commit/43e6c23d05bfd9a8300b4d5f318bce3d6b67ad70"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "other"
+batch = "5"
+
+[expected]
+residue = "status"
+evidence = "status moved inside a {count,next,previous,results} envelope (pagination_class added)"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

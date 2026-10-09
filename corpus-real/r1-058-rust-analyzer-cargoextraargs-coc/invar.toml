@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-058"
+producer = "github:rust-lang/rust-analyzer@3d7ee9b4ea7d77289230e128a7534904c4c31216:crates/rust-analyzer/src/lsp/ext.rs"
+producer_base = "github:rust-lang/rust-analyzer@fcddcf2ee5233254d49ec4cbbcd9da5e9667a5a1:crates/rust-analyzer/src/lsp/ext.rs"
+consumer = "github:fannheyward/coc-rust-analyzer@a6a8f15de619b021e0063bff80a928fa8c2958ce:src/commands.ts"

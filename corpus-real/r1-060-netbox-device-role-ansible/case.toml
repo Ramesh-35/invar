@@ -1,0 +1,21 @@
+[case]
+id = "r1-060"
+title = "NetBox 3.6 renamed writable device_role to role; netbox ansible_modules sent device_role (request side)"
+source = "https://github.com/netbox-community/ansible_modules/pull/1066"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "field_renamed"
+batch = "5"
+
+[expected]
+residue = "device_role"
+evidence = "Request side; device_role kept only as read-only deprecated output"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

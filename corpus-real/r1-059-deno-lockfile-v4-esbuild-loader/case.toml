@@ -1,0 +1,21 @@
+[case]
+id = "r1-059"
+title = "deno_lockfile switched default output to v4 (top-level specifiers); esbuild_deno_loader read packages.specifiers"
+source = "https://github.com/lucacasonato/esbuild_deno_loader/pull/140"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "other"
+batch = "5"
+
+[expected]
+residue = "specifiers"
+evidence = "Default format switch; the v4 printer existed behind a flag at base"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"
