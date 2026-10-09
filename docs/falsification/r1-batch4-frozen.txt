@@ -1,0 +1,4 @@
+2026-10-08T12:46:57Z
+2d5d79e35246b28c631a9fc7f0e2841c5b82fcbb8dba0653fc0ab632876f8115  invar-gapcf/target/release/invar
+src 3d7a023adc247ee5
+binary rebuilt from the same sources in a clean build: identical sha256 (reproducible)

@@ -1,0 +1,21 @@
+[case]
+id = "r1-046"
+title = "Harbor v2.0 systeminfo storage became an array; harbor_exporter decoded an object"
+source = "https://github.com/goharbor/harbor/commit/db8ce49133763ceda573210f464546db40651d50"
+source_kind = "commit"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "type_changed"
+batch = "4"
+
+[expected]
+residue = "storage"
+evidence = "object to array; the handler moved files between the pins, each pin uses its own file; harbor_exporter later reads Storage[0]"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

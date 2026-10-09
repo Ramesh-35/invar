@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "x-b2"
+producer = "github:astral-sh/ruff@e603382cf012f6d4e498a67c73ec534c8b9c1745:crates/ruff_cli/src/printer.rs"
+producer_base = "github:astral-sh/ruff@32be63fd1e8dd626020a51a56bdcd7cd9f24d8c4:crates/ruff_cli/src/printer.rs"
+consumer = "github:astral-sh/ruff-lsp@2a0e2ea3afefdbf00810b8df91030c1c6b59d103:ruff_lsp/server.py"

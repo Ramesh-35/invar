@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "x-c3"
+producer = "github:sigp/lighthouse@d60c24ef1cc0b5dfa930e1dd4fc85abc29e5fc4c:common/logging/src/sse_logging_components.rs"
+producer_base = "github:sigp/lighthouse@f23f984f85750d3abe6a9692ebb8c82037e83ae3:common/logging/src/async_record.rs"
+consumer = "github:sigp/siren@7e114aeb6e62c798c770976e2b43fba0d196f295:src/components/LogDisplay/LogRow.tsx"

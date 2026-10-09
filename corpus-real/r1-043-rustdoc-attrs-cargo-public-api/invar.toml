@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-043"
+producer = "github:rust-lang/rust@5795086bdfe7ed988aa53a110bd0692c33d8755b:src/rustdoc-json-types/lib.rs"
+producer_base = "github:rust-lang/rust@1c6de215099bbe33668de762f9591187f6c25eef:src/rustdoc-json-types/lib.rs"
+consumer = "github:cargo-public-api/cargo-public-api@7bd0f11a057934e281e9aa6c491145e37c1fc7bb:public-api/src/render.rs"

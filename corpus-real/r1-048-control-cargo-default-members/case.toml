@@ -1,0 +1,21 @@
+[case]
+id = "r1-048"
+title = "Control: cargo metadata added workspace_default_members; cargo_metadata unaffected"
+source = "https://github.com/rust-lang/cargo/commit/6240788425cb8221a2dc87dc8f5428cc12bd255b"
+source_kind = "commit"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "other"
+batch = "4"
+
+[expected]
+residue = "none"
+evidence = "Additive"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

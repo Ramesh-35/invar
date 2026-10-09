@@ -1,0 +1,21 @@
+[case]
+id = "r1-037"
+title = "Lemmy 0.19.4 dropped post_id from MarkPostAsRead; pythorhead kept sending it (request side)"
+source = "https://github.com/db0/pythorhead/commit/742e5eb989d98fc12a8b4636539bacdfe4c4282b"
+source_kind = "commit"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "field_removed"
+batch = "4"
+
+[expected]
+residue = "post_id"
+evidence = "Request-side: consumer writes the key, producer stopped accepting it. Fix: 'Update mark post as read to work with 0.19.4'"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

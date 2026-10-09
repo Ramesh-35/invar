@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-042"
+producer = "github:rust-lang/cargo@77069b43f0d2dc33b3262d53927640912bcfdb95:src/cargo/util/machine_message.rs"
+producer_base = "github:rust-lang/cargo@de80432f04da61d98dcbbc1572598071718ccfd2:src/cargo/util/machine_message.rs"
+consumer = "github:oli-obk/cargo_metadata@56fcbaaa46e0ff995b4ad16a878db0e1c8c68ba1:src/messages.rs"

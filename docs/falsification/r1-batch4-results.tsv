@@ -1,0 +1,14 @@
+case	real	expected	invar_residue	outcome	extra	oasdiff	openapi_diff	buf_breaking	schema_registry	semgrep	ai_reviewer
+r1-037-lemmy-post-id-pythorhead	true	post_id	-	MISSED	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-038-headscale-tags-headplane	true	forcedTags,validTags	-	MISSED	-	not_run	partial	not_applicable	not_applicable	not_run	not_run
+r1-039-zulip-email-address-zt	true	email_address	emailaddress	CAUGHT	-	not_run	missed	not_applicable	not_applicable	not_run	not_run
+r1-040-zulip-edit-limit-null-zt	true	realm_message_content_edit_limit_seconds	-	MISSED	-	not_run	missed	not_applicable	not_applicable	not_run	not_run
+r1-041-zulip-peer-plural-zt	true	stream_id,user_id	streamid,userid	CAUGHT	-	not_run	error	not_applicable	not_applicable	not_run	not_run
+r1-042-cargo-debuginfo-cargo-metadata	true	debuginfo	debuginfo	CAUGHT	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-043-rustdoc-attrs-cargo-public-api	true	attrs	attrs	CAUGHT	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-044-bundle-tracker-chunks-loader	true	name,path,publicPath	-	MISSED	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-045-erigon-totaldifficulty-otterscan	true	totalDifficulty	totaldifficulty	CAUGHT	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-046-harbor-storage-array-exporter	true	storage	free,storage,total	CAUGHT	free,total	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-047-control-headscale-user-fields	true	none	-	CLEAN	-	not_run	clean	not_applicable	not_applicable	not_run	not_run
+r1-048-control-cargo-default-members	true	none	-	CLEAN	-	not_run	not_applicable	not_applicable	not_applicable	not_run	not_run
+r1-049-control-harbor-current-time	true	none	-	CLEAN	-	not_run	error	not_applicable	not_applicable	not_run	not_run

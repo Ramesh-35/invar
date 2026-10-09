@@ -1,0 +1,21 @@
+[case]
+id = "r1-043"
+title = "rustdoc JSON format 54 made Item.attrs structured; cargo-public-api iterated strings"
+source = "https://github.com/rust-lang/rust/commit/5795086bdfe7ed988aa53a110bd0692c33d8755b"
+source_kind = "commit"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "type_changed"
+batch = "4"
+
+[expected]
+residue = "attrs"
+evidence = "Vec<String> to Vec<Attribute>; cargo-public-api later matches on Attribute variants"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

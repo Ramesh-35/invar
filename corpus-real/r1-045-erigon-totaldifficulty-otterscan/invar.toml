@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-045"
+producer = "github:erigontech/erigon@a273520ecc1ca32b28da72b4cb4bda406bf77ee0:turbo/jsonrpc/otterscan_api.go"
+producer_base = "github:erigontech/erigon@b346ece52e05256e1ca12ac447a2be38af16b3f0:turbo/jsonrpc/otterscan_api.go"
+consumer = "github:otterscan/otterscan@b007dfe205c6ee7ea210782a4e1c2f85a2dc7c84:src/useErigonHooks.ts"

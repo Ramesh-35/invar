@@ -1,0 +1,21 @@
+[case]
+id = "r1-042"
+title = "Cargo emitted debuginfo as string or int; cargo_metadata declared Option<u32>"
+source = "https://github.com/rust-lang/cargo/commit/77069b43f0d2dc33b3262d53927640912bcfdb95"
+source_kind = "commit"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "type_changed"
+batch = "4"
+
+[expected]
+residue = "debuginfo"
+evidence = "Option<u32> to untagged enum (Int or Named); cargo_metadata later added its own ArtifactDebuginfo"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

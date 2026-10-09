@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-048"
+producer = "github:rust-lang/cargo@6240788425cb8221a2dc87dc8f5428cc12bd255b:src/cargo/ops/cargo_output_metadata.rs"
+producer_base = "github:rust-lang/cargo@9984c88ea8760804feb260b415a378561ea2a3d1:src/cargo/ops/cargo_output_metadata.rs"
+consumer = "github:oli-obk/cargo_metadata@88565758dda9f9f61dc05f71cfc557b43f8cb2ea:src/lib.rs"

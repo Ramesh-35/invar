@@ -258,3 +258,75 @@ Why it misses, across all 30 (each is a separate fact, not a ranking):
 Adequacy is unchanged by this verdict (D PARTIAL, overall NOT ESTABLISHED);
 the decision on what INVAR claims and builds next belongs to the founder.
 
+
+## Batch 4: fresh in-scope benchmark (held out, frozen alpha.4 engine)
+
+Founder directive 2026-10-08: before R2, score the frozen alpha.4 engine on
+10 to 15 unseen real breaks with both sides in Go, Python, JS/TS or Rust.
+
+Engine: binary `invar 0.1.0-alpha.4` built from the alpha.4 sources (commit
+`0dd1361`), unchanged for this batch. Container binary sha256
+`2d5d79e35246b28c...8115`, concatenated `src/*.rs` sha256 prefix
+`3d7a023adc247ee5`, stamped 2026-10-08T12:46:57Z before the first run.
+Run with `GITHUB_TOKEN` unset so fetches use the public raw endpoint (the
+session token is not valid for these repositories); this changes transport
+only.
+
+Rules fixed before running, applied to all 18 candidates the sourcing agents
+returned (15 breaks, 3 controls):
+1. The producer change must be visible in the pinned producer files, and the
+   consumer file at its pin must read the field.
+2. There must be public evidence the consumer was affected: a fix commit, or
+   the consumer's later code reading the new shape. This is the template's
+   existing `source` requirement.
+3. Use the published spec when the producer has one at both pins, plus one
+   supported code file. When the code moved between pins, each pin uses its
+   own file.
+4. Request-side and behavioural breaks are admitted and labelled.
+
+Five candidates failed rule 1 or 2 and are **not scored**:
+
+| Candidate | Reason excluded | INVAR (unscored) |
+|---|---|---|
+| Ruff `fix` fields to ruff-lsp | break plausible, no evidence the consumer was affected | flagged `content`, `fix` |
+| Rspack stats defaults to webpack-bundle-analyzer | behavioural; no evidence found | flagged `assets`, `chunks`, `entrypoints`, `modules` |
+| Lighthouse SSE `msg` to Siren | Siren's later code still reads top-level `msg`; no evidence | HOLDS (would be MISSED) |
+| Tekton `resourcetemplates` case rename to tektoncd/cli | no evidence; cli reads the Go field, not the JSON key | flagged `resourcetemplates` |
+| Argo `deleteDelayDuration` to Hera | wire format unchanged (`metav1.Duration` marshals to a string) | flagged `deleteDelayDuration` (likely a false alarm on the wire) |
+
+The exclusions went against INVAR: it flagged 4 of the 5. Sensitivity
+below shows the verdict does not depend on them.
+
+| Case | Break (from source) | INVAR | openapi-diff |
+|---|---|---|---|
+| r1-037 Lemmy to pythorhead | `post_id` dropped from MarkPostAsRead (request side) | MISSED (consumer writes the key; INVAR reads only reads) | not applicable |
+| r1-038 headscale to Headplane | `forcedTags`, `validTags` replaced by `tags` | MISSED (consumer reads by destructuring `({ validTags, forcedTags })`) | partial |
+| r1-039 Zulip to zulip-terminal | `email_address` removed from subscriptions | **CAUGHT** | missed (listed as non-breaking) |
+| r1-040 Zulip to zulip-terminal | edit limit integer to nullable | MISSED (nullable not treated as a type change) | missed |
+| r1-041 Zulip to zulip-terminal | peer events `stream_id`, `user_id` pluralised | **CAUGHT** | error |
+| r1-042 Cargo to cargo_metadata | `debuginfo` u32 to enum | **CAUGHT** | not applicable |
+| r1-043 rustdoc JSON to cargo-public-api | `attrs` strings to structured | **CAUGHT** | not applicable |
+| r1-044 bundle-tracker to django-webpack-loader | `name`, `path`, `publicPath` moved from chunks to assets | MISSED (names still emitted elsewhere in the file) | not applicable |
+| r1-045 Erigon to Otterscan | `totalDifficulty` removed | **CAUGHT** | not applicable |
+| r1-046 Harbor to harbor_exporter | `storage` object to array | **CAUGHT** as a removal, plus extras `free`, `total` (false: they moved into generated models, still on the wire) | not applicable |
+| r1-047 control, headscale adds user fields | none | CLEAN | clean |
+| r1-048 control, cargo adds `workspace_default_members` | none | CLEAN | not applicable |
+| r1-049 control, Harbor adds `current_time` | none | CLEAN | error |
+
+**In-scope held-out score: INVAR caught 6 of 10 real breaks, 0 partial,
+4 missed, 0 errors, 0 skipped. Miss rate 40%. Controls: 3 of 3 clean.**
+95% Wilson interval on the catch rate: 31% to 83% (n = 10, wide).
+openapi-diff, where a spec existed (4 breaks): 0 caught, 1 partial, 2
+missed, 1 error.
+
+Sensitivity, all 15 candidates admitted and scored from their sources: 8
+caught, 2 partial, 5 missed: miss rate 33% to 47%. Either way above the 20%
+bar.
+
+Reading: inside the supported languages INVAR does better than across the
+full corpus (40% missed here against 67% to 73% held-out before), but it
+still misses more than twice the locked bar. The four misses are each a
+separate mechanism: request-side writes, destructuring reads, nullability,
+and fields that move but keep their names. R1 stays FALSIFIED on the
+miss-rate criterion; this batch is evidence about the in-scope rate, not a
+reversal. Results: `r1-batch4-results.tsv`.

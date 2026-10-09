@@ -1,0 +1,9 @@
+[[invariant]]
+kind = "schema"
+id = "r1-049"
+producer = "github:goharbor/harbor@b7af0f15292668542b7e21b874db89731415778d:api/v2.0/swagger.yaml"
+producer_base = "github:goharbor/harbor@634f0139a035a952d73333944b63fb22028b4208:api/v2.0/swagger.yaml"
+producer_code = "github:goharbor/harbor@b7af0f15292668542b7e21b874db89731415778d:src/server/v2.0/handler/systeminfo.go"
+producer_code_base = "github:goharbor/harbor@634f0139a035a952d73333944b63fb22028b4208:src/server/v2.0/handler/systeminfo.go"
+pointer = "/definitions/GeneralInfo"
+consumer = "github:c4po/harbor_exporter@6599268d1d4b2659ce861b2db4cde60990cdb636:metrics_system.go"

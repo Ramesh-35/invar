@@ -1,0 +1,9 @@
+[[invariant]]
+kind = "schema"
+id = "r1-039"
+producer = "github:zulip/zulip@432001656e54e27d08e72e99db38be3a9ed8edd9:zerver/openapi/zulip.yaml"
+producer_base = "github:zulip/zulip@e6102af351a656c5b2d3aa3909482759164077be:zerver/openapi/zulip.yaml"
+producer_code = "github:zulip/zulip@432001656e54e27d08e72e99db38be3a9ed8edd9:zerver/lib/subscription_info.py"
+producer_code_base = "github:zulip/zulip@e6102af351a656c5b2d3aa3909482759164077be:zerver/lib/subscription_info.py"
+pointer = "/components/schemas/Subscriptions"
+consumer = "github:zulip/zulip-terminal@1c30f074a1cc2cfaeca79499936c208c36227986:zulipterminal/ui_tools/views.py"

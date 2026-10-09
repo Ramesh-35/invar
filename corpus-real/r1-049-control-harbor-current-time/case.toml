@@ -1,0 +1,21 @@
+[case]
+id = "r1-049"
+title = "Control: Harbor systeminfo added current_time; harbor_exporter unaffected"
+source = "https://github.com/goharbor/harbor/commit/b7af0f15292668542b7e21b874db89731415778d"
+source_kind = "commit"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "other"
+batch = "4"
+
+[expected]
+residue = "none"
+evidence = "Additive"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "error"          # source schema failed validation
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

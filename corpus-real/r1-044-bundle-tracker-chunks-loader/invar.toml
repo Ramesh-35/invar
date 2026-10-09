@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-044"
+producer = "github:django-webpack/webpack-bundle-tracker@f98ade0eea33fc408846cf8e907ad5a18c76bc8f:lib/index.js"
+producer_base = "github:django-webpack/webpack-bundle-tracker@906ac3be53b676475235723eed8c9f569d3059e6:lib/index.js"
+consumer = "github:django-webpack/django-webpack-loader@b792c608b1114f1d42eeddc3e37645a35fed99cd:webpack_loader/loader.py"

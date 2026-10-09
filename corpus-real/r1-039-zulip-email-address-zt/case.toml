@@ -1,0 +1,21 @@
+[case]
+id = "r1-039"
+title = "Zulip removed email_address from subscription objects; zulip-terminal read stream['email_address']"
+source = "https://github.com/zulip/zulip/commit/432001656e54e27d08e72e99db38be3a9ed8edd9"
+source_kind = "commit"
+admitted = "2026-10-08"
+real = "true"
+break_kind = "field_removed"
+batch = "4"
+
+[expected]
+residue = "email_address"
+evidence = "Removed from Subscriptions schema and subscription_info.py; zulip-terminal later fetches the address via a separate call"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "missed"          # listed the email_address removal as non-breaking; a gate on breaking changes passes
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

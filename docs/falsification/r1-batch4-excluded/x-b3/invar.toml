@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "x-b3"
+producer = "github:web-infra-dev/rspack@defdcd939086a102bf5d4d91531e9aea2c3b63b8:packages/rspack/src/stats/DefaultStatsPresetPlugin.ts"
+producer_base = "github:web-infra-dev/rspack@f3c661ada432ce10ff21b5ff347401b5655db088:packages/rspack/src/stats/DefaultStatsPresetPlugin.ts"
+consumer = "github:webpack-contrib/webpack-bundle-analyzer@a2ae1ef9f700fcaad77f44149df9fe77695d2a99:src/analyzer.js"

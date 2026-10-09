@@ -515,3 +515,18 @@ missed. The R1 verdict stands (FALSIFIED on the miss rate). The narrowed
 scope has not been scored on any case chosen after it was declared; a fresh
 in-scope batch is the only fair test of it.
 
+
+## R1 batch 4: in-scope benchmark (2026-10-08)
+
+- Evidence rung: real, held out, frozen alpha.4 engine, 10 scored breaks
+  plus 3 controls, all sides in Go, Python, JS/TS or Rust.
+- INVAR caught 6 of 10, missed 4 (40%); controls 3 of 3 clean; one case
+  with 2 false extras. Wilson 95% on catch rate: 31% to 83%.
+- 5 of 18 candidates excluded before running for lack of consumer-impact
+  evidence or unchanged wire format; INVAR flagged 4 of them. With all 15
+  scored: miss rate 33% to 47%.
+- R1 remains FALSIFIED (bar is 20%). Details in
+  `docs/falsification/R1-CORPUS.md`.
+- Source hash of commit 0dd1361 recomputed on the Mac: 3d7a023adc247ee5, equal to the
+  sources that built the batch 4 binary (sha256 2d5d79e3...8115, rebuilt
+  byte-identical).

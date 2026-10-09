@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-046"
+producer = "github:goharbor/harbor@db8ce49133763ceda573210f464546db40651d50:src/server/v2.0/handler/systeminfo.go"
+producer_base = "github:goharbor/harbor@dec12308a13740421f4e6a70d10b06602e3ac7f5:src/core/api/systeminfo.go"
+consumer = "github:c4po/harbor_exporter@02c37e32fb5d6c79fe628651102fa9744c16acb5:metrics_systemvolumes.go"

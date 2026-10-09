@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "x-c5"
+producer = "github:argoproj/argo-workflows@c698990a0283e98b6695bb8f7dd3651eac17331f:pkg/apis/workflow/v1alpha1/workflow_types.go"
+producer_base = "github:argoproj/argo-workflows@0d95341404b82f6d8ada619cbac48623ce2c8803:pkg/apis/workflow/v1alpha1/workflow_types.go"
+consumer = "github:argoproj-labs/hera@964f4008a9fceccdb5f066a395b4cd68dbfafc2a:src/hera/workflows/models/io/argoproj/workflow/v1alpha1.py"

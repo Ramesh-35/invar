@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "x-c4"
+producer = "github:tektoncd/triggers@447f613dd1731181e40ada3d9141548b45bbdb2c:pkg/apis/triggers/v1beta1/trigger_template_types.go"
+producer_base = "github:tektoncd/triggers@176dc0f7eef61e030cf8e173cf5854b61add8589:pkg/apis/triggers/v1beta1/trigger_template_types.go"
+consumer = "github:tektoncd/cli@024a8c9bbde39fd1635d972fc02128ba4d43cdd7:pkg/cmd/triggertemplate/describe.go"

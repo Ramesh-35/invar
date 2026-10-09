@@ -1,0 +1,9 @@
+[[invariant]]
+kind = "schema"
+id = "r1-038"
+producer = "github:juanfont/headscale@0516c0ec375cb24fa657060a427f5d87945e405f:gen/openapiv2/headscale/v1/headscale.swagger.json"
+producer_base = "github:juanfont/headscale@72fcb93ef3ae99a5f9fe769a51ea0d50ef702b97:gen/openapiv2/headscale/v1/headscale.swagger.json"
+producer_code = "github:juanfont/headscale@0516c0ec375cb24fa657060a427f5d87945e405f:hscontrol/types/node.go"
+producer_code_base = "github:juanfont/headscale@72fcb93ef3ae99a5f9fe769a51ea0d50ef702b97:hscontrol/types/node.go"
+pointer = "/definitions/v1Node"
+consumer = "github:tale/headplane@a710995f97aece4161fbeff8de49e3a4db006f29:app/utils/node-info.ts"

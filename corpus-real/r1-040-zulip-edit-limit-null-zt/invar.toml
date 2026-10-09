@@ -1,0 +1,9 @@
+[[invariant]]
+kind = "schema"
+id = "r1-040"
+producer = "github:zulip/zulip@a1f40ccda5d9bbf91122d755f88e8f03f426fc9a:zerver/openapi/zulip.yaml"
+producer_base = "github:zulip/zulip@1747ab8482c3bfde23a113450a3afcdbdde1d00d:zerver/openapi/zulip.yaml"
+producer_code = "github:zulip/zulip@a1f40ccda5d9bbf91122d755f88e8f03f426fc9a:zerver/models.py"
+producer_code_base = "github:zulip/zulip@1747ab8482c3bfde23a113450a3afcdbdde1d00d:zerver/models.py"
+pointer = "/paths/~1register/post/responses/200/content/application~1json/schema/allOf/2"
+consumer = "github:zulip/zulip-terminal@da84485cfc011c13e4177cc56442eeb04d83302d:zulipterminal/ui_tools/messages.py"

@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-037"
+producer = "github:LemmyNet/lemmy@87b577467be74637881e1a22eba39349232f0a77:crates/api_common/src/post.rs"
+producer_base = "github:LemmyNet/lemmy@6d815db375a074b2b7dd9b01cb942bd7bdcaeeda:crates/api_common/src/post.rs"
+consumer = "github:db0/pythorhead@4a49d4e987bc4c91e818efbd8990e614b4a504d6:pythorhead/post.py"
