@@ -543,3 +543,14 @@ in-scope batch is the only fair test of it.
   partial catch is given up for an honest SKIPPED.
 - Exit 1 means VIOLATED only; `invar lock` drift is exit 3 (LOCK_DRIFT);
   waivers capped at 90 days. Reference: docs/reference/INVAR-LOCK.md.
+
+### v0.1.0-alpha.5 published (2026-10-09)
+
+- Pushed `d3ce79c..ef2808c` (this also published 8f331ca, c4a6b0b and
+  0dd1361; alpha.4 was never tagged). CI run 37900992040 passed on ef2808c.
+- Tag v0.1.0-alpha.5 on ef2808c; release run 37901314299 passed; prerelease.
+- Asset digests (sha256, as reported by GitHub):
+  - aarch64-apple-darwin: 6db71e5cde87009bb3ffca34e9b5bd2f4c982e59d9e1ae8c4eeeba4646f6453b (1.69 MiB)
+  - x86_64-apple-darwin: 3347552d2ec58c910686ecb4bccfba38fa34ebcd801867e16f9ee52333e2d272 (1.82 MiB)
+  - x86_64-unknown-linux-musl: c0aa794fb320ac6314867e4300e4ea89bd65a1efcc4c51dad27c8bdd13b92c8f (1.98 MiB)
+- Release notes: docs/releases/v0.1.0-alpha.5.md.
