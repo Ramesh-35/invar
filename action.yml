@@ -30,6 +30,13 @@ inputs:
     description: Fail the job on a contract violation. 'false' gives report-only mode. Errors always fail.
     required: false
     default: 'true'
+  release_token:
+    description: >-
+      Token used only to download the signed release binary (needs read access
+      to this action's repository). Defaults to github_token. Set it when the
+      action's repository is private and github_token cannot read it.
+    required: false
+    default: ''
   version:
     description: Release tag of the binary to download. Defaults to the action ref; if no release asset matches, the action builds from source.
     required: false
@@ -57,7 +64,7 @@ runs:
         INVAR_ACTION_REPO: ${{ github.action_repository }}
         INVAR_ACTION_REF: ${{ github.action_ref }}
         INVAR_ACTION_PATH: ${{ github.action_path }}
-        GH_TOKEN: ${{ inputs.github_token }}
+        GH_TOKEN: ${{ inputs.release_token || inputs.github_token }}
       run: bash "$INVAR_ACTION_PATH/action/install.sh"
 
     - name: Run invar check --ci

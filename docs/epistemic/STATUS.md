@@ -612,3 +612,18 @@ in-scope batch is the only fair test of it.
   which cannot read this private repo's releases, so it builds from source
   every time ("release not found", run on 5d37337). The Action uses one token
   for both downloading and commenting; a separate download token is next.
+
+## v0.1.0-alpha.8: Action hardening against moved tags (2026-10-09)
+
+- Threat model: tj-actions/changed-files (CVE-2025-30066), tags repointed to a
+  secret-leaking commit. docs/reference/ACTION-HARDENING.md.
+- This repo's workflows pin every third-party action to a commit SHA, CI
+  checks it (scripts/check-pins.sh), and CI runs with contents: read.
+  dtolnay/rust-toolchain is now given toolchain: stable explicitly (its ref no
+  longer names the toolchain).
+- The Action supports pinning by full commit SHA (uses the signed release only
+  if the SHA is exactly that release's commit, else builds from source), warns
+  when pinned by tag, and takes a separate release_token for the download.
+- Tested on the founder's Mac workspace with a stub release and stub gh:
+  tag pin (warning + verified binary), matching SHA (verified binary),
+  non-matching SHA (source build). Not yet run live.

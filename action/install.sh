@@ -14,7 +14,24 @@ case "${RUNNER_OS:-}-${RUNNER_ARCH:-}" in
 esac
 
 tag="${INVAR_VERSION:-}"
-if [ -z "$tag" ] && [[ "${INVAR_ACTION_REF:-}" == v* ]]; then tag="$INVAR_ACTION_REF"; fi
+ref="${INVAR_ACTION_REF:-}"
+if [ -z "$tag" ] && [[ "$ref" == v* ]]; then tag="$ref"; fi
+
+# Tags can be moved by whoever controls this repository (tj-actions/changed-files,
+# CVE-2025-30066). Pinning the action by full commit SHA is the defence; say so.
+if [[ "$ref" =~ ^[0-9a-f]{40}$ ]]; then
+  # Pinned by SHA: use the release whose tag points at exactly this commit,
+  # found from the version in the pinned source, or build from that source.
+  if [ -z "$tag" ] && [ -n "${INVAR_ACTION_REPO:-}" ] && command -v gh >/dev/null; then
+    v=$(grep -m1 '^version' "$INVAR_ACTION_PATH/crates/invar-falsify/Cargo.toml" | cut -d'"' -f2)
+    tag_sha=$(gh api "repos/$INVAR_ACTION_REPO/commits/v$v" --jq .sha 2>/dev/null || true)
+    if [ "$tag_sha" = "$ref" ]; then tag="v$v"; else
+      echo "invar: pinned commit is not the v$v release commit; building from the pinned source"
+    fi
+  fi
+elif [ -n "$ref" ]; then
+  echo "::warning::invar: this action is pinned by '$ref', which can be moved. Pin by full commit SHA (see docs/reference/ACTION-HARDENING.md)."
+fi
 
 dest="${RUNNER_TEMP:-/tmp}/invar-bin"
 mkdir -p "$dest"
