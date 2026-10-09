@@ -591,3 +591,16 @@ in-scope batch is the only fair test of it.
 - Chosen over GitHub artifact attestations (public repositories or Enterprise
   Cloud only) and Sigstore keyless (would publish the private repo's identity
   to a public log). Engine unchanged from alpha.6.
+
+### v0.1.0-alpha.7 published (2026-10-09)
+
+- CI run 37911185596 passed on 9d833b7; tag v0.1.0-alpha.7 on 9d833b7;
+  release run 37911766195 passed (each signature verified against
+  action/release-signers before publishing); prerelease.
+- Signing key fingerprint SHA256:TskzCIjWasw0XmCJ3xKJYdVDW9kQILVlmgmzd8ERY+M.
+- Asset digests (sha256, as reported by GitHub):
+  - aarch64-apple-darwin: 516b603ee083de6b76cf4e35eacf5b329b9d58e5d65d9b825716c071d548285d (sig 3cd423df...a2c)
+  - x86_64-apple-darwin: 1ea4fd639b9f6f86b6545d5f490c26bf094b4a7fac34e9be8c92f2fbfde5a576 (sig 97f91add...1d1)
+  - x86_64-unknown-linux-musl: fdfa220c6e39b46fb6478f395a1461102a7bb551a8f731a4b921cc4c66f3a1d3 (sig 597353ab...60b)
+- The Action's verify path is tested only against a stub release so far; a
+  live run against this release is pending.
