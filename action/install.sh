@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Resolve the invar binary for this runner: a checksum-verified release asset
-# when one matches the requested tag, otherwise a --locked source build from
-# the action's own checkout (always available on GitHub-hosted runners).
+# Resolve the invar binary for this runner: a release asset whose SHA-256
+# checksum and SSH signature both verify (trusted key: action/release-signers
+# at the action ref you pinned), otherwise a --locked source build from the
+# action's own checkout. A signature that fails to verify stops the job; it
+# never falls back to anything.
 set -euo pipefail
 
 case "${RUNNER_OS:-}-${RUNNER_ARCH:-}" in
@@ -26,9 +28,25 @@ if [ -n "$tag" ] && [ -n "$target" ] && [ -n "${INVAR_ACTION_REPO:-}" ] && comma
     else
       (cd "$dest" && shasum -a 256 -c "$asset.sha256")
     fi
+    signers="$INVAR_ACTION_PATH/action/release-signers"
+    if [ -f "$signers" ]; then
+      if ! gh release download "$tag" --repo "$INVAR_ACTION_REPO" \
+           --pattern "$asset.sig" --dir "$dest" --clobber >/dev/null 2>&1; then
+        echo "::error::invar: release $tag has no signature ($asset.sig); refusing an unsigned binary. Pin version to a signed release (v0.1.0-alpha.7 or later) or leave version empty."
+        exit 1
+      fi
+      if ! ssh-keygen -Y verify -f "$signers" -I invar-release -n invar-release \
+           -s "$dest/$asset.sig" < "$dest/$asset" >/dev/null 2>&1; then
+        echo "::error::invar: SIGNATURE CHECK FAILED for $asset ($tag). Not running it, not falling back."
+        exit 1
+      fi
+      verified="checksum and signature verified"
+    else
+      verified="checksum verified (no release-signers in this action ref)"
+    fi
     tar -xzf "$dest/$asset" -C "$dest"
     echo "bin=$dest/invar" >> "$GITHUB_OUTPUT"
-    echo "invar: using release $tag ($target), checksum verified"
+    echo "invar: using release $tag ($target), $verified"
     exit 0
   fi
   # Say why: a token without read access to a private action repo looks

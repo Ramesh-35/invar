@@ -579,3 +579,15 @@ in-scope batch is the only fair test of it.
   - aarch64-apple-darwin: 601266866222b910d6b3c49e146c8f672a5150466faab70609ad2cee27db8b3a (1.70 MiB)
   - x86_64-apple-darwin: ea42430c83ccca51497674b4aa8d59e633960fe89a5633aed5c2717881cc2789 (1.83 MiB)
   - x86_64-unknown-linux-musl: bcd135fe721e355411639e0a746282f69ab07e5bf7894aa5e920ecef8ec7617d (1.99 MiB)
+
+## v0.1.0-alpha.7: signed releases (2026-10-09)
+
+- Release archives signed with an SSH key (secret INVAR_RELEASE_SIGNING_KEY);
+  public key in action/release-signers; the Action verifies checksum and
+  signature before running invar and stops on a bad signature.
+- Tested on the founder's Mac workspace with a throwaway key and a stub
+  release: good signature passes; tampered archive with a fresh checksum,
+  missing signature, and wrong key each stop the job (exit 1).
+- Chosen over GitHub artifact attestations (public repositories or Enterprise
+  Cloud only) and Sigstore keyless (would publish the private repo's identity
+  to a public log). Engine unchanged from alpha.6.
