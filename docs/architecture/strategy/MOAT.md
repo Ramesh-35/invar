@@ -122,3 +122,25 @@ New sequence: A2 evidence receipts (spec drafted, docs/architecture/
 A2-RECEIPTS.md, awaiting ratification), then A4 field-level dependents
 graph. Both deliver value that does not depend on winning the detection
 race; the detection bottleneck remains recorded as bottleneck #1, unsolved.
+
+## Adopted 2026-10-10 from the 2026-2036 horizon report (see strategy/2026-2036-CONFLICTS.md)
+
+Banned patterns, permanent (extends the do-not-build list):
+- No hosted SaaS receipt databases or central contract registries.
+- No browser-based lockfile editors or secondary web parsers: evaluation
+  happens only in the authoritative binary; a second parser is a parser
+  differential waiting to be exploited.
+- No autonomous remediation bots: INVAR never mutates implementation code
+  (`fix --suggest` prints, never writes; that line is permanent).
+- No proprietary cryptographic envelopes, consensus ledgers, or PKI; SSHSIG
+  and flat allowed_signers files only.
+- No LLM or neural heuristic anywhere in the verification path.
+
+Kill criteria, adopted as measurable:
+- If users accept modified invar.lock files without reviewing the diff more
+  than 25% of the time (measurable once there are external users), the
+  lockfile has become automation noise and the habit asset is refuted.
+- If CI platforms will not gate on distinct non-zero exit codes, the
+  five-state algebra loses its enforcement value.
+- If enterprise pilots bypass checks via blanket waivers, the premise is
+  refuted; scope down rather than market harder.
