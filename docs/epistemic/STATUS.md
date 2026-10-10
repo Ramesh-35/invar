@@ -759,3 +759,21 @@ in-scope batch is the only fair test of it.
   and several of its ADRs contradict decisions already frozen here (exit
   code map, receipt format 1 compatibility promise, no new dependencies).
   Conflicts listed for founder adjudication before any part lands.
+
+## 2026-10-10 (night): A2.1 in-toto export and the baseline signing ceremony, v0.1.0-alpha.13
+
+- `invar receipt export --in-toto <receipt> [--out p]`: wraps a format 1
+  receipt as an in-toto Statement v1.0 (subjects = the content-addressed
+  inputs; predicate = the format 1 body verbatim). Additive view only;
+  format 1 stays canonical per CONFLICTS ruling 3.
+- Baseline ceremony (CONFLICTS adoption): a human signs the lock with
+  `ssh-keygen -Y sign -n invar-lock -f <key> invar.lock`; `invar check` and
+  `invar lock` accept `--lock-signers <file> --lock-principal <name>` and
+  then refuse to evaluate unless invar.lock.sig verifies (missing lock,
+  missing signature, or rejected signature: ERROR exit 3, fail closed,
+  never a verdict). Without the flags, behavior is unchanged.
+- 36 tests green (the SSH round-trip test also proves namespace separation:
+  an invar-lock signature does not verify as invar-receipt). Receipts spot-
+  checked deterministic under alpha.13. Engine binary sha256
+  41813bffa16f3d11..., src fingerprint 495aaf3aa04bceb6. Detection rules
+  unchanged; verdicts identical to alpha.11/alpha.12.

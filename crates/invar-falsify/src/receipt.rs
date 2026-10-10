@@ -210,3 +210,73 @@ impl Transport for DirTransport {
             .map_err(|e| format!("offline verify: artifact {hash} ({reference}): {e}"))
     }
 }
+
+/// A2.1: the receipt body wrapped as an in-toto Statement v1.0, an ADDITIVE
+/// export (CONFLICTS ruling 3). Format 1 stays canonical; this is a view of
+/// it for in-toto consumers. Subjects are the content-addressed inputs; the
+/// predicate is the format 1 body verbatim.
+pub fn to_in_toto(body: &Value) -> Value {
+    let mut subjects = Vec::new();
+    if let (Some(name), Some(h)) = (
+        body.pointer("/config/name").and_then(Value::as_str),
+        body.pointer("/config/blake3").and_then(Value::as_str),
+    ) {
+        subjects.push(json!({"digest": {"blake3": h}, "name": name}));
+    }
+    if let Some(h) = body.pointer("/lock/blake3").and_then(Value::as_str) {
+        subjects.push(json!({"digest": {"blake3": h}, "name": "invar.lock"}));
+    }
+    for a in body
+        .get("artifacts")
+        .and_then(Value::as_array)
+        .unwrap_or(&Vec::new())
+    {
+        if let (Some(r), Some(h)) = (
+            a.get("ref").and_then(Value::as_str),
+            a.get("blake3").and_then(Value::as_str),
+        ) {
+            subjects.push(json!({"digest": {"blake3": h}, "name": r}));
+        }
+    }
+    json!({
+        "_type": "https://in-toto.io/Statement/v1",
+        "predicate": body,
+        "predicateType": "https://github.com/Ramesh-35/invar-platform/receipt/v1",
+        "subject": subjects,
+    })
+}
+
+/// Verify a detached OpenSSH signature over `payload` by shelling out to
+/// ssh-keygen (same standing as the curl subprocess). Ok(true) verified,
+/// Ok(false) signature rejected, Err only when ssh-keygen cannot run.
+pub fn verify_ssh(
+    payload: &[u8],
+    sig_file: &std::path::Path,
+    signers_file: &std::path::Path,
+    principal: &str,
+    namespace: &str,
+) -> Result<bool> {
+    use std::io::Write as _;
+    let mut child = std::process::Command::new("ssh-keygen")
+        .arg("-Y")
+        .arg("verify")
+        .arg("-f")
+        .arg(signers_file)
+        .arg("-I")
+        .arg(principal)
+        .arg("-n")
+        .arg(namespace)
+        .arg("-s")
+        .arg(sig_file)
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .spawn()
+        .map_err(|e| anyhow!("running ssh-keygen: {e}"))?;
+    child
+        .stdin
+        .take()
+        .ok_or_else(|| anyhow!("ssh-keygen stdin unavailable"))?
+        .write_all(payload)?;
+    Ok(child.wait()?.success())
+}

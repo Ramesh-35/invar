@@ -1509,3 +1509,55 @@ fn a2_receipt_is_canonical_and_sealed() {
     assert_eq!(receipt::contracts_exit(&out), 0);
     let _ = std::fs::remove_dir_all(&dir);
 }
+
+// ---------------------------------------------------------------------------
+// 36. A2.1: the in-toto export wraps the format 1 body verbatim; the SSH
+// verify helper accepts a good signature and rejects a bad one (skipped
+// with a stated reason when ssh-keygen is absent).
+// ---------------------------------------------------------------------------
+#[test]
+fn a21_in_toto_export_and_ssh_verify() {
+    use invar_falsify::receipt;
+    let dir = std::env::temp_dir().join(format!("invar-a21-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    let w = |n: &str, b: &str| std::fs::write(dir.join(n), b).unwrap();
+    w("s.json", r#"{"properties":{"total":{"type":"integer"}}}"#);
+    w("c.py", "t = d[\"total\"]\n");
+    let cfg = "[[invariant]]\nkind = \"schema\"\nid = \"a\"\nproducer = \"s.json\"\nconsumer = \"c.py\"\n";
+    let out = evaluate(&parse_sections("invar.toml", cfg).unwrap(), &Resolver::local(&dir)).unwrap();
+    let body = receipt::body("0.0.0-test", "2026-10-10", "invar.toml", "cfg-hash", Some("lock-hash"), &out);
+    let st = receipt::to_in_toto(&body);
+    assert_eq!(st.get("_type").and_then(|v| v.as_str()), Some("https://in-toto.io/Statement/v1"));
+    assert_eq!(st.get("predicate"), Some(&body), "the predicate is the format 1 body verbatim");
+    let subj = st.get("subject").and_then(|v| v.as_array()).unwrap();
+    assert!(subj.iter().any(|s| s.get("name").and_then(|v| v.as_str()) == Some("invar.lock")));
+    assert!(subj.iter().any(|s| s.get("name").and_then(|v| v.as_str()) == Some("invar.toml")));
+
+    // SSH round-trip, only where ssh-keygen exists (CI has it; the gate is
+    // the real proof, this is the unit check).
+    if std::process::Command::new("ssh-keygen").arg("-h").output().is_err() {
+        eprintln!("SKIPPED ssh round-trip: ssh-keygen not on PATH");
+        let _ = std::fs::remove_dir_all(&dir);
+        return;
+    }
+    let key = dir.join("k");
+    let runs = std::process::Command::new("ssh-keygen")
+        .args(["-t", "ed25519", "-N", "", "-q", "-f"]).arg(&key).status().unwrap().success();
+    assert!(runs);
+    w("payload.txt", "locked bytes\n");
+    let ok = std::process::Command::new("ssh-keygen")
+        .args(["-Y", "sign", "-n", "invar-lock", "-f"]).arg(&key).arg(dir.join("payload.txt"))
+        .status().unwrap().success();
+    assert!(ok);
+    let signers = dir.join("signers");
+    let pubkey = std::fs::read_to_string(key.with_extension("pub")).unwrap();
+    std::fs::write(&signers, format!("release@invar {}", pubkey)).unwrap();
+    let good = receipt::verify_ssh(b"locked bytes\n", &dir.join("payload.txt.sig"), &signers, "release@invar", "invar-lock").unwrap();
+    assert!(good, "a valid signature verifies");
+    let bad = receipt::verify_ssh(b"tampered bytes\n", &dir.join("payload.txt.sig"), &signers, "release@invar", "invar-lock").unwrap();
+    assert!(!bad, "tampered payload is rejected");
+    let wrong_ns = receipt::verify_ssh(b"locked bytes\n", &dir.join("payload.txt.sig"), &signers, "release@invar", "invar-receipt").unwrap();
+    assert!(!wrong_ns, "namespace separation holds");
+    let _ = std::fs::remove_dir_all(&dir);
+}

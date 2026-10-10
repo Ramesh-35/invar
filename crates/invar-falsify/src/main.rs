@@ -57,6 +57,8 @@ enum Command {
     Fix(FixArgs),
     /// Re-run an evidence receipt and confirm it reproduces byte for byte.
     VerifyReceipt(VerifyReceiptArgs),
+    /// Receipt views: `receipt export --in-toto` (format 1 stays canonical).
+    Receipt(ReceiptArgs),
     /// Scan a workspace and propose an invar.toml (heuristic discovery).
     Init(InitArgs),
     /// Verify and summarize a ledger; point to the adequacy matrix.
@@ -123,6 +125,37 @@ struct CheckArgs {
     /// Also write an A2 evidence receipt (canonical, byte-deterministic) here.
     #[arg(long)]
     receipt: Option<String>,
+    /// Baseline ceremony: require invar.lock.sig to verify against this
+    /// allowed-signers file before evaluating (fail closed, exit 3).
+    #[arg(long)]
+    lock_signers: Option<String>,
+    /// Principal for --lock-signers (required with it).
+    #[arg(long)]
+    lock_principal: Option<String>,
+}
+
+#[derive(Parser)]
+struct ReceiptArgs {
+    #[command(subcommand)]
+    cmd: ReceiptCmd,
+}
+
+#[derive(clap::Subcommand)]
+enum ReceiptCmd {
+    /// Convert a format 1 receipt into another view. Never alters format 1.
+    Export(ReceiptExportArgs),
+}
+
+#[derive(Parser)]
+struct ReceiptExportArgs {
+    /// The format 1 receipt file to export.
+    path: String,
+    /// Emit an in-toto Statement v1.0 wrapping the receipt body.
+    #[arg(long, default_value_t = false)]
+    in_toto: bool,
+    /// Write here instead of stdout.
+    #[arg(long)]
+    out: Option<String>,
 }
 
 #[derive(Parser)]
@@ -151,6 +184,14 @@ struct LockArgs {
     /// producer (waivers are kept).
     #[arg(long, default_value_t = false)]
     update: bool,
+    /// Baseline ceremony: require invar.lock.sig to verify against this
+    /// allowed-signers file (fail closed, exit 3). Sign with:
+    /// ssh-keygen -Y sign -n invar-lock -f <key> invar.lock
+    #[arg(long)]
+    lock_signers: Option<String>,
+    /// Principal for --lock-signers (required with it).
+    #[arg(long)]
+    lock_principal: Option<String>,
 }
 
 #[derive(Parser)]
@@ -214,6 +255,7 @@ fn main() {
         Command::Mcp(a) => dispatch_r2(cmd_mcp(a)),
         Command::Fix(a) => dispatch_r2(cmd_fix(a)),
         Command::VerifyReceipt(a) => dispatch_r2(cmd_verify_receipt(a)),
+        Command::Receipt(a) => dispatch_r2(cmd_receipt(a)),
         Command::Init(a) => dispatch(cmd_init(a)),
         Command::Audit(a) => dispatch(cmd_audit(a)),
         Command::Replay(a) => dispatch(cmd_replay(a)),
@@ -469,6 +511,12 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
         record_local: args.receipt.is_some(),
     };
     let lock_path = base_dir_of(&args.config).join("invar.lock");
+    if let Some(signers) = &args.lock_signers {
+        if let Err(e) = require_lock_signature(&lock_path, signers, args.lock_principal.as_deref()) {
+            eprintln!("ERROR (not a verdict): {e:#}");
+            return Ok(3);
+        }
+    }
     let mut lock_text: Option<String> = None;
     let lock_file = if lock_path.exists() {
         let text = match std::fs::read_to_string(&lock_path) {
@@ -765,6 +813,9 @@ fn cmd_lock(args: LockArgs) -> Result<i32> {
     let sections = invar_falsify::config::parse_sections(&args.config, &raw)?;
     let base_dir = base_dir_of(&args.config);
     let lock_path = base_dir.join("invar.lock");
+    if let Some(signers) = &args.lock_signers {
+        require_lock_signature(&lock_path, signers, args.lock_principal.as_deref())?;
+    }
     let prev = if lock_path.exists() {
         lock::parse(
             &lock_path.display().to_string(),
@@ -1080,5 +1131,78 @@ fn cmd_verify_receipt(args: VerifyReceiptArgs) -> Result<i32> {
             .unwrap_or(0);
         println!("result: receipt NOT reproduced (first differing line {diff})");
         Ok(1)
+    }
+}
+
+/// Baseline ceremony check: when a signers file is supplied, invar.lock.sig
+/// must verify (namespace invar-lock) before any evaluation. Fail closed:
+/// a missing lock, missing signature, or rejected signature is an error
+/// (exit 3), never a verdict.
+fn require_lock_signature(
+    lock_path: &std::path::Path,
+    signers: &str,
+    principal: Option<&str>,
+) -> Result<()> {
+    let principal =
+        principal.ok_or_else(|| anyhow::anyhow!("--lock-signers needs --lock-principal"))?;
+    if !lock_path.exists() {
+        anyhow::bail!(
+            "--lock-signers given but {} does not exist",
+            lock_path.display()
+        );
+    }
+    let sig = lock_path.with_extension("lock.sig");
+    if !sig.exists() {
+        anyhow::bail!(
+            "lock not confirmed: {} is missing; sign with: ssh-keygen -Y sign -n invar-lock -f <key> {}",
+            sig.display(),
+            lock_path.display()
+        );
+    }
+    let payload = std::fs::read(lock_path)?;
+    if !receipt::verify_ssh(
+        &payload,
+        &sig,
+        std::path::Path::new(signers),
+        principal,
+        "invar-lock",
+    )? {
+        anyhow::bail!(
+            "lock not confirmed: {} does not verify against {} as {}",
+            sig.display(),
+            signers,
+            principal
+        );
+    }
+    println!("lock signature ok ({principal})");
+    Ok(())
+}
+
+/// `invar receipt export`: views over a format 1 receipt. Format 1 stays
+/// canonical; exporting never alters or re-signs it.
+fn cmd_receipt(args: ReceiptArgs) -> Result<i32> {
+    match args.cmd {
+        ReceiptCmd::Export(a) => {
+            if !a.in_toto {
+                anyhow::bail!("nothing to export: pass --in-toto");
+            }
+            let text = std::fs::read_to_string(&a.path)
+                .map_err(|e| anyhow::anyhow!("reading {}: {e}", a.path))?;
+            let parsed = receipt::parse(&text)?;
+            let statement = receipt::to_in_toto(&parsed.body);
+            let rendered = format!(
+                "{}\n",
+                serde_json::to_string_pretty(&statement).unwrap_or_default()
+            );
+            match &a.out {
+                Some(p) => {
+                    std::fs::write(p, &rendered)
+                        .map_err(|e| anyhow::anyhow!("writing {p}: {e}"))?;
+                    println!("in-toto statement written: {p}");
+                }
+                None => print!("{rendered}"),
+            }
+            Ok(0)
+        }
     }
 }
