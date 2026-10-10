@@ -1,0 +1,21 @@
+[case]
+id = "r1-118"
+title = "Gotenberg 8 removed the deprecated pdfFormat form field; paperless-ngx mail parser still sent it"
+source = "https://github.com/gotenberg/gotenberg/commit/21c47f60f225e5ae9a85bb1c91675c1b53f1c855"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "field_removed"
+batch = "8"
+
+[expected]
+residue = "pdfFormat"
+evidence = "gotenberg 'feat: remove deprecated stuff (#726)' 2023-12-01; paperless at pin writes data[pdfFormat] (request-side write, batch-4 precedent)"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

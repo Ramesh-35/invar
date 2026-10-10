@@ -1,0 +1,8 @@
+[[invariant]]
+kind = "schema"
+id = "r1-104"
+producer = "github:pnpm/pnpm@dd6b0b62d80340655ac1cf4c4365fcfffe1e3f2c:lockfile/lockfile-types/src/index.ts"
+producer_base = "github:pnpm/pnpm@afe8ecef1f24812845b699c141d52643d1524079:lockfile/lockfile-types/src/index.ts"
+producer_code = "github:pnpm/pnpm@dd6b0b62d80340655ac1cf4c4365fcfffe1e3f2c:packages/constants/src/index.ts"
+producer_code_base = "github:pnpm/pnpm@afe8ecef1f24812845b699c141d52643d1524079:packages/constants/src/index.ts"
+consumer = "github:vercel/turborepo@adbfe4c04e3cdd31ae1916d0a5222bbc5ae2bb58:crates/turborepo-lockfiles/src/pnpm/data.rs"

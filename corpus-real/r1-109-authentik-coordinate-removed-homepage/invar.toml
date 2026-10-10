@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-109"
+producer = "github:goauthentik/authentik@734db4dee650e6cbc8c0a5a2a3c3843f162e1559:authentik/events/api/events.py"
+producer_base = "github:goauthentik/authentik@856ac052e75a35273facd5c1e56dbe2afdaaef56:authentik/admin/api/metrics.py"
+consumer = "github:gethomepage/homepage@6d7be1c7f219115d4fdb4a75a5abdb1fe37a76fb:src/widgets/authentik/component.jsx"

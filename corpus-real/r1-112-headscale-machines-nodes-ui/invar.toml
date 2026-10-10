@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-112"
+producer = "github:juanfont/headscale@0030af3fa432082f20519fa58e9e29870f605e3f:gen/go/headscale/v1/node.pb.go"
+producer_base = "github:juanfont/headscale@096ac31bb3c9e6aa041975ce1695f364db22509d:gen/go/headscale/v1/machine.pb.go"
+consumer = "github:gurucomputing/headscale-ui@a9db179089e3ae2b417fb657a2d3da68a54b1f2d:src/lib/common/apiFunctions.svelte"

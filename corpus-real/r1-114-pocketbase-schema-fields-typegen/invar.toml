@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-114"
+producer = "github:pocketbase/pocketbase@d5dddf3eadaffadc73503c464f6ff8ac6450a874:core/collection_model.go"
+producer_base = "github:pocketbase/pocketbase@ad92992324c3fd0f09c36300890620a0224c6c06:models/collection.go"
+consumer = "github:patmood/pocketbase-typegen@b50cdb8413032f0b915aa2f58dfa40f8186a3441:src/schema.ts"

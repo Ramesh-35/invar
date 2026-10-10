@@ -1,0 +1,21 @@
+[case]
+id = "r1-113"
+title = "Cargo made lockfile v4 the default; the cargo-lock crate rejected version = 4"
+source = "https://github.com/rustsec/rustsec/pull/1206"
+source_kind = "pr"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "other"
+batch = "8"
+
+[expected]
+residue = "version"
+evidence = "cargo 5dfdd5900 'feat: make lockfile v4 the default' 2024-09-24 (rust-lang/cargo#12852); cargo-lock v4 support feeb220 2024-10-09"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

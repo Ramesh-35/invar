@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-119"
+producer = "github:netbox-community/netbox@6659bb3abe4bc51589977f03576f9d519c1f39be:netbox/netbox/api/pagination.py"
+producer_base = "github:netbox-community/netbox@0a5f40338d8fab55c1a647d4cad15fcb8e4b39d5:netbox/netbox/api/pagination.py"
+consumer = "github:netbox-community/pynetbox@b13e510aed04d196aec9f95d7d2775ec20da80d8:pynetbox/core/query.py"

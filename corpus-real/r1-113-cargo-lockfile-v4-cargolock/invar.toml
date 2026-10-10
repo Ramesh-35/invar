@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-113"
+producer = "github:rust-lang/cargo@5dfdd59009930729787e59049c988a7d18b9f5a1:src/cargo/core/resolver/resolve.rs"
+producer_base = "github:rust-lang/cargo@f3672cbf3925f3ab91725bc2d4aa5cd04aaf43f4:src/cargo/core/resolver/resolve.rs"
+consumer = "github:rustsec/rustsec@252e63b3b7981c61e2268227de7c4c14160e6527:cargo-lock/src/lockfile/version.rs"

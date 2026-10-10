@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-110"
+producer = "github:netbox-community/netbox@e1f0c18c7448d6e18175442b5e9b73cc34871a13:netbox/extras/api/customfields.py"
+producer_base = "github:netbox-community/netbox@18fc16df8e59a0fd26f1eb12f482bda5e0e7f8f6:netbox/extras/api/customfields.py"
+consumer = "github:netbox-community/pynetbox@88d9f9bcf42dea81f50f54cfb5251498a25ad9ff:pynetbox/core/response.py"

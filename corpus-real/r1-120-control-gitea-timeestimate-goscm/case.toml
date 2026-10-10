@@ -1,0 +1,21 @@
+[case]
+id = "r1-120"
+title = "CONTROL: Gitea added TimeEstimate to the issue struct; go-scm gitea driver reads unchanged fields"
+source = "https://github.com/go-gitea/gitea/commit/fe5afcb0227db0aa9d8634564de385a328dfbced"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "false"
+break_kind = "none"
+batch = "8"
+
+[expected]
+residue = "none"
+evidence = "additive field 2025-09-16; title/body/number unchanged"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

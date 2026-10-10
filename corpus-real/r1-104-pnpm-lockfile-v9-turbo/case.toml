@@ -1,0 +1,21 @@
+[case]
+id = "r1-104"
+title = "pnpm 9 lockfile format 9.0 (importers/snapshots split, new dep paths); turbo prune failed to parse"
+source = "https://github.com/vercel/turborepo/issues/7993"
+source_kind = "issue"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "other"
+batch = "8"
+
+[expected]
+residue = "lockfileVersion"
+evidence = "turbo: 'error parsing dependency path'; Vercel 'WARN Ignoring not compatible lockfile'; fix turborepo#7994 2024-04-17; rules_js#1749 same incident"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

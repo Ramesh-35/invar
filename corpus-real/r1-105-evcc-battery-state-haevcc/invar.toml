@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-105"
+producer = "github:evcc-io/evcc@15fd774062d8688f10a2d3e62afd0b70ff578e17:core/site.go"
+producer_base = "github:evcc-io/evcc@15071f4ac904c07bd4aad4feb12015c617400161:core/site.go"
+consumer = "github:marq24/ha-evcc@4ff273667f279a9eed28f2e305ebcf0fc466c707:custom_components/evcc_intg/pyevcc_ha/keys.py"

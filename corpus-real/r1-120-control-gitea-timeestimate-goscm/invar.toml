@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-120"
+producer = "github:go-gitea/gitea@fe5afcb0227db0aa9d8634564de385a328dfbced:modules/structs/issue.go"
+producer_base = "github:go-gitea/gitea@8c8eb4b6f97ba31dd93aaf44a071caa89e908f5a:modules/structs/issue.go"
+consumer = "github:drone/go-scm@568467306e54a0d18d877bbfbd1a21de98b284ac:scm/driver/gitea/issue.go"

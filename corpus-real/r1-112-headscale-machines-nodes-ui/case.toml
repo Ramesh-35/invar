@@ -1,0 +1,21 @@
+[case]
+id = "r1-112"
+title = "headscale 0.23 renamed Machine to Node across the API (machines list key became nodes); headscale-ui read data.machines"
+source = "https://github.com/gurucomputing/headscale-ui/commit/eead9859f90e217420822f6c61f78cb5a73f7dfe"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "field_renamed"
+batch = "8"
+
+[expected]
+residue = "machines"
+evidence = "headscale #1553 'Rename Machine to Node' 2023-09-24; headscale-ui #132 'change api to dynamically check for breaking change' 2024-02-24"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

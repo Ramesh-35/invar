@@ -1,0 +1,21 @@
+[case]
+id = "r1-109"
+title = "authentik removed CoordinateSerializer (x_cord/y_cord) for EventVolume; homepage reduced over x_cord/y_cord"
+source = "https://github.com/gethomepage/homepage/pull/5687"
+source_kind = "pr"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "field_removed"
+batch = "8"
+
+[expected]
+residue = "x_cord,y_cord"
+evidence = "homepage #5687 'handle authentik v2025.8.0 breaking API changes' 2025-08-20; authentik #14934; producer file moved (metrics.py removed, events.py EventVolumeSerializer)"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"

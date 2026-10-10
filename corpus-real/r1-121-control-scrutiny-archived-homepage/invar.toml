@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-121"
+producer = "github:AnalogJ/scrutiny@600cd153e0d0fb9aef9c723fffdc2f28a76b5a1f:webapp/backend/pkg/models/device.go"
+producer_base = "github:AnalogJ/scrutiny@a58f9445c13c314829dbe162cbb29c58dba2bbbc:webapp/backend/pkg/models/device.go"
+consumer = "github:gethomepage/homepage@b55da10ae99c72569018a97cd2580642b1811393:src/widgets/scrutiny/component.jsx"

@@ -485,3 +485,52 @@ elsewhere in the new shape (r1-091, r1-068 `url`, r1-044).
 
 Results: r1-batch7-alpha8.tsv, r1-batch7-d1.tsv, r1-batch7-e1.tsv,
 r1-batch6-e1.tsv.
+
+## Batch 8 (r1-104 to r1-121), sourced 2026-10-09/10, scored 2026-10-10
+
+Held-out protocol: F1 spec frozen (9dc28c3) and the alpha.11 engine built and
+fingerprinted (ffca8aa) before any batch 8 case was sourced. Sourcing was
+ecosystem-driven (mining consumer repositories' fix history), not
+mechanism-driven; one admitted case (r1-113) happens to be a default switch,
+found through the same mining as every other case. 15 real in-scope breaks,
+3 controls, no overlap with r1-001 to r1-103.
+
+| Case | Break | alpha.10 | alpha.11 (F1) |
+|---|---|---|---|
+| r1-104 pnpm lockfile 9.0 vs turbo prune | version + layout | CAUGHT | CAUGHT |
+| r1-105 evcc battery consolidation vs ha-evcc | fields -> object | NOT EVALUATED (A1) | NOT EVALUATED (A1) |
+| r1-106 dispatcharr stream_name -> channel_name vs homepage | rename, behavioural | missed, silent | missed, silent |
+| r1-107 linkwarden {response} -> {data:{tags}} vs homepage | envelope rename | missed, silent | missed, silent |
+| r1-108 tandoor 2.0 paginated space vs homepage | envelope | CAUGHT | CAUGHT |
+| r1-109 authentik Coordinate removed vs homepage | field_removed | CAUGHT | CAUGHT |
+| r1-110 netbox 4.7 select custom fields -> {value,label} vs pynetbox | retype | missed, silent | missed, silent |
+| r1-111 immich v3 deviceAssetId removed vs homarr | field_removed | CAUGHT | CAUGHT |
+| r1-112 headscale machines -> nodes vs headscale-ui | rename | CAUGHT | CAUGHT |
+| r1-113 Cargo.lock v4 default vs cargo-lock crate | default switch | missed, silent | missed, silent |
+| r1-114 pocketbase schema -> fields vs typegen | rename | CAUGHT | CAUGHT |
+| r1-115 moonraker need_channel_update removed vs mainsail | field_removed | CAUGHT | CAUGHT |
+| r1-116 evcc forecast arrays (BC) vs ha-evcc | retype | missed (flagged `temperature`, not the read fields) | same |
+| r1-117 ghostfolio performance fields removed vs homepage | field_removed | CAUGHT | CAUGHT |
+| r1-118 gotenberg pdfFormat removed vs paperless | request-side | missed, silent | missed, silent |
+| r1-119 control: netbox cursor pagination | additive | CLEAN | CLEAN |
+| r1-120 control: gitea TimeEstimate | additive | CLEAN | CLEAN |
+| r1-121 control: scrutiny archived | additive | CLEAN | CLEAN |
+
+Totals, breaks: 8 caught, 1 NOT EVALUATED, 6 missed (5 silent HOLDS, 1
+flagged with a field the consumer does not read). Controls: 3 clean. The
+alpha.10 and alpha.11 engines give identical verdicts on every case: F1 had
+zero held-out effect and zero cost.
+
+The finding that matters: the default-switch mechanism recurred for the
+fifth time (r1-113) and the frozen F1 missed it. Cargo's flip is
+`ResolveVersion::V3 -> ResolveVersion::V4`, an enum variant; the frozen F1
+value grammar accepts only integers, booleans, and quoted integers, so the
+selector is invisible to it. Any widening of the grammar is a new rule for
+batch 9, not a retroactive fix.
+
+Pin corrections, disclosed: r1-113's producer was first pinned to
+encode.rs, where the flip is not visible (the commit never touched it); the
+pin was corrected to resolve.rs after a first scoring pass and both engines
+were re-scored on the corrected pin (both: silent HOLDS either way).
+r1-114 hit a transient fetch failure in one alpha.10 run; the rerun is the
+recorded result.

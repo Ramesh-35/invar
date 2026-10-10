@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-118"
+producer = "github:gotenberg/gotenberg@21c47f60f225e5ae9a85bb1c91675c1b53f1c855:pkg/modules/chromium/routes.go"
+producer_base = "github:gotenberg/gotenberg@66142b1dd8e83265d9cb16ceed348647f9ee48db:pkg/modules/chromium/routes.go"
+consumer = "github:paperless-ngx/paperless-ngx@5f0eba694c24c634f55bd67adea98aebdf5c995f:src/paperless_mail/parsers.py"

@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-115"
+producer = "github:Arksine/moonraker@357276b1d928445ae130a8bee86e2ff05a59bc41:moonraker/components/update_manager/app_deploy.py"
+producer_base = "github:Arksine/moonraker@b2d84bc7338479ab5523354cda2cada52a823b1b:moonraker/components/update_manager/app_deploy.py"
+consumer = "github:mainsail-crew/mainsail@ef2d17cadde566e8b713031cb7292d65ca1bec12:src/store/server/updateManager/types.ts"

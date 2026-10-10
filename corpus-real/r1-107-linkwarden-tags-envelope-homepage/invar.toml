@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-107"
+producer = "github:linkwarden/linkwarden@82f97b10956d17fc7d18b5ec8bc0239c9d6ac1cb:apps/web/pages/api/v1/tags/index.ts"
+producer_base = "github:linkwarden/linkwarden@c4f8985be9a438a229aeb8f77b09d95b69eb4463:apps/web/pages/api/v1/tags/index.ts"
+consumer = "github:gethomepage/homepage@9cabb46bb7803a7de7a7eeefef76ecc946330978:src/widgets/linkwarden/component.jsx"

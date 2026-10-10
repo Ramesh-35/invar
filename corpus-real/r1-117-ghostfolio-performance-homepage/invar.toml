@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-117"
+producer = "github:ghostfolio/ghostfolio@f2cb671c7f577da99cdccc07be2b720895d6aa3e:libs/common/src/lib/interfaces/portfolio-performance.interface.ts"
+producer_base = "github:ghostfolio/ghostfolio@3f41e5c5def7330ec49c908955d4efa1bd66b062:libs/common/src/lib/interfaces/portfolio-performance.interface.ts"
+consumer = "github:gethomepage/homepage@d20ab844d6ec84062b22f6b5b7d339ce32789349:src/widgets/ghostfolio/component.jsx"

@@ -684,3 +684,23 @@ in-scope batch is the only fair test of it.
   identical in both engines. Evidence rung: tuning data. D1 and E1 also
   looked exact on tuning data and changed nothing held out; the only score
   that counts for F1 is batch 8, not yet sourced.
+
+## 2026-10-10: batch 8 scored; F1 zero held-out effect; fifth default-switch recurrence missed
+
+- Batch 8 (15 real breaks + 3 controls, r1-104..r1-121) scored on the frozen
+  alpha.10 and alpha.11 engines: identical verdicts on all 18 cases.
+  8 caught, 1 NOT EVALUATED (A1), 6 missed; controls clean. F1, like D1 and
+  E1 before it, changed nothing on held-out data. Three rules in a row.
+- The mechanism F1 was built for recurred (r1-113, Cargo.lock v4 default)
+  and F1 missed it: the selector value is an enum variant
+  (`ResolveVersion::V4`), outside the frozen value grammar (integers,
+  booleans, quoted integers). The rule family is right about the mechanism
+  and too narrow in its grammar; widening it is batch 9 work under a new
+  frozen spec.
+- Combined held-out record (batches 4 to 8): 38 of 70 in-scope real breaks
+  caught, 46% missed. The 20% gate is not close. R1 remains FALSIFIED.
+- Honest read of three zero-effect rules in a row: each new rule fixed past
+  misses that have not recurred (except default-switch); the misses that do
+  occur keep coming from mechanisms one notch outside each frozen rule.
+  Tuning-data exactness (4 flips, 0 noise) predicted nothing about held-out
+  effect, again.

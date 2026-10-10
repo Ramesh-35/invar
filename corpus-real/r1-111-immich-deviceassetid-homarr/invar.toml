@@ -1,0 +1,7 @@
+[[invariant]]
+kind = "schema"
+id = "r1-111"
+producer = "github:immich-app/immich@8ee5d3039ada5b9f60cea204d98e49833478ab3a:open-api/immich-openapi-specs.json"
+producer_base = "github:immich-app/immich@d41013131283ee75f098fdb1423e18203ade5e55:open-api/immich-openapi-specs.json"
+pointer = "/components/schemas/AssetResponseDto"
+consumer = "github:homarr-labs/homarr@b588672709c73c5e759aa2c52b15145ad96885d4:packages/integrations/src/immich/immich-integration.ts"

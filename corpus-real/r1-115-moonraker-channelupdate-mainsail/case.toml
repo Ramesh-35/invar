@@ -1,0 +1,21 @@
+[case]
+id = "r1-115"
+title = "Moonraker removed need_channel_update from update_manager status; mainsail typed and read it"
+source = "https://github.com/Arksine/moonraker/commit/357276b1d928445ae130a8bee86e2ff05a59bc41"
+source_kind = "commit"
+admitted = "2026-10-09"
+real = "true"
+break_kind = "field_removed"
+batch = "8"
+
+[expected]
+residue = "need_channel_update"
+evidence = "moonraker 357276b1 'update_manager: remove unused reinstall functionality' 2023-06-26, documented in docs/api_changes.md; mainsail types.ts need_channel_update"
+
+[baseline]
+oasdiff = "not_run"
+openapi_diff = "not_applicable"
+buf_breaking = "not_applicable"
+schema_registry = "not_applicable"
+semgrep = "not_run"
+ai_reviewer = "not_run"
