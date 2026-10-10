@@ -18,6 +18,7 @@ use clap::{Parser, Subcommand};
 
 use invar_falsify::check::{evaluate_with, render_report_md, witness_text};
 use invar_falsify::lock;
+use invar_falsify::receipt;
 use invar_falsify::evaluator::{evaluate_case, CaseResult};
 use invar_falsify::init::{discover, render_manifest};
 use invar_falsify::ledger::Ledger;
@@ -54,6 +55,8 @@ enum Command {
     Mcp(McpArgs),
     /// Suggest consumer patches for unambiguous field renames (never writes).
     Fix(FixArgs),
+    /// Re-run an evidence receipt and confirm it reproduces byte for byte.
+    VerifyReceipt(VerifyReceiptArgs),
     /// Scan a workspace and propose an invar.toml (heuristic discovery).
     Init(InitArgs),
     /// Verify and summarize a ledger; point to the adequacy matrix.
@@ -117,6 +120,27 @@ struct CheckArgs {
     /// Also write a markdown report (PR comment / job summary) to this path.
     #[arg(long)]
     report_md: Option<String>,
+    /// Also write an A2 evidence receipt (canonical, byte-deterministic) here.
+    #[arg(long)]
+    receipt: Option<String>,
+}
+
+#[derive(Parser)]
+struct VerifyReceiptArgs {
+    /// The receipt file to verify.
+    path: String,
+    #[arg(long, default_value = "invar.toml")]
+    config: String,
+    /// Verify fully offline from a directory of artifacts named by BLAKE3 hex.
+    #[arg(long)]
+    artifacts: Option<String>,
+    /// Also verify the detached SSH signature (<path>.sig) against this
+    /// allowed-signers file (ssh-keygen -Y verify, namespace invar-receipt).
+    #[arg(long)]
+    signers: Option<String>,
+    /// Principal to verify the signature as (required with --signers).
+    #[arg(long)]
+    principal: Option<String>,
 }
 
 #[derive(Parser)]
@@ -189,6 +213,7 @@ fn main() {
         Command::Lock(a) => dispatch_r2(cmd_lock(a)),
         Command::Mcp(a) => dispatch_r2(cmd_mcp(a)),
         Command::Fix(a) => dispatch_r2(cmd_fix(a)),
+        Command::VerifyReceipt(a) => dispatch_r2(cmd_verify_receipt(a)),
         Command::Init(a) => dispatch(cmd_init(a)),
         Command::Audit(a) => dispatch(cmd_audit(a)),
         Command::Replay(a) => dispatch(cmd_replay(a)),
@@ -441,14 +466,23 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
         } else {
             None
         },
+        record_local: args.receipt.is_some(),
     };
     let lock_path = base_dir_of(&args.config).join("invar.lock");
+    let mut lock_text: Option<String> = None;
     let lock_file = if lock_path.exists() {
-        match std::fs::read_to_string(&lock_path)
-            .map_err(anyhow::Error::from)
-            .and_then(|t| lock::parse(&lock_path.display().to_string(), &t))
-        {
-            Ok(l) => Some(l),
+        let text = match std::fs::read_to_string(&lock_path) {
+            Ok(t) => t,
+            Err(e) => {
+                eprintln!("ERROR (not a verdict): reading {}: {e}", lock_path.display());
+                return Ok(3);
+            }
+        };
+        match lock::parse(&lock_path.display().to_string(), &text) {
+            Ok(l) => {
+                lock_text = Some(text);
+                Some(l)
+            }
             Err(e) => {
                 eprintln!("ERROR (not a verdict): {e:#}");
                 return Ok(3);
@@ -457,7 +491,8 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
     } else {
         None
     };
-    let outcomes = match evaluate_with(&sections, &resolver, lock_file.as_ref(), lock::today_utc()) {
+    let today = lock::today_utc();
+    let outcomes = match evaluate_with(&sections, &resolver, lock_file.as_ref(), today) {
         Ok(o) => o,
         Err(e) => {
             eprintln!("ERROR (not a verdict): {e:#}");
@@ -541,6 +576,30 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
             eprintln!("ERROR (not a verdict): writing report {path}: {e}");
             return Ok(3);
         }
+    }
+
+    if let Some(path) = &args.receipt {
+        let config_name = std::path::Path::new(&args.config)
+            .file_name()
+            .map(|n| n.to_string_lossy().to_string())
+            .unwrap_or_else(|| args.config.clone());
+        let config_b3 = blake3::hash(raw.as_bytes()).to_hex().to_string();
+        let lock_b3 = lock_text
+            .as_ref()
+            .map(|t| blake3::hash(t.as_bytes()).to_hex().to_string());
+        let body = receipt::body(
+            env!("CARGO_PKG_VERSION"),
+            &lock::format_date(today),
+            &config_name,
+            &config_b3,
+            lock_b3.as_deref(),
+            &outcomes,
+        );
+        if let Err(e) = std::fs::write(path, receipt::render(&body)) {
+            eprintln!("ERROR (not a verdict): writing receipt {path}: {e}");
+            return Ok(3);
+        }
+        println!("receipt written: {path}");
     }
 
     if let Some(path) = &args.ledger {
@@ -724,6 +783,7 @@ fn cmd_lock(args: LockArgs) -> Result<i32> {
         token: std::env::var("GITHUB_TOKEN").ok().filter(|v| !v.is_empty()),
         base_ref: None,
         transport: Some(&curl as &dyn Transport),
+        record_local: false,
     };
     lock::validate_waivers(&prev.waivers, lock::today_utc())?;
     let next = lock::compute(&sections, &resolver, &prev, lock::today_utc())?;
@@ -787,6 +847,7 @@ fn cmd_fix(args: FixArgs) -> Result<i32> {
         token: std::env::var("GITHUB_TOKEN").ok().filter(|v| !v.is_empty()),
         base_ref: None,
         transport: Some(&curl as &dyn Transport),
+        record_local: false,
     };
     let mut any = false;
     for b in invar_falsify::check::gather_blocks(&sections)? {
@@ -826,4 +887,198 @@ fn cmd_fix(args: FixArgs) -> Result<i32> {
         println!("no residue in locked contracts: nothing to suggest");
     }
     Ok(0)
+}
+
+/// `invar verify-receipt`: re-run an A2 evidence receipt and confirm it
+/// reproduces byte for byte. Exit 0 reproduced; 1 not reproduced (input
+/// drift, signature failure, or verdict/byte mismatch: the receipt's claim
+/// does not hold today); 3 error (corrupted receipt, wrong engine version,
+/// unreadable inputs). 1 is about the receipt's claim, never the contracts.
+fn cmd_verify_receipt(args: VerifyReceiptArgs) -> Result<i32> {
+
+    let text = std::fs::read_to_string(&args.path)
+        .map_err(|e| anyhow::anyhow!("reading {}: {e}", args.path))?;
+    let parsed = receipt::parse(&text)?;
+    let body = &parsed.body;
+    let format = body.get("receipt_format").and_then(|v| v.as_u64());
+    if format != Some(receipt::RECEIPT_FORMAT) {
+        anyhow::bail!(
+            "receipt_format {:?} is not {} (this engine cannot evaluate it)",
+            format,
+            receipt::RECEIPT_FORMAT
+        );
+    }
+    let recorded_engine = body
+        .pointer("/engine/version")
+        .and_then(|v| v.as_str())
+        .unwrap_or("");
+    if recorded_engine != env!("CARGO_PKG_VERSION") {
+        anyhow::bail!(
+            "receipt was produced by engine {recorded_engine}; this is {} (reproduction is only promised by the same version)",
+            env!("CARGO_PKG_VERSION")
+        );
+    }
+
+    // Optional detached SSH signature over the whole receipt file.
+    if let Some(signers) = &args.signers {
+        let principal = args
+            .principal
+            .as_deref()
+            .ok_or_else(|| anyhow::anyhow!("--signers needs --principal"))?;
+        let sig = format!("{}.sig", args.path);
+        if !std::path::Path::new(&sig).exists() {
+            println!("signature missing: {sig}");
+            println!("result: receipt NOT verified");
+            return Ok(1);
+        }
+        let mut child = std::process::Command::new("ssh-keygen")
+            .args(["-Y", "verify", "-f", signers, "-I", principal, "-n", "invar-receipt", "-s", &sig])
+            .stdin(std::process::Stdio::piped())
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .spawn()
+            .map_err(|e| anyhow::anyhow!("running ssh-keygen: {e}"))?;
+        use std::io::Write as _;
+        child
+            .stdin
+            .take()
+            .ok_or_else(|| anyhow::anyhow!("ssh-keygen stdin unavailable"))?
+            .write_all(text.as_bytes())?;
+        if !child.wait()?.success() {
+            println!("signature verification failed ({sig}, principal {principal})");
+            println!("result: receipt NOT verified");
+            return Ok(1);
+        }
+        println!("signature ok ({principal})");
+    }
+
+    // Inputs: the config and lock must be the recorded bytes.
+    let raw = std::fs::read_to_string(&args.config)
+        .map_err(|e| anyhow::anyhow!("reading {}: {e}", args.config))?;
+    let config_b3 = blake3::hash(raw.as_bytes()).to_hex().to_string();
+    if body.pointer("/config/blake3").and_then(|v| v.as_str()) != Some(config_b3.as_str()) {
+        println!("input drift: {} is not the config the receipt was made from", args.config);
+        println!("result: receipt NOT reproduced");
+        return Ok(1);
+    }
+    let sections = invar_falsify::config::parse_sections(&args.config, &raw)
+        .map_err(|e| anyhow::anyhow!("{e}"))?;
+    let lock_path = base_dir_of(&args.config).join("invar.lock");
+    let recorded_lock = body.pointer("/lock/blake3").and_then(|v| v.as_str());
+    let mut lock_file = None;
+    match (recorded_lock, lock_path.exists()) {
+        (None, false) => {}
+        (None, true) => {
+            println!("input drift: {} exists but the receipt was made without a lock", lock_path.display());
+            println!("result: receipt NOT reproduced");
+            return Ok(1);
+        }
+        (Some(_), false) => {
+            println!("input drift: the receipt was made with invar.lock, which is now missing");
+            println!("result: receipt NOT reproduced");
+            return Ok(1);
+        }
+        (Some(h), true) => {
+            let t = std::fs::read_to_string(&lock_path)
+                .map_err(|e| anyhow::anyhow!("reading {}: {e}", lock_path.display()))?;
+            if blake3::hash(t.as_bytes()).to_hex().to_string() != h {
+                println!("input drift: invar.lock differs from the receipt");
+                println!("result: receipt NOT reproduced");
+                return Ok(1);
+            }
+            lock_file = Some(lock::parse(&lock_path.display().to_string(), &t)?);
+        }
+    }
+    let as_of = body
+        .get("as_of")
+        .and_then(|v| v.as_str())
+        .ok_or_else(|| anyhow::anyhow!("receipt has no as_of"))?;
+    let today = lock::parse_date(as_of)
+        .ok_or_else(|| anyhow::anyhow!("unreadable as_of {as_of:?}"))?;
+
+    let env = |k: &str| std::env::var(k).ok().filter(|v| !v.is_empty());
+    let max_bytes = max_remote_bytes(&sections).map_err(anyhow::Error::msg)?;
+    let dir_t;
+    let curl_t;
+    let resolver = Resolver {
+        base_dir: base_dir_of(&args.config),
+        allow_remote: true,
+        token: match &args.artifacts {
+            Some(_) => None, // tokenless, so urls invert to refs
+            None => env("GITHUB_TOKEN"),
+        },
+        base_ref: None,
+        transport: match &args.artifacts {
+            Some(d) => {
+                dir_t = receipt::DirTransport::from_receipt(std::path::Path::new(d), body);
+                Some(&dir_t as &dyn Transport)
+            }
+            None => {
+                curl_t = CurlTransport { max_bytes, ..CurlTransport::default() };
+                Some(&curl_t as &dyn Transport)
+            }
+        },
+        record_local: true,
+    };
+    let outcomes = evaluate_with(&sections, &resolver, lock_file.as_ref(), today)?;
+
+    // Input drift: any artifact whose bytes differ from the recorded hash.
+    let mut recorded: std::collections::BTreeMap<&str, &str> = Default::default();
+    if let Some(arr) = body.get("artifacts").and_then(|v| v.as_array()) {
+        for a in arr {
+            if let (Some(r), Some(h)) = (
+                a.get("ref").and_then(|v| v.as_str()),
+                a.get("blake3").and_then(|v| v.as_str()),
+            ) {
+                recorded.insert(r, h);
+            }
+        }
+    }
+    let mut drift = Vec::new();
+    for o in &outcomes {
+        for f in &o.provenance {
+            match recorded.get(f.reference.as_str()) {
+                Some(h) if *h == f.blake3_hex => {}
+                Some(_) => drift.push(format!("{} (bytes changed)", f.reference)),
+                None => drift.push(format!("{} (not in the receipt)", f.reference)),
+            }
+        }
+    }
+    drift.sort();
+    drift.dedup();
+    if !drift.is_empty() {
+        for d in &drift {
+            println!("input drift: {d}");
+        }
+        println!("result: receipt NOT reproduced (the inputs are no longer the recorded bytes)");
+        return Ok(1);
+    }
+
+    let config_name = std::path::Path::new(&args.config)
+        .file_name()
+        .map(|n| n.to_string_lossy().to_string())
+        .unwrap_or_else(|| args.config.clone());
+    let lock_b3 = recorded_lock.map(str::to_string);
+    let rebuilt = receipt::body(
+        env!("CARGO_PKG_VERSION"),
+        as_of,
+        &config_name,
+        &config_b3,
+        lock_b3.as_deref(),
+        &outcomes,
+    );
+    let rebuilt_text = serde_json::to_string_pretty(&rebuilt).unwrap_or_default();
+    if rebuilt_text == parsed.body_text {
+        println!("result: receipt reproduced byte for byte ({} contract(s))", outcomes.len());
+        Ok(0)
+    } else {
+        let diff = rebuilt_text
+            .lines()
+            .zip(parsed.body_text.lines())
+            .position(|(a, b)| a != b)
+            .map(|i| i + 1)
+            .unwrap_or(0);
+        println!("result: receipt NOT reproduced (first differing line {diff})");
+        Ok(1)
+    }
 }

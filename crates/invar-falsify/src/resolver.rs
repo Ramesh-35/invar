@@ -292,6 +292,9 @@ pub struct Resolver<'a> {
     pub token: Option<String>,
     pub base_ref: Option<String>,
     pub transport: Option<&'a dyn Transport>,
+    /// Record local file reads in provenance too (A2 receipts: every input
+    /// is content-addressed). Off by default so normal output is unchanged.
+    pub record_local: bool,
 }
 
 impl<'a> Resolver<'a> {
@@ -302,6 +305,7 @@ impl<'a> Resolver<'a> {
             token: None,
             base_ref: None,
             transport: None,
+            record_local: false,
         }
     }
 
@@ -317,10 +321,13 @@ impl<'a> Resolver<'a> {
                 path: full.display().to_string(),
                 reason: e.to_string(),
             })?;
-            return Ok(Resolved {
-                text,
-                provenance: None,
+            let provenance = self.record_local.then(|| Fetched {
+                reference: spec.to_string(),
+                url: full.display().to_string(),
+                bytes: text.len(),
+                blake3_hex: blake3::hash(text.as_bytes()).to_hex().to_string(),
             });
+            return Ok(Resolved { text, provenance });
         }
         if !self.allow_remote {
             return Err(ResolveError::RemoteRequiresCi(spec.to_string()));

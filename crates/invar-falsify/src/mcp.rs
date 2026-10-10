@@ -90,6 +90,7 @@ impl Server<'_> {
             token: self.token.clone(),
             base_ref: None,
             transport: self.transport,
+            record_local: false,
         }
     }
 

@@ -27,6 +27,7 @@ pub mod manifest;
 pub mod mcp;
 pub mod provenance;
 pub mod reality;
+pub mod receipt;
 pub mod yaml;
 pub mod report;
 pub mod resolver;

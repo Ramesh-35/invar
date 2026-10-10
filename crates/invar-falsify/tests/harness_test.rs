@@ -1468,3 +1468,44 @@ fn f1_default_switch_is_stated_never_silent() {
     assert!(out[0].unevaluated.is_empty(), "{:?}", out[0].unevaluated);
     let _ = std::fs::remove_dir_all(&dir);
 }
+
+// ---------------------------------------------------------------------------
+// 35. A2: receipts are byte-deterministic; the body hash seals the file; the
+// recorded verdict and artifact hashes are what verification reproduces.
+// ---------------------------------------------------------------------------
+#[test]
+fn a2_receipt_is_canonical_and_sealed() {
+    use invar_falsify::receipt;
+    let dir = std::env::temp_dir().join(format!("invar-a2-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    let w = |n: &str, b: &str| std::fs::write(dir.join(n), b).unwrap();
+    w("s.json", r#"{"properties":{"total":{"type":"integer"}}}"#);
+    w("c.py", "t = d[\"total\"]\n");
+    let cfg = "[[invariant]]\nkind = \"schema\"\nid = \"a\"\nproducer = \"s.json\"\nconsumer = \"c.py\"\n";
+    let out = evaluate(&parse_sections("invar.toml", cfg).unwrap(), &Resolver::local(&dir)).unwrap();
+
+    // Determinism: same inputs, same bytes, twice.
+    let b1 = receipt::body("0.0.0-test", "2026-10-10", "invar.toml", "cfg-hash", None, &out);
+    let b2 = receipt::body("0.0.0-test", "2026-10-10", "invar.toml", "cfg-hash", None, &out);
+    let (r1, r2) = (receipt::render(&b1), receipt::render(&b2));
+    assert_eq!(r1, r2, "two renders of the same evaluation must be identical");
+    assert!(r1.ends_with("\"}\n") && r1.contains("\"receipt_format\": 1"));
+
+    // The footer seals the body: parse succeeds, tampering fails.
+    let parsed = receipt::parse(&r1).unwrap();
+    assert_eq!(parsed.body.pointer("/result/verdict").and_then(|v| v.as_str()), Some("all_hold"));
+    let tampered = r1.replace("all_hold", "violated");
+    assert!(receipt::parse(&tampered).is_err(), "a flipped verdict without a recomputed footer is corruption");
+
+    // A recomputed footer over a flipped verdict parses, but the body no
+    // longer matches a re-evaluation (what verify-receipt compares).
+    let flipped = receipt::render(&serde_json::from_str::<serde_json::Value>(
+        &parsed.body_text.replace("all_hold", "violated")).unwrap());
+    let reparsed = receipt::parse(&flipped).unwrap();
+    assert_ne!(reparsed.body_text, parsed.body_text);
+
+    // contracts_exit mirrors the check exit codes (0/1/4), never the ledger.
+    assert_eq!(receipt::contracts_exit(&out), 0);
+    let _ = std::fs::remove_dir_all(&dir);
+}

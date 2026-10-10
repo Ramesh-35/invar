@@ -82,7 +82,7 @@ Sigstore, that is a separate ratification with its own cost.
 ## Gates (from MOAT.md, unchanged)
 
 - A receipt produced on Linux verifies byte-identically on macOS and vice
-  versa, for EVERY corpus case (105 + batch 8 = 123 configs). Run in CI on
+  versa, for EVERY corpus case (104 + batch 8 = 122 configs). Run in CI on
   both platforms; any diff is a determinism bug and blocks the feature.
 - `verify-receipt` on an unmodified receipt: exit 0. On a receipt with one
   flipped verdict bit: exit 1. On a receipt from a tampered artifact:

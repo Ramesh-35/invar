@@ -721,3 +721,26 @@ in-scope batch is the only fair test of it.
   existing release machinery, cross-platform byte-identity gate over the
   whole corpus. RATIFY markers: verify-receipt exit codes, ssh-keygen
   subprocess, no hash-chaining.
+
+## 2026-10-10 (later still): A2 receipts built, v0.1.0-alpha.12; Linux gate green, macOS gate pending CI
+
+- A2 implemented per the ratified spec: `invar check --receipt` emits the
+  canonical receipt; `invar verify-receipt` re-runs it (exit 0 reproduced,
+  1 not reproduced or input drift or bad signature, 3 error); offline mode
+  `--artifacts <dir>`; optional SSH signature check via ssh-keygen
+  (namespace invar-receipt). Local file reads are now content-addressed in
+  provenance when a receipt is requested (record_local), so drift in local
+  inputs is detected, not silently re-evaluated. 35 tests green.
+- Correction to the spec text: the corpus is 122 configs (104 + 18), not
+  123; the _template dir was counted by mistake.
+- Determinism gate, Linux x86_64: all 122 corpus configs emit byte-identical
+  receipts across two runs and verify-receipt exits 0 on every one
+  (docs/falsification/a2-gate-linux-x86_64.txt; one transient fetch flake
+  on r1-063 passed on retry). The cross-platform half runs in CI
+  (.github/workflows/receipts-gate.yml, workflow_dispatch): the A2 gate is
+  NOT met until that run shows Linux and macOS receipts identical. Until
+  then A2's claim stays "built, gate pending", and alpha.12 release notes
+  must say so.
+- Engine v0.1.0-alpha.12: binary sha256 1a9e310f1c868347..., src fingerprint
+  da149cb55f7ab0bc. Detection rules unchanged from alpha.11 (rule expansion
+  stays frozen); the batch 8 verdicts are unaffected.
