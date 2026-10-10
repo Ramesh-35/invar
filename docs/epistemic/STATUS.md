@@ -744,3 +744,18 @@ in-scope batch is the only fair test of it.
 - Engine v0.1.0-alpha.12: binary sha256 1a9e310f1c868347..., src fingerprint
   da149cb55f7ab0bc. Detection rules unchanged from alpha.11 (rule expansion
   stays frozen); the batch 8 verdicts are unaffected.
+
+## 2026-10-10 (evening): A2 cross-platform gate MET; alpha.12 ready to tag; 2026-2036 spec held for conflict adjudication
+
+- a2-receipts-gate run 38047172189 (workflow_dispatch on c37efc9): gate
+  (ubuntu-latest) green, gate (macos-latest) green, compare green. Linux and
+  macOS receipts are byte-identical across all 122 corpus configs and
+  verify-receipt exits 0 on every one. The A2 gate from MOAT.md is met, on
+  real corpus inputs, cross-platform, in CI. Also noted: v0.1.0-alpha.11
+  release run 37931048122 succeeded with signed assets on all three targets.
+- A "2026-2036" architectural specification was received. It is NOT adopted
+  into canon in this commit: its Phase 0 "reality baseline" describes a
+  different repository (an LLM inference attestation server), not this one,
+  and several of its ADRs contradict decisions already frozen here (exit
+  code map, receipt format 1 compatibility promise, no new dependencies).
+  Conflicts listed for founder adjudication before any part lands.
