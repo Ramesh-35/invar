@@ -704,3 +704,20 @@ in-scope batch is the only fair test of it.
   occur keep coming from mechanisms one notch outside each frozen rule.
   Tuning-data exactness (4 flips, 0 noise) predicted nothing about held-out
   effect, again.
+
+## 2026-10-10 (later): v0.1.0-alpha.11 tagged; rule expansion frozen; A2 spec drafted
+
+- v0.1.0-alpha.11 tagged on 5741001 carrying the batch 8 record. Note for
+  the log: the tag was pushed before the CI run on 5741001 was visible; the
+  commit is corpus and docs only, and the release workflow runs its own
+  build and signature self-check. Release run result to be recorded when
+  confirmed.
+- Founder adjudication: no F2; per-mechanism textual rule expansion is
+  frozen (three consecutive rules with zero held-out effect). Recorded in
+  MOAT.md.
+- A2 evidence receipts spec drafted for ratification at
+  docs/architecture/A2-RECEIPTS.md: canonical byte-deterministic receipt,
+  as_of as input, offline verify-receipt, optional SSH signature via the
+  existing release machinery, cross-platform byte-identity gate over the
+  whole corpus. RATIFY markers: verify-receipt exit codes, ssh-keygen
+  subprocess, no hash-chaining.

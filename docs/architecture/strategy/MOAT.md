@@ -103,3 +103,22 @@ and agents it competes with. Each addition below leans on one of those.
   the format moat does not exist.
 - No two organizations want signed assumption exchange: the boundary moat is
   a story, not a need.
+
+## Adjudication 2026-10-10: detection rule expansion frozen
+
+Founder decision after batch 8. D1, E1 and F1 each scored perfectly on
+tuning data and changed zero verdicts on their held-out batch; the held-out
+catch rate has sat near 54% for five batches; the misses keep arriving one
+syntactic notch outside each frozen rule's grammar. The incremental
+textual-rule approach to the 20% gate is falsified and STOPPED. F2 (widened
+selector grammar for r1-113's enum-variant case) is declined.
+
+What this does NOT change: the corpus keeps growing one held-out batch per
+release (Asset 1), the honest scoring stands, R1 stays FALSIFIED, and every
+doc keeps saying so. A1-style stated non-evaluation stays, because it is
+honesty, not detection.
+
+New sequence: A2 evidence receipts (spec drafted, docs/architecture/
+A2-RECEIPTS.md, awaiting ratification), then A4 field-level dependents
+graph. Both deliver value that does not depend on winning the detection
+race; the detection bottleneck remains recorded as bottleneck #1, unsolved.
