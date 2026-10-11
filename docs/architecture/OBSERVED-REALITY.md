@@ -64,3 +64,37 @@ to any claim beyond those five: next real batch, fresh samples.
 
 No JSON Schema generation, no OpenAPI emission, no sample synthesis, no
 multi-sample statistics, no new dependencies.
+
+## Effectiveness gate, measured 2026-10-11 (engine v0.1.0-alpha.18)
+
+Protocol as frozen: real payloads only, pinned sources, three base
+observations where honestly obtainable, one head payload, verdicts
+recorded as they fired. Payload files are not committed (third-party
+content, one pair is 1.7 MB); every source is pinned below.
+
+| Case | Base payloads (3 observations) | Head payload | Verdict | Honest reading |
+|---|---|---|---|---|
+| r1-059 deno.lock v3->v4 | denoland/fresh deno.lock @ 97e2b54b, becd440d, a79e7972 (v3, real) | @ de8f1b0c (v4, real) | VIOLATED, exit 1 | CAUGHT: `packages` (and `packages.specifiers` beneath it) witnessed 3/3, gone at head. Buried in 1,232 residue items of version-key churn (see finding). |
+| r1-075 npm lockfile v3 drops `dependencies` | axios package-lock.json @ 4e9b33d6, b2cb45d5, 39ec2064 (v2, real) | @ 29f75425 (v3, real) | VIOLATED, exit 1 | CAUGHT: `dependencies` and its whole tree witnessed 3/3, gone at head. Buried in 23,240 residue items. |
+| r1-099 Suricata EVE DNS v2->v3 | the three documented v2 records in the producer's own docs @ 9ecc3573 (query, detailed, grouped) | documented v3 detailed record @ master (post-pin; the head-pin predates its own docs) | NOT FULLY EVALUATED, exit 4 | INCONCLUSIVE: the doc examples are abridged and heterogeneous, so `rrname` showed as optional (1 of 3) and absence was stated, not accused. Stated, not silent; but no catch claim. Full production records would be needed for a verdict. |
+| r1-100 Kibana status state->level | no real response fixture found at the pinned commits (route test paths 404; docs examples absent) | - | NOT RUN | Recorded as not honestly reconstructable from public fixtures, per the gate's own rule. |
+| r1-113 Cargo.lock v3->v4 | - | - | NOT RUN | The payload is TOML; sample ingestion is JSON-only by frozen spec. Out of mechanism scope, stated. |
+
+Static-engine contrast: all five cases are silent HOLDS on every engine
+from alpha.8 through alpha.18 (five held-out batches of record).
+
+### The finding that gates production use
+
+The mechanism catches the recurring default-switch class (2 clear catches
+where five generations of text rules saw nothing), BUT: lockfile-style
+payloads are MAPS whose keys are data (`packages.jsr.@std/assert@0.213.1`),
+not schema. Path-level witnesses treat every version-suffixed key as a
+field, so an ordinary dependency bump produces thousands of false residue
+items; the real signal was present but buried (1,232 and 23,240 items).
+By our own E1 standard (zero false alarms on clean changes), this
+disqualifies the mechanism for production claims on map-keyed payloads.
+Verdict: NO effectiveness claim yet. Next spec (W2, to be frozen before
+any further measurement): map-key abstraction, collapsing high-cardinality
+key sets into wildcard paths so `packages.jsr.*` is one witness, not
+hundreds. The two catches here are recorded as mechanism validation on
+reconstructed payloads, tuning-rung evidence, nothing more.

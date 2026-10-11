@@ -961,3 +961,18 @@ Conflicts, recorded:
   always-present removal is the only violation.
 - The observed-reality effectiveness gate (five reconstructed payloads)
   remains owed and is the next work item.
+
+## 2026-10-11 (midnight): observed-reality effectiveness gate measured; two catches, one disqualifying finding
+
+- The five-payload gate ran on real pinned payloads (record appended to
+  docs/architecture/OBSERVED-REALITY.md). Results: r1-059 and r1-075
+  CAUGHT by witnesses (VIOLATED, where every static engine was silent);
+  r1-099 inconclusive (abridged doc payloads; stated, not silent);
+  r1-100 not honestly reconstructable; r1-113 out of mechanism scope
+  (TOML).
+- The disqualifying finding: map-keyed payloads (lockfiles, exactly the
+  recurring-miss class) explode path-level witnesses into thousands of
+  false residue items on ordinary dependency churn (1,232 and 23,240 in
+  the two catches). By our own E1 zero-false-alarm standard, no
+  effectiveness claim is made. Next spec: W2 map-key abstraction, frozen
+  before any further measurement.
