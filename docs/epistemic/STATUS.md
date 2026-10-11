@@ -1130,3 +1130,20 @@ SWHIDs and Zenodo DOI follow once public.
   Code Now requests and swh:1:rev/swh:1:cnt anchors for the pinned
   upstream artifacts, then Zenodo integration and DOI on the
   then-current alpha tag.
+
+## 2026-10-11: SWHID anchors derived; archival sweep queued
+
+docs/reference/SWHID-ANCHORS.tsv: 395 pinned references across 177
+distinct upstream origins, swh:1:rev identifiers derived from the pins
+alone (git-compatible revision ids; scripts/swhid-anchors.py, stdlib,
+zero network). Derived is not archived, so the TSV says so in its
+header. Mechanism spot-check against the live archive (6 demo-case
+origins): authentik, headscale, ghostfolio, homepage, denoland/fresh
+archived with pinned revisions resolvable (HTTP 200 origin and
+revision); gurucomputing/headscale-ui origin NOT archived (404) though
+its pinned revision resolves, so at least one Save Code Now request is
+known to be needed. Full 177-origin verification and Save Code Now
+submissions stay queued on "go public" per the ratified sequencing
+(anonymous API rate limits also make the full sweep a batched job).
+Repository visibility re-checked tonight: still private (unauthenticated
+fetch 404), so the flip remains pending on the founder.
