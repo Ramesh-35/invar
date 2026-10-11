@@ -795,3 +795,18 @@ in-scope batch is the only fair test of it.
 - Gate unchanged and not met: A4 counts only when a producer uses the
   answer to change or delay a removal in a real repository. Until then it
   is plumbing, recorded as such.
+
+## 2026-10-11 (later): alpha.13 release confirmed; public readiness audit delivered
+
+- v0.1.0-alpha.13 release run 38049587630: SUCCESS, signed assets on all
+  targets (founder confirmation). alpha.14 tagged on 02ac095; CI and
+  release results pending.
+- Public readiness audit committed at docs/epistemic/
+  PUBLIC-READINESS-AUDIT.md: 2 blockers (the README and the CLI about-text
+  still introduce the Phase-1 falsification harness, not the product),
+  6 fixes (SECURITY.md, CONTRIBUTING.md, stale tables, missing release
+  docs, exit-code documentation, init's consumer-discovery gap),
+  2 founder decisions (NEXTLOGIC naming, moving the six Phase-0/1 root
+  docs to docs/history/), and the clean checks (no secrets, licensing
+  complete, pins enforced, epistemic docs consistent). Remediation order
+  proposed; nothing changed yet beyond this record.
