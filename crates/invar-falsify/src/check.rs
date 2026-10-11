@@ -72,7 +72,7 @@ pub(crate) fn unsupported_language_of(specs: &[&str]) -> Option<String> {
     specs
         .iter()
         .filter(|s| !s.is_empty())
-        .find_map(|s| unsupported_language(s).map(|l| format!("language not supported ({l}: {})", artifact_name(s))))
+        .find_map(|s| unsupported_language(s).map(|l| format!("language not supported ({l}: {}) [not-evaluated:unsupported-language]", artifact_name(s))))
 }
 
 /// Locates one residue item. `sites` are `file:line` in the consumer source
@@ -326,7 +326,7 @@ fn schema_outcome(
         if let Some(l) = lines.first() {
             let more = if lines.len() > 1 { format!(" (+{} more)", lines.len() - 1) } else { String::new() };
             unevaluated.push(format!(
-                "{name} changed; mentioned at {cname}:{l}{more}, not evaluated (pattern not read)"
+                "{name} changed; mentioned at {cname}:{l}{more}, not evaluated (pattern not read) [not-evaluated:pattern-not-read]"
             ));
         }
     }
@@ -337,7 +337,7 @@ fn schema_outcome(
         let lines = mention_lines(&cr, name);
         if let Some(l) = lines.first() {
             unevaluated.push(format!(
-                "{name} moved from {from} to {} in {where_}; consumer use at {cname}:{l} not evaluated",
+                "{name} moved from {from} to {} in {where_}; consumer use at {cname}:{l} not evaluated [not-evaluated:field-moved]",
                 to.join(", ")
             ));
         }
@@ -349,7 +349,7 @@ fn schema_outcome(
     if residue.is_empty() && !reads.is_empty() {
         for (name, old, new, where_) in &switches {
             unevaluated.push(format!(
-                "default selector '{name}' changed {old} -> {new} in {where_}; emission of the fields read in {cname} not evaluated"
+                "default selector '{name}' changed {old} -> {new} in {where_}; emission of the fields read in {cname} not evaluated [not-evaluated:default-switch]"
             ));
         }
     }

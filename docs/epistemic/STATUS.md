@@ -867,3 +867,49 @@ in-scope batch is the only fair test of it.
   honestly reconstructed are recorded as such. Until that is measured,
   observed-reality locking is a built mechanism with no effectiveness
   claim, and the docs say exactly that.
+
+## 2026-10-11 (night): deep-research report received and adjudicated; DX batch shipped, v0.1.0-alpha.17
+
+Report quality: guardrails held (right repository treated as ground truth,
+evidence labeled, lookalike repos discarded, no invented citations found on
+spot-check). Adjudication against shipped state:
+
+Adopted and SHIPPED in alpha.17 (research items A1, A2, A3/A4-as-docs, A8):
+- Fixed summary line on every check: `summary: held N | violated N |
+  skipped or not evaluated N`, plus `measured: 38 of 70 held-out real
+  cross-repository breaks caught`, printed even when counts are zero.
+- Stable reason codes on every not-evaluated statement
+  (docs/reference/REASON-CODES.md), no severity tier, append-only.
+- Exit-4 CI semantics documented (non-zero fails plain CI; the Action's
+  fail_on_violation is the knob). No new flag: the frozen exit map already
+  does what cargo-audit's --deny does.
+- Lock drift already names the exact next command (shipped in R2).
+
+Adopted, NEXT engine increment: presence-witness counts (research B5/B6).
+The shipped single-sample shape lock will flag an optional field that was
+present in the locked sample and absent in a fresh one; witness counts
+across repeated --sample runs (seen-present/absent/null, window, N) fix
+that honestly: hard residue only for always-present-now-gone. Design page
+mapping counts onto lock format 2 before code.
+
+Adopted, corpus track (research D1-D6, founder dispatch Module C): licence
+split (CDLA-Permissive-2.0 for data), Zenodo DOI, Software Heritage ids,
+standalone scorer, JSONL export, sealed held-out set with a committed
+manifest hash. Scheduled after the demo and coverage commands.
+
+Adopted, experiments (research E1-E3): false-positive rate on 10 real PRs;
+the exit-4 comprehension test with 5 developers; TTFV timing with 3
+developers. All need the founder or external people; INVAR cannot grade
+itself on these.
+
+Conflicts, recorded:
+- Research B7 (staleness as printed age, never an exit trigger) contradicts
+  the founder's ratified stale-sample ruling (NOT FULLY EVALUATED, exit 4),
+  which shipped in alpha.16 and stands.
+- The dispatch's [[observed_shapes]]/schema_version lockfile sketch is the
+  horizon report's fantasy format again; observed-reality locking shipped
+  as lock format 2 [[sample]] sections (alpha.16). No change.
+- invar.dev does not exist; reason-code references point at
+  docs/reference/REASON-CODES.md in this repository, not at URLs we do not
+  own.
+- Demo case ids corrected once more: r1-109, r1-112, r1-117.

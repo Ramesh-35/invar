@@ -502,6 +502,12 @@ fn cmd_verify(args: VerifyArgs) -> Result<i32> {
 /// `github:OWNER/REPO@REF:PATH` artifacts are fetched into memory, hashed with
 /// BLAKE3 and never written to disk; their provenance is printed. The reality
 /// gate and the PROVEN_RESIDUE verdict stay in the resolving path, not here.
+/// The honest number, printed on every check (A1, research adjudication
+/// 2026-10-11). Updated only when a new held-out batch is scored; the full
+/// record lives in docs/epistemic/STATUS.md.
+const MEASURED_RECORD: &str =
+    "38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)";
+
 fn cmd_check(args: CheckArgs) -> Result<i32> {
     let raw = match std::fs::read_to_string(&args.config) {
         Ok(r) => r,
@@ -711,6 +717,14 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
         );
         1
     };
+    // Fixed summary, printed on every run whatever the counts (A1): "clean"
+    // and "unexamined" are never shown the same way, and the measured record
+    // travels with every verdict.
+    println!(
+        "summary: held {} | violated {violations} | skipped or not evaluated {skipped}",
+        outcomes.len() - violations - skipped
+    );
+    println!("measured: {MEASURED_RECORD}");
 
     if let Some(path) = &args.report_md {
         if let Err(e) = std::fs::write(path, render_report_md(&outcomes)) {
@@ -1403,7 +1417,7 @@ fn sample_findings(
             if today - taken > SAMPLE_STALE_DAYS {
                 let i = entry(&mut out, &sm.contract);
                 out[i].2.push(format!(
-                    "observed sample is stale (taken {}, older than {SAMPLE_STALE_DAYS} days); refresh with `invar lock --sample`",
+                    "observed sample is stale (taken {}, older than {SAMPLE_STALE_DAYS} days); refresh with `invar lock --sample` [not-evaluated:stale-sample]",
                     sm.taken
                 ));
             }

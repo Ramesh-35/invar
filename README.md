@@ -37,6 +37,13 @@ waivers (capped at 90 days) are explicit and owned. Commit it.
 | 3 | error, including lock drift for `invar lock`: not a verdict, never silently a pass |
 | 4 | something was skipped or not evaluated, stated with reasons |
 
+Exit 4 is non-zero, so a plain `invar check` step fails a CI job by
+default; the Action's `fail_on_violation` input gives report-only mode.
+Every not-evaluated statement carries a stable reason code
+([docs/reference/REASON-CODES.md](docs/reference/REASON-CODES.md)), and
+every run ends with the same fixed summary line and the measured record,
+even when every count is zero.
+
 ## In CI (GitHub Action, hardened)
 
 ```yaml
