@@ -913,3 +913,31 @@ Conflicts, recorded:
   docs/reference/REASON-CODES.md in this repository, not at URLs we do not
   own.
 - Demo case ids corrected once more: r1-109, r1-112, r1-117.
+
+## 2026-10-11 (late night): experiments adjudicated; E1 measured clean; engine latency measured; E2 needs humans
+
+- Adjudication of "run E1-E3 locally with synthetic user simulation":
+  DECLINED for E2 and for E3's real metric. Simulated users are synthetic
+  evidence graded by the thing under test; comprehension and
+  time-to-first-verdict are human measurements. E2 is packaged for the
+  founder to run in ~2 hours (docs/epistemic/E2-PACKET.md, scoring fixed in
+  advance). E3's human half needs 3 outside developers.
+- E1, run mechanically (the strongest form we can run without an outside
+  reviewer): 10 real post-pin commits touching corpus producer files, each
+  diff inspected and labeled before the engine ran (two candidates REJECTED
+  at inspection: a ghostfolio commit that removes fields the pinned
+  consumer reads is a break candidate, not a clean probe; replaced by the
+  next additive commit). Probe = PR simulation (base = the commit's own
+  parent, pinned consumer). Result: 10 of 10 HOLDS, zero false VIOLATED,
+  zero noise codes (docs/falsification/e1-false-positive-probe.tsv).
+  Against the pre-registered thresholds (<10% confirm, >25% refute): the
+  assumption is CONFIRMED at n=10, with the stated caveats: small n, and
+  the clean labels were judged by the engine's author, not an independent
+  reviewer.
+- Engine latency, measured (NOT time-to-first-verdict, which is a human
+  metric): local `invar check`, median 2.2 ms, max 4.0 ms over 50 runs on a
+  1-contract fixture (Linux container, release build); `invar init
+  --stdout` median 2.0 ms; one remote `--ci` check with 3 live fetches:
+  893 ms, network-bound, n=1. The 200 ms editor and 2 s pre-commit budgets
+  hold with two orders of margin locally; remote checks are and will stay
+  network-bound.

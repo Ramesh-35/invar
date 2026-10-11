@@ -1,0 +1,11 @@
+probe	producer_commit	probe_kind	inspected	verdict	false_positive	noise_codes
+evcc	0ee6d787e1a6b2c0139af9cc4513ee27a10fd4bc	refactor (Go 1.26 chore)	clean	HOLDS	no	none
+ghostfolio	f38a2d7ff15fc819bd3e7840f4e410d184d1638e	additive bugfix	clean	HOLDS	no	none
+pocketbase	35196674e60b2f9d5ce6ad723f23ba10fed3b4df	validator change	clean	HOLDS	no	none
+headscale	47405931c6a3d5e756c1e5bd655c26326dbeb6d0	protoc regen	clean	HOLDS	no	none
+moonraker	4edfbce3ce42d935f8d3278a1ff4950673fca85a	config refactor	clean	HOLDS	no	none
+scrutiny	c3b2eb2b4fff832ca0409bb19bec708eb3bf7195	wwn field removed, consumer does not read it	clean-for-contract	HOLDS	no	none
+netbox	58b4209fe6522c7bcd6a57cdb1a510f172b118c6	additive validation	clean	HOLDS	no	none
+cargo	c3409d542579c26106db3295d271d582c7349617	clippy refactor	clean	HOLDS	no	none
+linkwarden	694f8e7f48e6ba575d89036f51aa83284124bb48	additive search	clean	HOLDS	no	none
+dispatcharr	eb9dd391d5429b80745154495bd39a16c1c65bb7	connected_since renamed, consumer does not read it	clean-for-contract	HOLDS	no	none
