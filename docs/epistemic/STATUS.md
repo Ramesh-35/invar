@@ -1091,3 +1091,21 @@ Sealed while the repository is still private, in the same commit that
 adds the manifest, so membership provably predates any external
 visibility or scoring. This completes queued deliverable 5 of the
 go-public list early, by design: a seal is strongest before publicity.
+
+## 2026-10-11: go-public protocol corrections ratified
+
+Four corrections ratified and fixed into the launch protocol: (1) the
+corpus harness is 122 configurations; this is the whole-corpus count the
+A2 gate byte-verified, distinct from the sealed held-out subset of 85
+cases (70 breaks + 15 controls), two denominators for two different
+things. (2) SWHID syntax swh:1:rev:<sha1> for pinned upstream commits
+and swh:1:cnt:<sha1> for pinned file bytes; Save Code Now targets the
+upstream repositories; placement of the mapping decided at build time.
+(3) No v0.1.0 tag for DOI minting: the Zenodo archival release is the
+then-current alpha tag; v0.1.0 proper requires its own explicit
+stability criteria, never a side effect of archival. (4) E1 wording is
+the count form: 0 false positives across 10 clean post-pin producer
+commits (n=10, caveats recorded), never a percentage rate from n=10.
+Launch sequence otherwise as adjudicated: founder flips visibility;
+LICENSE-DATA, JSONL export and standalone scorer land on "go public";
+SWHIDs and Zenodo DOI follow once public.
