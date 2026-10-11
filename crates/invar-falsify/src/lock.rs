@@ -1043,14 +1043,28 @@ pub fn payload_shape(v: &serde_json::Value) -> Vec<(String, String)> {
             serde_json::Value::Object(_) => "object",
         }
     }
+    // W2 mechanism 1 (docs/architecture/W2-MAP-KEY-ABSTRACTION.md): a map's
+    // keys are data, not schema, so its children derive under `*`.
+    fn data_like(k: &str) -> bool {
+        k.len() > 40
+            || (!k.is_empty() && k.bytes().all(|c| c.is_ascii_digit()))
+            || k.bytes()
+                .any(|c| !(c.is_ascii_alphanumeric() || c == b'_' || c == b'-'))
+    }
+    fn is_map(m: &serde_json::Map<String, serde_json::Value>) -> bool {
+        m.len() >= 16
+            || (m.len() >= 2 && m.keys().filter(|k| data_like(k)).count() * 2 > m.len())
+    }
     fn walk(v: &serde_json::Value, path: &str, out: &mut BTreeMap<String, BTreeSet<&'static str>>) {
         if !path.is_empty() {
             out.entry(path.to_string()).or_default().insert(ty(v));
         }
         match v {
             serde_json::Value::Object(m) => {
+                let collapse = is_map(m);
                 for (k, x) in m {
-                    let p = if path.is_empty() { k.clone() } else { format!("{path}.{k}") };
+                    let seg = if collapse { "*" } else { k.as_str() };
+                    let p = if path.is_empty() { seg.to_string() } else { format!("{path}.{seg}") };
                     walk(x, &p, out);
                 }
             }
@@ -1064,6 +1078,62 @@ pub fn payload_shape(v: &serde_json::Value) -> Vec<(String, String)> {
     }
     let mut m = BTreeMap::new();
     walk(v, "", &mut m);
+    // W2.1 amendment (disclosed in the spec): map detection on the DERIVED
+    // tree too. A parent whose merged children exceed the same thresholds
+    // (16+ distinct named segments, or a data-like majority of 2+) is a
+    // map one level deeper than any single object showed; collapse to `*`
+    // and repeat to fixpoint. Catches records nested under map entries
+    // whose keys vary across entries (packages.*.bin.<name>).
+    loop {
+        use std::collections::BTreeMap as M;
+        let mut children: M<String, BTreeSet<String>> = M::new();
+        for path in m.keys() {
+            if let Some(i) = path.rfind('.') {
+                let seg = path[i + 1..].trim_end_matches("[]");
+                if seg != "*" {
+                    children
+                        .entry(path[..i].to_string())
+                        .or_default()
+                        .insert(seg.to_string());
+                }
+            }
+        }
+        let marked: Vec<String> = children
+            .into_iter()
+            .filter(|(_, segs)| {
+                segs.len() >= 16
+                    || (segs.len() >= 2
+                        && segs.iter().filter(|k| data_like(k)).count() * 2 > segs.len())
+            })
+            .map(|(p, _)| p)
+            .collect();
+        if marked.is_empty() {
+            break;
+        }
+        let mut next: BTreeMap<String, BTreeSet<&'static str>> = BTreeMap::new();
+        'outer: for (path, ts) in m {
+            for parent in &marked {
+                if path.len() > parent.len()
+                    && path.starts_with(parent.as_str())
+                    && path.as_bytes()[parent.len()] == b'.'
+                {
+                    let rest = &path[parent.len() + 1..];
+                    let (seg, tail) = match rest.find('.') {
+                        Some(j) => (&rest[..j], &rest[j..]),
+                        None => (rest, ""),
+                    };
+                    if seg.trim_end_matches("[]") != "*" {
+                        let arr = &seg[seg.trim_end_matches("[]").len()..];
+                        let new = format!("{parent}.*{arr}{tail}");
+                        next.entry(new).or_default().extend(ts.iter());
+                        continue 'outer;
+                    }
+                }
+            }
+            next.entry(path).or_default().extend(ts.iter());
+        }
+        m = next;
+    }
     m.into_iter()
         .map(|(p, ts)| (p, ts.into_iter().collect::<Vec<_>>().join("|")))
         .collect()
@@ -1120,9 +1190,27 @@ pub fn witness_drift(
 ) -> (Vec<(String, String)>, Vec<String>) {
     let now: std::collections::BTreeMap<&str, &str> =
         fresh.iter().map(|(p, t)| (p.as_str(), t.as_str())).collect();
+    // W2 mechanism 2: when an ancestor path is absent, every descendant is
+    // trivially absent; report only the shallowest missing path.
+    let absent: Vec<&str> = sm
+        .witnesses
+        .iter()
+        .filter(|w| !now.contains_key(w.path.as_str()))
+        .map(|w| w.path.as_str())
+        .collect();
+    let dominated = |p: &str| {
+        absent.iter().any(|a| {
+            a.len() < p.len()
+                && p.starts_with(a)
+                && matches!(p.as_bytes()[a.len()], b'.' | b'[')
+        })
+    };
     let mut residue = Vec::new();
     let mut stated = Vec::new();
     for w in &sm.witnesses {
+        if dominated(&w.path) {
+            continue;
+        }
         let seen = now.get(w.path.as_str());
         let mismatch = match seen {
             None => Some("absent"),

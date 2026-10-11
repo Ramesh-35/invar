@@ -98,3 +98,27 @@ any further measurement): map-key abstraction, collapsing high-cardinality
 key sets into wildcard paths so `packages.jsr.*` is one witness, not
 hundreds. The two catches here are recorded as mechanism validation on
 reconstructed payloads, tuning-rung evidence, nothing more.
+
+### Gate re-run under W2 map-key abstraction, measured 2026-10-11 (engine v0.1.0-alpha.19)
+
+Same pinned payloads, same protocol, engine now carrying W2 (map
+detection, wildcard paths, ancestor dominance) and the disclosed W2.1
+tree-level collapse (docs/architecture/W2-MAP-KEY-ABSTRACTION.md,
+amendment section). Sequence stated plainly: frozen W2 was measured
+first and FAILED the npm case (230 findings against the at-most-20
+bar); W2.1 was then specified, implemented, and re-measured. Both
+measurements are on the record in the spec.
+
+| Case | Verdict | Findings | Was (alpha.18) | Gate bar | Result |
+|---|---|---|---|---|---|
+| r1-059 deno.lock v3->v4 | VIOLATED, exit 1 | 1 (`packages`, witnessed 3/3, gone) | 1,232 | VIOLATED and <=20 | PASS |
+| r1-075 npm v2->v3 | VIOLATED, exit 1 | 2 (`dependencies` witnessed 3/3 gone; plus one dot-key artifact path, disclosed in spec) | 23,240 | VIOLATED and <=20 | PASS |
+| r1-099 Suricata DNS | NOT FULLY EVALUATED, exit 4 | 3 stated optional-field lines | same | unchanged, stated not silent | PASS (regression) |
+
+The ratified metric (both catches remain VIOLATED, residue reduced from
+thousands to near-unit counts) is met: 1,232 -> 1 and 23,240 -> 2. The
+disqualifying finding of the alpha.18 measurement is closed. What this
+does and does not license, unchanged: two catches on reconstructed
+real payloads are mechanism validation, not an effectiveness claim;
+r1-099 remains inconclusive, r1-100 not reconstructable, r1-113 out of
+mechanism scope. The held-out record stands at 38 of 70.

@@ -1670,3 +1670,37 @@ fn observed_reality_witnesses_formats_and_thresholds() {
     assert!(lock::parse("l", "[lock]\nformat = \"4\"\n").is_err());
     assert!(lock::render(&lock::Lock::default()).unwrap().contains("format = \"1\""));
 }
+
+// ---------------------------------------------------------------------------
+// 39. W2: map keys are data (wildcarded), records keep their fields, and an
+// absent ancestor dominates its descendants in drift reporting.
+// ---------------------------------------------------------------------------
+#[test]
+fn w2_map_key_abstraction_and_ancestor_dominance() {
+    use invar_falsify::lock::{merge_observation, payload_shape, witness_drift, Sample};
+    let sh = |j: &str| payload_shape(&serde_json::from_str(j).unwrap());
+
+    // Data-like keys collapse even at low cardinality; record keys do not.
+    let s = sh(r#"{"packages": {"@std/assert@0.213.1": {"integrity": "x"}, "@std/async@0.224.1": {"integrity": "y"}}, "meta": {"name": "a", "count": 2}}"#);
+    let paths: Vec<&str> = s.iter().map(|(p, _)| p.as_str()).collect();
+    assert!(paths.contains(&"packages.*.integrity"), "{paths:?}");
+    assert!(!paths.iter().any(|p| p.contains("@std")), "map keys never appear as paths");
+    assert!(paths.contains(&"meta.name"), "records keep their fields");
+
+    // Cardinality rule: 16+ identifier-like keys still collapse.
+    let many = (0..17).map(|i| format!("\"dep-{i}\": {{\"version\": \"1\"}}")).collect::<Vec<_>>().join(",");
+    let s2 = sh(&format!("{{\"dependencies\": {{{many}}}}}"));
+    assert!(s2.iter().any(|(p, _)| p == "dependencies.*.version"), "{s2:?}");
+    assert!(!s2.iter().any(|(p, _)| p.contains("dep-3")));
+
+    // Ancestor dominance: `dependencies` gone is ONE finding, not many.
+    let base = sh(&format!("{{\"lockfileVersion\": 2, \"dependencies\": {{{many}}}}}"));
+    let mut sm = Sample { contract: "c".into(), blake3: String::new(), taken: String::new(), window_start: String::new(), observations: 0, witnesses: Vec::new() };
+    merge_observation(&mut sm, &base, "2026-10-01", "a");
+    merge_observation(&mut sm, &base, "2026-10-02", "b");
+    merge_observation(&mut sm, &base, "2026-10-03", "c");
+    let (residue, stated) = witness_drift(&sm, &sh(r#"{"lockfileVersion": 3}"#), "f.json");
+    assert_eq!(residue.len(), 1, "{residue:?}");
+    assert_eq!(residue[0].0, "dependencies");
+    assert!(stated.is_empty(), "{stated:?}");
+}

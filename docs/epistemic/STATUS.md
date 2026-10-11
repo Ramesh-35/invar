@@ -976,3 +976,19 @@ Conflicts, recorded:
   the two catches). By our own E1 zero-false-alarm standard, no
   effectiveness claim is made. Next spec: W2 map-key abstraction, frozen
   before any further measurement.
+
+## 2026-10-11: W2 map-key abstraction lands; gate metric met (v0.1.0-alpha.19)
+
+- W2 (spec frozen at 036fd2f) implemented: per-object map detection with
+  wildcard paths, ancestor dominance in drift reporting. Measured under
+  frozen W2: deno 1,232 -> 1 finding PASS; npm 23,240 -> 230 FAIL against
+  the at-most-20 bar (nested record keys under map entries leak).
+- W2.1 amendment, disclosed in the spec: tree-level collapse to fixpoint
+  (same two rules applied to the derived path tree). Re-measured: deno 1,
+  npm 2, suricata unchanged (exit 4, stated). Ratified gate metric met:
+  both catches remain VIOLATED at near-unit residue.
+- The npm residue includes one artifact path from dot-bearing map keys
+  (`array.prototype.map`), disclosed in the spec as a known limitation.
+- Unchanged and restated: this is mechanism validation on reconstructed
+  payloads, not an effectiveness claim. Held-out record stands 38 of 70.
+- Engine delta confined to lock.rs plus tests; 39 of 39 tests green.

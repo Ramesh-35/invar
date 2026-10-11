@@ -56,3 +56,40 @@ stated, not silent). Results recorded in the gate record either way.
 No per-payload configuration, no key-pattern learning, no entry counts or
 cardinality statistics in the lock, no change to static detection rules
 (the expansion freeze stands).
+
+## Amendment W2.1: tree-level collapse (disclosed, 2026-10-11)
+
+Measured first, amended second, both on the record.
+
+The frozen mechanisms above were implemented and the gate re-run before
+any amendment. Result under frozen W2: deno (r1-059) VIOLATED with 1
+finding, PASS; npm (r1-075) VIOLATED with 230 findings, FAIL against the
+at-most-20 bar. The leak: per-object map detection sees each object in
+isolation, so low-cardinality record-like children nested under map
+entries (`packages.<entry>.bin.<name>`, two or three short keys each)
+never individually trip the map rules, yet across thousands of map
+entries their key names multiply into hundreds of distinct paths.
+
+W2.1 adds a third deterministic pass, after per-object derivation: group
+the derived paths by parent path; if any level has 16 or more distinct
+named child segments, or 2 or more with a data-like majority (same
+data-like test as Mechanism 1), rewrite that level's segment to `*`
+(array `[]` suffixes preserved), merging value types; iterate to
+fixpoint. This is the same two rules applied to the derived tree instead
+of to each object, so sibling keys scattered across map entries are
+counted together, which is where they actually live.
+
+Re-measured under W2.1, same payloads, same protocol: deno VIOLATED with
+1 finding (unchanged); npm VIOLATED with 2 findings; suricata unchanged
+(exit 4, three stated optional-field lines). Both gate cases PASS.
+
+The npm residue's second finding, stated: `packages.*.*.*.*.map`. Map
+keys that themselves contain dots (`node_modules/array.prototype.map`,
+`node_modules/object.map`) split into spurious path segments, and the
+trailing fragment survives collapse as its own segment. The witness
+behind it is real (present in all three base observations, absent at
+head, because those packages left the dependency tree), so it is honest
+residue within the gate bar, but the path it prints is an artifact of
+dot-joined derivation, not a field anyone wrote. Known limitation,
+carried openly; fixing it would mean escaping dots in keys, a lock
+format concern deferred until it costs a verdict.
