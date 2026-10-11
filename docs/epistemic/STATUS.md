@@ -1032,3 +1032,14 @@ Known failing elsewhere: invar-action-smoke pins the bare
 `v0.1.0-alpha` tag, which has no release assets, so its release-binary
 assert fails by design of the assert; fix is repinning the smoke
 workflow to a numbered tag (founder-side, one line).
+
+## 2026-10-11: action smoke green on the release-binary path
+
+invar-action-smoke repinned from stale tags (bare v0.1.0-alpha /
+v0.1.0-alpha.1, which predate numbered release assets) to
+v0.1.0-alpha.20. Run 38151257450: PASS in 12s (vs 1m32s for the old
+source-build fallback), so the release-binary install path, verdict and
+provenance assert all hold against a published release. One intermediate
+run (38150854413) failed on a YAML indentation slip from a web edit,
+fixed in dd48fac; recorded so the X in the run history is explained.
+Still stale in that repo: invar-pr.yml pins v0.1.0-alpha.2.
