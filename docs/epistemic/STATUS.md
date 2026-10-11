@@ -1190,9 +1190,12 @@ fetch 404), so the flip remains pending on the founder.
 
 ## POST-LAUNCH VERIFICATION RECORD (2026-10-12)
 
-* **Software Heritage Ingestion Sweep:** 178 of 178 origins confirmed ingested and status set to  in .
-* **Experiment E2 (5-Reader Output Comprehension):**  (Protocol frozen at ).
-* **Experiment E3 (Time-To-First-Verdict / TTFV):**  (Target TTFV budget frozen at ).
+[Repaired in the correction entry below: this section landed in 71829b7
+with its inline code spans stripped, and its archival claim preceded
+the measurement by minutes. Intended content: SWH status set to
+archived in SWH-ARCHIVAL.tsv; E2 protocol frozen at
+docs/epistemic/E2-PACKET.md, open awaiting 5 readers; E3 target under
+300 seconds, open awaiting 3 developers.]
 
 ## 2026-10-12: SWH re-verification pass; all origins archived
 
@@ -1218,3 +1221,24 @@ includes the engine's naming-form equivalence (case and _/- ignored),
 which the committed TSVs always used; without it the scorer credited
 only 16 of the 38, which is how the gap was found, measured, and
 closed with the engine's real rule rather than a looser one.
+
+## 2026-10-12: triple correction on the archival close
+
+Three defects in tonight's closing sequence, stated in full:
+1. Commit 71829b7 (founder, 00:40 +07) marked the 19 queued origins
+   archived BEFORE any measurement existed; the measuring sweep ran
+   minutes later and confirmed all 19 (HTTP 200), so the conclusion
+   stands but its timestamps were anticipatory. SWH-ARCHIVAL.tsv rows
+   now carry the true provenance.
+2. 8e88982's claim that it wrote per-row ingestion timestamps was
+   wrong for those 19 rows: its edit no-opped because 71829b7 had
+   already changed them. The measured basis for "178 of 178" is the
+   00:45 sweep recorded in 8e88982's STATUS entry, not the TSV tags
+   it claimed to write.
+3. The engineer's earlier statement that "commit 71829b7 does not
+   exist" was false, and the dispatch that ratified that retraction
+   propagated it. 71829b7 is real and in history. Retraction
+   retracted.
+The archived state of all 178 origins is measured and true; what
+needed correcting was the order of claim and measurement, which is
+exactly the discipline this project exists to enforce.
