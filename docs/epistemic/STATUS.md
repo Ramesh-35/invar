@@ -810,3 +810,18 @@ in-scope batch is the only fair test of it.
   docs to docs/history/), and the clean checks (no secrets, licensing
   complete, pins enforced, epistemic docs consistent). Remediation order
   proposed; nothing changed yet beyond this record.
+
+## 2026-10-11 (later): Stage 1 front-door remediation, v0.1.0-alpha.15
+
+- README rewritten product-first: what INVAR checks, the sixty-second start,
+  the frozen exit-code table, the hardened Action snippet, receipts and
+  dependents, and a "What INVAR does not claim" section quoting the measured
+  held-out record (38 of 70 caught, 46% missed, R1 FALSIFIED) with links to
+  STATUS.md and the corpus. The research harness is now a labeled section.
+- CLI front door: `invar --help` introduces the contract checker and its
+  exit codes; product commands listed first, the six research-harness
+  commands labeled as such. No behavioral change; 37 tests green.
+- Remaining remediation stages per PUBLIC-READINESS-AUDIT.md: Stage 2
+  (SECURITY.md, CONTRIBUTING.md, release-doc backfill), Stage 3 (NEXTLOGIC
+  genericization per ruling (a), six root docs to docs/history/), Stage 4
+  (init Python consumer discovery, ratified, with a test).

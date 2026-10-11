@@ -30,7 +30,7 @@ use invar_falsify::resolver::{CurlTransport, Resolver, Transport};
 #[command(
     name = "invar",
     version,
-    about = "Deterministic falsification harness for the INVAR category-residue hypothesis."
+    about = "Checks cross-repository contracts: the fields your code reads from another repository's API, locked, verified, and stated honestly (a skip is never a pass). Exit codes: 0 holds, 1 violated, 2 ledger break, 3 error or lock drift, 4 skipped or not evaluated."
 )]
 struct Cli {
     #[command(subcommand)]
@@ -39,33 +39,33 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
-    /// Evaluate the corpus and persist the run (results, report, ledger).
-    Run(RunArgs),
-    /// Structurally validate a manifest (and optionally a composite config).
-    Validate(ValidateArgs),
-    /// Evaluate the corpus and print a report to stdout without persisting.
-    Report(ReportArgs),
-    /// Re-walk a ledger and confirm its bi-temporal BLAKE3 chain.
-    Verify(VerifyArgs),
     /// Check a cross-repository contract from an invar.toml (CI entrypoint).
     Check(CheckArgs),
     /// Record the producer fields this repo reads in invar.lock.
     Lock(LockArgs),
-    /// Read-only MCP server on stdio (tools: check, contract).
-    Mcp(McpArgs),
-    /// Suggest consumer patches for unambiguous field renames (never writes).
-    Fix(FixArgs),
+    /// Scan a workspace and propose an invar.toml (heuristic discovery).
+    Init(InitArgs),
+    /// Who depends on a producer field, from local invar.lock files.
+    Dependents(DependentsArgs),
     /// Re-run an evidence receipt and confirm it reproduces byte for byte.
     VerifyReceipt(VerifyReceiptArgs),
     /// Receipt views: `receipt export --in-toto` (format 1 stays canonical).
     Receipt(ReceiptArgs),
-    /// A4: who depends on a producer field, from local invar.lock files.
-    Dependents(DependentsArgs),
-    /// Scan a workspace and propose an invar.toml (heuristic discovery).
-    Init(InitArgs),
-    /// Verify and summarize a ledger; point to the adequacy matrix.
+    /// Suggest consumer patches for unambiguous field renames (never writes).
+    Fix(FixArgs),
+    /// Read-only MCP server on stdio (tools: check, contract).
+    Mcp(McpArgs),
+    /// Research harness: evaluate the falsification corpus and persist the run.
+    Run(RunArgs),
+    /// Research harness: structurally validate a corpus manifest.
+    Validate(ValidateArgs),
+    /// Research harness: evaluate the corpus and print a report (no persist).
+    Report(ReportArgs),
+    /// Research harness: re-walk a ledger's bi-temporal BLAKE3 chain.
+    Verify(VerifyArgs),
+    /// Research harness: verify and summarize a ledger.
     Audit(AuditArgs),
-    /// Reconstruct ledger state as known at a bi-temporal coordinate.
+    /// Research harness: reconstruct ledger state at a bi-temporal coordinate.
     Replay(ReplayArgs),
 }
 
