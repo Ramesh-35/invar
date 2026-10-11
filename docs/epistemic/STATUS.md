@@ -1147,3 +1147,25 @@ submissions stay queued on "go public" per the ratified sequencing
 (anonymous API rate limits also make the full sweep a batched job).
 Repository visibility re-checked tonight: still private (unauthenticated
 fetch 404), so the flip remains pending on the founder.
+
+## 2026-10-12: repository PUBLIC; Software Heritage sweep executed
+
+- Visibility flip verified from outside: unauthenticated reads return
+  200. The repository is public with the held-out seal (7951bd3), data
+  license, corpus export, scorer and SWHID anchors already in history
+  from before the flip.
+- Software Heritage sweep over all 178 origins (177 upstream pins plus
+  this repository): 159 already archived; 19 absent, Save Code Now
+  submitted and accepted (HTTP 200) for every one, including
+  gurucomputing/headscale-ui, Ramesh-35/invar-platform and
+  Ramesh-35/invar-demo-producer. Per-origin status in
+  docs/reference/SWH-ARCHIVAL.tsv. Accepted is queued, not ingested:
+  a re-verification pass is owed after SWH processes the requests, and
+  only then do the 19 move to archived in the record.
+- Zenodo: integration not yet authorized; it archives releases created
+  AFTER it is enabled, so the DOI lands on the next tagged release, not
+  retroactively on alpha.20. Steps recorded in the launch notes below.
+- Still owed on the scorer track: reproducing the 38 of 70 record from
+  the committed TSVs through scripts/score-corpus.py needs the
+  per-batch engine-of-record mapping stated first; queued as its own
+  careful task, not rushed tonight.
