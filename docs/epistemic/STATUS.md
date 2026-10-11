@@ -825,3 +825,24 @@ in-scope batch is the only fair test of it.
   (SECURITY.md, CONTRIBUTING.md, release-doc backfill), Stage 3 (NEXTLOGIC
   genericization per ruling (a), six root docs to docs/history/), Stage 4
   (init Python consumer discovery, ratified, with a test).
+
+## 2026-10-11 (later still): Stages 2-3 landed; observed-reality and demo specs frozen
+
+- Stage 2: SECURITY.md (GitHub private vulnerability reporting; verify
+  binaries per RELEASE-SIGNING.md; honest attack-surface notes),
+  CONTRIBUTING.md (corpus admission rules and honesty rules),
+  docs/releases backfill (alpha.13, alpha.14, and a README noting the
+  deliberate alpha.9 skip).
+- Stage 3: NEXTLOGIC genericized in current-facing docs (INVAR.md,
+  architecture OVERVIEW, MATHEMATICAL-ADEQUACY, invar-isv README) per
+  ruling (a); decision records DR-001/DR-002 left as written history;
+  personal absolute paths removed; the six Phase-0/1 root documents moved
+  to docs/history/ with archive banners.
+- Specs frozen for the next increments: docs/architecture/
+  OBSERVED-REALITY.md (lock the shape of a real observed payload;
+  shape-level, never byte-level; a sample is evidence about one response
+  at one moment and the report says "observed", never "guaranteed") and
+  docs/architecture/DEMO-ENGINE.md (offline replay of real CAUGHT corpus
+  cases with the honest coda; explicitly NOT CrowdStrike/Azure, which are
+  outside supported scope). Both carry RATIFY markers for the open points.
+- v0.1.0-alpha.15 ready to tag once CI is green on the Stage 3 commit.
