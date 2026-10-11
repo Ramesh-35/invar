@@ -47,6 +47,11 @@ use crate::resolver::{Fetched, Resolver};
 use crate::surface::{broad_reads, code_fields, mention_lines, name_key, spec_fields, Fields};
 
 pub const LOCK_FORMAT: &str = "1";
+/// Format 2 is format 1 plus optional [[sample]] sections (observed-reality
+/// locking). This engine reads both, forever; it writes "1" unless samples
+/// exist, so a lock without samples never changes format. An older engine
+/// reading a format 2 lock fails closed with a clear message.
+pub const LOCK_FORMATS: [&str; 2] = ["1", "2"];
 
 /// One bound field: the consumer reads it, the producer declared it.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -138,10 +143,24 @@ impl Waiver {
     }
 }
 
+/// Observed-reality sample (docs/architecture/OBSERVED-REALITY.md): the
+/// SHAPE of one real payload the consumer accepted, never its values.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Sample {
+    pub contract: String,
+    /// BLAKE3 of the sample file bytes (the file itself is never copied).
+    pub blake3: String,
+    /// The day the sample was locked (YYYY-MM-DD).
+    pub taken: String,
+    /// Derived shape: (key path, type). Deterministic order.
+    pub fields: Vec<(String, String)>,
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Lock {
     pub contracts: Vec<LockedContract>,
     pub waivers: Vec<Waiver>,
+    pub samples: Vec<Sample>,
 }
 
 // ---------------------------------------------------------------- dates
@@ -433,6 +452,7 @@ pub fn compute(sections: &Sections, resolver: &Resolver, prev: &Lock, today: i64
     Ok(Lock {
         contracts,
         waivers: prev.waivers.clone(),
+        samples: prev.samples.clone(),
     })
 }
 
@@ -566,11 +586,12 @@ fn q(v: &str) -> Result<String> {
 
 /// Deterministic text: contracts by id, bindings sorted, waivers as written.
 pub fn render(lock: &Lock) -> Result<String> {
-    let mut s = String::from(
+    let format = if lock.samples.is_empty() { "1" } else { "2" };
+    let mut s = format!(
         "# invar.lock: the producer fields this repository depends on.\n\
          # Written by `invar lock`. Accept a reviewed producer change with\n\
          # `invar lock --update`. Waivers are written by hand and kept.\n\n\
-         [lock]\nformat = \"1\"\n",
+         [lock]\nformat = \"{format}\"\n",
     );
     for c in &lock.contracts {
         s.push_str(&format!(
@@ -606,6 +627,17 @@ pub fn render(lock: &Lock) -> Result<String> {
             ));
         }
     }
+    for sm in &lock.samples {
+        s.push_str(&format!(
+            "\n[[sample]]\ncontract = {}\nblake3 = {}\ntaken = {}\n",
+            q(&sm.contract)?,
+            q(&sm.blake3)?,
+            q(&sm.taken)?
+        ));
+        for (p2, t) in &sm.fields {
+            s.push_str(&format!("field = {}\n", q(&format!("{} {t}", esc_field(p2)))?));
+        }
+    }
     for w in &lock.waivers {
         s.push_str(&format!(
             "\n[[waiver]]\ncontract = {}\nfield = {}\nowner = {}\nreason = {}\nexpires = {}\n",
@@ -627,9 +659,10 @@ pub fn parse(path: &str, text: &str) -> Result<Lock> {
         let need = |k: &str| getk(pairs, k).ok_or_else(|| anyhow!("{path}: [{name}] needs {k}"));
         match name.as_str() {
             "lock" => {
-                if getk(pairs, "format").as_deref() != Some(LOCK_FORMAT) {
+                let f = getk(pairs, "format");
+                if !LOCK_FORMATS.contains(&f.as_deref().unwrap_or("")) {
                     bail!(
-                        "{path}: unsupported lock format (this INVAR reads format {LOCK_FORMAT})"
+                        "{path}: unsupported lock format (this INVAR reads formats 1 and 2)"
                     );
                 }
                 format_seen = true;
@@ -694,6 +727,25 @@ pub fn parse(path: &str, text: &str) -> Result<Lock> {
                     );
                 }
                 lock.waivers.push(w);
+            }
+            "sample" => {
+                let sm = Sample {
+                    contract: need("contract")?,
+                    blake3: need("blake3")?,
+                    taken: need("taken")?,
+                    fields: pairs
+                        .iter()
+                        .filter(|(k, _)| k == "field")
+                        .map(|(_, v)| match v.split_once(' ') {
+                            Some((p2, t)) => Ok((unesc_field(p2), t.to_string())),
+                            None => Err(anyhow!("{path}: bad sample field {v:?}")),
+                        })
+                        .collect::<Result<Vec<_>>>()?,
+                };
+                if parse_date(&sm.taken).is_none() {
+                    bail!("{path}: sample for {:?}: taken must be YYYY-MM-DD", sm.contract);
+                }
+                lock.samples.push(sm);
             }
             other => bail!("{path}: unknown section [{other}]"),
         }
@@ -908,3 +960,84 @@ pub fn check_contract(
         notes,
     })
 }
+
+// ------------------------------------------------- observed-reality samples
+
+/// Derive the SHAPE of a payload value: (key path, type) pairs, deterministic.
+/// Types: string, integer, number, boolean, null, object, array; a path seen
+/// with several types gets them joined sorted with `|` (so an optional null
+/// shows as e.g. `string|null`). Array elements contribute under `path[]`.
+pub fn payload_shape(v: &serde_json::Value) -> Vec<(String, String)> {
+    use std::collections::{BTreeMap, BTreeSet};
+    fn ty(v: &serde_json::Value) -> &'static str {
+        match v {
+            serde_json::Value::Null => "null",
+            serde_json::Value::Bool(_) => "boolean",
+            serde_json::Value::Number(n) if n.is_i64() || n.is_u64() => "integer",
+            serde_json::Value::Number(_) => "number",
+            serde_json::Value::String(_) => "string",
+            serde_json::Value::Array(_) => "array",
+            serde_json::Value::Object(_) => "object",
+        }
+    }
+    fn walk(v: &serde_json::Value, path: &str, out: &mut BTreeMap<String, BTreeSet<&'static str>>) {
+        if !path.is_empty() {
+            out.entry(path.to_string()).or_default().insert(ty(v));
+        }
+        match v {
+            serde_json::Value::Object(m) => {
+                for (k, x) in m {
+                    let p = if path.is_empty() { k.clone() } else { format!("{path}.{k}") };
+                    walk(x, &p, out);
+                }
+            }
+            serde_json::Value::Array(a) => {
+                for x in a {
+                    walk(x, &format!("{path}[]"), out);
+                }
+            }
+            _ => {}
+        }
+    }
+    let mut m = BTreeMap::new();
+    walk(v, "", &mut m);
+    m.into_iter()
+        .map(|(p, ts)| (p, ts.into_iter().collect::<Vec<_>>().join("|")))
+        .collect()
+}
+
+/// Shape drift between a locked sample and a fresh one: (path, locked type,
+/// fresh type or None when the path is gone). Additions are never drift.
+pub fn shape_drift(locked: &[(String, String)], fresh: &[(String, String)]) -> Vec<(String, String, Option<String>)> {
+    let now: std::collections::BTreeMap<&str, &str> =
+        fresh.iter().map(|(p, t)| (p.as_str(), t.as_str())).collect();
+    let mut out = Vec::new();
+    for (p, t) in locked {
+        match now.get(p.as_str()) {
+            None => out.push((p.clone(), t.clone(), None)),
+            Some(t2) if *t2 != t => out.push((p.clone(), t.clone(), Some(t2.to_string()))),
+            _ => {}
+        }
+    }
+    out
+}
+
+/// Ratified PII heuristic: key-name tokens that suggest a sample holds
+/// personal data or credentials. A warning, never a block.
+pub fn pii_suspects(fields: &[(String, String)]) -> Vec<String> {
+    let needles = ["email", "password", "ssn", "token", "secret"];
+    let mut out: Vec<String> = fields
+        .iter()
+        .map(|(p, _)| p)
+        .filter(|p| {
+            let l = p.to_ascii_lowercase();
+            needles.iter().any(|n| l.contains(n))
+        })
+        .cloned()
+        .collect();
+    out.dedup();
+    out
+}
+
+/// Days after which a locked sample is stale (the waiver cap, ratified).
+pub const SAMPLE_STALE_DAYS: i64 = 90;

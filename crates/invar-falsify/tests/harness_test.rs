@@ -1610,3 +1610,50 @@ fn a4_dependents_graph_over_local_locks() {
     assert!(dependents::find(&empty, "x", None).is_err());
     let _ = std::fs::remove_dir_all(&root);
 }
+
+// ---------------------------------------------------------------------------
+// 38. Observed reality: payload shapes derive deterministically, lock format 2
+// roundtrips (format 1 still parses), drift and PII and staleness behave as
+// the frozen spec says.
+// ---------------------------------------------------------------------------
+#[test]
+fn observed_reality_shapes_lock_format2_and_drift() {
+    use invar_falsify::lock::{self, payload_shape, pii_suspects, shape_drift, Sample};
+    let v: serde_json::Value = serde_json::from_str(
+        r#"{"total": 3, "user": {"email": "x@y.z", "age": null}, "items": [{"id": 1}, {"id": "a"}]}"#,
+    ).unwrap();
+    let shape = payload_shape(&v);
+    let get = |p: &str| shape.iter().find(|(q, _)| q == p).map(|(_, t)| t.as_str());
+    assert_eq!(get("total"), Some("integer"));
+    assert_eq!(get("user.age"), Some("null"));
+    assert_eq!(get("items[].id"), Some("integer|string"), "type union is sorted and stated");
+    assert_eq!(payload_shape(&v), shape, "derivation is deterministic");
+    assert_eq!(pii_suspects(&shape), ["user.email"]);
+
+    // Lock format 2 roundtrip; format 1 locks still parse; format 3 refused.
+    let mut l = lock::Lock::default();
+    l.samples.push(Sample {
+        contract: "orders".into(),
+        blake3: "aa".into(),
+        taken: "2026-10-11".into(),
+        fields: shape.clone(),
+    });
+    let text = lock::render(&l).unwrap();
+    assert!(text.contains("format = \"2\"") && text.contains("[[sample]]"));
+    let back = lock::parse("invar.lock", &text).unwrap();
+    assert_eq!(back.samples, l.samples);
+    assert!(lock::render(&lock::Lock::default()).unwrap().contains("format = \"1\""), "no samples, format 1");
+    assert!(lock::parse("l", "[lock]\nformat = \"1\"\n").is_ok());
+    assert!(lock::parse("l", "[lock]\nformat = \"3\"\n").is_err());
+
+    // Drift: removal and retype are drift; additions are not.
+    let fresh: serde_json::Value = serde_json::from_str(
+        r#"{"total": "3", "user": {"age": null}, "items": [{"id": 2}], "extra": true}"#,
+    ).unwrap();
+    let d = shape_drift(&shape, &payload_shape(&fresh));
+    let find = |p: &str| d.iter().find(|(q, _, _)| q == p);
+    assert_eq!(find("total").unwrap().2.as_deref(), Some("string"));
+    assert!(find("user.email").unwrap().2.is_none(), "removed path");
+    assert!(find("extra").is_none(), "additions are never drift");
+    assert_eq!(find("items[].id").unwrap().2.as_deref(), Some("integer"), "union narrowed is stated as a change");
+}

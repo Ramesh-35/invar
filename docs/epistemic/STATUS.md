@@ -846,3 +846,24 @@ in-scope batch is the only fair test of it.
   cases with the honest coda; explicitly NOT CrowdStrike/Azure, which are
   outside supported scope). Both carry RATIFY markers for the open points.
 - v0.1.0-alpha.15 ready to tag once CI is green on the Stage 3 commit.
+
+## 2026-10-11 (evening): observed-reality locking built, v0.1.0-alpha.16; validation benchmark still owed
+
+- `invar lock --sample` and `invar check --sample` built per the frozen
+  spec and the ratified points: shape-level locking (never values), PII
+  key-name warnings (warn, never block), lock format 2 (format 1 is still
+  read and written forever when no samples exist; older engines fail
+  closed on format 2), drift = residue with waivers applied (exit 1),
+  stale sample past 90 days = stated, NOT FULLY EVALUATED (exit 4).
+  38 tests green; end-to-end smoke: drift exit 1, stale exit 4, PII
+  warning fires, format 2 roundtrips.
+- Demo case pick recorded with corrected ids: r1-109 (authentik), r1-112
+  (headscale), r1-117 (ghostfolio); the ids in the ratifying dispatch
+  (r1-012/028/035) referred to other cases.
+- NOT yet done, and owed before any effectiveness claim: the ratified
+  measurement gate. Reconstruct the five recurring-miss payloads (r1-059,
+  r1-075, r1-099, r1-100, r1-113) from public evidence and measure whether
+  sample-vs-sample comparison flags them; cases whose payloads cannot be
+  honestly reconstructed are recorded as such. Until that is measured,
+  observed-reality locking is a built mechanism with no effectiveness
+  claim, and the docs say exactly that.

@@ -80,3 +80,26 @@ Consumer reads are not scoped, so a field is bound in every producer type
 that declares a name the consumer reads. The lock makes a check
 reproducible and reviewable; it does not raise the detection rate measured
 in R1 (40% missed in-scope, batch 4).
+
+## Format 2: observed-reality samples (2026-10-11)
+
+Format 2 is format 1 plus optional `[[sample]]` sections
+(docs/architecture/OBSERVED-REALITY.md). `invar lock --sample <payload.json>
+[--contract id]` locks the SHAPE of one real payload the consumer accepted:
+every key path with its JSON type (`items[].id integer|string`), the sample
+file's BLAKE3, and the date. Values are never copied into the lock, and the
+sample file itself stays wherever you keep it (it may hold real data; key
+names that look like credentials or personal data draw a warning).
+
+`invar check --sample <fresh.json>` compares the fresh payload's shape
+against the locked one: a locked path that is absent or retyped is residue
+(waivers apply); additions are never drift. A locked sample older than 90
+days is stated as stale and the contract is NOT FULLY EVALUATED (exit 4)
+until refreshed. A sample is evidence about one response at one moment; the
+report says "observed", never "guaranteed", and optional fields absent from
+the sample are simply not locked.
+
+Compatibility: this engine reads formats 1 and 2, forever. `invar lock`
+writes format 1 unless samples exist, so a lock without samples never
+changes format. An engine older than alpha.16 reading a format 2 lock fails
+closed with "unsupported lock format", never a wrong verdict.

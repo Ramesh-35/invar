@@ -134,6 +134,14 @@ struct CheckArgs {
     /// Principal for --lock-signers (required with it).
     #[arg(long)]
     lock_principal: Option<String>,
+    /// Observed reality: compare this fresh payload's shape against the
+    /// contract's locked sample (invar lock --sample).
+    #[arg(long)]
+    sample: Option<String>,
+    /// Contract id the fresh sample belongs to (optional when exactly one
+    /// contract has a locked sample).
+    #[arg(long)]
+    contract: Option<String>,
 }
 
 #[derive(Parser)]
@@ -210,6 +218,14 @@ struct LockArgs {
     /// Principal for --lock-signers (required with it).
     #[arg(long)]
     lock_principal: Option<String>,
+    /// Observed reality: lock the SHAPE of this real payload file (values are
+    /// never copied; the file itself stays where it is, and may hold real
+    /// data: keep it out of version control unless scrubbed).
+    #[arg(long)]
+    sample: Option<String>,
+    /// Contract id the sample belongs to (optional when there is exactly one).
+    #[arg(long)]
+    contract: Option<String>,
 }
 
 #[derive(Parser)]
@@ -559,13 +575,71 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
         None
     };
     let today = lock::today_utc();
-    let outcomes = match evaluate_with(&sections, &resolver, lock_file.as_ref(), today) {
+    let mut outcomes = match evaluate_with(&sections, &resolver, lock_file.as_ref(), today) {
         Ok(o) => o,
         Err(e) => {
             eprintln!("ERROR (not a verdict): {e:#}");
             return Ok(3);
         }
     };
+    // Observed reality (docs/architecture/OBSERVED-REALITY.md): fresh sample
+    // vs locked sample, and staleness. Drift is residue (waivers respected);
+    // a stale sample is stated, never silent.
+    if let Some(lockf) = lock_file.as_ref() {
+        let fresh_v;
+        let fresh = match &args.sample {
+            Some(path) => {
+                let bytes = match std::fs::read(path) {
+                    Ok(b) => b,
+                    Err(e) => {
+                        eprintln!("ERROR (not a verdict): reading sample {path}: {e}");
+                        return Ok(3);
+                    }
+                };
+                fresh_v = match serde_json::from_slice::<serde_json::Value>(&bytes) {
+                    Ok(v) => v,
+                    Err(e) => {
+                        eprintln!("ERROR (not a verdict): {path} is not JSON: {e}");
+                        return Ok(3);
+                    }
+                };
+                Some((path.as_str(), &fresh_v, args.contract.as_deref()))
+            }
+            None => None,
+        };
+        let findings = match sample_findings(lockf, fresh, today) {
+            Ok(f) => f,
+            Err(e) => {
+                eprintln!("ERROR (not a verdict): {e:#}");
+                return Ok(3);
+            }
+        };
+        for (cid, residue, stated) in findings {
+            let Some(o) = outcomes.iter_mut().find(|o| o.id == cid) else {
+                eprintln!("ERROR (not a verdict): locked sample names contract {cid:?}, which invar.toml does not define");
+                return Ok(3);
+            };
+            for (field, detail) in residue {
+                let waived = lockf.waivers.iter().find(|w| w.contract == cid && w.covers(&field) && w.days_left(today) >= 0);
+                if let Some(w) = waived {
+                    o.waived.push((field, w.owner.clone(), w.reason.clone(), w.days_left(today)));
+                } else {
+                    o.residue.push(field.clone());
+                    o.witnesses.push(invar_falsify::check::Witness {
+                        residue: field,
+                        sites: Vec::new(),
+                        missing_from: Some(detail),
+                        type_change: None,
+                        read_as: Vec::new(),
+                    });
+                }
+            }
+            o.unevaluated.extend(stated);
+        }
+    } else if args.sample.is_some() {
+        eprintln!("ERROR (not a verdict): --sample needs an invar.lock with a locked sample (run `invar lock`, then `invar lock --sample`)");
+        return Ok(3);
+    }
 
     println!(
         "INVAR check ({} contract(s){})",
@@ -827,6 +901,9 @@ fn max_remote_bytes(sections: &[(String, Vec<(String, String)>)]) -> Result<usiz
 /// creates the file, or confirms it is current; it never overwrites a lock
 /// whose bindings would change (that is a reviewed `--update`).
 fn cmd_lock(args: LockArgs) -> Result<i32> {
+    if let Some(sample) = &args.sample {
+        return cmd_lock_sample(&args, sample);
+    }
     let raw = std::fs::read_to_string(&args.config)
         .with_context(|| format!("reading {}", args.config))?;
     let sections = invar_falsify::config::parse_sections(&args.config, &raw)?;
@@ -1243,4 +1320,121 @@ fn cmd_dependents(args: DependentsArgs) -> Result<i32> {
     // An answer with unreadable lockfiles is an answer with stated blind
     // spots: exit 4, never a silent 0 (same convention as NOT EVALUATED).
     Ok(if a.parse_errors.is_empty() { 0 } else { 4 })
+}
+
+/// `invar lock --sample <payload.json>`: lock the SHAPE of one real payload
+/// under a contract (docs/architecture/OBSERVED-REALITY.md). The payload's
+/// values are never copied into the lock; only key paths, types, the file's
+/// BLAKE3 and the date. Writing a sample moves the lock to format 2.
+fn cmd_lock_sample(args: &LockArgs, sample_path: &str) -> Result<i32> {
+    let lock_path = base_dir_of(&args.config).join("invar.lock");
+    if let Some(signers) = &args.lock_signers {
+        require_lock_signature(&lock_path, signers, args.lock_principal.as_deref())?;
+    }
+    if !lock_path.exists() {
+        anyhow::bail!(
+            "{} does not exist; run `invar lock` first, then add the sample",
+            lock_path.display()
+        );
+    }
+    let text = std::fs::read_to_string(&lock_path)?;
+    let mut lockf = lock::parse(&lock_path.display().to_string(), &text)?;
+    let contract = match (&args.contract, lockf.contracts.len()) {
+        (Some(c), _) => c.clone(),
+        (None, 1) => lockf.contracts[0].id.clone(),
+        (None, n) => anyhow::bail!("the lock has {n} contracts; say which with --contract <id>"),
+    };
+    if !lockf.contracts.iter().any(|c| c.id == contract) {
+        anyhow::bail!("no contract {contract:?} in {}", lock_path.display());
+    }
+    let bytes = std::fs::read(sample_path)
+        .with_context(|| format!("reading sample {sample_path}"))?;
+    let v: serde_json::Value = serde_json::from_slice(&bytes)
+        .with_context(|| format!("{sample_path} is not JSON"))?;
+    let fields = lock::payload_shape(&v);
+    if fields.is_empty() {
+        anyhow::bail!("{sample_path}: no fields derived (is it an object or array of objects?)");
+    }
+    for p in lock::pii_suspects(&fields) {
+        eprintln!("warning: sample key {p:?} looks like personal data or a credential; scrub the sample file before committing it anywhere");
+    }
+    eprintln!("note: only the sample's SHAPE is locked; the file itself may hold real data and stays your responsibility");
+    let sm = lock::Sample {
+        contract: contract.clone(),
+        blake3: blake3::hash(&bytes).to_hex().to_string(),
+        taken: lock::format_date(lock::today_utc()),
+        fields,
+    };
+    lockf.samples.retain(|x| x.contract != contract);
+    let n = sm.fields.len();
+    lockf.samples.push(sm);
+    lockf.samples.sort_by(|a, b| a.contract.cmp(&b.contract));
+    std::fs::write(&lock_path, lock::render(&lockf)?)?;
+    println!(
+        "locked the observed shape of {sample_path} under {contract:?}: {n} path(s); {} is now format 2",
+        lock_path.display()
+    );
+    if lock_path.with_extension("lock.sig").exists() {
+        println!("note: invar.lock changed; re-sign it (ssh-keygen -Y sign -n invar-lock -f <key> {})", lock_path.display());
+    }
+    Ok(0)
+}
+
+/// Check-side observed-reality evaluation: fresh sample vs locked sample
+/// (drift is residue, waivers respected), and staleness (stated, exit 4
+/// path). Returns per-contract (residue additions, unevaluated additions).
+fn sample_findings(
+    lockf: &invar_falsify::lock::Lock,
+    fresh: Option<(&str, &serde_json::Value, Option<&str>)>,
+    today: i64,
+) -> Result<Vec<(String, Vec<(String, String)>, Vec<String>)>> {
+    use invar_falsify::lock::{parse_date, payload_shape, shape_drift, SAMPLE_STALE_DAYS};
+    let mut out: Vec<(String, Vec<(String, String)>, Vec<String>)> = Vec::new();
+    fn entry(out: &mut Vec<(String, Vec<(String, String)>, Vec<String>)>, id: &str) -> usize {
+        if let Some(i) = out.iter().position(|(c, _, _)| c == id) {
+            i
+        } else {
+            out.push((id.to_string(), Vec::new(), Vec::new()));
+            out.len() - 1
+        }
+    }
+    for sm in &lockf.samples {
+        if let Some(taken) = parse_date(&sm.taken) {
+            if today - taken > SAMPLE_STALE_DAYS {
+                let i = entry(&mut out, &sm.contract);
+                out[i].2.push(format!(
+                    "observed sample is stale (taken {}, older than {SAMPLE_STALE_DAYS} days); refresh with `invar lock --sample`",
+                    sm.taken
+                ));
+            }
+        }
+    }
+    if let Some((path, v, wanted)) = fresh {
+        let target = match wanted {
+            Some(c) => c.to_string(),
+            None => {
+                let with: Vec<&str> = lockf.samples.iter().map(|s| s.contract.as_str()).collect();
+                match with.as_slice() {
+                    [one] => one.to_string(),
+                    [] => anyhow::bail!("--sample given but no contract has a locked sample; run `invar lock --sample` first"),
+                    _ => anyhow::bail!("several contracts have locked samples; say which with --contract <id>"),
+                }
+            }
+        };
+        let locked = lockf
+            .samples
+            .iter()
+            .find(|s| s.contract == target)
+            .ok_or_else(|| anyhow::anyhow!("no locked sample for contract {target:?}"))?;
+        let fresh_shape = payload_shape(v);
+        let i = entry(&mut out, &target);
+        for (p, was, now) in shape_drift(&locked.fields, &fresh_shape) {
+            let detail = match now {
+                None => format!("the fresh payload {path} (locked {was} from the sample taken {})", locked.taken),
+                Some(t2) => format!("its locked shape: {path} now shows {t2}, the sample taken {} showed {was}", locked.taken),
+            };
+            out[i].1.push((p, detail));
+        }
+    }
+    Ok(out)
 }
