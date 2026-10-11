@@ -1013,3 +1013,11 @@ Conflicts, recorded:
 - 41 of 41 tests green. Held-out record unchanged: 38 of 70.
 - Open from the release side: alpha.19 release-workflow view and the
   alpha.15 through alpha.18 release views remain unpasted.
+
+## 2026-10-11: demo verified on a second machine
+
+Founder ran `invar demo` on macOS (Apple Silicon, release build): all three
+cases VIOLATED with every pin BLAKE3-verified; measured 1.1 / 6.1 / 0.4 ms
+per case. Reports, not promises. v0.1.0-alpha.20 CI green on 104c151 (run
+38131930249), tag pushed. Release-workflow confirmation still owed for
+alpha.19 and alpha.20, release views still owed for alpha.15 through 18.
