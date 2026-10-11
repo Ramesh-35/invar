@@ -777,3 +777,21 @@ in-scope batch is the only fair test of it.
   checked deterministic under alpha.13. Engine binary sha256
   41813bffa16f3d11..., src fingerprint 495aaf3aa04bceb6. Detection rules
   unchanged; verdicts identical to alpha.11/alpha.12.
+
+## 2026-10-11: releases recorded; A4 dependents graph built, v0.1.0-alpha.14
+
+- Release records: v0.1.0-alpha.12 live and signed on all three targets;
+  v0.1.0-alpha.13 CI green (run 38049584644), release run 38049587630
+  result to be recorded when the founder confirms it.
+- A4 (Option A, local-first) built per docs/architecture/A4-DEPENDENTS.md:
+  `invar dependents <Type.field | field> --locks <dir> [--producer substr]
+  [--format json]` answers "who depends on this field" from local
+  invar.lock files. Zero network by construction (no resolver, no token in
+  the module). Unparseable lockfiles are stated and exit 4 (an answer with
+  blind spots is never a silent 0); no parseable lockfile at all is exit 3;
+  the command never exits 1 (it holds no verdict). A scoped query that
+  misses but whose field matches unscoped (spec-producer) bindings says so
+  instead of showing a bare zero. 37 tests green.
+- Gate unchanged and not met: A4 counts only when a producer uses the
+  answer to change or delay a removal in a real repository. Until then it
+  is plumbing, recorded as such.

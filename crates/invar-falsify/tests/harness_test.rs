@@ -1561,3 +1561,52 @@ fn a21_in_toto_export_and_ssh_verify() {
     assert!(!wrong_ns, "namespace separation holds");
     let _ = std::fs::remove_dir_all(&dir);
 }
+
+// ---------------------------------------------------------------------------
+// 37. A4: the dependents graph answers "who depends on Type.field" from
+// local lockfiles only, deterministically; zero matches is an answer.
+// ---------------------------------------------------------------------------
+#[test]
+fn a4_dependents_graph_over_local_locks() {
+    use invar_falsify::dependents;
+    use invar_falsify::lock::{self, parse_date, Lock};
+    let root = std::env::temp_dir().join(format!("invar-a4-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    let day = parse_date("2026-10-09").unwrap();
+    // Two consumer repos locking the same producer field, one unrelated.
+    for (repo, reads) in [
+        ("team-a/billing", "const a = order.amount_cents;\n"),
+        ("team-b/reports", "total += order.amountCents;\nconst c = order.currency;\n"),
+        ("team-c/other", "const n = user.name;\n"),
+    ] {
+        let dir = root.join(repo);
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join("api.json"), r#"{"components":{"schemas":{"Order":{"properties":{"amount_cents":{"type":"integer"},"currency":{"type":"string"}}},"User":{"properties":{"name":{"type":"string"}}}}}"#.to_string()+"}").unwrap();
+        std::fs::write(dir.join("c.js"), reads).unwrap();
+        let ptr = if repo.contains("other") { "/components/schemas/User" } else { "/components/schemas/Order" };
+        let cfg = format!("[[invariant]]\nkind = \"schema\"\nid = \"x\"\nproducer = \"api.json\"\npointer = \"{ptr}\"\nconsumer = \"c.js\"\n");
+        let sections = parse_sections("invar.toml", &cfg).unwrap();
+        let l = lock::compute(&sections, &Resolver::local(&dir), &Lock::default(), day).unwrap();
+        std::fs::write(dir.join("invar.lock"), lock::render(&l).unwrap()).unwrap();
+    }
+    // Scoped query matches by naming form across both consumers.
+    let a = dependents::find(&root, "Order.amountCents", None).unwrap();
+    assert_eq!(a.lockfiles_scanned, 3);
+    assert_eq!(a.lockfiles_matched, 2, "{:?}", a.dependents);
+    let consumers: Vec<&str> = a.dependents.iter().map(|d| d.consumer.as_str()).collect();
+    assert_eq!(consumers, ["team-a/billing/invar.lock", "team-b/reports/invar.lock"], "sorted and relative");
+    // Bare field and producer filter.
+    assert_eq!(dependents::find(&root, "currency", None).unwrap().dependents.len(), 1);
+    assert!(dependents::find(&root, "amount_cents", Some("nonexistent")).unwrap().dependents.is_empty());
+    // Zero matches is an answer; deterministic JSON.
+    let none = dependents::find(&root, "Order.gone", None).unwrap();
+    assert!(none.dependents.is_empty());
+    let j1 = dependents::render_json("Order.amountCents", None, &a);
+    let j2 = dependents::render_json("Order.amountCents", None, &dependents::find(&root, "Order.amountCents", None).unwrap());
+    assert_eq!(j1, j2, "byte-identical for identical inputs");
+    assert!(j1.contains("\"lockfiles_scanned\": 3"));
+    // A directory with no lockfiles is an error, not an empty answer.
+    let empty = root.join("empty"); std::fs::create_dir_all(&empty).unwrap();
+    assert!(dependents::find(&empty, "x", None).is_err());
+    let _ = std::fs::remove_dir_all(&root);
+}

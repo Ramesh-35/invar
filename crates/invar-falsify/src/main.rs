@@ -59,6 +59,8 @@ enum Command {
     VerifyReceipt(VerifyReceiptArgs),
     /// Receipt views: `receipt export --in-toto` (format 1 stays canonical).
     Receipt(ReceiptArgs),
+    /// A4: who depends on a producer field, from local invar.lock files.
+    Dependents(DependentsArgs),
     /// Scan a workspace and propose an invar.toml (heuristic discovery).
     Init(InitArgs),
     /// Verify and summarize a ledger; point to the adequacy matrix.
@@ -132,6 +134,22 @@ struct CheckArgs {
     /// Principal for --lock-signers (required with it).
     #[arg(long)]
     lock_principal: Option<String>,
+}
+
+#[derive(Parser)]
+struct DependentsArgs {
+    /// `Type.field` or a bare `field` (naming-form match, as the engine).
+    query: String,
+    /// Directory to scan for invar.lock files (any depth). Local only: this
+    /// command performs no network calls by construction.
+    #[arg(long)]
+    locks: String,
+    /// Only contracts whose producer ref contains this substring.
+    #[arg(long)]
+    producer: Option<String>,
+    /// "text" (default) or "json" (canonical, deterministic).
+    #[arg(long, default_value = "text")]
+    format: String,
 }
 
 #[derive(Parser)]
@@ -256,6 +274,7 @@ fn main() {
         Command::Fix(a) => dispatch_r2(cmd_fix(a)),
         Command::VerifyReceipt(a) => dispatch_r2(cmd_verify_receipt(a)),
         Command::Receipt(a) => dispatch_r2(cmd_receipt(a)),
+        Command::Dependents(a) => dispatch_r2(cmd_dependents(a)),
         Command::Init(a) => dispatch(cmd_init(a)),
         Command::Audit(a) => dispatch(cmd_audit(a)),
         Command::Replay(a) => dispatch(cmd_replay(a)),
@@ -1205,4 +1224,23 @@ fn cmd_receipt(args: ReceiptArgs) -> Result<i32> {
             Ok(0)
         }
     }
+}
+
+/// A4 blast radius: zero network, zero verdict. Exit 0 with the answer
+/// (an empty answer included); errors exit 3.
+fn cmd_dependents(args: DependentsArgs) -> Result<i32> {
+    use invar_falsify::dependents;
+    let a = dependents::find(
+        std::path::Path::new(&args.locks),
+        &args.query,
+        args.producer.as_deref(),
+    )?;
+    match args.format.as_str() {
+        "text" => print!("{}", dependents::render_text(&args.query, &a)),
+        "json" => print!("{}", dependents::render_json(&args.query, args.producer.as_deref(), &a)),
+        other => anyhow::bail!("unknown --format {other:?}: text or json"),
+    }
+    // An answer with unreadable lockfiles is an answer with stated blind
+    // spots: exit 4, never a silent 0 (same convention as NOT EVALUATED).
+    Ok(if a.parse_errors.is_empty() { 0 } else { 4 })
 }
