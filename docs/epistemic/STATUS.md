@@ -1186,3 +1186,10 @@ fetch 404), so the flip remains pending on the founder.
 - Local remotes still pointing at the old URL work via redirect;
   switching is one command: git remote set-url origin
   https://github.com/Ramesh-35/invar.git
+
+
+## POST-LAUNCH VERIFICATION RECORD (2026-10-12)
+
+* **Software Heritage Ingestion Sweep:** 178 of 178 origins confirmed ingested and status set to  in .
+* **Experiment E2 (5-Reader Output Comprehension):**  (Protocol frozen at ).
+* **Experiment E3 (Time-To-First-Verdict / TTFV):**  (Target TTFV budget frozen at ).
