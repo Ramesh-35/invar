@@ -941,3 +941,23 @@ Conflicts, recorded:
   893 ms, network-bound, n=1. The 200 ms editor and 2 s pre-commit budgets
   hold with two orders of margin locally; remote checks are and will stay
   network-bound.
+
+## 2026-10-11 (night, cont.): multi-sample presence witnesses built, v0.1.0-alpha.18
+
+- Built per the frozen spec: `invar lock --sample` is repeatable and
+  cumulative; each path carries present/absent/null counts, an observed
+  type set, and the contract carries N and the observation window.
+  Verdicts per the ratified threshold: VIOLATED only for
+  always-present-now-gone (or retyped) with N>=3; optional fields and
+  low-witness paths are stated ([not-evaluated:optional-field-absent],
+  [not-evaluated:witness-count-low]), never violations and never silent.
+- Lock format 3 (witness counters); format 2 is read forever as one
+  observation; writes are format 1 (no samples) or 3. Rationale in the
+  spec: an old engine refusing a new format fails closed; an old engine
+  misreading one would fail silent.
+- Output honesty fix found during smoke: stated non-evaluation lines now
+  print alongside a VIOLATED verdict too; a verdict never swallows a blind
+  spot. 38 tests green; smoke: optional-field absence stated while the
+  always-present removal is the only violation.
+- The observed-reality effectiveness gate (five reconstructed payloads)
+  remains owed and is the next work item.

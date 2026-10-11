@@ -47,11 +47,13 @@ use crate::resolver::{Fetched, Resolver};
 use crate::surface::{broad_reads, code_fields, mention_lines, name_key, spec_fields, Fields};
 
 pub const LOCK_FORMAT: &str = "1";
-/// Format 2 is format 1 plus optional [[sample]] sections (observed-reality
-/// locking). This engine reads both, forever; it writes "1" unless samples
-/// exist, so a lock without samples never changes format. An older engine
-/// reading a format 2 lock fails closed with a clear message.
-pub const LOCK_FORMATS: [&str; 2] = ["1", "2"];
+/// Format 2 (alpha.16, read-only legacy) is format 1 plus single-sample
+/// [[sample]] sections; format 3 carries presence-witness counters. This
+/// engine reads all three, forever, and writes the lowest format that can
+/// express the content: 1 without samples, 3 with them. An older engine
+/// reading a newer format fails closed with a clear message, never a wrong
+/// verdict.
+pub const LOCK_FORMATS: [&str; 3] = ["1", "2", "3"];
 
 /// One bound field: the consumer reads it, the producer declared it.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -143,17 +145,33 @@ impl Waiver {
     }
 }
 
-/// Observed-reality sample (docs/architecture/OBSERVED-REALITY.md): the
-/// SHAPE of one real payload the consumer accepted, never its values.
+/// One key path's accumulated presence witnesses
+/// (docs/architecture/MULTI-SAMPLE-WITNESSES.md).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct WitnessCount {
+    pub path: String,
+    /// Observed JSON types, sorted, pipe-joined.
+    pub types: String,
+    pub present: u64,
+    pub absent: u64,
+    pub null: u64,
+}
+
+/// Observed-reality sample record: the SHAPE of real payloads the consumer
+/// accepted, as presence witnesses across N observations; never values.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Sample {
     pub contract: String,
-    /// BLAKE3 of the sample file bytes (the file itself is never copied).
+    /// BLAKE3 of the most recent sample file (earlier files stay the
+    /// consumer's own archive).
     pub blake3: String,
-    /// The day the sample was locked (YYYY-MM-DD).
+    /// The day of the most recent observation (YYYY-MM-DD); staleness keys
+    /// off this.
     pub taken: String,
-    /// Derived shape: (key path, type). Deterministic order.
-    pub fields: Vec<(String, String)>,
+    /// The day of the first observation.
+    pub window_start: String,
+    pub observations: u64,
+    pub witnesses: Vec<WitnessCount>,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -586,7 +604,7 @@ fn q(v: &str) -> Result<String> {
 
 /// Deterministic text: contracts by id, bindings sorted, waivers as written.
 pub fn render(lock: &Lock) -> Result<String> {
-    let format = if lock.samples.is_empty() { "1" } else { "2" };
+    let format = if lock.samples.is_empty() { "1" } else { "3" };
     let mut s = format!(
         "# invar.lock: the producer fields this repository depends on.\n\
          # Written by `invar lock`. Accept a reviewed producer change with\n\
@@ -629,13 +647,25 @@ pub fn render(lock: &Lock) -> Result<String> {
     }
     for sm in &lock.samples {
         s.push_str(&format!(
-            "\n[[sample]]\ncontract = {}\nblake3 = {}\ntaken = {}\n",
+            "\n[[sample]]\ncontract = {}\nblake3 = {}\ntaken = {}\nwindow_start = {}\nobservations = {}\n",
             q(&sm.contract)?,
             q(&sm.blake3)?,
-            q(&sm.taken)?
+            q(&sm.taken)?,
+            q(&sm.window_start)?,
+            q(&sm.observations.to_string())?
         ));
-        for (p2, t) in &sm.fields {
-            s.push_str(&format!("field = {}\n", q(&format!("{} {t}", esc_field(p2)))?));
+        for w in &sm.witnesses {
+            s.push_str(&format!(
+                "field = {}\n",
+                q(&format!(
+                    "{} {} {}/{}/{}",
+                    esc_field(&w.path),
+                    w.types,
+                    w.present,
+                    w.absent,
+                    w.null
+                ))?
+            ));
         }
     }
     for w in &lock.waivers {
@@ -729,21 +759,54 @@ pub fn parse(path: &str, text: &str) -> Result<Lock> {
                 lock.waivers.push(w);
             }
             "sample" => {
+                let taken = need("taken")?;
+                let observations: u64 = match getk(pairs, "observations") {
+                    Some(n) => n
+                        .parse()
+                        .map_err(|_| anyhow!("{path}: bad sample observations {n:?}"))?,
+                    None => 1, // format 2: one sample is one observation
+                };
+                let witnesses = pairs
+                    .iter()
+                    .filter(|(k, _)| k == "field")
+                    .map(|(_, v)| {
+                        let mut it = v.split(' ');
+                        let (Some(p2), Some(t)) = (it.next(), it.next()) else {
+                            bail!("{path}: bad sample field {v:?}");
+                        };
+                        let counts = it.next();
+                        let (present, absent, null) = match counts {
+                            Some(c) => {
+                                let mut n = c.split('/');
+                                let g = |x: Option<&str>| -> Result<u64> {
+                                    x.and_then(|v| v.parse().ok())
+                                        .ok_or_else(|| anyhow!("{path}: bad sample counts {v:?}"))
+                                };
+                                (g(n.next())?, g(n.next())?, g(n.next())?)
+                            }
+                            // format 2: present once; null once when the
+                            // observed type includes null.
+                            None => (1, 0, u64::from(t.split('|').any(|x| x == "null"))),
+                        };
+                        Ok(WitnessCount {
+                            path: unesc_field(p2),
+                            types: t.to_string(),
+                            present,
+                            absent,
+                            null,
+                        })
+                    })
+                    .collect::<Result<Vec<_>>>()?;
                 let sm = Sample {
                     contract: need("contract")?,
                     blake3: need("blake3")?,
-                    taken: need("taken")?,
-                    fields: pairs
-                        .iter()
-                        .filter(|(k, _)| k == "field")
-                        .map(|(_, v)| match v.split_once(' ') {
-                            Some((p2, t)) => Ok((unesc_field(p2), t.to_string())),
-                            None => Err(anyhow!("{path}: bad sample field {v:?}")),
-                        })
-                        .collect::<Result<Vec<_>>>()?,
+                    window_start: getk(pairs, "window_start").unwrap_or_else(|| taken.clone()),
+                    taken,
+                    observations,
+                    witnesses,
                 };
-                if parse_date(&sm.taken).is_none() {
-                    bail!("{path}: sample for {:?}: taken must be YYYY-MM-DD", sm.contract);
+                if parse_date(&sm.taken).is_none() || parse_date(&sm.window_start).is_none() {
+                    bail!("{path}: sample for {:?}: dates must be YYYY-MM-DD", sm.contract);
                 }
                 lock.samples.push(sm);
             }
@@ -1006,20 +1069,93 @@ pub fn payload_shape(v: &serde_json::Value) -> Vec<(String, String)> {
         .collect()
 }
 
-/// Shape drift between a locked sample and a fresh one: (path, locked type,
-/// fresh type or None when the path is gone). Additions are never drift.
-pub fn shape_drift(locked: &[(String, String)], fresh: &[(String, String)]) -> Vec<(String, String, Option<String>)> {
-    let now: std::collections::BTreeMap<&str, &str> =
-        fresh.iter().map(|(p, t)| (p.as_str(), t.as_str())).collect();
-    let mut out = Vec::new();
-    for (p, t) in locked {
-        match now.get(p.as_str()) {
-            None => out.push((p.clone(), t.clone(), None)),
-            Some(t2) if *t2 != t => out.push((p.clone(), t.clone(), Some(t2.to_string()))),
-            _ => {}
+/// Merge one observed shape into a sample's witnesses (one observation).
+pub fn merge_observation(sm: &mut Sample, shape: &[(String, String)], taken: &str, blake3: &str) {
+    use std::collections::BTreeSet;
+    let prior = sm.observations;
+    sm.observations += 1;
+    sm.taken = taken.to_string();
+    sm.blake3 = blake3.to_string();
+    if sm.window_start.is_empty() {
+        sm.window_start = taken.to_string();
+    }
+    let seen: std::collections::BTreeMap<&str, &str> =
+        shape.iter().map(|(p, t)| (p.as_str(), t.as_str())).collect();
+    for w in &mut sm.witnesses {
+        match seen.get(w.path.as_str()) {
+            Some(t) => {
+                w.present += 1;
+                if t.split('|').any(|x| x == "null") {
+                    w.null += 1;
+                }
+                let mut ts: BTreeSet<&str> = w.types.split('|').collect();
+                ts.extend(t.split('|'));
+                w.types = ts.into_iter().collect::<Vec<_>>().join("|");
+            }
+            None => w.absent += 1,
         }
     }
-    out
+    for (p2, t) in shape {
+        if !sm.witnesses.iter().any(|w| &w.path == p2) {
+            sm.witnesses.push(WitnessCount {
+                path: p2.clone(),
+                types: t.clone(),
+                present: 1,
+                // It did not appear in any earlier observation's shape.
+                absent: prior,
+                null: u64::from(t.split('|').any(|x| x == "null")),
+            });
+        }
+    }
+    sm.witnesses.sort_by(|a, b| a.path.cmp(&b.path));
+}
+
+/// Verdicts for a fresh payload against accumulated witnesses
+/// (MULTI-SAMPLE-WITNESSES.md): residue (path, detail) and stated
+/// not-evaluated lines. Additions are never drift.
+pub fn witness_drift(
+    sm: &Sample,
+    fresh: &[(String, String)],
+    fresh_name: &str,
+) -> (Vec<(String, String)>, Vec<String>) {
+    let now: std::collections::BTreeMap<&str, &str> =
+        fresh.iter().map(|(p, t)| (p.as_str(), t.as_str())).collect();
+    let mut residue = Vec::new();
+    let mut stated = Vec::new();
+    for w in &sm.witnesses {
+        let seen = now.get(w.path.as_str());
+        let mismatch = match seen {
+            None => Some("absent"),
+            Some(t) if !t.split('|').all(|x| w.types.split('|').any(|k| k == x)) => Some("retyped"),
+            _ => None,
+        };
+        let Some(kind) = mismatch else { continue };
+        let evidence = format!(
+            "witnessed present {}/{} (window {}..{})",
+            w.present, sm.observations, sm.window_start, sm.taken
+        );
+        if w.absent > 0 {
+            stated.push(format!(
+                "{} is {kind} in {fresh_name}, but it is optional ({} of {} observations lacked it); stated, not a violation [not-evaluated:optional-field-absent]",
+                w.path, w.absent, sm.observations
+            ));
+        } else if sm.observations < 3 {
+            stated.push(format!(
+                "{} is {kind} in {fresh_name}, but only {} observation(s) witnessed it; too few to accuse [not-evaluated:witness-count-low]",
+                w.path, sm.observations
+            ));
+        } else {
+            let detail = match seen {
+                None => format!("the fresh payload {fresh_name}; {evidence}"),
+                Some(t) => format!(
+                    "its witnessed types: {fresh_name} shows {t}, {evidence} as {}",
+                    w.types
+                ),
+            };
+            residue.push((w.path.clone(), detail));
+        }
+    }
+    (residue, stated)
 }
 
 /// Ratified PII heuristic: key-name tokens that suggest a sample holds

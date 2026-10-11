@@ -103,3 +103,14 @@ Compatibility: this engine reads formats 1 and 2, forever. `invar lock`
 writes format 1 unless samples exist, so a lock without samples never
 changes format. An engine older than alpha.16 reading a format 2 lock fails
 closed with "unsupported lock format", never a wrong verdict.
+
+## Format 3: presence witnesses (2026-10-11, supersedes single-sample comparison)
+
+`invar lock --sample` is repeatable and cumulative: each observation merges
+into per-path counters (`field = "path types present/absent/null"`, plus
+`observations` and a window). `invar check --sample` then accuses only what
+the evidence supports: a path present in every one of at least three
+observations and now absent or retyped is residue; a path some observations
+lacked is stated as optional; fewer than three observations is stated as
+too few to accuse. Format 2 locks are read forever as a single
+observation. Spec: docs/architecture/MULTI-SAMPLE-WITNESSES.md.

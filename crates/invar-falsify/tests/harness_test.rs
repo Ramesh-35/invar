@@ -1612,48 +1612,61 @@ fn a4_dependents_graph_over_local_locks() {
 }
 
 // ---------------------------------------------------------------------------
-// 38. Observed reality: payload shapes derive deterministically, lock format 2
-// roundtrips (format 1 still parses), drift and PII and staleness behave as
-// the frozen spec says.
+// 38. Observed reality with presence witnesses: shapes derive
+// deterministically; format 3 roundtrips and format 2 reads as one
+// observation; the verdict thresholds are exactly the frozen spec's.
 // ---------------------------------------------------------------------------
 #[test]
-fn observed_reality_shapes_lock_format2_and_drift() {
-    use invar_falsify::lock::{self, payload_shape, pii_suspects, shape_drift, Sample};
-    let v: serde_json::Value = serde_json::from_str(
-        r#"{"total": 3, "user": {"email": "x@y.z", "age": null}, "items": [{"id": 1}, {"id": "a"}]}"#,
-    ).unwrap();
-    let shape = payload_shape(&v);
-    let get = |p: &str| shape.iter().find(|(q, _)| q == p).map(|(_, t)| t.as_str());
-    assert_eq!(get("total"), Some("integer"));
-    assert_eq!(get("user.age"), Some("null"));
-    assert_eq!(get("items[].id"), Some("integer|string"), "type union is sorted and stated");
-    assert_eq!(payload_shape(&v), shape, "derivation is deterministic");
-    assert_eq!(pii_suspects(&shape), ["user.email"]);
+fn observed_reality_witnesses_formats_and_thresholds() {
+    use invar_falsify::lock::{self, merge_observation, payload_shape, pii_suspects, witness_drift, Sample};
+    let sh = |j: &str| payload_shape(&serde_json::from_str(j).unwrap());
+    let s1 = sh(r#"{"total": 3, "user": {"email": "x@y.z", "age": null}, "items": [{"id": 1}, {"id": "a"}]}"#);
+    assert_eq!(s1.iter().find(|(q, _)| q == "items[].id").map(|(_, t)| t.as_str()), Some("integer|string"));
+    assert_eq!(pii_suspects(&s1), ["user.email"]);
 
-    // Lock format 2 roundtrip; format 1 locks still parse; format 3 refused.
+    // Merge three observations: `coupon` appears only in the second.
+    let mut sm = Sample { contract: "orders".into(), blake3: String::new(), taken: String::new(), window_start: String::new(), observations: 0, witnesses: Vec::new() };
+    let base = sh(r#"{"total": 1, "state": "ok"}"#);
+    merge_observation(&mut sm, &base, "2026-10-01", "aa");
+    merge_observation(&mut sm, &sh(r#"{"total": 2, "state": "ok", "coupon": "X"}"#), "2026-10-05", "bb");
+    merge_observation(&mut sm, &base, "2026-10-11", "cc");
+    assert_eq!(sm.observations, 3);
+    let g = |p: &str| sm.witnesses.iter().find(|w| w.path == p).unwrap();
+    assert_eq!((g("total").present, g("total").absent), (3, 0));
+    assert_eq!((g("coupon").present, g("coupon").absent), (1, 2), "absent before first sighting counts");
+    assert_eq!((sm.window_start.as_str(), sm.taken.as_str()), ("2026-10-01", "2026-10-11"));
+
+    // Thresholds: always-present-now-gone is residue; optional-absent and
+    // additions are stated or ignored, never residue.
+    let fresh = sh(r#"{"state": "ok", "extra": true}"#);
+    let (residue, stated) = witness_drift(&sm, &fresh, "fresh.json");
+    assert_eq!(residue.len(), 1, "{residue:?}");
+    assert_eq!(residue[0].0, "total");
+    assert!(stated.iter().any(|x| x.contains("coupon") && x.contains("[not-evaluated:optional-field-absent]")), "{stated:?}");
+    assert!(!stated.iter().any(|x| x.contains("extra")), "additions are never drift");
+
+    // Below three observations: too few to accuse, stated.
+    let mut young = Sample { contract: "o".into(), blake3: String::new(), taken: String::new(), window_start: String::new(), observations: 0, witnesses: Vec::new() };
+    merge_observation(&mut young, &base, "2026-10-01", "aa");
+    merge_observation(&mut young, &base, "2026-10-02", "bb");
+    let (r2, s2) = witness_drift(&young, &sh(r#"{"state": "ok"}"#), "f.json");
+    assert!(r2.is_empty());
+    assert!(s2.iter().any(|x| x.contains("[not-evaluated:witness-count-low]")), "{s2:?}");
+
+    // Retype of an always-present field at N>=3 is residue.
+    let (r3, _) = witness_drift(&sm, &sh(r#"{"total": "3", "state": "ok"}"#), "f.json");
+    assert!(r3.iter().any(|(p, _)| p == "total"), "{r3:?}");
+
+    // Format 3 roundtrips; format 2 parses as one observation; 4 refused.
     let mut l = lock::Lock::default();
-    l.samples.push(Sample {
-        contract: "orders".into(),
-        blake3: "aa".into(),
-        taken: "2026-10-11".into(),
-        fields: shape.clone(),
-    });
+    l.samples.push(sm.clone());
     let text = lock::render(&l).unwrap();
-    assert!(text.contains("format = \"2\"") && text.contains("[[sample]]"));
-    let back = lock::parse("invar.lock", &text).unwrap();
-    assert_eq!(back.samples, l.samples);
-    assert!(lock::render(&lock::Lock::default()).unwrap().contains("format = \"1\""), "no samples, format 1");
-    assert!(lock::parse("l", "[lock]\nformat = \"1\"\n").is_ok());
-    assert!(lock::parse("l", "[lock]\nformat = \"3\"\n").is_err());
-
-    // Drift: removal and retype are drift; additions are not.
-    let fresh: serde_json::Value = serde_json::from_str(
-        r#"{"total": "3", "user": {"age": null}, "items": [{"id": 2}], "extra": true}"#,
-    ).unwrap();
-    let d = shape_drift(&shape, &payload_shape(&fresh));
-    let find = |p: &str| d.iter().find(|(q, _, _)| q == p);
-    assert_eq!(find("total").unwrap().2.as_deref(), Some("string"));
-    assert!(find("user.email").unwrap().2.is_none(), "removed path");
-    assert!(find("extra").is_none(), "additions are never drift");
-    assert_eq!(find("items[].id").unwrap().2.as_deref(), Some("integer"), "union narrowed is stated as a change");
+    assert!(text.contains("format = \"3\"") && text.contains("observations = \"3\""));
+    assert_eq!(lock::parse("invar.lock", &text).unwrap().samples, l.samples);
+    let f2 = "[lock]\nformat = \"2\"\n\n[[sample]]\ncontract = \"orders\"\nblake3 = \"aa\"\ntaken = \"2026-10-01\"\nfield = \"total integer\"\nfield = \"age null\"\n";
+    let back = lock::parse("l", f2).unwrap();
+    assert_eq!(back.samples[0].observations, 1);
+    assert_eq!(back.samples[0].witnesses[1].null, 1, "format 2 null type counts as one null witness");
+    assert!(lock::parse("l", "[lock]\nformat = \"4\"\n").is_err());
+    assert!(lock::render(&lock::Lock::default()).unwrap().contains("format = \"1\""));
 }
