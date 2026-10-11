@@ -1051,3 +1051,29 @@ then resolved: smoke repinned by full commit SHA
 (104c15115145865fcd834946589fc22fab3e3849, tag v0.1.0-alpha.20 noted in
 a comment), run 38151630527 green in 12s. Nothing open in the smoke
 repo.
+
+## 2026-10-11: corrections of record ratified; human-track protocol locked
+
+Founder adjudication ratified five corrections in full: tag
+v0.1.0-alpha.20 points at 104c151 (4bd4958 and later are docs commits);
+canonical Action pin SHA 104c15115145865fcd834946589fc22fab3e3849; test
+suite 41 of 41; the 2.2 ms median check latency (n=50) is a container
+measurement, with 1.1/6.1/0.4 ms the demo per-case times measured on the
+founder's Apple Silicon machine; "proven" and "mathematically sound" are
+permanently excluded from the record. Two further corrections applied in
+the same pass: the corpus is 122 configurations (123 was the _template
+miscount, settled at the A2 gate), and the sealed held-out set is 70
+cases.
+
+Human verification tracks locked:
+- E2: measures comprehension, never assumes it; pass bar 4 of 5 readers
+  reading exit 4 as a stated blind spot; all responses recorded verbatim
+  whatever the outcome.
+- E3: under 300 seconds download-to-first-verdict as target; every
+  individual timing published, no averaging.
+- Track 3 sequencing: repo public first, then Zenodo DOI and SWHIDs.
+  Queued deliverables on "go public": LICENSE-DATA (CDLA-Permissive-2.0),
+  JSONL corpus export, standalone zero-dependency scorer, SWHIDs for the
+  122 corpus configurations' pinned artifacts, and the BLAKE3 manifest
+  hash of the 70 sealed held-out cases committed before any external
+  scoring.
