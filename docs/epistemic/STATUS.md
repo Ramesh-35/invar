@@ -1077,3 +1077,17 @@ Human verification tracks locked:
   122 corpus configurations' pinned artifacts, and the BLAKE3 manifest
   hash of the 70 sealed held-out cases committed before any external
   scoring.
+
+## 2026-10-11: held-out set sealed ahead of going public
+
+docs/falsification/HELD-OUT-MANIFEST.txt seals the held-out evaluation
+set: 85 cases (70 in-scope real breaks + 15 named controls, batches 4-8),
+each with SHA-256 of its case.toml and invar.toml at seal time. The 38 of
+70 record is scored against exactly this membership. BLAKE3 of the
+manifest's exact bytes, computed in the build container on a
+byte-verified copy (SHA-256 cross-checked both sides):
+457f9888047c587482d76520a8371d052cc8e7d356a96a7c9aae866fd1392bc1
+Sealed while the repository is still private, in the same commit that
+adds the manifest, so membership provably predates any external
+visibility or scoring. This completes queued deliverable 5 of the
+go-public list early, by design: a seal is strongest before publicity.
