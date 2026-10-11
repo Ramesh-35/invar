@@ -1254,3 +1254,16 @@ re-verification; weekly workflow delivered as swh-archival.yml.new per
 the workflows-are-founder-domain rule. Engine verdict semantics
 unchanged; version 0.1.0-alpha.21. This tag will mint the first
 Zenodo DOI.
+
+## 2026-10-12: v0.1.0-alpha.21 released; reproduction guard live end to end
+
+Tag v0.1.0-alpha.21 on 54e201e. CI green on f6546d2 (run 38161770529)
+and release green (run 38161817530): three platform tarballs with
+SHA-256 and SSH signatures. The release job's own cargo test ran the
+reproduction guard, so the published binaries were built from a tree
+that re-proved 38 of 70 from committed bytes at release time. Weekly
+SWH re-verification workflow installed by the founder (f6546d2). Note
+for the record: the tag precedes the workflow-install commit, so the
+release source archive lacks swh-archival.yml; the workflow runs from
+main and is unaffected. Zenodo DOI: webhook fires on this release;
+recorded here as PENDING until the minted DOI is pasted.
