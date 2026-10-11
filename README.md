@@ -100,4 +100,8 @@ rules in [docs/falsification/R1-CORPUS.md](docs/falsification/R1-CORPUS.md).
 ## License
 
 Licensed under either of [Apache License 2.0](LICENSE-APACHE) or
-[MIT](LICENSE-MIT), at your option. See [`LICENSE`](LICENSE).
+[MIT](LICENSE-MIT), at your option. See [`LICENSE`](LICENSE). Corpus
+data is separately licensed under
+[CDLA-Permissive-2.0](LICENSE-DATA); see
+[docs/reference/CORPUS-DATA.md](docs/reference/CORPUS-DATA.md). Files
+under `demo/` keep their upstream licenses ([demo/NOTICE](demo/NOTICE)).
