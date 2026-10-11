@@ -1242,3 +1242,15 @@ Three defects in tonight's closing sequence, stated in full:
 The archived state of all 178 origins is measured and true; what
 needed correcting was the order of claim and measurement, which is
 exactly the discipline this project exists to enforce.
+
+## 2026-10-12: alpha.21 staged (reproduction guard in CI, SWH verifier)
+
+Test 42 added: cargo test now runs the standalone scorer against the
+committed corpus export and engine-of-record results and fails unless
+38 of 70 reproduces, so the public claim is re-proved on every CI run
+(42 of 42 green in the build container, scored against the PUBLIC
+repository bytes). scripts/swh-verify.sh added for archival
+re-verification; weekly workflow delivered as swh-archival.yml.new per
+the workflows-are-founder-domain rule. Engine verdict semantics
+unchanged; version 0.1.0-alpha.21. This tag will mint the first
+Zenodo DOI.

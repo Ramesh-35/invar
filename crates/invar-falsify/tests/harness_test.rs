@@ -1825,3 +1825,45 @@ fn coverage_disclosure_text_and_json() {
     let mut out5 = String::new();
     assert!(run_coverage(&cfg, None, "xml", rec, &mut out5).is_err());
 }
+
+/// Test 42 (reproduction guard): the public held-out record reproduces
+/// from the repository's own committed data through the standalone scorer.
+/// Guards the corpus export, the engine-of-record results file, and the
+/// scorer's disclosed matching rule together: if any of the three drifts,
+/// the headline number stops reproducing and this fails. Requires python3
+/// (present in CI and on dev machines); its absence is a loud failure,
+/// never a quiet skip.
+#[test]
+fn held_out_record_reproduces_via_standalone_scorer() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .canonicalize()
+        .unwrap();
+    for rel in [
+        "scripts/score-corpus.py",
+        "invar-corpus.jsonl",
+        "docs/falsification/heldout-engine-of-record-results.json",
+    ] {
+        assert!(root.join(rel).is_file(), "missing committed file {rel}");
+    }
+    let out = std::process::Command::new("python3")
+        .current_dir(&root)
+        .args([
+            "scripts/score-corpus.py",
+            "--corpus",
+            "invar-corpus.jsonl",
+            "--results",
+            "docs/falsification/heldout-engine-of-record-results.json",
+            "--held-out-only",
+        ])
+        .output()
+        .expect("python3 must be runnable for the reproduction guard");
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    assert!(out.status.success(), "scorer failed: {stdout}\n{}", String::from_utf8_lossy(&out.stderr));
+    assert!(
+        stdout.contains("breaks caught: 38 of 70"),
+        "held-out record no longer reproduces: {stdout}"
+    );
+    assert!(stdout.contains("FALSE_POSITIVE: 1"), "{stdout}");
+    assert!(stdout.contains("85 case(s) = 70 break(s) + 15 control(s)"), "{stdout}");
+}
