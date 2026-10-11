@@ -1193,3 +1193,12 @@ fetch 404), so the flip remains pending on the founder.
 * **Software Heritage Ingestion Sweep:** 178 of 178 origins confirmed ingested and status set to  in .
 * **Experiment E2 (5-Reader Output Comprehension):**  (Protocol frozen at ).
 * **Experiment E3 (Time-To-First-Verdict / TTFV):**  (Target TTFV budget frozen at ).
+
+## 2026-10-12: SWH re-verification pass; all origins archived
+
+Re-verification of the 19 queued Save Code Now origins plus this
+repository under both names: every one now resolves in the Software
+Heritage archive (HTTP 200). Measured state: 178 of 178 origins
+archived (plus Ramesh-35/invar post-rename). SWH-ARCHIVAL.tsv updated
+with per-row ingestion timestamps. The archival tail of the launch is
+closed by measurement.
