@@ -1042,4 +1042,10 @@ source-build fallback), so the release-binary install path, verdict and
 provenance assert all hold against a published release. One intermediate
 run (38150854413) failed on a YAML indentation slip from a web edit,
 fixed in dd48fac; recorded so the X in the run history is explained.
-Still stale in that repo: invar-pr.yml pins v0.1.0-alpha.2.
+Log line on record: "using release
+v0.1.0-alpha.20 (x86_64-unknown-linux-musl), checksum and signature
+verified". Correction to the first draft of this entry: invar-pr.yml
+exists only on the smoke repo's invar-pr-test branch, not on main, so
+nothing stale remains on main. Open hardening item, flagged by the
+action itself: the smoke pin is a movable tag; ACTION-HARDENING.md says
+pin by full commit SHA.
