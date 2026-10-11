@@ -1169,3 +1169,20 @@ fetch 404), so the flip remains pending on the founder.
   the committed TSVs through scripts/score-corpus.py needs the
   per-batch engine-of-record mapping stated first; queued as its own
   careful task, not rushed tonight.
+
+## 2026-10-12: repository renamed to Ramesh-35/invar; Zenodo enabled
+
+- Renamed by the founder at going-public: Ramesh-35/invar-platform is
+  now Ramesh-35/invar. GitHub redirects the old name for clones, raw
+  reads and Actions, verified live (old-name raw read returns 200), so
+  the smoke repo's SHA pin keeps working unchanged. The frozen in-toto
+  predicateType URI keeps the old name BY DESIGN: it is an identifier,
+  not a link, and frozen means frozen.
+- Save Code Now re-submitted for the new origin
+  https://github.com/Ramesh-35/invar (accepted, HTTP 200); the
+  old-name request is noted as superseded in SWH-ARCHIVAL.tsv.
+- Zenodo GitHub integration toggled ON by the founder. The DOI mints
+  with the next tagged release.
+- Local remotes still pointing at the old URL work via redirect;
+  switching is one command: git remote set-url origin
+  https://github.com/Ramesh-35/invar.git
