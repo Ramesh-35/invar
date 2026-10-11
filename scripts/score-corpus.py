@@ -21,8 +21,9 @@ Outcome vocabulary (identical to the committed scoring TSVs):
                 MISSED (none, or verdict holds), UNEVALUATED, ERROR
   controls:     CLEAN (holds), FALSE_POSITIVE (violated), UNEVALUATED, ERROR
   not in results: NOT_RUN
-A residue entry matches an expected field by exact name or as the final
-`.field` of a `Type.field` form. Extra residue on breaks is counted and
+A residue entry matches an expected field by exact name, as the final
+`.field` of a `Type.field` form, or across naming forms (case and _/-
+separators ignored), which is the engine's own binding rule. Extra residue on breaks is counted and
 reported, never hidden: noise is part of the score.
 
 The summary is printed in count form only (never percentages from small
@@ -34,8 +35,20 @@ import json
 import sys
 
 
+def normalize(name):
+    """The engine's naming-form equivalence: case and _/- separators are
+    not identity (the engine binds `x_cord` to a consumer's `xCord`), so
+    the scorer credits across forms exactly as the engine's own scoring
+    did. Anything stronger would misscore the engine's real behavior;
+    anything weaker would invent catches."""
+    return name.lower().replace("_", "").replace("-", "")
+
+
 def field_matches(expected, item):
-    return item == expected or item.rsplit(".", 1)[-1] == expected
+    if item == expected or item.rsplit(".", 1)[-1] == expected:
+        return True
+    ne, ni = normalize(expected), normalize(item.rsplit(".", 1)[-1])
+    return ne == ni
 
 
 def score(case, result):

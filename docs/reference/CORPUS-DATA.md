@@ -27,8 +27,11 @@ binaries.
 
 ## Scoring rules, stated
 
-A residue entry matches an expected field by exact name or as the
-final `.field` of a `Type.field` form; nothing else is credited. In
+A residue entry matches an expected field by exact name, as the final
+`.field` of a `Type.field` form, or across naming forms (case and the
+_/- separators ignored), which is the engine's own binding rule and
+was the rule in force in the committed scoring TSVs; nothing else is
+credited. In
 particular, an ancestor path that structurally subsumes an expected
 field (`packages` reported where `specifiers` lived beneath it, as
 INVAR's own observed-reality ancestor dominance prints) is NOT
@@ -48,3 +51,24 @@ never percentages.
   LICENSE-DATA.
 - The corpus references third-party repositories by pin (owner, repo,
   commit SHA, path); it does not contain their file contents.
+
+## Reproducing the held-out record
+
+The 38 of 70 record reproduces from public data alone. The engine of
+record per batch is each batch's FIRST scoring, on the engine frozen
+before that batch was sourced (later rescorings of old batches are
+tuning data, by the project's own rule): batch 4
+r1-batch4-results.tsv (6 caught of 10), batch 5 r1-batch5-alpha5.tsv
+(7 of 15), batch 6 r1-batch6-alpha8.tsv (9 of 15), batch 7
+r1-batch7-alpha8.tsv (8 of 15), batch 8 r1-batch8-alpha10.tsv (8 of
+15). Those verdicts, converted mechanically to the scorer's results
+format, are committed as
+docs/falsification/heldout-engine-of-record-results.json. Run:
+
+    python3 scripts/score-corpus.py --corpus invar-corpus.jsonl \
+      --results docs/falsification/heldout-engine-of-record-results.json \
+      --held-out-only
+
+Expected output: breaks caught 38 of 70; controls 13 CLEAN, 1
+FALSE_POSITIVE (the batch 5 spec-$ref case, long on the record), 1
+UNEVALUATED; 5 break UNEVALUATED; 25 extra residue items stated.

@@ -1202,3 +1202,19 @@ Heritage archive (HTTP 200). Measured state: 178 of 178 origins
 archived (plus Ramesh-35/invar post-rename). SWH-ARCHIVAL.tsv updated
 with per-row ingestion timestamps. The archival tail of the launch is
 closed by measurement.
+
+## 2026-10-12: held-out record reproduced through the standalone scorer
+
+38 of 70 reproduces from public data alone: engine-of-record TSVs
+(each batch's first scoring on its pre-sourcing frozen engine: 6+7+9+
+8+8) converted to the scorer's results format
+(docs/falsification/heldout-engine-of-record-results.json) and scored
+by scripts/score-corpus.py against invar-corpus.jsonl. Full held-out
+tally: breaks 38 caught, 27 missed, 5 not evaluated; controls 13
+clean, 1 false positive (batch 5 spec-$ref, long on the record), 1
+not evaluated; 25 extra residue items stated. One scorer amendment was
+required and is disclosed in CORPUS-DATA.md: the match rule now
+includes the engine's naming-form equivalence (case and _/- ignored),
+which the committed TSVs always used; without it the scorer credited
+only 16 of the 38, which is how the gap was found, measured, and
+closed with the engine's real rule rather than a looser one.

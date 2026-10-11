@@ -1,0 +1,450 @@
+{
+ "r1-037": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-038": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-039": {
+  "residue": [
+   "emailaddress"
+  ],
+  "verdict": "violated"
+ },
+ "r1-040": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-041": {
+  "residue": [
+   "streamid",
+   "userid"
+  ],
+  "verdict": "violated"
+ },
+ "r1-042": {
+  "residue": [
+   "debuginfo"
+  ],
+  "verdict": "violated"
+ },
+ "r1-043": {
+  "residue": [
+   "attrs"
+  ],
+  "verdict": "violated"
+ },
+ "r1-044": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-045": {
+  "residue": [
+   "totaldifficulty"
+  ],
+  "verdict": "violated"
+ },
+ "r1-046": {
+  "residue": [
+   "free",
+   "storage",
+   "total"
+  ],
+  "verdict": "violated"
+ },
+ "r1-047": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-048": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-049": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-050": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-051": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-052": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-053": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-054": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-055": {
+  "residue": [
+   "vulns"
+  ],
+  "verdict": "violated"
+ },
+ "r1-056": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-057": {
+  "residue": [
+   "pipeline"
+  ],
+  "verdict": "violated"
+ },
+ "r1-058": {
+  "residue": [
+   "cargoextraargs"
+  ],
+  "verdict": "violated"
+ },
+ "r1-059": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-060": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-061": {
+  "residue": [
+   "matched",
+   "templateid"
+  ],
+  "verdict": "violated"
+ },
+ "r1-062": {
+  "residue": [
+   "rx",
+   "timesinceupdate",
+   "tx"
+  ],
+  "verdict": "violated"
+ },
+ "r1-063": {
+  "residue": [
+   "rulescount"
+  ],
+  "verdict": "violated"
+ },
+ "r1-064": {
+  "residue": [
+   "description",
+   "fixedinversion",
+   "links",
+   "severity",
+   "version"
+  ],
+  "verdict": "violated"
+ },
+ "r1-065": {
+  "residue": [
+   "enabled"
+  ],
+  "verdict": "violated"
+ },
+ "r1-066": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-067": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-068": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-069": {
+  "verdict": "not_evaluated"
+ },
+ "r1-070": {
+  "residue": [
+   "listid"
+  ],
+  "verdict": "violated"
+ },
+ "r1-071": {
+  "verdict": "not_evaluated"
+ },
+ "r1-072": {
+  "residue": [
+   "maxacceltodecel"
+  ],
+  "verdict": "violated"
+ },
+ "r1-073": {
+  "residue": [
+   "kindstring"
+  ],
+  "verdict": "violated"
+ },
+ "r1-074": {
+  "residue": [
+   "nodetype"
+  ],
+  "verdict": "violated"
+ },
+ "r1-075": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-076": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-077": {
+  "residue": [
+   "output"
+  ],
+  "verdict": "violated"
+ },
+ "r1-078": {
+  "residue": [
+   "totaldifficulty"
+  ],
+  "verdict": "violated"
+ },
+ "r1-079": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-080": {
+  "residue": [
+   "containername",
+   "podname"
+  ],
+  "verdict": "violated"
+ },
+ "r1-081": {
+  "residue": [
+   "unlinked"
+  ],
+  "verdict": "violated"
+ },
+ "r1-082": {
+  "residue": [
+   "endpoint",
+   "isstatic",
+   "listenport",
+   "localaddress",
+   "localrange",
+   "macaddress",
+   "mtu",
+   "name",
+   "os",
+   "publickey"
+  ],
+  "verdict": "violated"
+ },
+ "r1-083": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-084": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-085": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-086": {
+  "residue": [
+   "allowed",
+   "denied"
+  ],
+  "verdict": "violated"
+ },
+ "r1-087": {
+  "residue": [
+   "emojis"
+  ],
+  "verdict": "violated"
+ },
+ "r1-088": {
+  "residue": [
+   "value"
+  ],
+  "verdict": "violated"
+ },
+ "r1-089": {
+  "residue": [
+   "lists"
+  ],
+  "verdict": "violated"
+ },
+ "r1-090": {
+  "residue": [
+   "kdf",
+   "kdfiterations",
+   "kdfmemory",
+   "kdfparallelism"
+  ],
+  "verdict": "violated"
+ },
+ "r1-091": {
+  "residue": [
+   "version"
+  ],
+  "verdict": "violated"
+ },
+ "r1-092": {
+  "verdict": "not_evaluated"
+ },
+ "r1-093": {
+  "residue": [
+   "sections"
+  ],
+  "verdict": "violated"
+ },
+ "r1-094": {
+  "verdict": "not_evaluated"
+ },
+ "r1-095": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-096": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-097": {
+  "residue": [
+   "data",
+   "statuscode",
+   "statustxt"
+  ],
+  "verdict": "violated"
+ },
+ "r1-098": {
+  "residue": [
+   "requestcount",
+   "requesterrorcount"
+  ],
+  "verdict": "violated"
+ },
+ "r1-099": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-100": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-101": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-102": {
+  "verdict": "not_evaluated"
+ },
+ "r1-103": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-104": {
+  "residue": [
+   "dev",
+   "lockfileversion"
+  ],
+  "verdict": "violated"
+ },
+ "r1-105": {
+  "verdict": "not_evaluated"
+ },
+ "r1-106": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-107": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-108": {
+  "residue": [
+   "keywords",
+   "recipecount",
+   "recipes",
+   "usercount"
+  ],
+  "verdict": "violated"
+ },
+ "r1-109": {
+  "residue": [
+   "xcord",
+   "ycord"
+  ],
+  "verdict": "violated"
+ },
+ "r1-110": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-111": {
+  "residue": [
+   "deviceassetid"
+  ],
+  "verdict": "violated"
+ },
+ "r1-112": {
+  "residue": [
+   "machines"
+  ],
+  "verdict": "violated"
+ },
+ "r1-113": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-114": {
+  "residue": [
+   "schema"
+  ],
+  "verdict": "violated"
+ },
+ "r1-115": {
+  "residue": [
+   "needchannelupdate"
+  ],
+  "verdict": "violated"
+ },
+ "r1-116": {
+  "residue": [
+   "temperature"
+  ],
+  "verdict": "violated"
+ },
+ "r1-117": {
+  "residue": [
+   "currentgrossperformancepercent"
+  ],
+  "verdict": "violated"
+ },
+ "r1-118": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-119": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-120": {
+  "residue": [],
+  "verdict": "holds"
+ },
+ "r1-121": {
+  "residue": [],
+  "verdict": "holds"
+ }
+}
