@@ -1046,6 +1046,8 @@ Log line on record: "using release
 v0.1.0-alpha.20 (x86_64-unknown-linux-musl), checksum and signature
 verified". Correction to the first draft of this entry: invar-pr.yml
 exists only on the smoke repo's invar-pr-test branch, not on main, so
-nothing stale remains on main. Open hardening item, flagged by the
-action itself: the smoke pin is a movable tag; ACTION-HARDENING.md says
-pin by full commit SHA.
+nothing stale remains on main. The action's own movable-tag warning was
+then resolved: smoke repinned by full commit SHA
+(104c15115145865fcd834946589fc22fab3e3849, tag v0.1.0-alpha.20 noted in
+a comment), run 38151630527 green in 12s. Nothing open in the smoke
+repo.
