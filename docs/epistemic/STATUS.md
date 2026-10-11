@@ -1021,3 +1021,14 @@ cases VIOLATED with every pin BLAKE3-verified; measured 1.1 / 6.1 / 0.4 ms
 per case. Reports, not promises. v0.1.0-alpha.20 CI green on 104c151 (run
 38131930249), tag pushed. Release-workflow confirmation still owed for
 alpha.19 and alpha.20, release views still owed for alpha.15 through 18.
+
+## 2026-10-11: release records closed, alpha.15 through alpha.20
+
+All six releases confirmed live (founder-pasted `gh release view`): each
+with aarch64-apple-darwin, x86_64-apple-darwin and
+x86_64-unknown-linux-musl tarballs plus .sha256 and SSH .sig. Release
+notes backfilled in docs/releases/. Nothing release-side remains open.
+Known failing elsewhere: invar-action-smoke pins the bare
+`v0.1.0-alpha` tag, which has no release assets, so its release-binary
+assert fails by design of the assert; fix is repinning the smoke
+workflow to a numbered tag (founder-side, one line).
