@@ -550,6 +550,68 @@ fn witness_md(w: &Witness, kind: &str) -> String {
     witness_text(w, kind, md_code)
 }
 
+/// The per-contract block `invar check` prints, as text, plus the status tag
+/// ("HOLDS" | "VIOLATED" | "SKIPPED" | "NOT_EVALUATED"). `invar demo` renders
+/// through this same function, so what the demo shows IS what check prints,
+/// by construction, not by imitation.
+pub fn outcome_lines(o: &ContractOutcome) -> (&'static str, String) {
+    use std::fmt::Write;
+    let mut s = String::new();
+    let tag = if let Some(why) = &o.skipped {
+        let _ = writeln!(s, "  [SKIPPED]  {} ({}): {why}", o.id, o.kind);
+        "SKIPPED"
+    } else if !o.violated() && !o.unevaluated.is_empty() {
+        let _ = writeln!(
+            s,
+            "  [NOT EVALUATED] {} ({}): {} site(s)",
+            o.id,
+            o.kind,
+            o.unevaluated.len()
+        );
+        for u in &o.unevaluated {
+            let _ = writeln!(s, "      {u}");
+        }
+        "NOT_EVALUATED"
+    } else if !o.violated() {
+        let _ = writeln!(s, "  [HOLDS]    {} ({})", o.id, o.kind);
+        "HOLDS"
+    } else {
+        let _ = writeln!(s, "  [VIOLATED] {} ({}): {:?}", o.id, o.kind, o.residue);
+        for (f, owner) in &o.expired {
+            let _ = writeln!(
+                s,
+                "      waiver EXPIRED: {f} (owner {owner}); renew or remove it in invar.lock"
+            );
+        }
+        for w in &o.witnesses {
+            let _ = writeln!(s, "      {}{}", w.residue, witness_text(w, &o.kind, |x| x.to_string()));
+        }
+        // Stated non-evaluation prints alongside a violation too: a verdict
+        // never swallows a blind spot.
+        for u in &o.unevaluated {
+            let _ = writeln!(s, "      {u}");
+        }
+        "VIOLATED"
+    };
+    for (f, owner, reason, left) in &o.waived {
+        let _ = writeln!(
+            s,
+            "      WAIVED {f} ({left} day(s) remaining, owner {owner}): {reason}"
+        );
+    }
+    for n in &o.notes {
+        let _ = writeln!(s, "      note: {n}");
+    }
+    for f in &o.provenance {
+        let _ = writeln!(
+            s,
+            "      fetched {} ({} bytes, blake3 {})",
+            f.reference, f.bytes, f.blake3_hex
+        );
+    }
+    (tag, s)
+}
+
 /// Markdown report for a PR comment or job summary. States plainly that a
 /// contract violation is not a PROVEN_RESIDUE verdict.
 pub fn render_report_md(outcomes: &[ContractOutcome]) -> String {

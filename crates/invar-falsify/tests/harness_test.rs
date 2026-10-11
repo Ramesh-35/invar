@@ -1704,3 +1704,124 @@ fn w2_map_key_abstraction_and_ancestor_dominance() {
     assert_eq!(residue[0].0, "dependencies");
     assert!(stated.is_empty(), "{stated:?}");
 }
+
+/// Test 40 (invar demo, docs/architecture/DEMO-ENGINE.md): the demo replays
+/// shipped cases offline through the stock path, verifies every pinned byte,
+/// treats VIOLATED as the demonstration, and refuses tampered bytes or a
+/// case that no longer violates (synthetic fixture; the shipped demo/ uses
+/// real corpus bytes).
+#[test]
+fn demo_replays_pinned_cases_and_fails_closed() {
+    use invar_falsify::demo::{run_demo, DEMO_CODA};
+    let root = temp_workspace("demo");
+    let base = r#"{"properties":{"kept":{"type":"integer"},"gone":{"type":"integer"}}}"#;
+    let head = r#"{"properties":{"kept":{"type":"integer"}}}"#;
+    let cons = "const v = data.gone;\n";
+    put(&root, "demo/t1/base.json", base);
+    put(&root, "demo/t1/head.json", head);
+    put(&root, "demo/t1/consumer.js", cons);
+    put(
+        &root,
+        "demo/t1/invar.toml",
+        "[[invariant]]\nkind = \"schema\"\nid = \"t1\"\nproducer = \"head.json\"\nproducer_base = \"base.json\"\nconsumer = \"consumer.js\"\n",
+    );
+    let b3 = |s: &str| blake3::hash(s.as_bytes()).to_hex().to_string();
+    let manifest = format!(
+        "[[case]]\nid = \"t1\"\ndir = \"t1\"\ntitle = \"synthetic removal\"\nstory = \"a synthetic fixture for the demo mechanics\"\nsource = \"https://example.invalid/t1\"\nfile = \"base.json ref:base {}\"\nfile = \"head.json ref:head {}\"\nfile = \"consumer.js ref:consumer {}\"\n",
+        b3(base),
+        b3(head),
+        b3(cons)
+    );
+    put(&root, "demo/demo.toml", &manifest);
+
+    // Runs from the repo root AND from a subdirectory (upward search).
+    let mut out = String::new();
+    assert_eq!(run_demo(&root, &mut out).unwrap(), 0);
+    assert!(out.contains("[VIOLATED] t1 (schema): [\"gone\"]"), "{out}");
+    assert!(out.contains("blake3 verified"), "{out}");
+    assert!(out.contains("measured:"), "{out}");
+    assert!(out.contains(DEMO_CODA), "{out}");
+    std::fs::create_dir_all(root.join("sub/dir")).unwrap();
+    let mut out2 = String::new();
+    assert_eq!(run_demo(&root.join("sub/dir"), &mut out2).unwrap(), 0);
+
+    // Tampered bytes: an error naming the mismatch, never a quiet verdict.
+    put(&root, "demo/t1/head.json", r#"{"properties":{"kept":{"type":"integer"},"x":{"type":"integer"}}}"#);
+    let mut out3 = String::new();
+    let err = run_demo(&root, &mut out3).unwrap_err().to_string();
+    assert!(err.contains("does not match its pinned BLAKE3"), "{err}");
+
+    // A case that holds is a broken demo (packaging error), stated plainly.
+    let holds = r#"{"properties":{"kept":{"type":"integer"},"gone":{"type":"integer"}}}"#;
+    put(&root, "demo/t1/head.json", holds);
+    let manifest2 = manifest.replace(&b3(head), &b3(holds));
+    put(&root, "demo/demo.toml", &manifest2);
+    let mut out4 = String::new();
+    let err2 = run_demo(&root, &mut out4).unwrap_err().to_string();
+    assert!(err2.contains("expected VIOLATED"), "{err2}");
+
+    // No demo/ anywhere: an honest error, not a crash.
+    let empty = temp_workspace("demo_none");
+    let nested = empty.join("deep");
+    std::fs::create_dir_all(&nested).unwrap();
+    let mut out5 = String::new();
+    let err3 = run_demo(&nested, &mut out5);
+    // Walking up from a temp dir can only find a demo/ if one exists above
+    // the temp root, which it does not in this suite's environment.
+    assert!(err3.is_err(), "expected demo.toml-not-found to be an error");
+}
+
+/// Test 41 (invar coverage): per-contract disclosure of what is evaluated,
+/// what is stated instead, and what never is; with and without witnesses;
+/// text and json; exit 0 on success and never a verdict exit.
+#[test]
+fn coverage_disclosure_text_and_json() {
+    use invar_falsify::demo::run_coverage;
+    let root = temp_workspace("coverage");
+    put(
+        &root,
+        "invar.toml",
+        "[[invariant]]\nkind = \"schema\"\nid = \"c1\"\nproducer = \"p.json\"\nconsumer = \"c.js\"\n[[invariant]]\nkind = \"schema\"\nid = \"c2\"\nproducer = \"api.cs\"\nconsumer = \"c.js\"\n",
+    );
+    let cfg = root.join("invar.toml").display().to_string();
+    let rec = "MEASURED-RECORD-SENTINEL";
+
+    // No lock: the observed-reality blind spot is stated per contract, and
+    // the unsupported language is disclosed as the skip it would be.
+    let mut out = String::new();
+    assert_eq!(run_coverage(&cfg, None, "text", rec, &mut out).unwrap(), 0);
+    assert!(out.contains("INVAR coverage"), "{out}");
+    assert!(out.contains("runtime payload drift is NOT evaluated"), "{out}");
+    assert!(
+        out.contains("[not-evaluated:unsupported-language]") && out.contains("C#: api.cs"),
+        "{out}"
+    );
+    assert!(out.contains("never evaluated: field values and semantics"), "{out}");
+    assert!(out.ends_with(&format!("measured: {rec}\n")), "{out}");
+
+    // With witnesses: counts, window, wildcards, thresholds, staleness.
+    put(
+        &root,
+        "invar.lock",
+        "[lock]\nformat = \"3\"\n\n[[sample]]\ncontract = \"c1\"\nblake3 = \"00\"\ntaken = \"2026-10-10\"\nwindow_start = \"2026-10-08\"\nobservations = \"3\"\nfield = \"items[].id string 3/0/0\"\nfield = \"items[].* string 3/0/0\"\n",
+    );
+    let mut out2 = String::new();
+    assert_eq!(run_coverage(&cfg, Some("c1"), "text", rec, &mut out2).unwrap(), 0);
+    assert!(out2.contains("3 observation(s), window 2026-10-08..2026-10-10"), "{out2}");
+    assert!(out2.contains("2 path witness(es) (1 wildcarded)"), "{out2}");
+    assert!(out2.contains("[not-evaluated:optional-field-absent]"), "{out2}");
+    assert!(!out2.contains("c2 ("), "--contract filters: {out2}");
+
+    // JSON is machine-readable and carries the same facts.
+    let mut out3 = String::new();
+    assert_eq!(run_coverage(&cfg, None, "json", rec, &mut out3).unwrap(), 0);
+    let v: serde_json::Value = serde_json::from_str(&out3).unwrap();
+    assert_eq!(v["contracts"].as_array().unwrap().len(), 2);
+    assert_eq!(v["measured"], rec);
+
+    // Unknown contract or format: errors, never verdicts.
+    let mut out4 = String::new();
+    assert!(run_coverage(&cfg, Some("nope"), "text", rec, &mut out4).is_err());
+    let mut out5 = String::new();
+    assert!(run_coverage(&cfg, None, "xml", rec, &mut out5).is_err());
+}

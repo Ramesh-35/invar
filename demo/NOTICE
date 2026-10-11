@@ -1,0 +1,25 @@
+# demo/ third-party notices
+
+The files under demo/ are unmodified source files from open-source
+repositories, shipped verbatim so `invar demo` can replay real
+cross-repository breaks offline. Each file is pinned to the exact commit the
+INVAR corpus of record pins (see demo.toml for the reference and BLAKE3 of
+every file), remains under its original license, and is used here as data
+the engine reads, not as code INVAR links or executes.
+
+- goauthentik/authentik (MIT; files outside website/ and
+  authentik/enterprise/ are MIT per the repository LICENSE):
+  r1-109/base-metrics.py, r1-109/head-events.py
+- gethomepage/homepage (GPL-3.0):
+  r1-109/consumer-component.jsx, r1-117/consumer-component.jsx
+- juanfont/headscale (BSD-3-Clause):
+  r1-112/base-machine.pb.go, r1-112/head-node.pb.go
+- gurucomputing/headscale-ui (BSD-3-Clause):
+  r1-112/consumer-apiFunctions.svelte
+- ghostfolio/ghostfolio (AGPL-3.0):
+  r1-117/base-portfolio-performance.interface.ts,
+  r1-117/head-portfolio-performance.interface.ts
+
+Complete license texts are available in each upstream repository at the
+pinned commits. These files are test data for a demonstration; shipping
+them grants no rights beyond their own licenses.

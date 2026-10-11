@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-109"
+producer = "head-events.py"
+producer_base = "base-metrics.py"
+consumer = "consumer-component.jsx"

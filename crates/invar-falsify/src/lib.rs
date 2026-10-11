@@ -16,6 +16,7 @@
 //!     and re-verifies its BLAKE3 chain by recomputation, not by a stored flag.
 
 pub mod check;
+pub mod demo;
 pub mod dependents;
 pub mod config;
 pub mod evaluator;

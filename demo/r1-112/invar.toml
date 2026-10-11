@@ -1,0 +1,6 @@
+[[invariant]]
+kind = "schema"
+id = "r1-112"
+producer = "head-node.pb.go"
+producer_base = "base-machine.pb.go"
+consumer = "consumer-apiFunctions.svelte"

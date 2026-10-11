@@ -16,7 +16,7 @@ use std::time::Duration;
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 
-use invar_falsify::check::{evaluate_with, render_report_md, witness_text};
+use invar_falsify::check::{evaluate_with, render_report_md};
 use invar_falsify::lock;
 use invar_falsify::receipt;
 use invar_falsify::evaluator::{evaluate_case, CaseResult};
@@ -47,6 +47,12 @@ enum Command {
     Init(InitArgs),
     /// Who depends on a producer field, from local invar.lock files.
     Dependents(DependentsArgs),
+    /// Replay real caught breaks from bytes pinned in demo/, fully offline.
+    /// The VIOLATED verdicts shown are the demonstration, not a failure.
+    Demo,
+    /// What INVAR evaluates per contract, and what it states instead
+    /// (disclosure, never a verdict).
+    Coverage(CoverageArgs),
     /// Re-run an evidence receipt and confirm it reproduces byte for byte.
     VerifyReceipt(VerifyReceiptArgs),
     /// Receipt views: `receipt export --in-toto` (format 1 stays canonical).
@@ -155,6 +161,18 @@ struct DependentsArgs {
     /// Only contracts whose producer ref contains this substring.
     #[arg(long)]
     producer: Option<String>,
+    /// "text" (default) or "json" (canonical, deterministic).
+    #[arg(long, default_value = "text")]
+    format: String,
+}
+
+#[derive(Parser)]
+struct CoverageArgs {
+    #[arg(long, default_value = "invar.toml")]
+    config: String,
+    /// Only this contract id.
+    #[arg(long)]
+    contract: Option<String>,
     /// "text" (default) or "json" (canonical, deterministic).
     #[arg(long, default_value = "text")]
     format: String,
@@ -292,6 +310,8 @@ fn main() {
         Command::VerifyReceipt(a) => dispatch_r2(cmd_verify_receipt(a)),
         Command::Receipt(a) => dispatch_r2(cmd_receipt(a)),
         Command::Dependents(a) => dispatch_r2(cmd_dependents(a)),
+        Command::Demo => dispatch_r2(cmd_demo()),
+        Command::Coverage(a) => dispatch_r2(cmd_coverage(a)),
         Command::Init(a) => dispatch(cmd_init(a)),
         Command::Audit(a) => dispatch(cmd_audit(a)),
         Command::Replay(a) => dispatch(cmd_replay(a)),
@@ -657,51 +677,15 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
     let mut skipped = 0usize;
     let mut summaries: Vec<String> = Vec::new();
     for o in &outcomes {
-        if let Some(why) = &o.skipped {
-            skipped += 1;
-            println!("  [SKIPPED]  {} ({}): {why}", o.id, o.kind);
-            summaries.push(format!("{}:{}=SKIPPED", o.id, o.kind));
-        } else if !o.violated() && !o.unevaluated.is_empty() {
-            skipped += 1;
-            println!("  [NOT EVALUATED] {} ({}): {} site(s)", o.id, o.kind, o.unevaluated.len());
-            for u in &o.unevaluated {
-                println!("      {u}");
-            }
-            summaries.push(format!("{}:{}=NOT_EVALUATED", o.id, o.kind));
-        } else if !o.violated() {
-            println!("  [HOLDS]    {} ({})", o.id, o.kind);
-            summaries.push(format!("{}:{}=HOLDS", o.id, o.kind));
-        } else {
-            violations += 1;
-            println!("  [VIOLATED] {} ({}): {:?}", o.id, o.kind, o.residue);
-            for (f, owner) in &o.expired {
-                println!("      waiver EXPIRED: {f} (owner {owner}); renew or remove it in invar.lock");
-            }
-            for w in &o.witnesses {
-                println!(
-                    "      {}{}",
-                    w.residue,
-                    witness_text(w, &o.kind, |x| x.to_string())
-                );
-            }
-            // Stated non-evaluation prints alongside a violation too: a
-            // verdict never swallows a blind spot.
-            for u in &o.unevaluated {
-                println!("      {u}");
-            }
-            summaries.push(format!("{}:{}=VIOLATED", o.id, o.kind));
+        let (tag, text) = invar_falsify::check::outcome_lines(o);
+        print!("{text}");
+        match tag {
+            "VIOLATED" => violations += 1,
+            "SKIPPED" | "NOT_EVALUATED" => skipped += 1,
+            _ => {}
         }
-        for (f, owner, reason, left) in &o.waived {
-            println!("      WAIVED {f} ({left} day(s) remaining, owner {owner}): {reason}");
-        }
-        for n in &o.notes {
-            println!("      note: {n}");
-        }
+        summaries.push(format!("{}:{}={tag}", o.id, o.kind));
         for f in &o.provenance {
-            println!(
-                "      fetched {} ({} bytes, blake3 {})",
-                f.reference, f.bytes, f.blake3_hex
-            );
             summaries.push(format!("fetched {} blake3={}", f.reference, f.blake3_hex));
         }
     }
@@ -1325,6 +1309,29 @@ fn cmd_receipt(args: ReceiptArgs) -> Result<i32> {
 
 /// A4 blast radius: zero network, zero verdict. Exit 0 with the answer
 /// (an empty answer included); errors exit 3.
+/// `invar demo`: replay the shipped real breaks, offline, stock engine path.
+fn cmd_demo() -> Result<i32> {
+    let cwd = std::env::current_dir().context("getting the current directory")?;
+    let mut out = String::new();
+    let code = invar_falsify::demo::run_demo(&cwd, &mut out)?;
+    print!("{out}");
+    Ok(code)
+}
+
+/// `invar coverage`: per-contract evaluation disclosure, never a verdict.
+fn cmd_coverage(args: CoverageArgs) -> Result<i32> {
+    let mut out = String::new();
+    let code = invar_falsify::demo::run_coverage(
+        &args.config,
+        args.contract.as_deref(),
+        &args.format,
+        MEASURED_RECORD,
+        &mut out,
+    )?;
+    print!("{out}");
+    Ok(code)
+}
+
 fn cmd_dependents(args: DependentsArgs) -> Result<i32> {
     use invar_falsify::dependents;
     let a = dependents::find(

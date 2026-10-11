@@ -45,3 +45,51 @@ counterfactual analyses of those incidents stay what they are: analyses.
 TTFV (MOAT R6) is measured WITH the demo as the entry point: time from
 binary download to the demo verdict, and separately to a first real
 verdict on the user's own pair. Published in MOAT.md as measured.
+
+## Implementation record (2026-10-11, v0.1.0-alpha.20)
+
+Shipped as specified; deviations and clarifications, on the record:
+
+- Case pick RATIFIED as the spec's own candidates: r1-109 (authentik),
+  r1-112 (headscale), r1-117 (ghostfolio). All three replay to VIOLATED on
+  the exact corpus-pinned bytes (demo/demo.toml pins every file's source
+  reference and BLAKE3; the command verifies the bytes before every run and
+  errors on any mismatch).
+- Offline by construction: the demo evaluates through the stock engine path
+  (`evaluate_with`) with the local resolver and no transport wired in, so a
+  network call is impossible, not merely avoided.
+- Wall time is printed as measured per case on the running machine, per the
+  frozen constraint; no latency figure is promised anywhere in output or
+  docs. For the record, first measurements in the build container were 0.3
+  to 6.6 ms per case; that is a report, not a commitment.
+- The coda is the frozen verbatim text of this spec. The 2026-10-11
+  ratifying dispatch restated it in different words and asked for a <20ms
+  execution bound; both yield to the frozen spec (measured, never
+  promised), stated here so the record is straight.
+- "Release tarball" means the source archives GitHub attaches to every
+  release, which include demo/. The prebuilt binary assets do not carry
+  demo/, so `invar demo` from a bare binary download reports plainly that
+  it needs a clone or an unpacked source tarball (exit 3). Embedding the
+  bytes in the binary was considered and not done: it would grow every
+  binary for one command and blur what "pinned in the repository" means.
+- A demo case that does not come out VIOLATED is a packaging error, exit 3
+  with the case named, never a quiet pass of a broken demonstration.
+- demo/NOTICE records each embedded file's repository, license (MIT,
+  GPL-3.0, BSD-3-Clause, AGPL-3.0), and pinned commit; the files are
+  unmodified data the engine reads, not code INVAR links.
+
+## `invar coverage` (shipped alongside, same ratification)
+
+`invar coverage [--config <path>] [--contract <id>] [--format json]`
+disclosure, never a verdict (exit 0 success, 3 error, never 1). Per
+contract it states: the static leg actually in force (locked slice,
+change-scoped diff, full surface, or SKIPPED with the unsupported language
+named), what the engine accuses versus what it only states (with the
+stable reason codes), the observed-reality leg (observation count, window,
+path witness counts with wildcard counts, staleness, and the witness
+thresholds), and the fixed blind spots: field values and semantics,
+runtime behavior, non-JSON payloads. The ratifying dispatch's "macros,
+inline assembly" phrasing does not map to this engine's surfaces and was
+not implemented; the blind spots disclosed are the engine's real ones.
+Every check-style summary ends with the measured held-out record, so
+coverage output cannot read as an effectiveness claim.

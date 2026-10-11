@@ -13,6 +13,8 @@ summary line and in exit 4.
 | [not-evaluated:field-moved] | A field moved between producer types; the consumer's use is stated, not evaluated (A1 rule 2). |
 | [not-evaluated:default-switch] | A default version or format selector changed at the producer; which output path the consumer gets cannot be told from text (F1). |
 | [not-evaluated:stale-sample] | The contract's observed sample is older than 90 days; refresh with `invar lock --sample`. |
+| [not-evaluated:optional-field-absent] | A locked sample path is absent from the fresh payload, but some observation also lacked it: the field is known optional; stated, never a violation (MULTI-SAMPLE-WITNESSES.md). |
+| [not-evaluated:witness-count-low] | A locked sample path is absent or retyped but was observed fewer than 3 times: too few witnesses to accuse; stated. |
 
 Exit 4 notes (research A3/A4, adopted as documentation): exit 4 is non-zero,
 so a plain `invar check` step fails a CI job by default; the GitHub Action's

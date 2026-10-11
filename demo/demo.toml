@@ -1,0 +1,35 @@
+# INVAR demo manifest (docs/architecture/DEMO-ENGINE.md).
+# Each case replays a REAL cross-repository break from the corpus of record,
+# on the exact bytes the corpus pins (verified against BLAKE3 before every
+# run). The engine path is the stock `invar check` path; nothing is staged.
+# file = "<name in dir> <original pinned reference> <blake3>"
+
+[[case]]
+id = "r1-109"
+dir = "r1-109"
+title = "authentik removed the coordinate fields a dashboard summed"
+story = "authentik v2025.8.0 removed the x_cord/y_cord fields from its events API (metrics.py deleted; EventVolumeSerializer took over without them); the homepage dashboard widget summing them broke, fixed after the fact in homepage PR #5687 (2025-08-20)."
+source = "https://github.com/gethomepage/homepage/pull/5687"
+file = "base-metrics.py github:goauthentik/authentik@856ac052e75a35273facd5c1e56dbe2afdaaef56:authentik/admin/api/metrics.py ec441b86eda08920687afa22da5c3647b671a2ef7fd79be4be0c8babcd69967f"
+file = "head-events.py github:goauthentik/authentik@734db4dee650e6cbc8c0a5a2a3c3843f162e1559:authentik/events/api/events.py a4f34e99888b446ba8b6030fe1577817ca7759bb6dbb9c157a31b0933f587926"
+file = "consumer-component.jsx github:gethomepage/homepage@6d7be1c7f219115d4fdb4a75a5abdb1fe37a76fb:src/widgets/authentik/component.jsx a90b979f1dc973b21064b60bdf03acfb1e9bf6ae69a84b040b4329706f3b9293"
+
+[[case]]
+id = "r1-112"
+dir = "r1-112"
+title = "headscale renamed machines to nodes under a third-party UI"
+story = "headscale 0.23 renamed Machine to Node across its API (headscale #1553, 2023-09-24), so the machines list key became nodes; headscale-ui read data.machines and later shipped a workaround that probes both forms at runtime (headscale-ui #132, 2024-02-24)."
+source = "https://github.com/gurucomputing/headscale-ui/commit/eead9859f90e217420822f6c61f78cb5a73f7dfe"
+file = "base-machine.pb.go github:juanfont/headscale@096ac31bb3c9e6aa041975ce1695f364db22509d:gen/go/headscale/v1/machine.pb.go 3f957d81cc5c4645a53b4c0df25a0e902daad4734d524e4e27dfdd10fbf46022"
+file = "head-node.pb.go github:juanfont/headscale@0030af3fa432082f20519fa58e9e29870f605e3f:gen/go/headscale/v1/node.pb.go 26d729caab726f5eff00290a330b995027773757a2496a70064c1daacfe0eed5"
+file = "consumer-apiFunctions.svelte github:gurucomputing/headscale-ui@a9db179089e3ae2b417fb657a2d3da68a54b1f2d:src/lib/common/apiFunctions.svelte 691993d86b3ba7ddb45db378d5345df6638ebbc58a15a99b322c53a55dd759b7"
+
+[[case]]
+id = "r1-117"
+dir = "r1-117"
+title = "ghostfolio removed the performance field a widget displayed"
+story = "Ghostfolio 2.79.0 removed currentGrossPerformancePercent and sibling fields from PortfolioPerformance (f2cb671c, 2024-05-04); the homepage ghostfolio widget read it and broke, fixed after the fact in homepage (2024-05-16)."
+source = "https://github.com/gethomepage/homepage/pull/3471"
+file = "base-portfolio-performance.interface.ts github:ghostfolio/ghostfolio@3f41e5c5def7330ec49c908955d4efa1bd66b062:libs/common/src/lib/interfaces/portfolio-performance.interface.ts 4d3f48baeacfa1d8e5bce1e19f9969ca37c339366392f60b91aee0b5af079130"
+file = "head-portfolio-performance.interface.ts github:ghostfolio/ghostfolio@f2cb671c7f577da99cdccc07be2b720895d6aa3e:libs/common/src/lib/interfaces/portfolio-performance.interface.ts e754f1987320c028f2f88e7cb939a0fe2e5c3d8f67d835523220ab3499c2f267"
+file = "consumer-component.jsx github:gethomepage/homepage@d20ab844d6ec84062b22f6b5b7d339ce32789349:src/widgets/ghostfolio/component.jsx 9bf763753f77331c5b2a3c41caf9cede020ac3e83710ea05b484457ca1fe141d"

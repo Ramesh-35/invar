@@ -992,3 +992,24 @@ Conflicts, recorded:
 - Unchanged and restated: this is mechanism validation on reconstructed
   payloads, not an effectiveness claim. Held-out record stands 38 of 70.
 - Engine delta confined to lock.rs plus tests; 39 of 39 tests green.
+
+## 2026-10-11: invar demo and invar coverage land (v0.1.0-alpha.20)
+
+- `invar demo`: replays r1-109, r1-112, r1-117 offline from bytes pinned in
+  demo/ (BLAKE3-verified on every run), through the stock engine path, with
+  wall time printed as measured and the frozen honest coda. VIOLATED is the
+  demonstration; anything else is a packaging error, exit 3. First
+  container measurements: 0.3 to 6.6 ms per case (a report, not a promise;
+  the dispatch's <20ms bound was not encoded, per the frozen spec).
+- `invar coverage`: per-contract disclosure of the static leg in force,
+  what is accused vs stated (stable reason codes), observed-reality witness
+  counts and thresholds, and the fixed blind spots; text and json; never a
+  verdict. Implementation record appended to DEMO-ENGINE.md.
+- Doc gap closed: REASON-CODES.md was missing the two codes alpha.18
+  shipped ([not-evaluated:optional-field-absent],
+  [not-evaluated:witness-count-low]); rows appended (append-only held).
+- check output rendering factored into `outcome_lines`, shared by check and
+  demo, and verified byte-identical against the pre-refactor output.
+- 41 of 41 tests green. Held-out record unchanged: 38 of 70.
+- Open from the release side: alpha.19 release-workflow view and the
+  alpha.15 through alpha.18 release views remain unpasted.
