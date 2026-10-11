@@ -1,3 +1,5 @@
+> **HISTORICAL ARCHIVE:** This document records early Phase 0/1 architectural research and is superseded by `README.md`, `docs/reference/INVAR-LOCK.md`, and `docs/epistemic/STATUS.md`.
+
 # INVAR Developer Journey
 
 The commission's definition of success: a developer who has never spoken to the

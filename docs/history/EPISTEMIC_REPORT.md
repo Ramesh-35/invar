@@ -1,3 +1,5 @@
+> **HISTORICAL ARCHIVE:** This document records early Phase 0/1 architectural research and is superseded by `README.md`, `docs/reference/INVAR-LOCK.md`, and `docs/epistemic/STATUS.md`.
+
 # EPISTEMIC REPORT (template)
 
 This root file documents the **shape** of the epistemic report. The real report

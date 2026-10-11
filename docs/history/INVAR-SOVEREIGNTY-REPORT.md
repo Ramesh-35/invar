@@ -1,3 +1,5 @@
+> **HISTORICAL ARCHIVE:** This document records early Phase 0/1 architectural research and is superseded by `README.md`, `docs/reference/INVAR-LOCK.md`, and `docs/epistemic/STATUS.md`.
+
 # INVAR Sovereignty Report
 
 Phase 0 of the INVAR commission. Read-only audit of the authoritative repository,
@@ -12,11 +14,11 @@ REAL-DATA-VALIDATED, INDEPENDENTLY-VALIDATED, REALITY-PROVEN. Bare "PROVEN" is
 reserved for REAL evidence and is never a synthetic status.
 
 ## A. Repository identity
-- Path: `/Users/nikhilramesh/Documents/Projects/invar-platform` (authoritative).
+- Path: this repository (authoritative).
 - Branch: `master`. HEAD: `fdf6551adc63adf4e8619eaca11bce2d53ca7e89`.
 - Commits: 1 (`chore: establish independent INVAR platform repository`).
 - Remotes: none. Never pushed. Working tree: clean.
-- Distinct from NEXTLOGIC (`~/Documents/Projects/nextlogic`) and from the staging
+- Distinct from the founder's separate enterprise platform and from the staging
   folder (`~/Documents/PROJECT INVAR`). No nesting, no shared path.
 
 ## B. Existing implementation
@@ -62,7 +64,7 @@ adjudication artifact, not on disk here):
 - HKDF key isolation. SPECIFIED (no formal definition; not ZK).
 - Statistical code-metric change-point. UNVERIFIED / BLOCKED (no CBR-001 transfer).
 
-Gap: the NEXTLOGIC six-primitive Mathematical-Adequacy framework (Epistemic
+Gap: the founder's six-primitive Mathematical-Adequacy framework (Epistemic
 Standing, Provenance Independence, Temporal Admissibility, Reality Boundary,
 Weakest-link Composition, Conservation-with-residual) is named by the commission
 as a permanent gate but is NOT instantiated as INVAR's own documented constitution

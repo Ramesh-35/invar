@@ -17,11 +17,11 @@ invar-falsify
 └── main.rs       clap CLI: run | validate | report | verify
 ```
 
-## The NEXTLOGIC integration boundary
+## The external-platform integration boundary
 
-**There is no runtime coupling between INVAR and NEXTLOGIC.** INVAR reads only
-its own corpus and configuration. It does not import NEXTLOGIC source, call
-NEXTLOGIC services, or share a database. A future consumer interface, if any,
+**There is no runtime coupling between INVAR and any other platform.** INVAR reads only
+its own corpus and configuration. It does not import another platform's source, call
+its services, or share a database. A future consumer interface, if any,
 will be explicit and versioned (DR-001). This boundary is an architectural
 invariant, not an aspiration.
 

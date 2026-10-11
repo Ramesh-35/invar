@@ -6,7 +6,7 @@ adequacy primitives. First issued at commit `af1b1b6` (code at Gate 0
 `2164ac4`); rows C and F updated at commit `6c68af1`, row B at commit
 `0fc1d9a`, row E at commit `71290d6`; the GAP-D admission gate at commit
 `ef60dc6` (source fingerprint `dc900e7`); B, C, E, F closed on synthetic data and
-the D gate added (D still PARTIAL), 16/16 acceptance tests. It imports no NEXTLOGIC or VEM vocabulary: every
+the D gate added (D still PARTIAL), 16/16 acceptance tests. It imports no external-platform vocabulary: every
 primitive is stated generically, over any system that presents an invariant.
 
 Method: for each primitive the constitution requirement is matched against the

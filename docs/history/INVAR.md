@@ -1,3 +1,5 @@
+> **HISTORICAL ARCHIVE:** This document records early Phase 0/1 architectural research and is superseded by `README.md`, `docs/reference/INVAR-LOCK.md`, and `docs/epistemic/STATUS.md`.
+
 # INVAR Platform — Root Execution Blueprint
 
 > **Authoritative document.** Every forward-looking claim below carries an
@@ -48,13 +50,13 @@ semantic invariants it depends on are described in
 
 ## C. Repository boundaries
 
-- INVAR lives **only** at `/Users/nikhilramesh/Documents/Projects/invar-platform`.
-- **INVAR is not NEXTLOGIC.** NEXTLOGIC
-  (`/Users/nikhilramesh/Documents/Projects/nextlogic`) is a separate enterprise
+- INVAR lives **only** in this repository.
+- **INVAR is independent.** The founder's other platform
+  is a separate, unrelated enterprise
   decision-intelligence platform with its own source, history, and lifecycle.
-- INVAR does not import NEXTLOGIC source, history, or documents. See DR-001,
+- INVAR does not import that platform's source, history, or documents. See DR-001,
   DR-002.
-- `[TARGET]` NEXTLOGIC may one day *consume* INVAR through an explicit,
+- `[TARGET]` that platform may one day *consume* INVAR through an explicit,
   versioned interface. There is **no runtime coupling today** (DR-001).
 
 ## D. Falsification-first engineering strategy
@@ -127,7 +129,7 @@ non-synthetic evidence and is never a synthetic status.)
 
 ## J. Integration boundaries
 
-- **Runtime:** none between INVAR and NEXTLOGIC today (DR-001).
+- **Runtime:** none between INVAR and any other platform today (DR-001).
 - **Data:** INVAR reads only its own corpus and configuration.
 - `[TARGET]` A future, explicit INVAR→consumer interface will be versioned and
   documented before any coupling is introduced.
