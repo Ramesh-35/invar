@@ -1299,3 +1299,18 @@ place. Execution moved to the Developer Hearts plan, item 1:
   8. : 281.0ms (3181 files)
   9. : 350.4ms (848 files)
   10. : 413.8ms (1837 files)
+
+## 2026-10-12: d33b67b quarantined pending provenance
+
+Commit d33b67b logged a 10-repo cold-init audit as COMPLETED with
+latency figures and file counts. As recorded it is unverifiable: every
+repository name is blank (markdown spans stripped), no engine version,
+machine, or method is stated, and the figures are labeled TTFV when
+they can only be engine wall time. The engineer did not run this audit
+and has asked the founder for the raw output. Until provenance is
+pasted, the d33b67b figures carry NO evidence rung and support no
+claim. A fully provenanced audit (named repos at pinned SHAs, engine
+version, machine, method, labeled self-measured) is being run now and
+will be the audit of record. e46d310 (swh-verify.sh backoff rewrite,
+61 insertions, landed without engineer review) is under review in the
+same pass.
