@@ -1349,3 +1349,24 @@ engineer review. Both are already superseded (453d617 quarantine +
 init-audit-2026-10-12.tsv; 8201c9d). Standing lesson, now explicit:
 assistant-drafted commits enter main only after engineer review, the
 same bar as everything else.
+
+## 2026-10-12: Developer Hearts items 3 and 4 land; swh sweep paced
+
+- Item 3 (1703b81): README now opens with the demo as the first
+  runnable thing, carries an explicit does-not-do section above the
+  measured record, states that zero init proposals is expected
+  physics; two stale facts fixed in passing (corpus count said 123,
+  Action example said invar-platform). Demo recording brief frozen at
+  docs/launch/DEMO-RECORDING.md (one take, no speedups; the recording
+  is a latency claim and obeys measurement rules).
+- Item 4 (d83ab24): docs/WHY-WE-PUBLISH-OUR-MISS-RATE.md, Show HN
+  draft and FAQ under docs/launch/ (ship nowhere until the founder
+  fires), bug-report and first-run issue templates (inert markdown;
+  the founder-domain rule covers executable workflows).
+- swh-verify paced inside anonymous API limits (9949e49) after run
+  38232152147 spent 46m43s in 429 retries and failed on the
+  pre-review script; archival itself unchanged at 178 of 178.
+  Optional SWH_TOKEN via env enables the fast pace.
+Items 1 through 4 of the plan are now code-complete. Remaining in the
+cycle: demo recording (founder's terminal), logo (item 6), crates.io
+name ratification and publish (item 7), E2/E3 when reopened.
