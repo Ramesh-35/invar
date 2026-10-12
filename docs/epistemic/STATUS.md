@@ -1398,3 +1398,14 @@ Still owed before any promotion to residue: the false-accusation probe
 over clean producer changes. 45 of 45 green; lock format 4 documented
 in INVAR-LOCK.md; [not-evaluated:value-switch] appended to
 REASON-CODES.md.
+
+## 2026-10-12: Homebrew formula staged (pinned alpha.21, hashes re-measured)
+
+packaging/homebrew/invar.rb pins the latest PUBLISHED release
+(alpha.21); the three asset hashes were re-downloaded and measured
+today, not copied from the release page, and they matched it. The
+founder copies the file into Ramesh-35/homebrew-tap when he creates
+it, and the formula gets regenerated per release. Note: the
+completions subcommand ships in alpha.22+, so
+generate_completions_from_executable activates on the next release
+bump of the formula.
