@@ -34,7 +34,7 @@ use invar_falsify::resolver::{CurlTransport, Resolver, Transport};
 )]
 struct Cli {
     #[command(subcommand)]
-    command: Command,
+    command: Option<Command>,
 }
 
 #[derive(Subcommand)]
@@ -53,6 +53,8 @@ enum Command {
     /// What INVAR evaluates per contract, and what it states instead
     /// (disclosure, never a verdict).
     Coverage(CoverageArgs),
+    /// Print a shell completion script (bash | zsh | fish).
+    Completions(CompletionsArgs),
     /// Re-run an evidence receipt and confirm it reproduces byte for byte.
     VerifyReceipt(VerifyReceiptArgs),
     /// Receipt views: `receipt export --in-toto` (format 1 stays canonical).
@@ -164,6 +166,12 @@ struct DependentsArgs {
     /// "text" (default) or "json" (canonical, deterministic).
     #[arg(long, default_value = "text")]
     format: String,
+}
+
+#[derive(Parser)]
+struct CompletionsArgs {
+    /// Which shell: "bash", "zsh" or "fish".
+    shell: String,
 }
 
 #[derive(Parser)]
@@ -298,7 +306,15 @@ struct ReplayArgs {
 
 fn main() {
     let cli = Cli::parse();
-    let code = match cli.command {
+    let Some(command) = cli.command else {
+        // A bare `invar` renders orientation, never a verdict: no contract
+        // was evaluated, so none of the frozen verdict exits apply, and the
+        // orientation itself cannot fail. clap's own bare-invocation exit
+        // of 2 would collide with "ledger break" in the frozen map.
+        print!("{}", ORIENTATION);
+        std::process::exit(0);
+    };
+    let code = match command {
         Command::Run(a) => dispatch(cmd_run(a)),
         Command::Validate(a) => dispatch(cmd_validate(a)),
         Command::Report(a) => dispatch(cmd_report(a)),
@@ -312,6 +328,7 @@ fn main() {
         Command::Dependents(a) => dispatch_r2(cmd_dependents(a)),
         Command::Demo => dispatch_r2(cmd_demo()),
         Command::Coverage(a) => dispatch_r2(cmd_coverage(a)),
+        Command::Completions(a) => dispatch_r2(cmd_completions(a)),
         Command::Init(a) => dispatch(cmd_init(a)),
         Command::Audit(a) => dispatch(cmd_audit(a)),
         Command::Replay(a) => dispatch(cmd_replay(a)),
@@ -532,6 +549,13 @@ const MEASURED_RECORD: &str =
 fn cmd_check(args: CheckArgs) -> Result<i32> {
     let raw = match std::fs::read_to_string(&args.config) {
         Ok(r) => r,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+            eprintln!(
+                "ERROR (not a verdict): {} not found; run `invar init` to propose one from this repository, or point at one with --config",
+                args.config
+            );
+            return Ok(3);
+        }
         Err(e) => {
             eprintln!("ERROR (not a verdict): reading {}: {e}", args.config);
             return Ok(3);
@@ -643,7 +667,7 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
         };
         for (cid, residue, stated) in findings {
             let Some(o) = outcomes.iter_mut().find(|o| o.id == cid) else {
-                eprintln!("ERROR (not a verdict): locked sample names contract {cid:?}, which invar.toml does not define");
+                eprintln!("ERROR (not a verdict): locked sample names contract {cid:?}, which invar.toml does not define; if the contract was renamed or removed, re-record its sample with `invar lock --sample --contract <id>`");
                 return Ok(3);
             };
             for (field, detail) in residue {
@@ -1309,6 +1333,26 @@ fn cmd_receipt(args: ReceiptArgs) -> Result<i32> {
 
 /// A4 blast radius: zero network, zero verdict. Exit 0 with the answer
 /// (an empty answer included); errors exit 3.
+/// What a bare `invar` prints: the three commands that matter, one line
+/// each, and where everything else lives. Nothing more.
+const ORIENTATION: &str = "invar checks cross-repository contracts: the fields your code reads\nfrom another repository's API, locked, verified, stated honestly.\n\n  invar demo    replay three real caught breaks, offline, in milliseconds\n  invar init    scan this repository and propose an invar.toml\n  invar check   evaluate the contracts in invar.toml\n\n  invar --help  every command and the exit codes\n";
+
+/// `invar completions <shell>`: print the embedded static completion
+/// script. Hand-written and shipped in completions/ (zero dependencies,
+/// no clap_complete); test 43 keeps them in step with the command set.
+fn cmd_completions(args: CompletionsArgs) -> Result<i32> {
+    let script = match args.shell.as_str() {
+        "bash" => include_str!("../completions/invar.bash"),
+        "zsh" => include_str!("../completions/invar.zsh"),
+        "fish" => include_str!("../completions/invar.fish"),
+        other => {
+            anyhow::bail!("unknown shell {other:?} (bash | zsh | fish)");
+        }
+    };
+    print!("{script}");
+    Ok(0)
+}
+
 /// `invar demo`: replay the shipped real breaks, offline, stock engine path.
 fn cmd_demo() -> Result<i32> {
     let cwd = std::env::current_dir().context("getting the current directory")?;

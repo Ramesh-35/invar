@@ -1267,3 +1267,20 @@ for the record: the tag precedes the workflow-install commit, so the
 release source archive lacks swh-archival.yml; the workflow runs from
 main and is unaffected. Zenodo DOI: webhook fires on this release;
 recorded here as PENDING until the minted DOI is pasted.
+
+## 2026-10-12: Developer Hearts item 1 lands (v0.1.0-alpha.22); E2/E3 postponed
+
+Founder direction: E2 and E3 postponed, posture stays
+OPEN / AWAITING_HUMAN_SUBJECTS; the public-recruitment design (bounty
+Discussion, first-run issue template) is on the shelf in the strategy
+doc, not abandoned, and no human data will ever be simulated in their
+place. Execution moved to the Developer Hearts plan, item 1:
+- crates.io: `invar` is TAKEN (third-party crate, ~10k downloads) and
+  `invar-cli` is TAKEN; `invar-check`, `invar-contracts`,
+  `invar-engine`, `invar-ci` all AVAILABLE as of today. Recommendation
+  pending founder ratification: crate `invar-check`, binary still
+  `invar`. Nothing published yet.
+- Bare `invar` orientation (exit 0, never clap's 2), three-shell
+  completions with drift-guard test 43, and the error-message audit
+  (17 reviewed, 2 fixed) all landed. 43 of 43 tests green in the
+  container.

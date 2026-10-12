@@ -1867,3 +1867,57 @@ fn held_out_record_reproduces_via_standalone_scorer() {
     assert!(stdout.contains("FALSE_POSITIVE: 1"), "{stdout}");
     assert!(stdout.contains("85 case(s) = 70 break(s) + 15 control(s)"), "{stdout}");
 }
+
+/// Test 43 (CLI craft): a bare `invar` prints orientation and exits 0
+/// (never clap's exit 2, which collides with "ledger break" in the frozen
+/// map), and the three hand-written completion scripts stay in step with
+/// the real command set: every subcommand `--help` lists must appear in
+/// each script, so a new command cannot ship without its completions.
+#[test]
+fn bare_invocation_and_completions_stay_in_step() {
+    let bin = env!("CARGO_BIN_EXE_invar");
+    let bare = std::process::Command::new(bin).output().unwrap();
+    assert_eq!(bare.status.code(), Some(0), "bare invar must exit 0");
+    let out = String::from_utf8_lossy(&bare.stdout);
+    for s in ["invar demo", "invar init", "invar check", "invar --help"] {
+        assert!(out.contains(s), "orientation missing {s:?}: {out}");
+    }
+    assert!(out.lines().count() <= 10, "orientation must stay short: {out}");
+
+    let help = std::process::Command::new(bin).arg("--help").output().unwrap();
+    let help = String::from_utf8_lossy(&help.stdout).to_string();
+    let mut commands = Vec::new();
+    let mut in_cmds = false;
+    for line in help.lines() {
+        if line.starts_with("Commands:") {
+            in_cmds = true;
+            continue;
+        }
+        if in_cmds {
+            if line.trim().is_empty() || line.starts_with("Options:") {
+                break;
+            }
+            if let Some(name) = line.trim_start().split_whitespace().next() {
+                if name != "help" {
+                    commands.push(name.to_string());
+                }
+            }
+        }
+    }
+    assert!(commands.len() >= 16, "command extraction broke: {commands:?}");
+    for (shell, script) in [
+        ("bash", include_str!("../completions/invar.bash")),
+        ("zsh", include_str!("../completions/invar.zsh")),
+        ("fish", include_str!("../completions/invar.fish")),
+    ] {
+        for c in &commands {
+            assert!(script.contains(c), "{shell} completions missing command {c:?}");
+        }
+        let run = std::process::Command::new(bin)
+            .args(["completions", shell])
+            .output()
+            .unwrap();
+        assert_eq!(run.status.code(), Some(0));
+        assert_eq!(String::from_utf8_lossy(&run.stdout), *script, "{shell} emit differs from file");
+    }
+}

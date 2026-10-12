@@ -1,6 +1,6 @@
 [package]
 name = "invar-falsify"
-version = "0.1.0-alpha.21"
+version = "0.1.0-alpha.22"
 edition = "2021"
 description = "INVAR Phase-1 deterministic falsification instrument (EICS category-residue probe)."
 license = "MIT OR Apache-2.0"
