@@ -1384,3 +1384,17 @@ out-of-scope. Prediction was recorded BEFORE the build and held. W3
 constant-value witnesses drafted (salted fingerprints, never values;
 format 4; stated-vs-accused open) and awaits founder ratification;
 nothing of W3 is built. 44 of 44 green.
+
+## 2026-10-12: W3 built as ratified (alpha.24); the recurring class speaks
+
+W3 ratified as drafted (stated-first, salted fingerprints, format 4)
+and built the same day: crate name also ratified (invar-check, binary
+invar). Gate-trio re-measurement matched the pre-build prediction on
+all three selectors: r1-113 version (TOML) stated with exit 4 where
+alpha.23 measured silent HOLDS; deno version and npm lockfileVersion
+stated beside their unchanged shape VIOLATEDs. The five-time-recurring
+default-switch class now produces a stated line on payload evidence.
+Still owed before any promotion to residue: the false-accusation probe
+over clean producer changes. 45 of 45 green; lock format 4 documented
+in INVAR-LOCK.md; [not-evaluated:value-switch] appended to
+REASON-CODES.md.

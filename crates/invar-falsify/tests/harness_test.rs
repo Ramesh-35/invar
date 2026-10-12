@@ -1667,7 +1667,7 @@ fn observed_reality_witnesses_formats_and_thresholds() {
     let back = lock::parse("l", f2).unwrap();
     assert_eq!(back.samples[0].observations, 1);
     assert_eq!(back.samples[0].witnesses[1].null, 1, "format 2 null type counts as one null witness");
-    assert!(lock::parse("l", "[lock]\nformat = \"4\"\n").is_err());
+    assert!(lock::parse("l", "[lock]\nformat = \"5\"\n").is_err());
     assert!(lock::render(&lock::Lock::default()).unwrap().contains("format = \"1\""));
 }
 
@@ -1947,4 +1947,65 @@ fn toml_payload_ingestion_subset() {
     assert!(e.contains("line 2"), "{e}");
     let e2 = toml_payload_to_json("x = \"a\\\\n\"\n").unwrap_err().to_string();
     assert!(e2.contains("escape"), "{e2}");
+}
+
+/// Test 45 (W3 value witnesses, ratified STATED-FIRST): a path whose
+/// value was identical across 3+ observations STATES a changed value
+/// with [not-evaluated:value-switch], never accuses; one divergence
+/// during locking frees the path forever; wildcard and array paths are
+/// never tracked; the lock stores fingerprints, not values, and parses
+/// back as format 4.
+#[test]
+fn w3_value_witnesses_stated_first() {
+    use invar_falsify::lock::{
+        merge_observation_scalars, parse, payload_scalars, payload_shape, render,
+        witness_drift_scalars, Lock, Sample, VState,
+    };
+    let pay = |j: &str| serde_json::from_str::<serde_json::Value>(j).unwrap();
+    let obs = |sm: &mut Sample, j: &str, d: &str| {
+        let v = pay(j);
+        let sh = payload_shape(&v);
+        let sc = payload_scalars(&v, &sh);
+        merge_observation_scalars(sm, &sh, &sc, d, "b3");
+    };
+    let mut sm = Sample {
+        contract: "c".into(),
+        blake3: String::new(),
+        taken: String::new(),
+        window_start: String::new(),
+        observations: 0,
+        witnesses: Vec::new(),
+    };
+    obs(&mut sm, r#"{"version": 3, "name": "a", "items": ["x"]}"#, "2026-10-01");
+    obs(&mut sm, r#"{"version": 3, "name": "b", "items": ["y"]}"#, "2026-10-02");
+    obs(&mut sm, r#"{"version": 3, "name": "c", "items": ["z"]}"#, "2026-10-03");
+    // version constant; name freed (3 distinct values); items[] untracked
+    let w = |p: &str| sm.witnesses.iter().find(|w| w.path == p).unwrap();
+    assert!(matches!(w("version").vstate, VState::Constant(_)));
+    assert_eq!(w("name").vstate, VState::Free);
+    assert_eq!(w("items[]").vstate, VState::Untracked);
+    // lock stores no values: render carries fingerprints only, format 4
+    let lock = Lock { contracts: Vec::new(), waivers: Vec::new(), samples: vec![sm.clone()] };
+    let text = render(&lock).unwrap();
+    assert!(text.contains("format = \"4\""), "{text}");
+    assert!(!text.contains('3') || !text.contains("version 3"), "no raw values in the lock");
+    let back = parse("l", &text).unwrap();
+    assert_eq!(back.samples[0].witnesses, sm.witnesses);
+    // fresh payload with the selector switched: STATED, never residue
+    let fresh = pay(r#"{"version": 4, "name": "d", "items": ["x"]}"#);
+    let fs = payload_shape(&fresh);
+    let fc = payload_scalars(&fresh, &fs);
+    let (residue, stated) = witness_drift_scalars(&sm, &fs, &fc, "f.json");
+    assert!(residue.is_empty(), "{residue:?}");
+    assert_eq!(stated.len(), 1, "{stated:?}");
+    assert!(stated[0].contains("version") && stated[0].contains("[not-evaluated:value-switch]"), "{}", stated[0]);
+    assert!(stated[0].contains('4'), "fresh value shown: {}", stated[0]);
+    // freed path never states
+    assert!(!stated.iter().any(|x| x.contains("name ")), "{stated:?}");
+    // under 3 observations: silent on values
+    let mut sm2 = Sample { contract: "c".into(), blake3: String::new(), taken: String::new(), window_start: String::new(), observations: 0, witnesses: Vec::new() };
+    obs(&mut sm2, r#"{"version": 3}"#, "2026-10-01");
+    obs(&mut sm2, r#"{"version": 3}"#, "2026-10-02");
+    let (_, st2) = witness_drift_scalars(&sm2, &fs, &fc, "f.json");
+    assert!(!st2.iter().any(|x| x.contains("value-switch")), "{st2:?}");
 }

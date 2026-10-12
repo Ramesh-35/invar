@@ -53,7 +53,7 @@ pub const LOCK_FORMAT: &str = "1";
 /// express the content: 1 without samples, 3 with them. An older engine
 /// reading a newer format fails closed with a clear message, never a wrong
 /// verdict.
-pub const LOCK_FORMATS: [&str; 3] = ["1", "2", "3"];
+pub const LOCK_FORMATS: [&str; 4] = ["1", "2", "3", "4"];
 
 /// One bound field: the consumer reads it, the producer declared it.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -147,6 +147,19 @@ impl Waiver {
 
 /// One key path's accumulated presence witnesses
 /// (docs/architecture/MULTI-SAMPLE-WITNESSES.md).
+/// W3 (docs/architecture/W3-VALUE-WITNESS.md, ratified stated-first):
+/// whether a path's VALUE has been identical across every observation.
+/// Values are never stored; `Constant` carries only a salted fingerprint
+/// (16 hex of blake3(contract || path || canonical JSON value)). Once two
+/// distinct values are seen the path is `Free` forever and never states.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum VState {
+    /// Not a short scalar (or wildcard/array path): value never tracked.
+    Untracked,
+    Constant(String),
+    Free,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct WitnessCount {
     pub path: String,
@@ -155,6 +168,7 @@ pub struct WitnessCount {
     pub present: u64,
     pub absent: u64,
     pub null: u64,
+    pub vstate: VState,
 }
 
 /// Observed-reality sample record: the SHAPE of real payloads the consumer
@@ -604,7 +618,19 @@ fn q(v: &str) -> Result<String> {
 
 /// Deterministic text: contracts by id, bindings sorted, waivers as written.
 pub fn render(lock: &Lock) -> Result<String> {
-    let format = if lock.samples.is_empty() { "1" } else { "3" };
+    // Lowest format that expresses the content: value-witness states need
+    // format 4 (older engines fail closed on it, by design).
+    let has_vstate = lock
+        .samples
+        .iter()
+        .any(|sm| sm.witnesses.iter().any(|w| w.vstate != VState::Untracked));
+    let format = if lock.samples.is_empty() {
+        "1"
+    } else if has_vstate {
+        "4"
+    } else {
+        "3"
+    };
     let mut s = format!(
         "# invar.lock: the producer fields this repository depends on.\n\
          # Written by `invar lock`. Accept a reviewed producer change with\n\
@@ -657,14 +683,21 @@ pub fn render(lock: &Lock) -> Result<String> {
         for w in &sm.witnesses {
             s.push_str(&format!(
                 "field = {}\n",
-                q(&format!(
-                    "{} {} {}/{}/{}",
-                    esc_field(&w.path),
-                    w.types,
-                    w.present,
-                    w.absent,
-                    w.null
-                ))?
+                q(&{
+                    let base = format!(
+                        "{} {} {}/{}/{}",
+                        esc_field(&w.path),
+                        w.types,
+                        w.present,
+                        w.absent,
+                        w.null
+                    );
+                    match &w.vstate {
+                        VState::Untracked => base,
+                        VState::Free => format!("{base} v=free"),
+                        VState::Constant(fp) => format!("{base} v={fp}"),
+                    }
+                })?
             ));
         }
     }
@@ -788,12 +821,21 @@ pub fn parse(path: &str, text: &str) -> Result<Lock> {
                             // observed type includes null.
                             None => (1, 0, u64::from(t.split('|').any(|x| x == "null"))),
                         };
+                        let vstate = match it.next() {
+                            None => VState::Untracked,
+                            Some("v=free") => VState::Free,
+                            Some(v) => match v.strip_prefix("v=") {
+                                Some(fp) if fp.len() == 16 => VState::Constant(fp.to_string()),
+                                _ => bail!("{path}: bad sample value token {v:?}"),
+                            },
+                        };
                         Ok(WitnessCount {
                             path: unesc_field(p2),
                             types: t.to_string(),
                             present,
                             absent,
                             null,
+                            vstate,
                         })
                     })
                     .collect::<Result<Vec<_>>>()?;
@@ -1140,7 +1182,65 @@ pub fn payload_shape(v: &serde_json::Value) -> Vec<(String, String)> {
 }
 
 /// Merge one observed shape into a sample's witnesses (one observation).
+/// Salted value fingerprint (W3): nothing about the value is recoverable
+/// from the lock; identical values share a fingerprint.
+pub fn value_fp(contract: &str, path: &str, canon: &str) -> String {
+    let mut h = blake3::Hasher::new();
+    h.update(contract.as_bytes());
+    h.update(b"\0");
+    h.update(path.as_bytes());
+    h.update(b"\0");
+    h.update(canon.as_bytes());
+    h.finalize().to_hex().to_string()[..16].to_string()
+}
+
+/// Canonical short-scalar values per EXACT path, for W3. Eligible: string
+/// (at most 32 characters), integer/number, boolean; never null. Paths
+/// that W2 collapsed (wildcards) or array elements aggregate many values,
+/// so only paths present verbatim in the final shape are kept.
+pub fn payload_scalars(
+    v: &serde_json::Value,
+    shape: &[(String, String)],
+) -> std::collections::BTreeMap<String, String> {
+    use serde_json::Value;
+    let keep: std::collections::BTreeSet<&str> = shape
+        .iter()
+        .map(|(p, _)| p.as_str())
+        .filter(|p| !p.contains('*') && !p.contains("[]"))
+        .collect();
+    let mut out = std::collections::BTreeMap::new();
+    fn walk(v: &Value, path: &str, out: &mut std::collections::BTreeMap<String, String>) {
+        match v {
+            Value::Object(m) => {
+                for (k, x) in m {
+                    let p = if path.is_empty() { k.clone() } else { format!("{path}.{k}") };
+                    walk(x, &p, out);
+                }
+            }
+            Value::Array(_) | Value::Null => {}
+            Value::String(s) if s.chars().count() > 32 => {}
+            scalar => {
+                out.insert(path.to_string(), scalar.to_string());
+            }
+        }
+    }
+    walk(v, "", &mut out);
+    out.retain(|k, _| keep.contains(k.as_str()));
+    out
+}
+
 pub fn merge_observation(sm: &mut Sample, shape: &[(String, String)], taken: &str, blake3: &str) {
+    merge_observation_scalars(sm, shape, &std::collections::BTreeMap::new(), taken, blake3)
+}
+
+/// Merge one observation: presence/type witnesses plus W3 value constancy.
+pub fn merge_observation_scalars(
+    sm: &mut Sample,
+    shape: &[(String, String)],
+    scalars: &std::collections::BTreeMap<String, String>,
+    taken: &str,
+    blake3: &str,
+) {
     use std::collections::BTreeSet;
     let prior = sm.observations;
     sm.observations += 1;
@@ -1161,6 +1261,17 @@ pub fn merge_observation(sm: &mut Sample, shape: &[(String, String)], taken: &st
                 let mut ts: BTreeSet<&str> = w.types.split('|').collect();
                 ts.extend(t.split('|'));
                 w.types = ts.into_iter().collect::<Vec<_>>().join("|");
+                // W3: constancy only survives identical scalar values; any
+                // divergence (or a present non-scalar) frees the path forever.
+                if let VState::Constant(fp0) = &w.vstate {
+                    let same = scalars
+                        .get(&w.path)
+                        .map(|c| &value_fp(&sm.contract, &w.path, c) == fp0)
+                        .unwrap_or(false);
+                    if !same {
+                        w.vstate = VState::Free;
+                    }
+                }
             }
             None => w.absent += 1,
         }
@@ -1174,6 +1285,10 @@ pub fn merge_observation(sm: &mut Sample, shape: &[(String, String)], taken: &st
                 // It did not appear in any earlier observation's shape.
                 absent: prior,
                 null: u64::from(t.split('|').any(|x| x == "null")),
+                vstate: match scalars.get(p2) {
+                    Some(c) => VState::Constant(value_fp(&sm.contract, p2, c)),
+                    None => VState::Untracked,
+                },
             });
         }
     }
@@ -1186,6 +1301,19 @@ pub fn merge_observation(sm: &mut Sample, shape: &[(String, String)], taken: &st
 pub fn witness_drift(
     sm: &Sample,
     fresh: &[(String, String)],
+    fresh_name: &str,
+) -> (Vec<(String, String)>, Vec<String>) {
+    witness_drift_scalars(sm, fresh, &std::collections::BTreeMap::new(), fresh_name)
+}
+
+/// Drift plus W3 value statements (ratified STATED-FIRST: a changed
+/// constant is stated with [not-evaluated:value-switch], never accused;
+/// promotion to residue requires its own ratification after a clean
+/// false-accusation pass).
+pub fn witness_drift_scalars(
+    sm: &Sample,
+    fresh: &[(String, String)],
+    fresh_scalars: &std::collections::BTreeMap<String, String>,
     fresh_name: &str,
 ) -> (Vec<(String, String)>, Vec<String>) {
     let now: std::collections::BTreeMap<&str, &str> =
@@ -1217,7 +1345,22 @@ pub fn witness_drift(
             Some(t) if !t.split('|').all(|x| w.types.split('|').any(|k| k == x)) => Some("retyped"),
             _ => None,
         };
-        let Some(kind) = mismatch else { continue };
+        let Some(kind) = mismatch else {
+            // Present and type-consistent: the W3 value check applies here.
+            if let VState::Constant(fp0) = &w.vstate {
+                if sm.observations >= 3 && w.present == sm.observations {
+                    if let Some(canon) = fresh_scalars.get(&w.path) {
+                        if &value_fp(&sm.contract, &w.path, canon) != fp0 {
+                            stated.push(format!(
+                                "{} held one identical value across all {} observation(s); {fresh_name} shows {canon}; a changed constant often selects a format or version; stated, not a violation [not-evaluated:value-switch]",
+                                w.path, sm.observations
+                            ));
+                        }
+                    }
+                }
+            }
+            continue;
+        };
         let evidence = format!(
             "witnessed present {}/{} (window {}..{})",
             w.present, sm.observations, sm.window_start, sm.taken

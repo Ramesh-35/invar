@@ -114,3 +114,15 @@ observations and now absent or retyped is residue; a path some observations
 lacked is stated as optional; fewer than three observations is stated as
 too few to accuse. Format 2 locks are read forever as a single
 observation. Spec: docs/architecture/MULTI-SAMPLE-WITNESSES.md.
+
+## Format 4 (v0.1.0-alpha.24): value-witness tokens
+
+A sample field line may carry a fourth token: `v=<16 hex>` (the path's
+value has been identical across every observation; the token is a
+salted BLAKE3 fingerprint, the value itself is never stored) or
+`v=free` (two distinct values were seen; the path never states value
+drift again). Engines read formats 1 through 4 forever and write the
+lowest format expressing the content; an older engine refuses format 4
+outright, which is the fail-closed behavior the format bump exists for.
+Pre-W3 locks read as value-untracked; re-run `invar lock --sample` to
+arm value witnesses.

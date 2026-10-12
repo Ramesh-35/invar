@@ -1443,13 +1443,14 @@ fn cmd_lock_sample(args: &LockArgs) -> Result<i32> {
             .with_context(|| format!("reading sample {sample_path}"))?;
         let v: serde_json::Value = lock::parse_sample_payload(sample_path, &bytes)?;
         let fields = lock::payload_shape(&v);
+        let scalars = lock::payload_scalars(&v, &fields);
         if fields.is_empty() {
             anyhow::bail!("{sample_path}: no fields derived (is it an object or array of objects?)");
         }
         for p in lock::pii_suspects(&fields) {
             eprintln!("warning: sample key {p:?} looks like personal data or a credential; scrub the sample file before committing it anywhere");
         }
-        lock::merge_observation(&mut sm, &fields, &today, &blake3::hash(&bytes).to_hex().to_string());
+        lock::merge_observation_scalars(&mut sm, &fields, &scalars, &today, &blake3::hash(&bytes).to_hex().to_string());
     }
     eprintln!("note: only payload SHAPES are locked; the sample files may hold real data, are not retained, and stay your responsibility");
     let (n_paths, n_obs) = (sm.witnesses.len(), sm.observations);
@@ -1476,7 +1477,7 @@ fn sample_findings(
     fresh: Option<(&str, &serde_json::Value, Option<&str>)>,
     today: i64,
 ) -> Result<Vec<(String, Vec<(String, String)>, Vec<String>)>> {
-    use invar_falsify::lock::{parse_date, payload_shape, witness_drift, SAMPLE_STALE_DAYS};
+    use invar_falsify::lock::{parse_date, payload_scalars, payload_shape, witness_drift_scalars, SAMPLE_STALE_DAYS};
     let mut out: Vec<(String, Vec<(String, String)>, Vec<String>)> = Vec::new();
     fn entry(out: &mut Vec<(String, Vec<(String, String)>, Vec<String>)>, id: &str) -> usize {
         if let Some(i) = out.iter().position(|(c, _, _)| c == id) {
@@ -1516,7 +1517,8 @@ fn sample_findings(
             .ok_or_else(|| anyhow::anyhow!("no locked sample for contract {target:?}"))?;
         let fresh_shape = payload_shape(v);
         let i = entry(&mut out, &target);
-        let (residue, stated) = witness_drift(locked, &fresh_shape, path);
+        let fresh_scalars = payload_scalars(v, &fresh_shape);
+        let (residue, stated) = witness_drift_scalars(locked, &fresh_shape, &fresh_scalars, path);
         out[i].1.extend(residue);
         out[i].2.extend(stated);
     }

@@ -15,6 +15,7 @@ summary line and in exit 4.
 | [not-evaluated:stale-sample] | The contract's observed sample is older than 90 days; refresh with `invar lock --sample`. |
 | [not-evaluated:optional-field-absent] | A locked sample path is absent from the fresh payload, but some observation also lacked it: the field is known optional; stated, never a violation (MULTI-SAMPLE-WITNESSES.md). |
 | [not-evaluated:witness-count-low] | A locked sample path is absent or retyped but was observed fewer than 3 times: too few witnesses to accuse; stated. |
+| [not-evaluated:value-switch] | A path whose value was identical across every observation (3+) shows a different value in the fresh payload; a changed constant often selects a format or version (W3, stated-first). |
 
 Exit 4 notes (research A3/A4, adopted as documentation): exit 4 is non-zero,
 so a plain `invar check` step fails a CI job by default; the GitHub Action's

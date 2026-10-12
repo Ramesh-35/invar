@@ -1,4 +1,4 @@
-# W3: constant-value witnesses (DRAFT, awaiting ratification; NOT built)
+# W3: constant-value witnesses (RATIFIED AS DRAFTED 2026-10-12, stated-first; built in v0.1.0-alpha.24)
 
 The five-time-recurring default-switch class is now measured in scope
 and missed: the r1-113 Cargo.lock v3->v4 transition is shape-identical
@@ -45,3 +45,19 @@ All three gate selectors (deno "version", npm "lockfileVersion", cargo
 "version") were value-constant across their base observations and
 changed at head, so W3 as specified would state or accuse all three.
 That prediction is falsifiable and will be measured, not assumed.
+
+
+## Measured on landing (gate protocol, same pinned payloads)
+
+The recorded prediction held on all three selectors:
+- r1-113 (Cargo.lock, TOML): `version held one identical value across
+  all 3 observation(s); head.toml shows 4` stated,
+  [not-evaluated:value-switch], exit 4. This morning the same pair was
+  a silent HOLDS; the five-time-recurring class now speaks.
+- r1-059 (deno.lock): shape VIOLATED (`packages`) unchanged, plus
+  `version ... shows "4"` stated.
+- r1-075 (npm): shape VIOLATED unchanged, plus `lockfileVersion ...
+  shows 3` stated.
+Promotion to residue stays gated on a clean false-accusation pass
+(E1-style probe over clean producer changes), not yet run; until then
+value switches state and never accuse, as ratified.
