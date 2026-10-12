@@ -1370,3 +1370,17 @@ same bar as everything else.
 Items 1 through 4 of the plan are now code-complete. Remaining in the
 cycle: demo recording (founder's terminal), logo (item 6), crates.io
 name ratification and publish (item 7), E2/E3 when reopened.
+
+## 2026-10-12: TOML ingestion lands (alpha.23); r1-113 measured, W3 drafted
+
+Logo direction rejected by the founder; design shelved, brief stays
+frozen. Build pivoted to the highest-leverage open gap: the five-time
+default-switch recurrence. TOML payload ingestion shipped (stated
+subset, loud errors, zero dependencies; test 44). Gate-protocol
+measurement on real pinned ripgrep Cargo.locks: HOLDS, exit 0; the
+v3->v4 transition is shape-identical and its selector is a value, so
+the class is now measured-in-scope-and-missed instead of stated
+out-of-scope. Prediction was recorded BEFORE the build and held. W3
+constant-value witnesses drafted (salted fingerprints, never values;
+format 4; stated-vs-accused open) and awaits founder ratification;
+nothing of W3 is built. 44 of 44 green.

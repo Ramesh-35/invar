@@ -1921,3 +1921,30 @@ fn bare_invocation_and_completions_stay_in_step() {
         assert_eq!(String::from_utf8_lossy(&run.stdout), *script, "{shell} emit differs from file");
     }
 }
+
+/// Test 44 (TOML payload ingestion): lockfile-style TOML parses through
+/// the stated subset into the same shape pipeline as JSON; constructs
+/// outside the subset error loudly, never a silent partial parse.
+#[test]
+fn toml_payload_ingestion_subset() {
+    use invar_falsify::lock::{payload_shape, toml_payload_to_json};
+    let v = toml_payload_to_json(
+        "# lockfile\nversion = 3\n\n[[package]]\nname = \"aho\"\nversion = \"1.1.0\"\ndependencies = [\n \"memchr\",\n]\n\n[[package]]\nname = \"memchr\"\nversion = \"2.7.0\"\nchecksum = \"abc\"\n\n[metadata]\nnote = true\n",
+    )
+    .unwrap();
+    assert_eq!(v["version"], 3);
+    assert_eq!(v["package"][0]["name"], "aho");
+    assert_eq!(v["package"][0]["dependencies"][0], "memchr");
+    assert_eq!(v["package"][1]["checksum"], "abc");
+    assert_eq!(v["metadata"]["note"], true);
+    let shape = payload_shape(&v);
+    let paths: Vec<&str> = shape.iter().map(|(p, _)| p.as_str()).collect();
+    assert!(paths.contains(&"version"), "{paths:?}");
+    assert!(paths.contains(&"package[].name"), "{paths:?}");
+    assert!(paths.contains(&"package[].dependencies[]"), "{paths:?}");
+    // outside the subset: loud error with the line, no partial value
+    let e = toml_payload_to_json("a = 1\nb = 1979-05-27\n").unwrap_err().to_string();
+    assert!(e.contains("line 2"), "{e}");
+    let e2 = toml_payload_to_json("x = \"a\\\\n\"\n").unwrap_err().to_string();
+    assert!(e2.contains("escape"), "{e2}");
+}

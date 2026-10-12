@@ -122,3 +122,23 @@ does and does not license, unchanged: two catches on reconstructed
 real payloads are mechanism validation, not an effectiveness claim;
 r1-099 remains inconclusive, r1-100 not reconstructable, r1-113 out of
 mechanism scope. The held-out record stands at 38 of 70.
+
+## TOML payload ingestion (addendum, 2026-10-12, v0.1.0-alpha.23)
+
+`invar lock --sample` and `invar check --sample` now ingest `.toml`
+payloads through a stated TOML SUBSET parsed by the engine itself
+(zero new dependencies): tables, arrays of tables, string/integer/
+boolean scalars, and string arrays including multiline. Anything
+outside the subset is an ERROR naming the line, never a silent
+partial parse. The extension decides the format; shapes derive through
+the same pipeline as JSON (W2/W2.1 apply unchanged).
+
+Measured on landing, gate protocol, real pinned payloads
+(BurntSushi/ripgrep Cargo.lock: bases 3b7fd442, 6dfaec03, 53279db4,
+all version 3; head 81bed786, version 4): parse clean, 9 paths
+witnessed across 3 observations, check result HOLDS, exit 0. Stated
+plainly: the v3->v4 transition is shape-identical and its selector is
+a value, so shape witnesses do not see it. The r1-113 class thereby
+moves from out-of-mechanism-scope to measured-in-scope-and-missed.
+The proposed remedy is W3 (docs/architecture/W3-VALUE-WITNESS.md,
+DRAFT, awaiting ratification; not built).

@@ -1265,3 +1265,164 @@ pub fn pii_suspects(fields: &[(String, String)]) -> Vec<String> {
 
 /// Days after which a locked sample is stale (the waiver cap, ratified).
 pub const SAMPLE_STALE_DAYS: i64 = 90;
+
+// ------------------------------------------------- TOML payload ingestion
+
+/// Parse a TOML-SUBSET payload into a JSON value for shape derivation
+/// (docs/architecture/OBSERVED-REALITY.md, TOML ingestion addendum). The
+/// subset is what lockfile-style payloads use: `[table]`, `[[array of
+/// tables]]`, `key = "string" | integer | true | false`, and arrays of
+/// strings (single line or spread over lines). Anything outside the
+/// subset is an ERROR naming the line, never a silent partial parse:
+/// a payload half-read would witness a shape nobody shipped.
+pub fn toml_payload_to_json(text: &str) -> Result<serde_json::Value> {
+    use serde_json::{Map, Value};
+    let mut root = Map::new();
+    // Path of the table currently open; None = root.
+    let mut current: Option<(Vec<String>, bool)> = None; // (path, is_array_of_tables)
+    let mut pending: Vec<(String, String, usize)> = Vec::new(); // key, joined value, line
+    let mut buf: Option<(String, String, usize)> = None; // multiline array accumulation
+
+    fn insert<'a>(root: &'a mut Map<String, Value>, path: &[String], arr: bool) -> Result<&'a mut Map<String, Value>> {
+        let mut cur = root;
+        for (i, seg) in path.iter().enumerate() {
+            let last = i + 1 == path.len();
+            if last && arr {
+                let e = cur
+                    .entry(seg.clone())
+                    .or_insert_with(|| Value::Array(Vec::new()));
+                let Value::Array(a) = e else {
+                    bail!("TOML: {seg:?} is both a table and an array of tables");
+                };
+                a.push(Value::Object(Map::new()));
+                let Some(Value::Object(m)) = a.last_mut() else { unreachable!() };
+                cur = m;
+            } else {
+                let e = cur
+                    .entry(seg.clone())
+                    .or_insert_with(|| Value::Object(Map::new()));
+                cur = match e {
+                    Value::Object(m) => m,
+                    Value::Array(a) => match a.last_mut() {
+                        Some(Value::Object(m)) => m,
+                        _ => bail!("TOML: cannot descend into {seg:?}"),
+                    },
+                    _ => bail!("TOML: {seg:?} is not a table"),
+                };
+            }
+        }
+        Ok(cur)
+    }
+
+    fn scalar(v: &str, line: usize) -> Result<Value> {
+        let v = v.trim();
+        if let Some(s) = v.strip_prefix('"').and_then(|s| s.strip_suffix('"')) {
+            if s.contains('\\') {
+                bail!("TOML subset: escape sequences not supported (line {line})");
+            }
+            return Ok(Value::String(s.to_string()));
+        }
+        if v == "true" || v == "false" {
+            return Ok(Value::Bool(v == "true"));
+        }
+        if let Ok(n) = v.parse::<i64>() {
+            return Ok(Value::Number(n.into()));
+        }
+        bail!("TOML subset: unsupported value {v:?} (line {line})")
+    }
+
+    fn parse_value(raw: &str, line: usize) -> Result<Value> {
+        let raw = raw.trim();
+        if let Some(inner) = raw.strip_prefix('[').and_then(|s| s.strip_suffix(']')) {
+            let mut out = Vec::new();
+            for part in inner.split(',') {
+                let part = part.trim();
+                if part.is_empty() {
+                    continue;
+                }
+                out.push(scalar(part, line)?);
+            }
+            return Ok(serde_json::Value::Array(out));
+        }
+        scalar(raw, line)
+    }
+
+    let mut flush = |root: &mut Map<String, Value>,
+                     current: &Option<(Vec<String>, bool)>,
+                     pending: &mut Vec<(String, String, usize)>|
+     -> Result<()> {
+        if pending.is_empty() {
+            return Ok(());
+        }
+        let taken = std::mem::take(pending);
+        let target = match current {
+            None => root,
+            Some((path, arr)) => insert(root, path, *arr)?,
+        };
+        for (k, v, line) in taken {
+            if target.contains_key(&k) {
+                bail!("TOML: duplicate key {k:?} (line {line})");
+            }
+            target.insert(k, parse_value(&v, line)?);
+        }
+        Ok(())
+    };
+
+    for (idx, raw) in text.lines().enumerate() {
+        let line_no = idx + 1;
+        let line = raw.trim();
+        if let Some((k, acc, start)) = &mut buf {
+            let add = line.split('#').next().unwrap_or("").trim();
+            acc.push_str(add);
+            if add.ends_with(']') {
+                pending.push((k.clone(), acc.clone(), *start));
+                buf = None;
+            }
+            continue;
+        }
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        if let Some(inner) = line.strip_prefix("[[").and_then(|s| s.strip_suffix("]]")) {
+            flush(&mut root, &current, &mut pending)?;
+            current = Some((inner.trim().split('.').map(|s| s.trim().to_string()).collect(), true));
+            // array-of-tables entry is created eagerly so empty tables exist
+            insert(&mut root, &current.as_ref().unwrap().0, true)?;
+            current.as_mut().unwrap().1 = false; // further keys go into the entry just pushed
+            continue;
+        }
+        if let Some(inner) = line.strip_prefix('[').and_then(|s| s.strip_suffix(']')) {
+            flush(&mut root, &current, &mut pending)?;
+            current = Some((inner.trim().split('.').map(|s| s.trim().to_string()).collect(), false));
+            insert(&mut root, &current.as_ref().unwrap().0, false)?;
+            continue;
+        }
+        let Some((k, v)) = line.split_once('=') else {
+            bail!("TOML subset: expected `key = value` (line {line_no}): {line:?}");
+        };
+        let k = k.trim().to_string();
+        let v_full = v.split(" #").next().unwrap_or(v).trim().to_string();
+        if v_full.starts_with('[') && !v_full.ends_with(']') {
+            buf = Some((k, v_full, line_no));
+        } else {
+            pending.push((k, v_full, line_no));
+        }
+    }
+    if let Some((k, _, start)) = buf {
+        bail!("TOML subset: array for {k:?} never closed (line {start})");
+    }
+    flush(&mut root, &current, &mut pending)?;
+    Ok(serde_json::Value::Object(root))
+}
+
+/// Parse a sample payload by file extension: `.toml` through the TOML
+/// subset above, everything else as JSON. The extension decides; a JSON
+/// file named .toml errors loudly rather than guessing.
+pub fn parse_sample_payload(path: &str, bytes: &[u8]) -> Result<serde_json::Value> {
+    let text = std::str::from_utf8(bytes).with_context(|| format!("{path} is not UTF-8"))?;
+    if path.rsplit('.').next().map(|e| e.eq_ignore_ascii_case("toml")) == Some(true) {
+        toml_payload_to_json(text).with_context(|| format!("{path} (TOML subset)"))
+    } else {
+        serde_json::from_str(text).with_context(|| format!("{path} is not JSON"))
+    }
+}

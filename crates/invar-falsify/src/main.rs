@@ -650,10 +650,10 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
                         return Ok(3);
                     }
                 };
-                fresh_v = match serde_json::from_slice::<serde_json::Value>(&bytes) {
+                fresh_v = match lock::parse_sample_payload(path, &bytes) {
                     Ok(v) => v,
                     Err(e) => {
-                        eprintln!("ERROR (not a verdict): {path} is not JSON: {e}");
+                        eprintln!("ERROR (not a verdict): {e:#}");
                         return Ok(3);
                     }
                 };
@@ -1441,8 +1441,7 @@ fn cmd_lock_sample(args: &LockArgs) -> Result<i32> {
     for sample_path in &args.sample {
         let bytes = std::fs::read(sample_path)
             .with_context(|| format!("reading sample {sample_path}"))?;
-        let v: serde_json::Value = serde_json::from_slice(&bytes)
-            .with_context(|| format!("{sample_path} is not JSON"))?;
+        let v: serde_json::Value = lock::parse_sample_payload(sample_path, &bytes)?;
         let fields = lock::payload_shape(&v);
         if fields.is_empty() {
             anyhow::bail!("{sample_path}: no fields derived (is it an object or array of objects?)");
