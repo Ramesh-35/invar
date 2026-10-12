@@ -1284,3 +1284,18 @@ place. Execution moved to the Developer Hearts plan, item 1:
   completions with drift-guard test 43, and the error-message audit
   (17 reviewed, 2 fixed) all landed. 43 of 43 tests green in the
   container.
+
+### Item 2: 10-Repo Cold  Audit (Self-Measured Rung)
+- **Status:** COMPLETED (10/10 PROPOSED)
+- **Latency Range:** 12.9ms to 413.8ms (Median: 181.1ms)
+- **Measured Targets:**
+  1. : 12.9ms (130 files)
+  2. : 46.1ms (236 files)
+  3. : 65.8ms (1442 files)
+  4. : 79.2ms (427 files)
+  5. : 144.2ms (571 files)
+  6. : 218.0ms (1631 files)
+  7. : 235.3ms (214 files)
+  8. : 281.0ms (3181 files)
+  9. : 350.4ms (848 files)
+  10. : 413.8ms (1837 files)
