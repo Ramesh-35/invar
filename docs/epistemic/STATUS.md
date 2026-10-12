@@ -1409,3 +1409,13 @@ it, and the formula gets regenerated per release. Note: the
 completions subcommand ships in alpha.22+, so
 generate_completions_from_executable activates on the next release
 bump of the formula.
+
+## 2026-10-12: declaration-graph strategy locked
+
+Founder locked the two inversions and the survival doctrine in
+docs/architecture/strategy/DECLARATION-GRAPH.md: declarations compound
+where checks do not; agents are the emerging primary reader and need
+deterministic, citable evidence; survival against platform absorption
+is become-the-format (SARIF precedent), neutrality, and the record.
+Ratified build sequence: SARIF export, then a frozen DEPENDENTS-GRAPH
+spec, then the nightly public lock index.
