@@ -132,6 +132,10 @@ struct CheckArgs {
     /// Also write a markdown report (PR comment / job summary) to this path.
     #[arg(long)]
     report_md: Option<String>,
+    /// Also write a SARIF 2.1.0 report here (GitHub code scanning ingests
+    /// it). Blind spots ride along as notes; holds emit no result.
+    #[arg(long)]
+    sarif: Option<String>,
     /// Also write an A2 evidence receipt (canonical, byte-deterministic) here.
     #[arg(long)]
     receipt: Option<String>,
@@ -748,6 +752,16 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
             eprintln!("ERROR (not a verdict): writing report {path}: {e}");
             return Ok(3);
         }
+    }
+
+    if let Some(path) = &args.sarif {
+        let doc = invar_falsify::check::render_sarif(&outcomes);
+        let text = serde_json::to_string_pretty(&doc).unwrap_or_default() + "\n";
+        if let Err(e) = std::fs::write(path, text) {
+            eprintln!("ERROR (not a verdict): writing SARIF {path}: {e}");
+            return Ok(3);
+        }
+        println!("sarif written: {path}");
     }
 
     if let Some(path) = &args.receipt {

@@ -1419,3 +1419,12 @@ deterministic, citable evidence; survival against platform absorption
 is become-the-format (SARIF precedent), neutrality, and the record.
 Ratified build sequence: SARIF export, then a frozen DEPENDENTS-GRAPH
 spec, then the nightly public lock index.
+
+## 2026-10-12: SARIF export lands (alpha.25), strategy step 1
+
+`invar check --sarif` ships (test 46; smoke-verified on the demo's
+real r1-109 catch: error at consumer-component.jsx:33, blind-spot
+notes under reason codes, measured record in run properties). This is
+step 1 of the locked declaration-graph sequence; step 2 is the frozen
+DEPENDENTS-GRAPH spec for founder ratification, step 3 the nightly
+public lock index.

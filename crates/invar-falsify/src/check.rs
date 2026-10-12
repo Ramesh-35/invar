@@ -877,3 +877,110 @@ pub fn apply_waivers(o: &mut ContractOutcome, waivers: &[crate::lock::Waiver], t
     }
     o.witnesses.retain(|x| !o.waived.iter().any(|(f, ..)| f == &x.residue));
 }
+
+/// SARIF 2.1.0 export of check outcomes (strategy/DECLARATION-GRAPH.md:
+/// become the format platforms ingest). Honest mapping, stated:
+/// VIOLATED residue -> level "error" (rule "violated"), one result per
+/// residue item, located at the consumer read sites; stated
+/// not-evaluated lines -> level "note" under their stable reason code as
+/// the rule id (a blind spot rides into the platform UI instead of
+/// disappearing); SKIPPED contracts -> level "note" (rule
+/// "skipped-unsupported-language"); HOLDS emits no result, because SARIF
+/// results are findings and a hold is the absence of one; the fixed
+/// summary and the measured record travel in run properties so the
+/// export can never read as an effectiveness claim.
+pub fn render_sarif(outcomes: &[ContractOutcome]) -> serde_json::Value {
+    use serde_json::json;
+    let mut rules: std::collections::BTreeMap<String, String> = std::collections::BTreeMap::new();
+    let mut results = Vec::new();
+    let reason_code = |u: &str| -> String {
+        u.rfind("[not-evaluated:")
+            .and_then(|i| u[i..].strip_prefix('['))
+            .and_then(|r| r.strip_suffix(']'))
+            .unwrap_or("not-evaluated")
+            .to_string()
+    };
+    let loc = |site: &str| -> serde_json::Value {
+        let (file, line) = match site.rsplit_once(':') {
+            Some((f, l)) if l.parse::<u64>().is_ok() => (f, l.parse::<u64>().unwrap()),
+            _ => (site, 1),
+        };
+        json!({"physicalLocation": {"artifactLocation": {"uri": file},
+               "region": {"startLine": line}}})
+    };
+    for o in outcomes {
+        if let Some(why) = &o.skipped {
+            rules.insert(
+                "skipped-unsupported-language".into(),
+                "The contract names an artifact INVAR does not read; stated, never a pass.".into(),
+            );
+            results.push(json!({
+                "ruleId": "skipped-unsupported-language",
+                "level": "note",
+                "message": {"text": format!("{} ({}): SKIPPED: {why}", o.id, o.kind)},
+            }));
+            continue;
+        }
+        if o.violated() {
+            rules.insert(
+                "violated".into(),
+                "A field the consumer reads changed at the producer.".into(),
+            );
+            for w in &o.witnesses {
+                let text = format!(
+                    "{} ({}): {} {}",
+                    o.id,
+                    o.kind,
+                    w.residue,
+                    witness_text(w, &o.kind, |x| x.to_string()).trim()
+                );
+                let locations: Vec<_> = w.sites.iter().map(|s| loc(s)).collect();
+                let mut r = json!({"ruleId": "violated", "level": "error",
+                                   "message": {"text": text}});
+                if !locations.is_empty() {
+                    r["locations"] = json!(locations);
+                }
+                results.push(r);
+            }
+        }
+        for u in &o.unevaluated {
+            let code = reason_code(u);
+            rules.insert(
+                code.clone(),
+                "INVAR could not evaluate this and says so instead of passing.".into(),
+            );
+            results.push(json!({
+                "ruleId": code,
+                "level": "note",
+                "message": {"text": format!("{} ({}): {u}", o.id, o.kind)},
+            }));
+        }
+    }
+    let rule_objs: Vec<_> = rules
+        .iter()
+        .map(|(id, desc)| json!({"id": id, "shortDescription": {"text": desc}}))
+        .collect();
+    let violations = outcomes.iter().filter(|o| o.violated()).count();
+    let skipped = outcomes
+        .iter()
+        .filter(|o| o.skipped.is_some() || (!o.violated() && !o.unevaluated.is_empty()))
+        .count();
+    json!({
+        "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+        "version": "2.1.0",
+        "runs": [{
+            "tool": {"driver": {
+                "name": "invar",
+                "version": env!("CARGO_PKG_VERSION"),
+                "informationUri": "https://github.com/Ramesh-35/invar",
+                "rules": rule_objs
+            }},
+            "properties": {
+                "summary": format!("held {} | violated {violations} | skipped or not evaluated {skipped}",
+                                    outcomes.len() - violations - skipped),
+                "measured": "38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)"
+            },
+            "results": results
+        }]
+    })
+}

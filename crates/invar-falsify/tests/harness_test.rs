@@ -2009,3 +2009,46 @@ fn w3_value_witnesses_stated_first() {
     let (_, st2) = witness_drift_scalars(&sm2, &fs, &fc, "f.json");
     assert!(!st2.iter().any(|x| x.contains("value-switch")), "{st2:?}");
 }
+
+/// Test 46 (SARIF export): violations map to error results located at
+/// consumer read sites; stated blind spots ride along as notes under
+/// their stable reason codes; holds emit no result; the measured record
+/// travels in run properties so the export can never read as an
+/// effectiveness claim.
+#[test]
+fn sarif_export_honest_mapping() {
+    use invar_falsify::check::{render_sarif, ContractOutcome, Witness};
+    let violated = ContractOutcome {
+        id: "c1".into(),
+        kind: "schema".into(),
+        residue: vec!["x_cord".into()],
+        witnesses: vec![Witness {
+            residue: "x_cord".into(),
+            sites: vec!["widget.jsx:33".into()],
+            missing_from: Some("events.py".into()),
+            type_change: None,
+            read_as: Vec::new(),
+        }],
+        unevaluated: vec!["default selector changed [not-evaluated:default-switch]".into()],
+        ..Default::default()
+    };
+    let holds = ContractOutcome { id: "c2".into(), kind: "schema".into(), ..Default::default() };
+    let doc = render_sarif(&[violated, holds]);
+    assert_eq!(doc["version"], "2.1.0");
+    let run = &doc["runs"][0];
+    assert_eq!(run["tool"]["driver"]["name"], "invar");
+    assert!(run["properties"]["measured"].as_str().unwrap().contains("38 of 70"));
+    let results = run["results"].as_array().unwrap();
+    assert_eq!(results.len(), 2, "one error + one note, holds silent: {results:?}");
+    let err = &results[0];
+    assert_eq!(err["level"], "error");
+    assert_eq!(err["ruleId"], "violated");
+    assert_eq!(err["locations"][0]["physicalLocation"]["artifactLocation"]["uri"], "widget.jsx");
+    assert_eq!(err["locations"][0]["physicalLocation"]["region"]["startLine"], 33);
+    let note = &results[1];
+    assert_eq!(note["level"], "note");
+    assert_eq!(note["ruleId"], "not-evaluated:default-switch");
+    let rules = run["tool"]["driver"]["rules"].as_array().unwrap();
+    assert!(rules.iter().any(|r| r["id"] == "violated"));
+    assert!(rules.iter().any(|r| r["id"] == "not-evaluated:default-switch"));
+}
