@@ -1,0 +1,18 @@
+# 10-repo cold `invar init` audit OF RECORD, 2026-10-12. Self-measured
+# evidence rung: engine v0.1.0-alpha.22 (pre-fix build = alpha.22 tree
+# before the init changes this audit motivated), Linux x86_64 build
+# container, shallow clones at the pinned HEADs below, wall time around
+# one `invar init --stdout` process measured with a monotonic clock.
+# These are ENGINE WALL TIMES, not TTFV: TTFV includes the human and
+# needs outside developers (E3, postponed).
+repo	head	files	wall_ms	exit	contracts_proposed	output_lines_prefix
+gethomepage/homepage	4a38eea	1546	189	0	0	25
+louislam/uptime-kuma	7982ce0	841	149	0	0	62
+usememos/memos	a80fe19	1373	172	0	1	41
+fastapi/fastapi	f5c6e9b	3181	247	0	0	1639
+gin-gonic/gin	0f09c3a	152	22	0	0	25
+tokio-rs/axum	e57b547	522	52	0	0	534
+pallets/flask	d086db8	258	44	0	0	40
+honojs/hono	552ea02	605	152	0	0	850
+caddyserver/caddy	054c92b	714	33	0	0	25
+BurntSushi/ripgrep	3fce3b5	259	69	0	0	25

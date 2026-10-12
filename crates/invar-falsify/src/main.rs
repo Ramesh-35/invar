@@ -284,6 +284,9 @@ struct InitArgs {
     /// Print the proposed manifest instead of writing it.
     #[arg(long, default_value_t = false)]
     stdout: bool,
+    /// Show every inventory item (default caps the list at 40 lines).
+    #[arg(long, default_value_t = false)]
+    full_inventory: bool,
 }
 
 #[derive(Parser)]
@@ -807,7 +810,7 @@ fn cmd_init(args: InitArgs) -> Result<i32> {
         anyhow::bail!("{} is not a directory", args.root);
     }
     let d = discover(&root);
-    let manifest = render_manifest(&d);
+    let manifest = invar_falsify::init::render_manifest_opts(&d, args.full_inventory);
     if args.stdout {
         print!("{manifest}");
         return Ok(0);
@@ -835,6 +838,9 @@ fn cmd_init(args: InitArgs) -> Result<i32> {
         "  inventory only     : {} item(s) found but not yet checkable",
         d.inventory.len()
     );
+    if d.proposals.is_empty() {
+        println!("  note               : zero proposals is expected inside a single repo; INVAR checks contracts BETWEEN repos (next step is in the template inside invar.toml)");
+    }
     println!("  wrote              : {}", out.display());
     Ok(0)
 }

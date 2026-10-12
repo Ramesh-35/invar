@@ -1314,3 +1314,27 @@ version, machine, method, labeled self-measured) is being run now and
 will be the audit of record. e46d310 (swh-verify.sh backoff rewrite,
 61 insertions, landed without engineer review) is under review in the
 same pass.
+
+## 2026-10-12: audit of record for item 2; d33b67b superseded
+
+The provenanced 10-repo cold `invar init` audit is committed as
+docs/falsification/init-audit-2026-10-12.tsv: named repos at pinned
+HEADs, engine and machine stated, monotonic wall times 22 to 247 ms,
+exit 0 on all ten, explicitly labeled engine wall time and NOT TTFV.
+It supersedes the quarantined d33b67b figures entirely; whatever their
+origin, they are no longer load-bearing anywhere.
+
+Headline finding, stated plainly: 9 of 10 repos proposed ZERO
+contracts (memos proposed 1), which is the expected physics of a
+single clone holding one side of a cross-repository contract, and the
+output never said so; and the not-checkable inventory was uncapped
+(fastapi: 1,614 comment lines). Three fixes landed in the same pass,
+verified on the audit repos themselves:
+- zero-proposal output now explains WHY zero is expected and names the
+  next step, in the file and on the terminal;
+- inventory capped at 40 lines with the remainder counted and
+  `--full-inventory` to see all (fastapi: 1,639 lines down to 70);
+- `invar init` terminal summary carries the same note on zero.
+43 of 43 tests green. swh-verify.sh review also closed this pass
+(8201c9d): founder's 429 backoff kept, documented exit contract and
+live absent-count restored.
