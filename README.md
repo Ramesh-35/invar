@@ -15,13 +15,27 @@ says so.
 
 ## Sixty seconds
 
-Download a signed release binary (verify it: [docs/reference/RELEASE-SIGNING.md](docs/reference/RELEASE-SIGNING.md)), then:
+Watch it catch three real breaks first (real incidents, pinned bytes,
+measured wall time, run fully offline through the stock engine):
+
+```sh
+git clone https://github.com/Ramesh-35/invar && cd invar
+cargo run --release -p invar-falsify -- demo
+```
+
+No Rust toolchain: download a signed release binary instead (verify it:
+[docs/reference/RELEASE-SIGNING.md](docs/reference/RELEASE-SIGNING.md))
+and run `invar demo` from the clone. Then, on your own repository:
 
 ```sh
 invar init          # scans the workspace, proposes invar.toml (a proposal: review it)
 invar check         # evaluates the contracts; local files only
 invar check --ci    # also fetches remote producers (github:OWNER/REPO@REF:PATH)
 ```
+
+Zero proposals from `invar init` is the expected result inside a single
+repository; INVAR checks contracts BETWEEN repositories, and init says
+so and names the next step.
 
 `invar lock` records the exact fields you depend on in `invar.lock`, with
 hashes and dates, so future checks compare against what you accepted, and
@@ -47,7 +61,7 @@ even when every count is zero.
 ## In CI (GitHub Action, hardened)
 
 ```yaml
-- uses: Ramesh-35/invar-platform@COMMIT_SHA   # pin by SHA; see docs/reference/ACTION-HARDENING.md
+- uses: Ramesh-35/invar@COMMIT_SHA   # pin by SHA; see docs/reference/ACTION-HARDENING.md
   with:
     config: invar.toml
 ```
@@ -72,9 +86,14 @@ correct, and it does not prove the producer is honest.
 this?" from committed lockfiles. Local directory in, deterministic list out,
 no network.
 
-## What INVAR does not claim
+## What INVAR does not do
 
-Measured on a corpus of 123 real cross-repository breaks and controls
+No semantic checks: INVAR evaluates structure (a field's presence, type,
+name, envelope), never what values mean. No runtime behavior: nothing is
+executed. Payload ingestion is JSON-only (TOML, YAML and binary payloads
+are stated as not evaluated, exit 4). And it misses real breaks:
+
+Measured on a corpus of 122 real cross-repository break cases and controls
 (sourced from public incidents, pinned commits, scored on held-out batches
 the rules never saw): INVAR currently catches 38 of 70 held-out in-scope
 real breaks. That is a 46% miss rate, the detection-reliability hypothesis
