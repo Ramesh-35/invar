@@ -1428,3 +1428,24 @@ notes under reason codes, measured record in run properties). This is
 step 1 of the locked declaration-graph sequence; step 2 is the frozen
 DEPENDENTS-GRAPH spec for founder ratification, step 3 the nightly
 public lock index.
+
+## 2026-10-12: substrate doctrine adopted as first-class strategy
+
+Founder adopted the substrate ("CUDA of contract verification")
+framing as first-class strategy. Recorded as an EXPLICIT SUPERSESSION
+of the 2026-10-08 CUDA-thesis retirement: the revived form claims only
+compatibility guarantees and installed base (the declaration graph),
+concedes margins and closed libraries never applied. Three overclaim
+corrections applied before adoption and made binding in the doctrine:
+no "zero-hallucination"/"proves safety" (deterministic verification of
+declared fields with stated blind spots and the 38 of 70 record), "the
+only engine" stays a labeled positioning hypothesis, format scope is
+what ships, growing by evidence only. Ordered priorities: kernel
+latency measured per release, MCP grows toward dependents/coverage for
+agents, the lock graduates toward a standalone versioned spec.
+DEPENDENTS-GRAPH spec DRAFTED (docs/architecture/DEPENDENTS-GRAPH.md,
+awaiting founder ratification): discovery by committed lock, nightly
+zero-server JSONL index of verifiable claims with partial coverage
+stated, trust rules frozen hardest (a lock is a claim by its
+publisher, coordination not security), A4 use-gate before any
+adoption claim.

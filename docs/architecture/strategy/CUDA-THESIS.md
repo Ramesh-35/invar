@@ -4,7 +4,7 @@
 > report: CUDA's moat came from hardware margins, closed tuned libraries,
 > compatibility guarantees and an installed base. A contract checker over open
 > formats has none of these. The thesis does not hold and must not be cited.
-> Kept below unchanged as history. Current strategy: docs/architecture/ROADMAP.md.
+> Kept below unchanged as history. Current strategy: docs/architecture/strategy/DECLARATION-GRAPH.md, whose Substrate doctrine section (2026-10-12) explicitly supersedes this retirement with a narrower, different mechanism.
 
 > **Classification: `[STRATEGIC HYPOTHESIS]`.** This entire document is a
 > positioning bet about *how INVAR could matter if the category residue is real*.

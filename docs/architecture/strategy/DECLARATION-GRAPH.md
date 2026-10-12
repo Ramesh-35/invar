@@ -69,3 +69,46 @@ Priority order:
    directories toward published locks (frozen spec before any build,
    founder ratifies).
 3. The public lock index as a nightly JSONL artifact (after the spec).
+
+## Substrate doctrine (founder, 2026-10-12: first-class strategy)
+
+This section REVIVES the substrate framing that CUDA-THESIS.md retired
+on 2026-10-08, as an explicit supersession, not a silent flip. The
+retirement held that CUDA's moat (hardware margins, closed tuned
+libraries, compatibility guarantees, installed base) does not map to a
+contract checker. The revived form claims only the two that do map:
+compatibility guarantees (our frozen formats: exit codes never
+re-meaning, locks reading 1..4 forever, receipts byte-reproducible)
+and an installed base (the declaration graph: every published lock and
+every agent integration compounds). Margins and closed libraries are
+conceded as never applicable. CUDA-THESIS.md stays retired as written;
+this doctrine is its successor with a different mechanism.
+
+The doctrine: do not build to be integrated or acquired; build the
+layer other things are unsafe without. Platforms own the UI; INVAR
+owns the deterministic verification kernel and its evidence ledger.
+The lock is the intermediate representation agents compile their
+changes against; the receipt is the proof object that travels across
+org and platform boundaries; SARIF and MCP are the sockets platforms
+and agents plug into.
+
+Language discipline for this doctrine, binding (overclaim corrections
+applied to the founder's framing before adoption):
+- Never "zero-hallucination" or "proves safety": INVAR deterministically
+  verifies conservation of DECLARED fields and STATES what it did not
+  evaluate; the held-out record (38 of 70) is part of every claim.
+- "The only engine that provides it" is a positioning hypothesis,
+  unverified; it is argued from the record, never asserted as fact.
+- Format scope is what ships: JSON and a stated TOML subset for
+  payloads, the supported languages for static surfaces; Protobuf and
+  OpenAPI enter when evidence demands, not when the analogy does.
+
+Technical priorities under the doctrine (ordered):
+1. The kernel stays instant and zero-overhead: engine wall times
+   remain measured and published per release, never promised.
+2. First-class agent interface: the MCP server grows from read-only
+   check/contract toward dependents and coverage, so an agent can ask
+   blast-radius and blind-spot questions mid-edit with receipts.
+3. The lock as protocol: INVAR-LOCK.md graduates toward a standalone
+   versioned specification others can implement; the DEPENDENTS-GRAPH
+   spec (step 2 of the locked sequence) is its first cross-repo use.
