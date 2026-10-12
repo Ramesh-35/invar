@@ -1338,3 +1338,14 @@ verified on the audit repos themselves:
 43 of 43 tests green. swh-verify.sh review also closed this pass
 (8201c9d): founder's 429 backoff kept, documented exit contract and
 live absent-count restored.
+
+## 2026-10-12: d33b67b and e46d310 provenance stated by the founder
+
+Founder's answer on the record: the d33b67b figures were a synthetic
+example list from a drafting assistant's script wrapper, misread as a
+completed execution before any real run; the e46d310 swh-verify
+rewrite was likewise assistant-generated and committed without
+engineer review. Both are already superseded (453d617 quarantine +
+init-audit-2026-10-12.tsv; 8201c9d). Standing lesson, now explicit:
+assistant-drafted commits enter main only after engineer review, the
+same bar as everything else.
