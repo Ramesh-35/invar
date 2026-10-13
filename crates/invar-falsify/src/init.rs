@@ -300,7 +300,18 @@ pub fn discover(root: &Path) -> Discovery {
             if overlap.is_empty() {
                 continue;
             }
-            let id = format!("schema:{}:{}->{}", file_name(&s.path), s.label, file_name(&c.path));
+            let base_id = format!("schema:{}:{}->{}", file_name(&s.path), s.label, file_name(&c.path));
+            // Ids key contracts in invar.lock, so they must be unique. Producers that
+            // share a basename (`schema.json` in several directories) used to collide,
+            // the lock kept one, and the first `invar check` failed with a mismatch
+            // (found by Experiment B, 2026-10-13). Non-colliding ids stay byte-identical;
+            // a collision gets a deterministic `#2`, `#3` suffix in discovery order.
+            let mut id = base_id.clone();
+            let mut n = 2;
+            while d.proposals.iter().any(|p| p.id == id) {
+                id = format!("{base_id}#{n}");
+                n += 1;
+            }
             if ![&id, &s.path, &c.path].iter().all(|v| toml_safe(v))
                 || !s.pointer.as_deref().map_or(true, toml_safe)
             {

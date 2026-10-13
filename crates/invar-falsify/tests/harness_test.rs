@@ -2257,3 +2257,39 @@ fn a41_check_states_sibling_dependents() {
     assert_eq!(bad.status.code(), plain.status.code(), "scan error never changes the exit code");
     let _ = std::fs::remove_dir_all(&root);
 }
+
+// ---------------------------------------------------------------------------
+// 50. init id uniqueness (alpha.29, found by Experiment B 2026-10-13): two
+// producers sharing a basename (`schema.json` in two directories) must get
+// distinct contract ids, so a stranger's init -> lock -> check never errors
+// (exit 3) on its first run. Non-colliding ids are unchanged.
+// ---------------------------------------------------------------------------
+#[test]
+fn init_ids_unique_across_same_basename_producers() {
+    use std::process::Command;
+    let bin = env!("CARGO_BIN_EXE_invar");
+    let dir = std::env::temp_dir().join(format!("invar-b50-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    for sub in ["a", "b", "app"] {
+        std::fs::create_dir_all(dir.join(sub)).unwrap();
+    }
+    let w = |n: &str, b: &str| std::fs::write(dir.join(n), b).unwrap();
+    w("a/schema.json", r#"{"type":"object","properties":{"order_id":{"type":"string"},"total_cents":{"type":"integer"}}}"#);
+    w("b/schema.json", r#"{"type":"object","properties":{"order_id":{"type":"string"},"currency":{"type":"string"}}}"#);
+    w("app/client.ts", "export const f = (payload: any) => [payload.order_id, payload.total_cents, payload.currency];\n");
+    let run = |args: &[&str]| Command::new(bin).args(args).current_dir(&dir).output().unwrap();
+    let init = run(&["init"]);
+    assert_eq!(init.status.code(), Some(0), "{}", String::from_utf8_lossy(&init.stderr));
+    let toml = std::fs::read_to_string(dir.join("invar.toml")).unwrap();
+    let ids: Vec<&str> = toml.lines().filter(|l| l.starts_with("id = ")).collect();
+    assert_eq!(ids.len(), 2, "{toml}");
+    assert_ne!(ids[0], ids[1], "ids must be unique: {ids:?}");
+    assert!(ids.iter().any(|l| !l.contains('#')), "the first id stays unsuffixed: {ids:?}");
+    let lock = run(&["lock"]);
+    assert_eq!(lock.status.code(), Some(0), "{}", String::from_utf8_lossy(&lock.stderr));
+    let lock_text = std::fs::read_to_string(dir.join("invar.lock")).unwrap();
+    assert!(lock_text.matches("[[contract]]").count() == 2 || lock_text.matches("contract").count() >= 2, "{lock_text}");
+    let check = run(&["check"]);
+    assert_ne!(check.status.code(), Some(3), "first check must not error: {}{}", String::from_utf8_lossy(&check.stdout), String::from_utf8_lossy(&check.stderr));
+    let _ = std::fs::remove_dir_all(&dir);
+}
