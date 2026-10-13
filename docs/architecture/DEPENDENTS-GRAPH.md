@@ -1,4 +1,4 @@
-# DEPENDENTS-GRAPH: dependents over published locks (spec DRAFT for ratification)
+# DEPENDENTS-GRAPH: dependents over published locks (spec RATIFIED 2026-10-13; build gated)
 
 Step 2 of the locked declaration-graph sequence
 (strategy/DECLARATION-GRAPH.md). Extends `invar dependents` from local
@@ -79,5 +79,14 @@ The nightly public index is explicitly sequenced AFTER the MCP agent
 surface (shipped, alpha.26) and after the A4.1 producer-side-awareness
 ratification decision. Local value precedes any public graph: a registry
 with ten publishers is worth nothing to the eleventh. Spec content above
-is unchanged; this note changes only its place in the queue. Still
-awaiting founder ratification.
+is unchanged; this note changes only its place in the queue. Ratified 2026-10-13; see the ratification section below.
+
+## Ratification (2026-10-13, founder ruling)
+
+The specification above is RATIFIED as the canonical format: anyone
+publishing an invar.lock now aligns with a frozen spec. The index
+BUILD is held behind a use-gate: it starts only when 5 independent,
+non-maintainer public repositories have committed invar.lock files.
+Until then the nightly index is empty infrastructure and is not built.
+Reason of record: vacancy pass G found no visible outside adoption
+(docs/falsification/vacancy-gpass-2026-10-13.md).

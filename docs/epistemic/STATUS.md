@@ -1461,3 +1461,5 @@ re-entry condition: a named consumer asks for the envelope. invar backtest
 dogfooded against fastapi's real history before landing
 (docs/falsification/backtest-dogfood-2026-10-12.md): 144 ms over the full
 21-commit file history, zero absence windows, introduction dates verified.
+
+2026-10-13: DEPENDENTS-GRAPH spec RATIFIED (founder ruling); index build held behind a use-gate of 5 independent non-maintainer public repositories with committed invar.lock files. Experiment A mining half authorized under the thresholds frozen in docs/falsification/vacancy-gpass-2026-10-13.md.
