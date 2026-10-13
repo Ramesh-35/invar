@@ -65,3 +65,30 @@ matches the external finding that churn concentrates in a small set of
 servers. The checker's value, if any, is concentrated in exactly those
 actively developed servers. The extractor undercounts: it reads top-level
 fields only and could not resolve most schemas, so 24 is a floor.
+
+## Addendum: disclosure check (2026-10-13, after the count, before any outreach)
+
+All three servers with verified breaks DOCUMENTED them as deliberate in
+their own changelogs: cyanheads/git-mcp-server v2.15.0 ("Breaking:
+Renamed inputs and outputs on git_add, git_blame, git_branch, and
+git_clone", each rename listed, plus old-name rejection tests);
+ankimcp/anki-mcp-server v0.25.0 ("BREAKING: get_due_cards / get_cards
+no longer return back by default") and v0.25.1 (mod no longer required,
+fixes #66); the-40-thieves/obsidian-tc 1.32.0 ("the advertised output
+schemas mark the concise-dropped fields optional", in four entries).
+
+Consequences recorded:
+1. Producer-side detection is not where the pain is. Maintainers who
+   break output contracts here know and announce it. The exposure is on
+   CONSUMERS holding the old schema, which is where INVAR's locks live.
+2. Condition 3 as frozen (offer maintainers "a consumer lock") cannot be
+   run honestly: INVAR does not parse MCP output schemas today, and these
+   maintainers have no detection gap to fill. It is NOT run as written;
+   the reason is recorded here instead of a fabricated outreach result.
+   Candidate A therefore cannot reach CONFIRM under the frozen rule.
+3. Condition 2 (public consumers reading the broken fields) remains the
+   informative test, and runs next.
+4. One in-the-wild instance of the declared-versus-observed class:
+   obsidian-tc 1.32.0 notes index_vault returned a field its declared
+   output schema omitted, so "a strict client rejected every detailed
+   result". One instance, an anecdote, not a rate.
