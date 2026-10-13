@@ -1014,6 +1014,7 @@ fn cmd_mcp(args: McpArgs) -> Result<i32> {
         transport: if args.offline { None } else { Some(&curl as &dyn Transport) },
         token: std::env::var("GITHUB_TOKEN").ok().filter(|v| !v.is_empty()),
         today: lock::today_utc(),
+        measured_record: MEASURED_RECORD,
     };
     let stdin = std::io::stdin();
     server.serve(stdin.lock(), std::io::stdout())?;

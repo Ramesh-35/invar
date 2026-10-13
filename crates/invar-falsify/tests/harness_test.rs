@@ -1291,7 +1291,7 @@ fn fix_suggest_and_mcp_server() {
     assert!(s[0].patch.is_none() && s[0].note.as_deref().unwrap().starts_with("type change"));
 
     // MCP: initialize, list, both tools, unknown method; notifications get no reply.
-    let server = Server { config: dir.join("invar.toml"), transport: None, token: None, today: day };
+    let server = Server { config: dir.join("invar.toml"), transport: None, token: None, today: day, measured_record: "test" };
     let input = concat!(
         r#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05"}}"#, "\n",
         r#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#, "\n",
@@ -1305,7 +1305,7 @@ fn fix_suggest_and_mcp_server() {
     let replies: Vec<serde_json::Value> = String::from_utf8(out).unwrap().lines().map(|l| serde_json::from_str(l).unwrap()).collect();
     assert_eq!(replies.len(), 5, "no reply to a notification");
     assert_eq!(replies[0]["result"]["protocolVersion"], "2024-11-05");
-    assert_eq!(replies[1]["result"]["tools"].as_array().unwrap().len(), 2);
+    assert_eq!(replies[1]["result"]["tools"].as_array().unwrap().len(), 4);
     let check = &replies[2]["result"]["structuredContent"];
     assert_eq!(check["result"], "violated", "{check}");
     assert_eq!(check["contracts"][0]["residue"][0]["field"], "Order.amount_cents");
@@ -2051,4 +2051,68 @@ fn sarif_export_honest_mapping() {
     let rules = run["tool"]["driver"]["rules"].as_array().unwrap();
     assert!(rules.iter().any(|r| r["id"] == "violated"));
     assert!(rules.iter().any(|r| r["id"] == "not-evaluated:default-switch"));
+}
+
+// ---------------------------------------------------------------------------
+// 47. MCP extension (alpha.26): `dependents` and `coverage` over MCP are the
+// SAME JSON documents as the CLI's --format json, proven binary-vs-binary
+// (one rendering path each). The server stays read-only: four tools, and a
+// failed call is an isError result, never a verdict.
+// ---------------------------------------------------------------------------
+#[test]
+fn mcp_dependents_and_coverage_match_cli() {
+    use std::io::Write as _;
+    use std::process::{Command, Stdio};
+    let bin = env!("CARGO_BIN_EXE_invar");
+    let dir = std::env::temp_dir().join(format!("invar-mcp47-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(dir.join("locks/web")).unwrap();
+    let w = |n: &str, b: &str| std::fs::write(dir.join(n), b).unwrap();
+    w("order.go", "type Order struct {\n\tAmountCents int64 `json:\"amount_cents\"`\n\tCurrency string `json:\"currency\"`\n}\n");
+    w("client.js", "const a = order.amount_cents;\n");
+    let cfg = "[[invariant]]\nkind = \"schema\"\nid = \"orders\"\nproducer = \"order.go\"\nconsumer = \"client.js\"\n";
+    w("invar.toml", cfg);
+    let sections = parse_sections("invar.toml", cfg).unwrap();
+    let r = Resolver::local(&dir);
+    let day = invar_falsify::lock::parse_date("2026-10-12").unwrap();
+    let l = invar_falsify::lock::compute(&sections, &r, &invar_falsify::lock::Lock::default(), day).unwrap();
+    let rendered = invar_falsify::lock::render(&l).unwrap();
+    w("invar.lock", &rendered);
+    w("locks/web/invar.lock", &rendered);
+
+    let cli = |args: &[&str]| -> serde_json::Value {
+        let out = Command::new(bin).args(args).current_dir(&dir).output().unwrap();
+        assert!(out.status.code() == Some(0) || out.status.code() == Some(4), "{:?}", out);
+        serde_json::from_slice(&out.stdout).unwrap()
+    };
+    let cli_dep = cli(&["dependents", "Order.amount_cents", "--locks", "locks", "--format", "json"]);
+    let cli_cov = cli(&["coverage", "--format", "json"]);
+
+    let mut child = Command::new(bin)
+        .args(["mcp", "--offline"])
+        .current_dir(&dir)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let input = concat!(
+        r#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05"}}"#, "\n",
+        r#"{"jsonrpc":"2.0","id":2,"method":"tools/list"}"#, "\n",
+        r#"{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"dependents","arguments":{"query":"Order.amount_cents","locks":"locks"}}}"#, "\n",
+        r#"{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"coverage","arguments":{}}}"#, "\n",
+        r#"{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"dependents","arguments":{"locks":"locks"}}}"#, "\n",
+    );
+    child.stdin.take().unwrap().write_all(input.as_bytes()).unwrap();
+    let out = child.wait_with_output().unwrap();
+    assert_eq!(out.status.code(), Some(0), "mcp exits 0 at EOF, never a verdict");
+    let replies: Vec<serde_json::Value> = String::from_utf8(out.stdout).unwrap().lines().map(|s| serde_json::from_str(s).unwrap()).collect();
+    assert_eq!(replies.len(), 5);
+    assert_eq!(replies[1]["result"]["tools"].as_array().unwrap().len(), 4);
+    assert!(replies[1]["result"]["tools"].as_array().unwrap().iter().all(|t| t["annotations"]["readOnlyHint"] == true), "all four tools read-only");
+    assert_eq!(replies[2]["result"]["structuredContent"], cli_dep, "dependents: one rendering path");
+    assert_eq!(replies[3]["result"]["structuredContent"], cli_cov, "coverage: one rendering path");
+    let mcp_dep = &replies[2]["result"]["structuredContent"];
+    assert_eq!(mcp_dep["dependents"][0]["consumer"], "web/invar.lock");
+    assert!(replies[4]["result"]["isError"] == true && replies[4]["result"]["content"][0]["text"].as_str().unwrap().contains("not a verdict"), "missing arg: error, never a verdict");
+    let _ = std::fs::remove_dir_all(&dir);
 }
