@@ -203,3 +203,135 @@ pub fn render_json(query: &str, producer_filter: Option<&str>, a: &Answer) -> St
     });
     format!("{}\n", serde_json::to_string_pretty(&v).unwrap_or_default())
 }
+
+// ---------------------------------------------------------------------------
+// A4.1 (ratified 2026-10-13): producer-side sibling awareness for `invar
+// check`. Awareness, not modification detection: check has no baseline to
+// know what changed, so this states which sibling lockfiles bind which of
+// THIS repository's producer files. Read-only, zero network, never leaves
+// `locks_dir`, and the caller must never let it change check's exit code.
+// ---------------------------------------------------------------------------
+
+/// One producer file of this repository, bound by one sibling lockfile.
+pub struct SiblingRow {
+    /// Producer path relative to this repository's base_dir, as resolved.
+    pub producer: String,
+    /// Sibling lockfile path relative to the scanned directory.
+    pub lockfile: String,
+    pub bindings: usize,
+}
+
+pub struct Siblings {
+    pub rows: Vec<SiblingRow>,
+    pub lockfiles_scanned: usize,
+    /// Sibling lockfiles that did not parse (stated, never dropped).
+    pub parse_errors: Vec<String>,
+    /// Local producer refs in sibling locks that could not be resolved on
+    /// disk (moved or deleted files); counted, never guessed at.
+    pub unresolved_producers: usize,
+    pub own_lock_excluded: bool,
+}
+
+/// Which sibling lockfiles under `locks_dir` bind producer files inside
+/// `base_dir`? The repository's own invar.lock is excluded.
+pub fn siblings(base_dir: &Path, locks_dir: &Path) -> Result<Siblings> {
+    let base = std::fs::canonicalize(base_dir)
+        .map_err(|e| anyhow::anyhow!("resolving {}: {e}", base_dir.display()))?;
+    let own_lock = std::fs::canonicalize(base_dir.join("invar.lock")).ok();
+    let mut files = Vec::new();
+    walk(locks_dir, &mut files);
+    files.sort();
+    let mut rows: std::collections::BTreeMap<(String, String), usize> = Default::default();
+    let mut parse_errors = Vec::new();
+    let mut unresolved = 0usize;
+    let mut scanned = 0usize;
+    let mut own_excluded = false;
+    for lf in &files {
+        if own_lock.is_some() && std::fs::canonicalize(lf).ok() == own_lock {
+            own_excluded = true;
+            continue;
+        }
+        scanned += 1;
+        let rel_lock = lf
+            .strip_prefix(locks_dir)
+            .unwrap_or(lf)
+            .display()
+            .to_string();
+        let text = match std::fs::read_to_string(lf) {
+            Ok(t) => t,
+            Err(e) => {
+                parse_errors.push(format!("{rel_lock}: {e}"));
+                continue;
+            }
+        };
+        let lock = match lock::parse(&lf.display().to_string(), &text) {
+            Ok(l) => l,
+            Err(e) => {
+                parse_errors.push(format!("{rel_lock}: {e}"));
+                continue;
+            }
+        };
+        let lock_dir = lf.parent().unwrap_or(Path::new("."));
+        for c in &lock.contracts {
+            if crate::resolver::is_remote(&c.producer) {
+                continue;
+            }
+            let resolved = match std::fs::canonicalize(lock_dir.join(&c.producer)) {
+                Ok(p) => p,
+                Err(_) => {
+                    unresolved += 1;
+                    continue;
+                }
+            };
+            if let Ok(inside) = resolved.strip_prefix(&base) {
+                *rows
+                    .entry((inside.display().to_string(), rel_lock.clone()))
+                    .or_insert(0) += c.bindings.len();
+            }
+        }
+    }
+    Ok(Siblings {
+        rows: rows
+            .into_iter()
+            .map(|((producer, lockfile), bindings)| SiblingRow { producer, lockfile, bindings })
+            .collect(),
+        lockfiles_scanned: scanned,
+        parse_errors,
+        unresolved_producers: unresolved,
+        own_lock_excluded: own_excluded,
+    })
+}
+
+/// Text for the end of `invar check`. Informational, never a verdict.
+pub fn render_siblings(locks_display: &str, s: &Siblings) -> String {
+    let mut out = String::new();
+    out.push_str(&format!(
+        "sibling dependents ({locks_display}: {} lockfile(s) scanned{}):\n",
+        s.lockfiles_scanned,
+        if s.own_lock_excluded { ", own lock excluded" } else { "" }
+    ));
+    if s.rows.is_empty() {
+        out.push_str("  none bind this repository's producer files\n");
+    }
+    for r in &s.rows {
+        out.push_str(&format!(
+            "  {} <- {} ({} binding(s))\n",
+            r.producer, r.lockfile, r.bindings
+        ));
+    }
+    for e in &s.parse_errors {
+        out.push_str(&format!("  unreadable (stated, never dropped): {e}\n"));
+    }
+    if s.unresolved_producers > 0 {
+        out.push_str(&format!(
+            "  {} sibling producer ref(s) did not resolve on disk (stated)\n",
+            s.unresolved_producers
+        ));
+    }
+    if !s.rows.is_empty() {
+        out.push_str(&format!(
+            "  detail: invar dependents <Type.field> --locks {locks_display}\n"
+        ));
+    }
+    out
+}

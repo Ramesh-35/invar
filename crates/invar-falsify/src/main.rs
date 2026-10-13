@@ -133,6 +133,12 @@ struct CheckArgs {
     /// GITHUB_TOKEN and GITHUB_BASE_REF are read from the environment).
     #[arg(long, default_value_t = false)]
     ci: bool,
+    /// A4.1: also scan this directory for sibling invar.lock files and state
+    /// which of them bind this repository's producer files. Read-only, zero
+    /// network, never changes the exit code. Overrides `[dependents]
+    /// locks = "<dir>"` in invar.toml.
+    #[arg(long)]
+    locks: Option<String>,
     /// Also write a markdown report (PR comment / job summary) to this path.
     #[arg(long)]
     report_md: Option<String>,
@@ -766,6 +772,27 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
         outcomes.len() - violations - skipped
     );
     println!("measured: {MEASURED_RECORD}");
+
+    // A4.1 sibling awareness (ratified 2026-10-13): flag overrides the
+    // optional `[dependents] locks` config key. Informational only: nothing
+    // in this block may change the exit code, including scan errors, which
+    // are stated instead.
+    let locks_dir = args.locks.clone().or_else(|| {
+        sections
+            .iter()
+            .find(|(s, _)| s == "dependents")
+            .and_then(|(_, kv)| kv.iter().find(|(k, _)| k == "locks"))
+            .map(|(_, v)| v.clone())
+    });
+    if let Some(dir) = locks_dir {
+        let base = base_dir_of(&args.config);
+        let p = std::path::Path::new(&dir);
+        let resolved = if p.is_absolute() { p.to_path_buf() } else { base.join(p) };
+        match invar_falsify::dependents::siblings(&base, &resolved) {
+            Ok(s) => print!("{}", invar_falsify::dependents::render_siblings(&dir, &s)),
+            Err(e) => println!("sibling dependents ({dir}): not scanned: {e:#} (stated; exit unchanged)"),
+        }
+    }
 
     if let Some(path) = &args.report_md {
         if let Err(e) = std::fs::write(path, render_report_md(&outcomes)) {

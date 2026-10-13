@@ -7,7 +7,7 @@ _invar() {
     return
   fi
   case "$words[2]" in
-    check)          compadd -- --config --ledger --ci --report-md --receipt --lock-signers --lock-principal --sample --contract --help;;
+    check)          compadd -- --config --ledger --ci --locks --report-md --receipt --lock-signers --lock-principal --sample --contract --help;;
     lock)           compadd -- --config --update --lock-signers --lock-principal --sample --contract --help;;
     init)           compadd -- --root --force --stdout --help;;
     dependents)     compadd -- --locks --producer --format --help;;

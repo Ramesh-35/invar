@@ -2195,3 +2195,65 @@ fn backtest_replays_git_history() {
     let _ = std::fs::remove_dir_all(&dir);
     let _ = std::fs::remove_dir_all(&nogit);
 }
+
+// ---------------------------------------------------------------------------
+// 49. A4.1 (alpha.28): `invar check` sibling awareness. A sibling lockfile
+// binding this repo's producer is named with its binding count; the repo's
+// own lock is excluded; the --locks flag overrides the [dependents] config
+// key; and the notice NEVER changes check's exit code, including when the
+// locks directory is unreadable.
+// ---------------------------------------------------------------------------
+#[test]
+fn a41_check_states_sibling_dependents() {
+    use std::process::Command;
+    let bin = env!("CARGO_BIN_EXE_invar");
+    let root = std::env::temp_dir().join(format!("invar-a41-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(root.join("a")).unwrap();
+    std::fs::create_dir_all(root.join("b")).unwrap();
+    std::fs::create_dir_all(root.join("empty")).unwrap();
+    let w = |n: &str, b: &str| std::fs::write(root.join(n), b).unwrap();
+    // Repo a: the producer, with one self-contained contract so check has
+    // something ordinary to evaluate.
+    w("a/order.go", "type Order struct {\n\tAmountCents int64 `json:\"amount_cents\"`\n\tCurrency string `json:\"currency\"`\n}\n");
+    w("a/client.js", "const x = order.currency;\n");
+    let cfg_a = "[[invariant]]\nkind = \"schema\"\nid = \"self\"\nproducer = \"order.go\"\nconsumer = \"client.js\"\n";
+    w("a/invar.toml", cfg_a);
+    let s_a = parse_sections("invar.toml", cfg_a).unwrap();
+    let day = invar_falsify::lock::parse_date("2026-10-13").unwrap();
+    let l_a = invar_falsify::lock::compute(&s_a, &Resolver::local(&root.join("a")), &invar_falsify::lock::Lock::default(), day).unwrap();
+    w("a/invar.lock", &invar_falsify::lock::render(&l_a).unwrap());
+    // Repo b: a sibling consumer whose lock binds a's producer file.
+    w("b/client.js", "const a = order.amount_cents;\n");
+    let cfg_b = "[[invariant]]\nkind = \"schema\"\nid = \"orders\"\nproducer = \"../a/order.go\"\nconsumer = \"client.js\"\n";
+    w("b/invar.toml", cfg_b);
+    let s_b = parse_sections("invar.toml", cfg_b).unwrap();
+    let l_b = invar_falsify::lock::compute(&s_b, &Resolver::local(&root.join("b")), &invar_falsify::lock::Lock::default(), day).unwrap();
+    w("b/invar.lock", &invar_falsify::lock::render(&l_b).unwrap());
+
+    let run = |dir: &str, args: &[&str]| Command::new(bin).args(args).current_dir(root.join(dir)).output().unwrap();
+    let plain = run("a", &["check"]);
+    let flagged = run("a", &["check", "--locks", ".."]);
+    assert_eq!(plain.status.code(), flagged.status.code(), "sibling scan never changes the exit code");
+    let out = String::from_utf8_lossy(&flagged.stdout).to_string();
+    assert!(out.contains("sibling dependents"), "{out}");
+    assert!(out.contains("own lock excluded"), "{out}");
+    assert!(out.contains("order.go <- b/invar.lock (1 binding(s))"), "{out}");
+    assert!(!String::from_utf8_lossy(&plain.stdout).contains("sibling dependents"), "no notice without flag or config");
+
+    // Config key variant, and C6: a [dependents] section changes nothing else.
+    w("a/invar.toml", &format!("{cfg_a}\n[dependents]\nlocks = \"..\"\n"));
+    let via_cfg = run("a", &["check"]);
+    assert_eq!(via_cfg.status.code(), plain.status.code(), "config-key scan never changes the exit code");
+    let out_cfg = String::from_utf8_lossy(&via_cfg.stdout).to_string();
+    assert!(out_cfg.contains("order.go <- b/invar.lock"), "{out_cfg}");
+    // Flag overrides config: an empty dir reports none.
+    let overridden = run("a", &["check", "--locks", "../empty"]);
+    let out_ov = String::from_utf8_lossy(&overridden.stdout).to_string();
+    assert!(out_ov.contains("none bind this repository's producer files"), "{out_ov}");
+    assert!(!out_ov.contains("b/invar.lock"), "flag wins over config");
+    // Unreadable locks dir: stated, exit unchanged.
+    let bad = run("a", &["check", "--locks", "../missing-dir"]);
+    assert_eq!(bad.status.code(), plain.status.code(), "scan error never changes the exit code");
+    let _ = std::fs::remove_dir_all(&root);
+}

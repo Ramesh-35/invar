@@ -10,7 +10,7 @@ complete -c invar -n "__fish_use_subcommand" -a "dependents" -d "Who depends on 
 complete -c invar -n "__fish_use_subcommand" -a "backtest" -d "Replay locked bindings over git history"
 complete -c invar -n "__fish_use_subcommand" -a "verify-receipt" -d "Re-verify an evidence receipt"
 complete -c invar -n "__fish_use_subcommand" -a "receipt fix mcp completions run validate report verify audit replay help"
-complete -c invar -n "__fish_seen_subcommand_from check" -l config -l ledger -l ci -l report-md -l receipt -l lock-signers -l lock-principal -l sample -l contract
+complete -c invar -n "__fish_seen_subcommand_from check" -l config -l ledger -l ci -l locks -l report-md -l receipt -l lock-signers -l lock-principal -l sample -l contract
 complete -c invar -n "__fish_seen_subcommand_from lock" -l config -l update -l lock-signers -l lock-principal -l sample -l contract
 complete -c invar -n "__fish_seen_subcommand_from init" -l root -l force -l stdout
 complete -c invar -n "__fish_seen_subcommand_from dependents" -l locks -l producer -l format

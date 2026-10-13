@@ -66,3 +66,24 @@ No crawling, no registry, no server, no transitive closure (a lock binds a
 consumer to a producer; chains are a later question), no writing, no
 network. Option B (fetching consumer locks by `github:` ref) is a separate
 future ratification.
+
+## A4.1: producer-side awareness in `invar check` (ratified 2026-10-13, v0.1.0-alpha.28)
+
+`invar check` states, after its ordinary output, which sibling
+invar.lock files bind this repository's producer files: producer path,
+sibling lockfile, binding count, and a pointer to `invar dependents`
+for field-level detail.
+
+Discovery and precedence: the optional `[dependents] locks = "<dir>"`
+key in invar.toml (written by users, never by `invar init`), overridden
+by `invar check --locks <dir>` when both are present. No flag and no
+key means no scan and no output: zero-config init is untouched.
+
+Scope, stated: this is AWARENESS, not modification detection. check has
+no baseline to know what changed; it reports who binds what on every
+scanned run. Hard guarantees: the scan never leaves the given
+directory, performs zero network calls, excludes the repository's own
+invar.lock, and never changes check's exit code: sibling parse errors,
+unresolvable producer refs, and an unreadable locks directory are all
+stated in the output instead (test 49 measures exit-code identity
+across flag, config, override, and unreadable-directory runs).

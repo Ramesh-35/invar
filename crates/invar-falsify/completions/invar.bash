@@ -8,7 +8,7 @@ _invar() {
   fi
   case "${COMP_WORDS[1]}" in
     backtest)       COMPREPLY=( $(compgen -W "--config --contract --depth --format --help" -- "$cur") );;
-    check)          COMPREPLY=( $(compgen -W "--config --ledger --ci --report-md --receipt --lock-signers --lock-principal --sample --contract --help" -- "$cur") );;
+    check)          COMPREPLY=( $(compgen -W "--config --ledger --ci --locks --report-md --receipt --lock-signers --lock-principal --sample --contract --help" -- "$cur") );;
     lock)           COMPREPLY=( $(compgen -W "--config --update --lock-signers --lock-principal --sample --contract --help" -- "$cur") );;
     init)           COMPREPLY=( $(compgen -W "--root --force --stdout --help" -- "$cur") );;
     dependents)     COMPREPLY=( $(compgen -W "--locks --producer --format --help" -- "$cur") );;
