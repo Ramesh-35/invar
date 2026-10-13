@@ -1,8 +1,8 @@
 # Experiment A: MCP output-contract breaks across releases
 
 Pre-registered decision experiment from vacancy pass G
-(../vacancy-gpass-2026-10-13.md). Status: MINING HALF COMPLETE,
-conditions 2 (public consumers) and 3 (maintainer interest) PENDING.
+(../vacancy-gpass-2026-10-13.md). Status: CLOSED, REFUTED on condition 2 (zero public
+consumers reading a broken field); condition 3 not run, reason recorded.
 
 - PREDICTIONS.md: method, thresholds and predictions, frozen before any
   data, with the addendum, smoke-test corrections and the aborted run 1.

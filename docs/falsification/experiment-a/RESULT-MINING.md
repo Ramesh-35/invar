@@ -92,3 +92,44 @@ Consequences recorded:
    obsidian-tc 1.32.0 notes index_vault returned a field its declared
    output schema omitted, so "a strict client rejected every detailed
    result". One instance, an anecdote, not a rate.
+
+## Condition 2: public consumers (scored 2026-10-13). RESULT: REFUTE
+
+Search: founder-run `gh search code`, four queries (chunks_unchanged,
+obsidian-tc, @cyanheads/git-mcp-server, get_due_cards), 30 results
+each, default branches of public repos only. Every plausible hit was
+cloned and read by the engineer.
+- shaqmughal/seekstone (benchmark adapter): a real code consumer of
+  obsidian-tc, reading search_text items[].path, read_note .content and
+  list_notes notes[].path. None of these is among the 24 broken fields;
+  reads are defensive (`??` fallbacks); pinned to 1.15.0. Not counted.
+- provos/ironcurtain: no field reads. Documents that
+  @cyanheads/git-mcp-server returns error structuredContent that does
+  not match its declared outputSchema, and ships an always-valid
+  validator to bypass SDK output validation entirely.
+- zouwei/moraya, neiii/bridle: agent configuration presets only.
+- microsoft/conductor: installs @cyanheads/git-mcp-server@2.15.1,
+  after the break; configuration only.
+- All other hits: CVE databases, directories, the servers' own repos,
+  or unrelated code sharing a common name.
+Identifiable public consumers reading a broken field by name: 0.
+Frozen REFUTE condition "zero identifiable consumers" is met.
+
+Predictions scored: M3 (0 to 2 consumer-backed breaks) CONFIRMED (0).
+Overall (REFUTE or inconclusive more likely than CONFIRM) CONFIRMED.
+
+## What the refutation teaches (recorded, not a new claim)
+
+1. MCP tool outputs are consumed mostly by models at runtime, not by
+   code. The consumer-side lock ("lock the fields your code reads") has
+   almost nothing to read: the reader is an agent, wired in by config.
+2. The pain observed twice in the wild is declared-versus-observed
+   mismatch under strict SDK validation (obsidian-tc index_vault;
+   git-mcp-server error responses), and one consumer's response was to
+   disable output validation altogether: the disarmed-gate pattern
+   again. Two instances, not a rate. Checking it would require running
+   the server, which is outside this experiment's static frame.
+3. Candidate A is closed. Shelved, not deleted.
+
+Limits: four queries, 30 results each, public default branches only;
+private consumers are invisible to this method.

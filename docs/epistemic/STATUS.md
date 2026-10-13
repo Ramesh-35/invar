@@ -1463,3 +1463,5 @@ dogfooded against fastapi's real history before landing
 21-commit file history, zero absence windows, introduction dates verified.
 
 2026-10-13: DEPENDENTS-GRAPH spec RATIFIED (founder ruling); index build held behind a use-gate of 5 independent non-maintainer public repositories with committed invar.lock files. Experiment A mining half authorized under the thresholds frozen in docs/falsification/vacancy-gpass-2026-10-13.md.
+
+2026-10-13: Experiment A CLOSED, REFUTED on condition 2 (zero public consumers reading any of the 24 verified broken output fields). Mining half confirmed breaks are real (24, concentrated in 3 of 30 servers, all deliberately documented by their maintainers). Record: docs/falsification/experiment-a/.
