@@ -20,7 +20,7 @@ use invar_falsify::check::{evaluate_with, render_report_md};
 use invar_falsify::lock;
 use invar_falsify::receipt;
 use invar_falsify::evaluator::{evaluate_case, CaseResult};
-use invar_falsify::init::{discover, render_manifest};
+use invar_falsify::init::discover;
 use invar_falsify::ledger::Ledger;
 use invar_falsify::manifest::{CompositeConfig, EpistemicStatus, Manifest};
 use invar_falsify::report::{RunReport, ENGINE_VERSION};
@@ -47,6 +47,9 @@ enum Command {
     Init(InitArgs),
     /// Who depends on a producer field, from local invar.lock files.
     Dependents(DependentsArgs),
+    /// Replay today's locked bindings over the producer's git history:
+    /// when was each bound field absent, by commit and date (never a verdict).
+    Backtest(BacktestArgs),
     /// Replay real caught breaks from bytes pinned in demo/, fully offline.
     /// The VIOLATED verdicts shown are the demonstration, not a failure.
     Demo,
@@ -61,7 +64,8 @@ enum Command {
     Receipt(ReceiptArgs),
     /// Suggest consumer patches for unambiguous field renames (never writes).
     Fix(FixArgs),
-    /// Read-only MCP server on stdio (tools: check, contract).
+    /// Read-only MCP server on stdio (tools: check, contract, dependents,
+    /// coverage).
     Mcp(McpArgs),
     /// Research harness: evaluate the falsification corpus and persist the run.
     Run(RunArgs),
@@ -167,6 +171,21 @@ struct DependentsArgs {
     /// Only contracts whose producer ref contains this substring.
     #[arg(long)]
     producer: Option<String>,
+    /// "text" (default) or "json" (canonical, deterministic).
+    #[arg(long, default_value = "text")]
+    format: String,
+}
+
+#[derive(Parser)]
+struct BacktestArgs {
+    #[arg(long, default_value = "invar.toml")]
+    config: String,
+    /// Only this contract id.
+    #[arg(long)]
+    contract: Option<String>,
+    /// How many of the producer's most recent commits to replay.
+    #[arg(long, default_value_t = 50)]
+    depth: usize,
     /// "text" (default) or "json" (canonical, deterministic).
     #[arg(long, default_value = "text")]
     format: String,
@@ -333,6 +352,7 @@ fn main() {
         Command::VerifyReceipt(a) => dispatch_r2(cmd_verify_receipt(a)),
         Command::Receipt(a) => dispatch_r2(cmd_receipt(a)),
         Command::Dependents(a) => dispatch_r2(cmd_dependents(a)),
+        Command::Backtest(a) => dispatch_r2(cmd_backtest(a)),
         Command::Demo => dispatch_r2(cmd_demo()),
         Command::Coverage(a) => dispatch_r2(cmd_coverage(a)),
         Command::Completions(a) => dispatch_r2(cmd_completions(a)),
@@ -856,6 +876,9 @@ fn cmd_init(args: InitArgs) -> Result<i32> {
         println!("  note               : zero proposals is expected inside a single repo; INVAR checks contracts BETWEEN repos (next step is in the template inside invar.toml)");
     }
     println!("  wrote              : {}", out.display());
+    // Discovery hint ratified 2026-10-12. `invar lock` is named first because
+    // backtest replays LOCKED bindings; without a lock it has nothing to replay.
+    println!("  hint               : after `invar lock`, run `invar backtest` to replay your locked fields over this repository's git history");
     Ok(0)
 }
 
@@ -1391,6 +1414,21 @@ fn cmd_coverage(args: CoverageArgs) -> Result<i32> {
         args.contract.as_deref(),
         &args.format,
         MEASURED_RECORD,
+        &mut out,
+    )?;
+    print!("{out}");
+    Ok(code)
+}
+
+/// `invar backtest`: replay today's locked bindings over the producer's git
+/// history. Disclosure of the past, never a verdict.
+fn cmd_backtest(args: BacktestArgs) -> Result<i32> {
+    let mut out = String::new();
+    let code = invar_falsify::backtest::run(
+        &args.config,
+        args.contract.as_deref(),
+        args.depth,
+        &args.format,
         &mut out,
     )?;
     print!("{out}");

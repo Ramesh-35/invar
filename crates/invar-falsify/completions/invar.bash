@@ -3,10 +3,11 @@
 _invar() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
   if [ "$COMP_CWORD" -eq 1 ]; then
-    COMPREPLY=( $(compgen -W "demo init check lock coverage dependents verify-receipt receipt fix mcp completions run validate report verify audit replay help" -- "$cur") )
+    COMPREPLY=( $(compgen -W "demo init check lock coverage dependents backtest verify-receipt receipt fix mcp completions run validate report verify audit replay help" -- "$cur") )
     return 0
   fi
   case "${COMP_WORDS[1]}" in
+    backtest)       COMPREPLY=( $(compgen -W "--config --contract --depth --format --help" -- "$cur") );;
     check)          COMPREPLY=( $(compgen -W "--config --ledger --ci --report-md --receipt --lock-signers --lock-principal --sample --contract --help" -- "$cur") );;
     lock)           COMPREPLY=( $(compgen -W "--config --update --lock-signers --lock-principal --sample --contract --help" -- "$cur") );;
     init)           COMPREPLY=( $(compgen -W "--root --force --stdout --help" -- "$cur") );;

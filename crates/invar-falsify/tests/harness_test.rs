@@ -2116,3 +2116,82 @@ fn mcp_dependents_and_coverage_match_cli() {
     assert!(replies[4]["result"]["isError"] == true && replies[4]["result"]["content"][0]["text"].as_str().unwrap().contains("not a verdict"), "missing arg: error, never a verdict");
     let _ = std::fs::remove_dir_all(&dir);
 }
+
+// ---------------------------------------------------------------------------
+// 48. `invar backtest` (alpha.27): replays today's locked bindings over the
+// producer's own git history. A field removed in one commit and restored in
+// the next is exactly one absence window, cited by commit and date; output
+// is deterministic (two runs byte-identical); outside a git repository it
+// is an error (exit 3), never a guess; it never emits a verdict exit.
+// ---------------------------------------------------------------------------
+#[test]
+fn backtest_replays_git_history() {
+    use std::process::Command;
+    let bin = env!("CARGO_BIN_EXE_invar");
+    let dir = std::env::temp_dir().join(format!("invar-bt48-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    let w = |n: &str, b: &str| std::fs::write(dir.join(n), b).unwrap();
+    let git = |args: &[&str]| {
+        let out = Command::new("git").arg("-C").arg(&dir).args(args).output().unwrap();
+        assert!(out.status.success(), "git {:?}: {}", args, String::from_utf8_lossy(&out.stderr));
+    };
+    git(&["init", "-q"]);
+    git(&["config", "user.email", "t@t"]);
+    git(&["config", "user.name", "t"]);
+    let v_with = "type Order struct {\n\tAmountCents int64 `json:\"amount_cents\"`\n\tCurrency string `json:\"currency\"`\n}\n";
+    let v_without = "type Order struct {\n\tCurrency string `json:\"currency\"`\n}\n";
+    w("order.go", v_with);
+    git(&["add", "order.go"]);
+    git(&["commit", "-qm", "v1"]);
+    w("order.go", v_without);
+    git(&["commit", "-aqm", "v2 drops amount_cents"]);
+    w("order.go", v_with);
+    git(&["commit", "-aqm", "v3 restores it"]);
+
+    w("client.js", "const a = order.amount_cents;\n");
+    let cfg = "[[invariant]]\nkind = \"schema\"\nid = \"orders\"\nproducer = \"order.go\"\nconsumer = \"client.js\"\n";
+    w("invar.toml", cfg);
+    let sections = parse_sections("invar.toml", cfg).unwrap();
+    let r = Resolver::local(&dir);
+    let day = invar_falsify::lock::parse_date("2026-10-12").unwrap();
+    let l = invar_falsify::lock::compute(&sections, &r, &invar_falsify::lock::Lock::default(), day).unwrap();
+    std::fs::write(dir.join("invar.lock"), invar_falsify::lock::render(&l).unwrap()).unwrap();
+
+    let run = |args: &[&str]| Command::new(bin).args(args).current_dir(&dir).output().unwrap();
+    let a = run(&["backtest", "--format", "json"]);
+    assert_eq!(a.status.code(), Some(0), "{}", String::from_utf8_lossy(&a.stderr));
+    let b = run(&["backtest", "--format", "json"]);
+    assert_eq!(a.stdout, b.stdout, "deterministic: two runs byte-identical");
+    let v: serde_json::Value = serde_json::from_slice(&a.stdout).unwrap();
+    let binding = v["backtest"][0]["bindings"].as_array().unwrap().iter()
+        .find(|t| t["binding"] == "Order.amount_cents").unwrap().clone();
+    assert_eq!(binding["absence_windows"], 1, "{binding}");
+    let events: Vec<&str> = binding["events"].as_array().unwrap().iter().map(|e| e["state"].as_str().unwrap()).collect();
+    assert_eq!(events, ["present", "absent", "present"], "first commit, drop, restore");
+    for e in binding["events"].as_array().unwrap() {
+        assert_eq!(e["commit"].as_str().unwrap().len(), 12);
+        assert!(e["date"].as_str().unwrap().starts_with("20"));
+    }
+    assert!(v["coda"].as_str().unwrap().contains("not replayed verdicts"));
+
+    let t = run(&["backtest"]);
+    let text = String::from_utf8_lossy(&t.stdout).to_string();
+    assert!(text.contains("Order.amount_cents") && text.contains("absent"), "{text}");
+    assert!(text.contains("1 absence window(s) after introduction"), "{text}");
+
+    // Outside a git repository: an error (exit 3), never a verdict exit.
+    let nogit = std::env::temp_dir().join(format!("invar-bt48n-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&nogit);
+    std::fs::create_dir_all(&nogit).unwrap();
+    std::fs::write(nogit.join("invar.toml"), cfg).unwrap();
+    std::fs::write(nogit.join("order.go"), v_with).unwrap();
+    std::fs::write(nogit.join("client.js"), "const a = order.amount_cents;\n").unwrap();
+    std::fs::write(nogit.join("invar.lock"), std::fs::read(dir.join("invar.lock")).unwrap()).unwrap();
+    let n = Command::new(bin).arg("backtest").current_dir(&nogit)
+        .env("GIT_CEILING_DIRECTORIES", &nogit).output().unwrap();
+    assert_eq!(n.status.code(), Some(3), "{}", String::from_utf8_lossy(&n.stderr));
+    assert!(String::from_utf8_lossy(&n.stderr).contains("git"));
+    let _ = std::fs::remove_dir_all(&dir);
+    let _ = std::fs::remove_dir_all(&nogit);
+}

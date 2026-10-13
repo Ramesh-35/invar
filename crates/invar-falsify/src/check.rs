@@ -171,7 +171,7 @@ pub(crate) fn load_object(
 }
 
 /// Fields one producer source provides: spec `properties` or code fields.
-fn source_fields(id: &str, spec: &str, text: &str, pointer: Option<&str>) -> Result<Fields> {
+pub(crate) fn source_fields(id: &str, spec: &str, text: &str, pointer: Option<&str>) -> Result<Fields> {
     if is_code(spec) {
         code_fields(&artifact_name(spec), text)
             .ok_or_else(|| anyhow!("{id}: cannot read fields from {}", artifact_name(spec)))

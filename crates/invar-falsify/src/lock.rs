@@ -1490,7 +1490,7 @@ pub fn toml_payload_to_json(text: &str) -> Result<serde_json::Value> {
         scalar(raw, line)
     }
 
-    let mut flush = |root: &mut Map<String, Value>,
+    let flush = |root: &mut Map<String, Value>,
                      current: &Option<(Vec<String>, bool)>,
                      pending: &mut Vec<(String, String, usize)>|
      -> Result<()> {

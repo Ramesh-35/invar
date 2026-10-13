@@ -15,6 +15,7 @@
 //!   * The bi-temporal ledger keeps valid-time and transaction-time distinct
 //!     and re-verifies its BLAKE3 chain by recomputation, not by a stored flag.
 
+pub mod backtest;
 pub mod check;
 pub mod demo;
 pub mod dependents;
