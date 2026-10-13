@@ -1,0 +1,467 @@
+repo	result	monorepo	files_scanned	proposed	init_seconds
+https://github.com/mholzen/workflowy	not-monorepo	False			
+https://github.com/colm18-gif/theaijournal	not-monorepo	False			
+https://github.com/quietforgestudio/qf-mcp-server	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-taiwan-procurement	not-monorepo	False			
+https://github.com/quantumcodersys/formasty-mcp	not-monorepo	False			
+https://github.com/tylerscomic-lab/broker-advisor-check-mcp	not-monorepo	False			
+https://github.com/simonmak-ascent/hkex-filing-scraper	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-arcgis-loudoun	not-monorepo	False			
+https://github.com/omnidebuglink/omnidebuglink	not-monorepo	False			
+https://github.com/mcp-dir/pref_ms_mundo_novo_cnd-mcp	not-monorepo	False			
+https://github.com/nolindnaidoo/jevlint-le	not-monorepo	False			
+https://github.com/lazymac2x/cron-collision-detector-api	not-monorepo	False			
+https://github.com/vola-trebla/zod-contract-mock-forge-mcp	not-monorepo	False			
+https://github.com/mikusnuz/gsc-mcp	not-monorepo	False			
+https://github.com/symbioza/claude-plugin	not-monorepo	False			
+https://github.com/analyticslegends/analytics-legends-mcp	not-monorepo	False			
+https://github.com/unboundcompute/lachesis	not-monorepo	False			
+https://github.com/srotzin/hive-mcp-connector	not-monorepo	False			
+https://github.com/mrfentmen/segaretro-mcp	clone-error				
+https://github.com/makeaivideo-ai/mcp	not-monorepo	False			
+https://github.com/tuteliq/mcp	not-monorepo	False			
+https://github.com/banksynchq/banksync-mcp	not-monorepo	False			
+https://github.com/jhytabest/papertext	clone-error				
+https://github.com/pree-dew/mcp-bookmark	not-monorepo	False			
+https://github.com/neoninnovationlab/neon-mcp-gateway	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-codex-mrl	not-monorepo	False			
+https://github.com/aiops-tools/truenas-aiops	not-monorepo	False			
+https://github.com/alligatorc0der/conkurrence	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-veriphone	not-monorepo	False			
+https://github.com/mcp-dir/portal_transparencia_cepim-mcp	not-monorepo	False			
+https://github.com/mcpvot/mcpvot-app	clone-error				
+https://github.com/rcfrias/extraer-datos-ine-mcp	not-monorepo	False			
+https://github.com/raullenchai/vnsh	not-monorepo	False			
+https://github.com/dave1362/rca-mcp-connector	not-monorepo	False			
+https://github.com/mcp-dir/pref_rj_rio_janeiro_multas-mcp	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-pokemon	not-monorepo	False			
+https://github.com/writerslogic/scrivener-mcp	not-monorepo	False			
+https://github.com/campbellaabbott-rgb/resumebooster-mcp	not-monorepo	False			
+https://github.com/silverbackmarketing/ai-readiness	not-monorepo	False			
+https://github.com/gowrishankar-infra/sabline-lang	not-monorepo	False			
+https://github.com/sebastienrousseau/corral	not-monorepo	False			
+https://github.com/glebenjoy/defillama-mcp	not-monorepo	False			
+https://github.com/m2m-sentinel/m2m-sentinel-sdk	not-monorepo	False			
+https://github.com/apventureengine/warn-mcp	not-monorepo	False			
+https://github.com/chandata/heathy-mcp	not-monorepo	False			
+https://github.com/cooldk/clize-cli	not-monorepo	False			
+https://github.com/sharproduction/production-metadata-mcp	not-monorepo	False			
+https://github.com/sepehr071/jabama-mcp	not-monorepo	False			
+https://github.com/temporal-cortex/mcp	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-urlhaus	not-monorepo	False			
+https://github.com/gal-a/qikly	not-monorepo	False			
+https://github.com/matthewwilliams949-ops/nakodo	MONOREPO	True	117	0	0.032
+https://github.com/austinmunday/tokenmaxxen-app	clone-error				
+https://github.com/iceywu/icloud-calendar-mcp	MONOREPO	True	52	0	0.008
+https://github.com/aiwerk/mcp-server-cal	clone-error				
+https://github.com/vulnify/vulnify-mcp	not-monorepo	False			
+https://github.com/fieldproofhq/kingofthehill	not-monorepo	False			
+https://github.com/vanmoose-apis/mcp-server	clone-error				
+https://github.com/human-pages-ai/humanpages	not-monorepo	False			
+https://github.com/cassette-editor/oh-my-cassette	not-monorepo	False			
+https://github.com/junter1989k-ai/thailand-payments-mcp	clone-error				
+https://github.com/theyahia/dadata-mcp	not-monorepo	False			
+https://github.com/minutemailco/mcp-server	not-monorepo	False			
+https://github.com/segentic-lab/periscope-mcp	not-monorepo	False			
+https://github.com/harshyadav442277/telegraph-morse	not-monorepo	False			
+https://github.com/jakobwennberg/fortnox-mcp	not-monorepo	False			
+https://github.com/daddariotech/whmcs-mcp	not-monorepo	False			
+https://github.com/mightbesaad/gvnr	not-monorepo	False			
+https://github.com/jkotzker/firesidefm-mcp-server	not-monorepo	False			
+https://github.com/mcp-dir/sefaz_df_iptu-mcp	not-monorepo	False			
+https://github.com/azhard/homebrew-tap	not-monorepo	False			
+https://github.com/atushi1841/rakuten-japan-mcp	not-monorepo	False			
+https://github.com/p-l-ta/calendar-mcp	not-monorepo	False			
+https://github.com/trusterinfo/mcp-server-truster	not-monorepo	False			
+https://github.com/oxyplay/wyd	not-monorepo	False			
+https://github.com/1325ai/1325ai	clone-error				
+https://github.com/pprotocol-us/problee-mcp	not-monorepo	False			
+https://github.com/wyre-ai/sentinelone-mcp	not-monorepo	False			
+https://github.com/abnegate/magents	not-monorepo	False			
+https://github.com/imnoo-team/drawing-converter-mcp	not-monorepo	False			
+https://github.com/revelica/skills	not-monorepo	False			
+https://github.com/wyre-technology/hudu-mcp	not-monorepo	False			
+https://github.com/checkra1neth/xbird	clone-error				
+https://github.com/turaxia/apps	clone-error				
+https://github.com/gabrielmahia/kenya-health-mcp	not-monorepo	False			
+https://github.com/henrysouchien/edgar-mcp	not-monorepo	False			
+https://github.com/elemzir/kta-oracle	clone-error				
+https://github.com/fxckcode/tauri-docs-mcp	not-monorepo	False			
+https://github.com/conaman/unreal-mcp-ue4	not-monorepo	False			
+https://github.com/arthurcarlsonn/aeo-mcp	not-monorepo	False			
+https://github.com/3dunlmtd/stylemcp	not-monorepo	False			
+https://github.com/propfirmdiscounts/prop-firm-discount-codes	not-monorepo	False			
+https://github.com/people-analyst/salesleader-site	clone-error				
+https://github.com/junter1989k-ai/oman-payments-mcp	clone-error				
+https://github.com/shalimov04/mcp-airlock	not-monorepo	False			
+https://github.com/ebrunet001/mcp-server-lol	not-monorepo	False			
+https://github.com/forgemeshlabs/kronos-forgemesh-mcp	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-uuid	not-monorepo	False			
+https://github.com/aiden-network/aiden-mcp	not-monorepo	False			
+https://github.com/solvohq/openworkdays	not-monorepo	False			
+https://github.com/vibekit-bot/vibekit-mcp	not-monorepo	False			
+https://github.com/mrfentmen/mbta-mcp	clone-error				
+https://github.com/hasdata/booking-mcp	not-monorepo	False			
+https://github.com/mikeslone/storylayer	clone-error				
+https://github.com/unbearabledev/dockerfile-audit	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-dados-pt	not-monorepo	False			
+https://github.com/declade/lucairn-sdks	not-monorepo	False			
+https://github.com/nikicat/mcp-wallet-signer	MONOREPO	True	37	0	0.006
+https://github.com/kiwoongeom/gmc-mcp	not-monorepo	False			
+https://github.com/fixitindia/fixidu-mcp-server	not-monorepo	False			
+https://github.com/lians-ai/lians	not-monorepo	False			
+https://github.com/mcp-dir/sefaz_am_certidao_debitos-mcp	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-timestamp	not-monorepo	False			
+https://github.com/koneisto/no-as-a-service	clone-error				
+https://github.com/generect/generect_mcp	not-monorepo	False			
+https://github.com/connected-paths/mcp-linkedinads	clone-error				
+https://github.com/a1-x-tech/mcp-google-drive	not-monorepo	False			
+https://github.com/0xthaner/reputa	clone-error				
+https://github.com/sndevore77/glp1search-mcp	not-monorepo	False			
+https://github.com/cm2489/oravan	not-monorepo	False			
+https://github.com/oliverhruby/gramps-mcp	not-monorepo	False			
+https://github.com/jra-zachpennington/saba	clone-error				
+https://github.com/srotzin/hive-mcp-vault	not-monorepo	False			
+https://github.com/fauxetine/t1-t2-protocol	not-monorepo	False			
+https://github.com/smart-link-t/is-real-biz	clone-error				
+https://github.com/ynnickw/applaunchflow-mcp	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-dane-gov-pl	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-tomorrow-io	not-monorepo	False			
+https://github.com/mustafacagri/ai-quality-gate	not-monorepo	False			
+https://github.com/kawacode-ai/kawa.mcp	not-monorepo	False			
+https://github.com/yintokey/mcp_hackernews	not-monorepo	False			
+https://github.com/dynatrace-oss/dynatrace-managed-mcp	not-monorepo	False			
+https://github.com/twelvetake-studios/reaper-mcp	not-monorepo	False			
+https://github.com/rudrendupaul/skillguard	not-monorepo	False			
+https://github.com/saidiibrahim/search-papers	not-monorepo	False			
+https://github.com/shubhtoy/github-project-info-mcp	not-monorepo	False			
+https://github.com/rinava/pls-touch-grass-mcp	not-monorepo	False			
+https://github.com/trigeochiral/snap-router-mcp	not-monorepo	False			
+https://github.com/biosshot/easyeda-copilot	MONOREPO	True	821	0	0.08
+https://github.com/pipeworx-io/mcp-nuget	not-monorepo	False			
+https://github.com/pzalutski-pixel/godotlens-mcp	not-monorepo	False			
+https://github.com/byteask/byteask-embedded-mcp	not-monorepo	False			
+https://github.com/da-troll/planhat-mcp	not-monorepo	False			
+https://github.com/devag7/linkedin-mcp	not-monorepo	False			
+https://github.com/anythink-cloud/anythink-cli	not-monorepo	False			
+https://github.com/ianderso/norway-archives-mcp	not-monorepo	False			
+https://github.com/mrz1880/mcp-keycloak-admin	not-monorepo	False			
+https://github.com/andreacappelletti97/google-flights-mcp	not-monorepo	False			
+https://github.com/mrfentmen/nyc311-mcp	clone-error				
+https://github.com/lonchdigital/serpagent-mcp	not-monorepo	False			
+https://github.com/andekqr/fitatu-mcp-unofficial	not-monorepo	False			
+https://github.com/explorer-64/imagcon-mcp	not-monorepo	False			
+https://github.com/blite-hq/qnexus-mcp	not-monorepo	False			
+https://github.com/dewtech-technologies/tubemind-secure-mcp	not-monorepo	False			
+https://github.com/kimny1143/mued_v2	clone-error				
+https://github.com/gmoneyn/mcp-marketplace	clone-error				
+https://github.com/zw008/vmware-nsx-security	not-monorepo	False			
+https://github.com/odd-innocent/den_archi_mcp	not-monorepo	False			
+https://github.com/smart-ai-memory/memdocs	not-monorepo	False			
+https://github.com/inmoprice/clipcliper-mcp	not-monorepo	False			
+https://github.com/cyanheads/biorxiv-mcp-server	not-monorepo	False			
+https://github.com/cfd-fea-service/cloudhpc-mcp	not-monorepo	False			
+https://github.com/labsfuture/revit-converter-remote-mcp-release	not-monorepo	False			
+https://github.com/supertrained/rhumb	not-monorepo	False			
+https://github.com/bx33661/wireshark-mcp	not-monorepo	False			
+https://github.com/getspm/spm-agent-connectors	not-monorepo	False			
+https://github.com/hasdata/instagram-mcp	not-monorepo	False			
+https://github.com/benyd/haypile	not-monorepo	False			
+https://github.com/krovacloud/krova-node	MONOREPO	True	115	0	0.049
+https://github.com/pipeworx-io/mcp-data-norfolk	not-monorepo	False			
+https://github.com/compellerai/compeller-mcp	not-monorepo	False			
+https://github.com/tane994/paretostudio-mcp	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-etsy	not-monorepo	False			
+https://github.com/chrischall/alexa-mcp	not-monorepo	False			
+https://github.com/csoai-org/nrswa-ai-mcp	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-inxight-drugs	not-monorepo	False			
+https://github.com/paperandbeyond23-gif/propzapi-skills	not-monorepo	False			
+https://github.com/hasdata/youtube-mcp	not-monorepo	False			
+https://github.com/cowboyhq/model-finder-mcp-app	clone-error				
+https://github.com/pipeworx-io/mcp-czso-cz	not-monorepo	False			
+https://github.com/shipper-dot-now/conqueror-skills	not-monorepo	False			
+https://github.com/mcp-dir/portal_transparencia_ceaf-mcp	not-monorepo	False			
+https://github.com/arjunkmrm/tutorials	clone-error				
+https://github.com/venut-technologies/engine-dj-mcp	not-monorepo	False			
+https://github.com/apegurus/web3agent	MONOREPO	True	488	0	0.116
+https://github.com/port-labs/remote-mcp-server	not-monorepo	False			
+https://github.com/kyma-api/kyma-mcp-plugin	not-monorepo	False			
+https://github.com/mindstone/mcp-servers	not-monorepo	False			
+https://github.com/cdcstream/captapi	clone-error				
+https://github.com/mihai-dinculescu/tapo	MONOREPO	True	407	0	0.033
+https://github.com/junct-bot/euler-mcp	not-monorepo	False			
+https://github.com/hal9ai/mcp.build	not-monorepo	False			
+https://github.com/lemmaoracle/lemma	MONOREPO	True	1255	0	0.099
+https://github.com/eltociear/secrets-audit-mcp	not-monorepo	False			
+https://github.com/sidneybissoli/senado-br-mcp-cloudflare	not-monorepo	False			
+https://github.com/trendsmcp-ai/wikipedia-trends-mcp	not-monorepo	False			
+https://github.com/piyushpathakqa/vigilis	MONOREPO	True	256	0	0.026
+https://github.com/pack4back/garmin-nutrition	clone-error				
+https://github.com/jnuo/salta-mcp	not-monorepo	False			
+https://github.com/lusrodri/css-sota-mcp	MONOREPO	True	72	0	0.014
+https://github.com/agencyenterprise/aiseo-audit	not-monorepo	False			
+https://github.com/get-mcp-ads/google-search-console-mcp-server	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-utah-code	not-monorepo	False			
+https://github.com/roybogs/portveil-mcp	not-monorepo	False			
+https://github.com/sha-net/community-board-mcp	clone-error				
+https://github.com/metehangzl/pokemcp	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-meteostat	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-bls	not-monorepo	False			
+https://github.com/tokencanopy/e2a	MONOREPO	True	2559	0	0.376
+https://github.com/ov3rk177/kairos-mcp-server	not-monorepo	False			
+https://github.com/surisoft-io/capi-core	not-monorepo	False			
+https://github.com/imviky-ctrl/tickerr-mcp	not-monorepo	False			
+https://github.com/petshopbros/lowdown-proxy	not-monorepo	False			
+https://github.com/f/prompts.chat-mcp	not-monorepo	False			
+https://github.com/ulasarslan6262-ui/swarm-market	clone-error				
+https://github.com/jbacalso24/mimry	not-monorepo	False			
+https://github.com/arturlys/ao3-mcp	not-monorepo	False			
+https://github.com/w1ne/kernelcad-web	not-monorepo	False			
+https://github.com/davidmosiah/strava-mcp	not-monorepo	False			
+https://github.com/aguantar/vibescan-mcp-server	not-monorepo	False			
+https://github.com/srotzin/hiveconsciousness	not-monorepo	False			
+https://github.com/thebridgedev/bridge-mcp	not-monorepo	False			
+https://github.com/krampslaag/uniteddepin	clone-error				
+https://github.com/samihalawa/magicinterview-plugin	not-monorepo	False			
+https://github.com/jellewas/eu-audit-mcp	not-monorepo	False			
+https://github.com/wyre-technology/timezest-mcp	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-arcgis-chatham	not-monorepo	False			
+https://github.com/mcp-dir/sefaz_mg_certidao_debitos-mcp	not-monorepo	False			
+https://github.com/spaumz/pcmr-gaming	clone-error				
+https://github.com/manhatton31-svg/dualregistry	not-monorepo	False			
+https://github.com/csoai-org/canada-aida-ai-mcp	not-monorepo	False			
+https://github.com/optisol-business/db-metadata-extractor-mcp	not-monorepo	False			
+https://github.com/fetchsandbox/mcp	not-monorepo	False			
+https://github.com/useotterkit/skill	not-monorepo	False			
+https://github.com/invowerk-dev/invowerk	not-monorepo	False			
+https://github.com/looney-tic/intel-overdrive	clone-error				
+https://github.com/nugehs/tieline	not-monorepo	False			
+https://github.com/infobloxopen/dns-aid-core	not-monorepo	False			
+https://github.com/mrrefactoring/atlassian-dc-mcp	MONOREPO	True	650	0	0.081
+https://github.com/jeeftor/abs-mcp	not-monorepo	False			
+https://github.com/mcp-dir/cfbm_cadastro-mcp	not-monorepo	False			
+https://github.com/89rat/m2m-exchange	clone-error				
+https://github.com/rongchang726-png/vivarium	not-monorepo	False			
+https://github.com/ark-forge/proveit-mcp	not-monorepo	False			
+https://github.com/agentsgetpaidmore/agents-get-paid-kit	clone-error				
+https://github.com/bowenxu0126/aistudio_hw3	not-monorepo	False			
+https://github.com/beatapi/beatdesign	MONOREPO	True	515	0	0.091
+https://github.com/paulieb89/bailii-mcp	not-monorepo	False			
+https://github.com/mcp-dir/pref_sp_sao_paulo_nfs-mcp	not-monorepo	False			
+https://github.com/rafaelomarques/seurastreio	clone-error				
+https://github.com/sunhome243/figma-mcp-express	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-arcgis-pflugerville	not-monorepo	False			
+https://github.com/hongnoul/mit-dining-mcp	not-monorepo	False			
+https://github.com/djrobson5/agentmd-mcp	not-monorepo	False			
+https://github.com/mrfentmen/ansible-galaxy-mcp	clone-error				
+https://github.com/kazkozdev/weboperator	not-monorepo	False			
+https://github.com/clusteragent/cluster	not-monorepo	False			
+https://github.com/akshatnerella/arduino-mcp-server	not-monorepo	False			
+https://github.com/mister-franklin/mcp-wetwetwet	clone-error				
+https://github.com/claude-book/mcp-server-google-forms	not-monorepo	False			
+https://github.com/apollographql/apollo-mcp-server	MONOREPO	True	290	0	0.057
+https://github.com/enioaguiar/llmpvp-plugin	not-monorepo	False			
+https://github.com/mrwizardlyloaf/rugcheck-ai	not-monorepo	False			
+https://github.com/artvepa80/agents-hefesto	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-textcase	not-monorepo	False			
+https://github.com/governmyai/mcp-server	not-monorepo	False			
+https://github.com/abstraxn-labs/abstraxn-agent-layer	not-monorepo	False			
+https://github.com/csacanam/voulti	MONOREPO	True	1295	0	0.186
+https://github.com/ouranos-labs/pseolint	MONOREPO	True	1685	0	0.232
+https://github.com/pipeworx-io/mcp-luchtmeetnet	not-monorepo	False			
+https://github.com/mrfentmen/gemini-mcp	clone-error				
+https://github.com/goodfel10w/welcometextgenerator	not-monorepo	False			
+https://github.com/quartzunit/diffgrab	not-monorepo	False			
+https://github.com/jyswee/canvasaas	not-monorepo	False			
+https://github.com/houtini-ai/fmp-mcp	not-monorepo	False			
+https://github.com/daedalus/mcp-sparql	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-dropbox	not-monorepo	False			
+https://github.com/decrec-io/decrec-plugin	not-monorepo	False			
+https://github.com/bugbug-io/agent-plugin	not-monorepo	False			
+https://github.com/feeless402/feeless402	not-monorepo	False			
+https://github.com/agimaulana/huaweiappgallerymcp	not-monorepo	False			
+https://github.com/elagerway/magpipe	not-monorepo	False			
+https://github.com/elinaseri/digche	clone-error				
+https://github.com/francisco-perez-sorrosal/cv	not-monorepo	False			
+https://github.com/acamolese/google-search-console-mcp	not-monorepo	False			
+https://github.com/kryp2/peck-mcp	not-monorepo	False			
+https://github.com/human-beyond/mainbook-mcp	not-monorepo	False			
+https://github.com/qmediat/cursor-mcp	not-monorepo	False			
+https://github.com/patrickbo19/bidlens-core	clone-error				
+https://github.com/lazytitan30/billing-doctor	not-monorepo	False			
+https://github.com/abyssbugg/sourcery-agent-bundle	not-monorepo	False			
+https://github.com/jonybur-oc/locus	clone-error				
+https://github.com/runapi-ai/recraft-mcp	not-monorepo	False			
+https://github.com/wyre-technology/sentinelone-mcp	not-monorepo	False			
+https://github.com/lvsmanhole/clearscreen-data	not-monorepo	False			
+https://github.com/camerondwills/lazyads-mcp	not-monorepo	False			
+https://github.com/eminuzun/hoptell	not-monorepo	False			
+https://github.com/pinion05/supabase-mcp-lite	not-monorepo	False			
+https://github.com/mrfentmen/epic-free-games-mcp	clone-error				
+https://github.com/csoai-org/risk-assessment-ai-mcp	not-monorepo	False			
+https://github.com/0x923041-dotcom/conceptio-cli	not-monorepo	False			
+https://github.com/kotaro-studio/curanz-sounds	clone-error				
+https://github.com/mrfentmen/worktree-orbit-mcp	clone-error				
+https://github.com/teamdzx/workflow-companion	not-monorepo	False			
+https://github.com/bitrise-io/bitrise-mcp	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-edmtrain	not-monorepo	False			
+https://github.com/mira-gift-hq/kolagent	clone-error				
+https://github.com/vcode-sh/dokploy-mcp	not-monorepo	False			
+https://github.com/nyyhao/saascity-mcp	not-monorepo	False			
+https://github.com/jordanburke/ssh-client-mcp-server	MONOREPO	True	57	0	0.007
+https://github.com/bhuman-ai/qabro	clone-error				
+https://github.com/mcp-dir/detran_rj_nada_consta-mcp	not-monorepo	False			
+https://github.com/unifically-dev/unifically-mcp	not-monorepo	False			
+https://github.com/profitelligence/profitelligence-mcp-server	not-monorepo	False			
+https://github.com/commodus67/sports-probabilities-mcp	not-monorepo	False			
+https://github.com/zionhopkins/launch-engine-mcp	not-monorepo	False			
+https://github.com/parlay-run/parlay-mcp	not-monorepo	False			
+https://github.com/sdamarketing/tracker_mcp	not-monorepo	False			
+https://github.com/pda-task-force/pda-platform	not-monorepo	False			
+https://github.com/sivaguruayyadurai/lots-mcp-server	clone-error				
+https://github.com/greencore-solutions/a2a-retailmedia	not-monorepo	False			
+https://github.com/velitricardo/axon-lang	clone-error				
+https://github.com/spacecowboyian/brains	clone-error				
+https://github.com/snowbikemike/tascan-mcp	not-monorepo	False			
+https://github.com/mcp-dir/dprf_nada_consta_multas_pagas-mcp	not-monorepo	False			
+https://github.com/stackcut/stackcut-plugin	not-monorepo	False			
+https://github.com/erodenn/godot-mcp-runtime	not-monorepo	False			
+https://github.com/verlon-ai/mcp	not-monorepo	False			
+https://github.com/open-qr/openqr	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-foursquare	not-monorepo	False			
+https://github.com/mcp-dir/pref_sc_balneario_cnd-mcp	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-qrcode	not-monorepo	False			
+https://github.com/davidmosiah/timeline-pulse	not-monorepo	False			
+https://github.com/peteratpondo/kit-demo-mcp	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-veterinary-fda	not-monorepo	False			
+https://github.com/ruvnet/claude-flow	MONOREPO	True	7769	2	1.803
+https://github.com/ftwagency/wpconvert-devtools	MONOREPO	True	63	0	0.014
+https://github.com/ryanalberts/best-of-agent-harnesses	not-monorepo	False			
+https://github.com/fless-io/skills	not-monorepo	False			
+https://github.com/marcusharjani/preflight	clone-error				
+https://github.com/paulchrisluke/krabiclaw	not-monorepo	False			
+https://github.com/jojo-adam/stemem	not-monorepo	False			
+https://github.com/johnisanerd/apify-yandex-search-scraper	not-monorepo	False			
+https://github.com/mambalabsdev/mcp-domain-deliverability-checker	not-monorepo	False			
+https://github.com/amos689/paper-preflight	not-monorepo	False			
+https://github.com/openagentemail/openagentemail	not-monorepo	False			
+https://github.com/avinash147-1193/thedeployer-mcp	not-monorepo	False			
+https://github.com/alex-feel/mcp-context-server	not-monorepo	False			
+https://github.com/mcp-dir/confea_crea-mcp	not-monorepo	False			
+https://github.com/temurkhan13/openclaw-output-vetter-mcp	clone-error				
+https://github.com/lonniev/goodearth-mcp	not-monorepo	False			
+https://github.com/banquish-app/banquish-mcp	not-monorepo	False			
+https://github.com/jaysonaionline/mcp-cognitive-substrate	not-monorepo	False			
+https://github.com/stumason/coolify-mcp	not-monorepo	False			
+https://github.com/mckellen-eth/galactic-bridge-mcp	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-rubygems	not-monorepo	False			
+https://github.com/atmark-ai/atmark-mcp	not-monorepo	False			
+https://github.com/quotewise/mcp	not-monorepo	False			
+https://github.com/davidweb3-ctrl/mcp-github-server	not-monorepo	False			
+https://github.com/aiwerk/mcp-server-clawhub	clone-error				
+https://github.com/prdicta/solitaire-for-agents	clone-error				
+https://github.com/alx1p/luma-cal-mcp	not-monorepo	False			
+https://github.com/ffucucuoglu/linkedin-mcp-server	not-monorepo	False			
+https://github.com/christophe77/netatmo-energy-mcp	not-monorepo	False			
+https://github.com/willyfh/visualtorch	not-monorepo	False			
+https://github.com/mcp-dir/pref_pb_mataraca_cnd-mcp	not-monorepo	False			
+https://github.com/joshanihub/skillos	clone-error				
+https://github.com/backtest360/backtest360-mcp	not-monorepo	False			
+https://github.com/stockdrifts/stockdrifts-mcp	not-monorepo	False			
+https://github.com/tim-nocode/quillhub-mcp	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-arcgis-glynncounty	not-monorepo	False			
+https://github.com/clira-dev/ezstat-mcp-server	MONOREPO	True	29	0	0.007
+https://github.com/schreyerpeter/crucible	clone-error				
+https://github.com/mcp-dir/tribunal_trt14_ceat-mcp	not-monorepo	False			
+https://github.com/michaeljmoody/caring-courseforge	clone-error				
+https://github.com/mrfentmen/meilisearch-mcp	clone-error				
+https://github.com/alex13slem/openproject-codex-plugin	not-monorepo	False			
+https://github.com/expertvagabond/ibmcloud-mcp-server	not-monorepo	False			
+https://github.com/autoview-com/mcp	not-monorepo	False			
+https://github.com/opspot-ai/betslipdoctor-mcp	not-monorepo	False			
+https://github.com/mcp-dir/ecrvsp_veiculos_motor-mcp	not-monorepo	False			
+https://github.com/thewhitewater/tube-bridge	not-monorepo	False			
+https://github.com/fuzulsfriend/markit-mcp	not-monorepo	False			
+https://github.com/alialtunar/review-miner-mcp	not-monorepo	False			
+https://github.com/datahogo/datahogo	MONOREPO	True	99	0	0.045
+https://github.com/gnews-io/gnews-io-mcp-server	not-monorepo	False			
+https://github.com/rudrendupaul/computeledger	not-monorepo	False			
+https://github.com/vdappdev2/vtimestamp-mcp-write	not-monorepo	False			
+https://github.com/orionlabsai/agentum-mcp-server	not-monorepo	False			
+https://github.com/meltingpixelsai/relayzero	clone-error				
+https://github.com/mrfentmen/artifact-hub-mcp	clone-error				
+https://github.com/marketcheckhub/marketcheck-ai-reports	clone-error				
+https://github.com/fwozen/fwozen	clone-error				
+https://github.com/expertvagabond/volcengine-mcp	not-monorepo	False			
+https://github.com/datenoio/iterabledata	not-monorepo	False			
+https://github.com/sou0327/knowmint	MONOREPO	True	489	0	0.078
+https://github.com/mcp-dir/contas_enel_sp_download-mcp	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-mapbox	not-monorepo	False			
+https://github.com/flowzap-xyz/flowzap-mcp	not-monorepo	False			
+https://github.com/mrfentmen/release-notes-forge-mcp	clone-error				
+https://github.com/gotchseo/rankability-integrations	not-monorepo	False			
+https://github.com/lazymac2x/form-backend-api	not-monorepo	False			
+https://github.com/seventhwalllab/anairyspirit	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-faa-regulations	not-monorepo	False			
+https://github.com/beepboop2025/palimpsest	not-monorepo	False			
+https://github.com/mcpcentral-io/mcp-time	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-lichess	not-monorepo	False			
+https://github.com/oddunits/pntr-cli	not-monorepo	False			
+https://github.com/sardorbekr/appstore-connect-mcp	not-monorepo	False			
+https://github.com/raistlin82/btp-sap-odata-to-mcp-server-optimized	not-monorepo	False			
+https://github.com/gogogadgetbytes/smart-connections-mcp	not-monorepo	False			
+https://github.com/flow-executor/flow	not-monorepo	False			
+https://github.com/evan-moon/firma	clone-error				
+https://github.com/csoai-org/muckaway-ai-mcp	not-monorepo	False			
+https://github.com/jordan-belfort-ai/image-to-svg	clone-error				
+https://github.com/romcdonald9976/chikoh-architecture-showcase	clone-error				
+https://github.com/andresolbach/nodriver-mcp-server	not-monorepo	False			
+https://github.com/snapsynapse/publedge	not-monorepo	False			
+https://github.com/belgacemelbar/amnt.io	clone-error				
+https://github.com/pipeworx-io/mcp-south-carolina-code	not-monorepo	False			
+https://github.com/j-256/guildcontrol	not-monorepo	False			
+https://github.com/rocnubie/flux-2-online-mcp	not-monorepo	False			
+https://github.com/dinglebear-ai/rgotify	MONOREPO	True	117	0	0.009
+https://github.com/ivangr1/walletap-mcp	not-monorepo	False			
+https://github.com/paaavkata/mcp-service	clone-error				
+https://github.com/helvetic-research/helvetic-research	not-monorepo	False			
+https://github.com/kenzolika/yandex-music-mcp	not-monorepo	False			
+https://github.com/nbibikov/cogvault	not-monorepo	False			
+https://github.com/tehtelabs/cheapestllmapi	clone-error				
+https://github.com/flight-queue/mcp	not-monorepo	False			
+https://github.com/pspdfkit/nutrient-document-engine-mcp-server	MONOREPO	True	252	0	0.118
+https://github.com/buildsbymatt/mentionagent-claude-skill	not-monorepo	False			
+https://github.com/mrfentmen/baconipsum-mcp	clone-error				
+https://github.com/inflectra/mcp-server-spira	not-monorepo	False			
+https://github.com/exa-labs/exa-mcp-server	not-monorepo	False			
+https://github.com/pipeworx-io/mcp-california-code	not-monorepo	False			
+https://github.com/bhuvnsh/mcp-mapmyindia	not-monorepo	False			
+https://github.com/horizonmedia/horizon-brand-authority-platform	clone-error				
+https://github.com/cyanheads/workflows-mcp-server	not-monorepo	False			
+https://github.com/wuniq/wuniq-mcp	not-monorepo	False			
+https://github.com/josusanz/compositor-mcp	not-monorepo	False			
+https://github.com/dreamrec/livepilot	not-monorepo	False			
+https://github.com/otakit/otakit	MONOREPO	True	1017	0	0.155
+https://github.com/guptaprakhariitr/drug-interaction-mcp	not-monorepo	False			
+https://github.com/junter1989k-ai/norway-invoice-mcp	clone-error				
+https://github.com/mcpcap/mcpcap	not-monorepo	False			
+https://github.com/krasnoperov/inventory	clone-error				
+https://github.com/stahldavid/sensegrep	MONOREPO	True	397	0	0.08
+https://github.com/stufently/google-webtools-mcp	not-monorepo	False			
+https://github.com/inssist/mcp	not-monorepo	False			
+https://github.com/markoskarllos-netizen/aetherintel-marketplace	clone-error				
+https://github.com/theluckystrike/mcp-servers	MONOREPO	True	2543	0	0.395
+https://github.com/qwertymuzaffar/mcp-udacity-commit	not-monorepo	False			
+https://github.com/minipuft/claude-prompts-mcp	MONOREPO	True	2005	4	0.65
+https://github.com/funplayai/funplay-godot-mcp	not-monorepo	False			
+https://github.com/dinglebear-ai/yarr	MONOREPO	True	873	0	0.115
+https://github.com/geiserx/genieacs-mcp	not-monorepo	False			
+https://github.com/yserrag/asksakina-mcp	not-monorepo	False			
+https://github.com/staccdotsol/staccbot-tg	clone-error				
+https://github.com/glauberfrancodesign/francolabs-mcp	not-monorepo	False			
+https://github.com/mcp-dir/pref_go_perolandia_licitacoes-mcp	not-monorepo	False			
+https://github.com/hostimdev/cli	not-monorepo	False			
+https://github.com/robert19001-cmyk/mcp-lint	not-monorepo	False			
+https://github.com/nguyenhuy158/healthchecksio-mcp	not-monorepo	False			
+https://github.com/reachpad/reachpad-mcp	not-monorepo	False			
+https://github.com/digitalbrewllc/playbykey-dev-tools	MONOREPO	True	163	0	0.019
