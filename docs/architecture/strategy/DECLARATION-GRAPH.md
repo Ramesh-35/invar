@@ -112,3 +112,8 @@ Technical priorities under the doctrine (ordered):
 3. The lock as protocol: INVAR-LOCK.md graduates toward a standalone
    versioned specification others can implement; the DEPENDENTS-GRAPH
    spec (step 2 of the locked sequence) is its first cross-repo use.
+
+Accepted complement (2026-10-12): strategy/RUNWAY.md is the offensive
+half of this doctrine (the local verification loop, the agent surface,
+latency as a measured budget); this document remains the defensive half.
+Neither supersedes the other.

@@ -104,6 +104,8 @@ accepted and when, and the receipts make every verdict reproducible. The
 full, unvarnished record: [docs/epistemic/STATUS.md](docs/epistemic/STATUS.md),
 corpus and per-batch scores in [docs/falsification/](docs/falsification/).
 
+What we promise never to break, in writing: [docs/COMPATIBILITY-COVENANT.md](docs/COMPATIBILITY-COVENANT.md).
+
 Unsupported languages (C, C++, C#, PHP, Swift, Java, Kotlin, Ruby) are
 SKIPPED, stated, exit 4; never a pass.
 

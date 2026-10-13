@@ -1449,3 +1449,15 @@ zero-server JSONL index of verifiable claims with partial coverage
 stated, trust rules frozen hardest (a lock is a claim by its
 publisher, coordination not security), A4 use-gate before any
 adoption claim.
+
+2026-10-13: Compatibility Covenant RATIFIED (docs/COMPATIBILITY-COVENANT.md:
+six promises, non-promises stated, latency deliberately excluded). Runway
+strategy ACCEPTED with binding corrections and the post-falsification
+ruling (docs/architecture/strategy/RUNWAY.md): advisory-first locked after
+the GOV.UK finding, commercial model recorded as a labeled hypothesis.
+Attestation layer SHELVED hours after drafting, on the falsification pass
+it commissioned (docs/falsification/attestation-fpass-2026-10-12.md);
+re-entry condition: a named consumer asks for the envelope. invar backtest
+dogfooded against fastapi's real history before landing
+(docs/falsification/backtest-dogfood-2026-10-12.md): 144 ms over the full
+21-commit file history, zero absence windows, introduction dates verified.

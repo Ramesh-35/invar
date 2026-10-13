@@ -72,3 +72,12 @@ No server, no API service, no write path, no scores or badges, no
 private-repo indexing, no scraping beyond lock files, no inferred
 dependencies (only declared ones), and no claim that the graph is
 complete, ever.
+
+## Sequencing note (2026-10-13, per strategy/RUNWAY.md)
+
+The nightly public index is explicitly sequenced AFTER the MCP agent
+surface (shipped, alpha.26) and after the A4.1 producer-side-awareness
+ratification decision. Local value precedes any public graph: a registry
+with ten publishers is worth nothing to the eleventh. Spec content above
+is unchanged; this note changes only its place in the queue. Still
+awaiting founder ratification.
