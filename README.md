@@ -84,14 +84,30 @@ correct, and it does not prove the producer is honest.
 
 `invar dependents Type.field --locks dir/` answers "who breaks if I remove
 this?" from committed lockfiles. Local directory in, deterministic list out,
-no network.
+no network. `invar check --locks dir/` (or `[dependents] locks = "dir"` in
+invar.toml) states, after every check, which sibling lockfiles bind this
+repository's producer files; it never changes the exit code.
+
+`invar backtest` replays your locked fields over the producer's own git
+history and shows, by commit and date, when each one was absent. It
+replays today's extraction over past contents; it is not a replayed
+verdict, and it says so in its output.
+
+`invar coverage` states, per contract, what INVAR evaluates here and what
+it does not. `invar check --sarif out.sarif` exports results for GitHub
+code scanning.
+
+`invar mcp` is a read-only MCP server for coding agents (tools: check,
+contract, dependents, coverage); it never writes files. Setup:
+[docs/reference/MCP-INTEGRATION.md](docs/reference/MCP-INTEGRATION.md).
 
 ## What INVAR does not do
 
 No semantic checks: INVAR evaluates structure (a field's presence, type,
 name, envelope), never what values mean. No runtime behavior: nothing is
-executed. Payload ingestion is JSON-only (TOML, YAML and binary payloads
-are stated as not evaluated, exit 4). And it misses real breaks:
+executed. Payload ingestion covers JSON and a stated
+TOML subset (YAML and binary payloads are stated as not evaluated,
+exit 4). And it misses real breaks:
 
 Measured on a corpus of 122 real cross-repository break cases and controls
 (sourced from public incidents, pinned commits, scored on held-out batches
