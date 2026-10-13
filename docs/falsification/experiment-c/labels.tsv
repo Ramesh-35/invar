@@ -1,0 +1,31 @@
+n	repo	label	note
+1	matthewwilliams949-ops/nakodo	NEGATIVE	2 packages, 0 cross-package imports
+2	iceywu/icloud-calendar-mcp	NEGATIVE	not a multi-package workspace (pnpm-workspace.yaml settings only)
+3	nikicat/mcp-wallet-signer	NEGATIVE	3 packages, 0 cross-package imports
+4	biosshot/easyeda-copilot	POSITIVE	PreviewPcbInput -> extension/src/eda/pcb-preview.ts (production)
+5	krovacloud/krova-node	AMBIGUOUS	BackupShare indexed alias into generated types (R5: out of v1); sensitivity counts POSITIVE
+6	apegurus/web3agent	NEGATIVE	only imported shape has 1 distinctive field
+7	mihai-dinculescu/tapo	POSITIVE	RecordingHubResult -> tapo-py (binding)
+8	lemmaoracle/lemma	POSITIVE	CircuitMeta (Readonly<{}>) -> packages/sdk/src/prover.ts (production)
+9	piyushpathakqa/vigilis	POSITIVE	AttestationBundle -> packages/cli/src/index.ts
+10	lusrodri/css-sota-mcp	NEGATIVE	2 packages, 0 cross-package imports
+11	tokencanopy/e2a	POSITIVE	EmailReceivedData -> cli/src/commands/listen.ts
+12	mrrefactoring/atlassian-dc-mcp	POSITIVE	HttpClientConfig -> packages/jira/src/jiraClient/core/client.ts (marginal: exactly 2 fields)
+13	beatapi/beatdesign	NEGATIVE	not a multi-package workspace (pnpm-workspace.yaml settings only)
+14	apollographql/apollo-mcp-server	NEGATIVE	8 candidates, all fail condition 4
+15	csacanam/voulti	NEGATIVE	@voulti/shared imported by no sibling
+16	ouranos-labs/pseolint	POSITIVE	Template -> apps/web/src/components/audit/template-card.tsx
+17	jordanburke/ssh-client-mcp-server	NEGATIVE	inferred-type coupling excluded by condition 3 (R6)
+18	ruvnet/claude-flow	NEGATIVE	1 candidate, 1 distinctive field read
+19	ftwagency/wpconvert-devtools	NEGATIVE	no named shapes imported
+20	clira-dev/ezstat-mcp-server	NEGATIVE	not a multi-package workspace (pnpm-workspace.yaml settings only)
+21	datahogo/datahogo	POSITIVE	FindingData -> packages/cli/src/sarif.ts
+22	sou0327/knowmint	NEGATIVE	5 candidates, none read 2 distinctive fields
+23	dinglebear-ai/rgotify	NEGATIVE	not a multi-package workspace (Cargo [workspace] without members)
+24	pspdfkit/nutrient-document-engine-mcp-server	NEGATIVE	not a multi-package workspace (pnpm-workspace.yaml settings only)
+25	otakit/otakit	POSITIVE	OtaKitState -> examples/demo-app/app/page.tsx (example)
+26	stahldavid/sensegrep	NEGATIVE	only cross-package type is a string union
+27	theluckystrike/mcp-servers	POSITIVE	ComputedLine -> servers/billing-docs/src/index.ts
+28	minipuft/claude-prompts-mcp	NEGATIVE	1 declared workspace package; Experiment B's TRUE proposal was intra-package
+29	dinglebear-ai/yarr	POSITIVE	OperationSpec -> xtask/src/live/contract.rs (tooling)
+30	digitalbrewllc/playbykey-dev-tools	NEGATIVE	cross-package imports are const objects and unions

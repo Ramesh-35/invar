@@ -1467,3 +1467,18 @@ dogfooded against fastapi's real history before landing
 2026-10-13: Experiment A CLOSED, REFUTED on condition 2 (zero public consumers reading any of the 24 verified broken output fields). Mining half confirmed breaks are real (24, concentrated in 3 of 30 servers, all deliberately documented by their maintainers). Record: docs/falsification/experiment-a/.
 
 2026-10-13: Experiment B (stranger first run on 30 monorepos) FAILS: 1 of 30 received a TRUE proposal, 0 absence windows. Root causes measured: init discovers producers as schema files only (24 of 30 had none) and consumers only via the literal payload.<field> pattern. A first-run defect (duplicate contract ids, check exit 3) was found and fixed in alpha.29. Record: docs/falsification/experiment-b/.
+
+2026-10-13: INIT-DISCOVERY ground-truth audit (Experiment C) ACCEPTED as
+the working evaluation baseline (directive 58317): 11 POSITIVE, 1
+AMBIGUOUS, 18 NEGATIVE across Experiment B's 30 repositories. Recorded
+against Experiment B's own method: on the audit's basis (a workspace
+marker listing no members: no `packages:` list, or a Cargo [workspace]
+without `members`), 5 of its 30 were not multi-package workspaces, so
+B's actual monorepo population is 25. This is a historical count, not a
+count under H2 as clarified by directive 73814 (at least 2 qualifying
+packages), a different predicate (B's FAILS verdict unchanged; B's
+frozen files not edited; the INIT-DISCOVERY evaluation frame stays at
+30). Rulings R1 to R6, H1 (schema files inventory-only in v1) and H2
+(multi-package workspace rule) recorded in
+docs/architecture/INIT-DISCOVERY.md. Implementation not authorized; no
+engine result exists. Record: docs/falsification/experiment-c/.
