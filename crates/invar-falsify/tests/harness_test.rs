@@ -652,10 +652,10 @@ const OPENAPI_JSON: &str = r#"{
   } } }
 }"#;
 
-// 21. `invar init` discovers specs, consumers, routes and models, proposes only
-//     runnable contracts (JSON Schema and OpenAPI-JSON component, each paired
-//     with a consumer by field overlap), skips vendored directories, lists the
-//     rest as inventory, and emits a manifest that parses and actually runs.
+// 21. `invar init` discovers specs, consumers, routes and models, skips
+//     vendored directories, and emits a manifest that parses and loads. Since
+//     INIT-DISCOVERY slice 1 (ruling H1), schema files are INVENTORY ONLY: the
+//     JSON Schema and the OpenAPI-JSON component are listed, never proposed.
 #[test]
 fn init_discovers_and_emits_runnable_manifest() {
     let root = temp_workspace("init");
@@ -677,7 +677,7 @@ fn init_discovers_and_emits_runnable_manifest() {
     assert_eq!(d.schemas.len(), 2, "json-schema + openapi component");
     assert_eq!(d.consumers.len(), 1, "node_modules must be skipped");
     assert_eq!(d.consumers[0].path, "src/client.js");
-    assert_eq!(d.proposals.len(), 2);
+    assert_eq!(d.proposals.len(), 0, "H1: schema files are never proposed");
 
     let manifest = render_manifest(&d);
     // Non-checkable artifacts are inventoried, explicitly not proposed.
@@ -688,6 +688,8 @@ fn init_discovers_and_emits_runnable_manifest() {
         "fastapi GET \"/orders\"",
         "axum \"/orders\"",
         "HEURISTIC",
+        "INVENTORY schema schemas/order.schema.json",
+        "INVENTORY schema api/openapi.json#/components/schemas/Order",
     ] {
         assert!(manifest.contains(needle), "manifest should mention {needle}");
     }
@@ -695,16 +697,13 @@ fn init_discovers_and_emits_runnable_manifest() {
     // It parses with the flat-TOML parser...
     let sections = parse_sections("invar.toml", &manifest).unwrap();
     let blocks = sections.iter().filter(|(n, _)| n == "invariant").count();
-    assert_eq!(blocks, 2);
+    assert_eq!(blocks, 0);
 
-    // ...and it runs: both proposed contracts find the real residue.
+    // ...and no contract is evaluated from a schema pairing: check's
+    // existing (unchanged) behavior on a manifest without blocks is an error.
     std::fs::write(root.join("invar.toml"), &manifest).unwrap();
-    let outcomes = evaluate(&sections, &Resolver::local(&root)).unwrap();
-    assert_eq!(outcomes.len(), 2);
-    for o in &outcomes {
-        assert_eq!(o.residue, vec!["amount_cents".to_string()], "{}", o.id);
-        assert!(o.provenance.is_empty(), "local artifacts carry no remote provenance");
-    }
+    let err = evaluate(&sections, &Resolver::local(&root)).unwrap_err().to_string();
+    assert!(err.contains("has no [[invariant]] blocks"), "{err}");
     let _ = std::fs::remove_dir_all(&root);
 }
 
@@ -2260,9 +2259,10 @@ fn a41_check_states_sibling_dependents() {
 
 // ---------------------------------------------------------------------------
 // 50. init id uniqueness (alpha.29, found by Experiment B 2026-10-13): two
-// producers sharing a basename (`schema.json` in two directories) must get
-// distinct contract ids, so a stranger's init -> lock -> check never errors
-// (exit 3) on its first run. Non-colliding ids are unchanged.
+// producers sharing a basename must get distinct contract ids, so a stranger's
+// init -> lock -> check never errors (exit 3) on its first run. Non-colliding
+// ids are unchanged. Re-pinned on code producers (INIT-DISCOVERY slice 1): two
+// packages each export a shape from `types.ts`, one consumer reads both.
 // ---------------------------------------------------------------------------
 #[test]
 fn init_ids_unique_across_same_basename_producers() {
@@ -2270,13 +2270,20 @@ fn init_ids_unique_across_same_basename_producers() {
     let bin = env!("CARGO_BIN_EXE_invar");
     let dir = std::env::temp_dir().join(format!("invar-b50-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&dir);
-    for sub in ["a", "b", "app"] {
+    for sub in ["a", "b", "app/src"] {
         std::fs::create_dir_all(dir.join(sub)).unwrap();
     }
     let w = |n: &str, b: &str| std::fs::write(dir.join(n), b).unwrap();
-    w("a/schema.json", r#"{"type":"object","properties":{"order_id":{"type":"string"},"total_cents":{"type":"integer"}}}"#);
-    w("b/schema.json", r#"{"type":"object","properties":{"order_id":{"type":"string"},"currency":{"type":"string"}}}"#);
-    w("app/client.ts", "export const f = (payload: any) => [payload.order_id, payload.total_cents, payload.currency];\n");
+    w("package.json", r#"{"private":true,"workspaces":["a","b","app"]}"#);
+    w("a/package.json", r#"{"name":"a"}"#);
+    w("b/package.json", r#"{"name":"b"}"#);
+    w("app/package.json", r#"{"name":"app"}"#);
+    w("a/types.ts", "export interface Order {\n  order_ref: string;\n  total_cents: number;\n}\n");
+    w("b/types.ts", "export interface Invoice {\n  invoice_ref: string;\n  currency_code: string;\n}\n");
+    w(
+        "app/src/client.ts",
+        "import { Order } from 'a/types';\nimport { Invoice } from 'b/types';\nexport const f = (o: Order, i: Invoice) => [o.order_ref, o.total_cents, i.invoice_ref, i.currency_code];\n",
+    );
     let run = |args: &[&str]| Command::new(bin).args(args).current_dir(&dir).output().unwrap();
     let init = run(&["init"]);
     assert_eq!(init.status.code(), Some(0), "{}", String::from_utf8_lossy(&init.stderr));

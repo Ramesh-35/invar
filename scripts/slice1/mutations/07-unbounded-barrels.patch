@@ -1,0 +1,18 @@
+# mutation: follows re-exports through any number of barrels
+# catch: u02_barrel_depth_two_abstains
+
+diff --git a/crates/invar-falsify/src/codepairs.rs b/crates/invar-falsify/src/codepairs.rs
+index 34a8f15..4d0a9a8 100644
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1105,8 +1105,8 @@ fn find_shape(ctx: &Ctx, infos: &BTreeMap<String, FileInfo>, name: &str, file: &
+             if !found.iter().any(|(f, _, _)| f == &t2) {
+                 found.push((t2, d.clone(), re.line));
+             }
+-        } else if shape_one_level_down(ctx, infos, &orig, &t2) {
+-            deeper = true;
++        } else if let Found::Decl { file: f3, decl: d3, .. } = find_shape(ctx, infos, &orig, &t2) {
++            found.push((f3, d3, re.line));
+         }
+     }
+     match found.len() {

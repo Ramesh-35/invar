@@ -1,0 +1,16 @@
+# mutation: reports a truncated run as COMPLETE
+# catch: t01_truncation_is_reported
+
+diff --git a/crates/invar-falsify/src/init.rs b/crates/invar-falsify/src/init.rs
+index 46e40a7..b9422a3 100644
+--- a/crates/invar-falsify/src/init.rs
++++ b/crates/invar-falsify/src/init.rs
+@@ -80,7 +80,7 @@ pub struct Discovery {
+ pub fn status(d: &Discovery) -> &'static str {
+     if d.repo_abstained {
+         "ABSTAINED"
+-    } else if d.truncated {
++    } else if false {
+         "TRUNCATED"
+     } else {
+         "COMPLETE"

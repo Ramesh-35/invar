@@ -1482,3 +1482,19 @@ frozen files not edited; the INIT-DISCOVERY evaluation frame stays at
 (multi-package workspace rule) recorded in
 docs/architecture/INIT-DISCOVERY.md. Implementation not authorized; no
 engine result exists. Record: docs/falsification/experiment-c/.
+
+2026-10-14: INIT-DISCOVERY slice 1 IMPLEMENTED (directive 86427). `invar
+init` now proposes TypeScript code-producer contracts across qualifying
+workspace packages, with evidence E1 to E6 and the status "PROPOSED
+(heuristic; receiver of field reads not verified)"; schema files are
+inventory only (an init behavior change). Evidence: 37 slice 1 fixtures
+pass, each run twice with byte-identical output (MECHANIZED); 13 of 13
+mutations caught by their named fixtures (ADVERSARIALLY VERIFIED, on
+these fixtures only); the release binary ran init, lock, check on the
+F01 clone (easyeda-copilot at fe7b2a5) with exit 0 at each step
+(PRODUCTION-REACHABLE, one exposed case). check.rs, lock.rs, surface.rs,
+backtest.rs, invariant.rs, config.rs, yaml.rs, Cargo.toml and Cargo.lock
+unchanged. Detection capability NOT ESTABLISHED; the Experiment C
+evaluation has not been run. Recorded defect, not fixed: without a lock,
+`invar check` on these proposals is a vacuous HOLDS. Record:
+docs/architecture/INIT-DISCOVERY-SLICE1.md.

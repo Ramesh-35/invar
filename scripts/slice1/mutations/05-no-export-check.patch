@@ -1,0 +1,25 @@
+# mutation: treats non-exported types as exported
+# catch: n07_non_exported_type_is_not_a_shape
+
+diff --git a/crates/invar-falsify/src/codepairs.rs b/crates/invar-falsify/src/codepairs.rs
+index 34a8f15..2d8530d 100644
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -293,7 +293,7 @@ struct FileInfo {
+ 
+ impl FileInfo {
+     fn exported_shape(&self, name: &str) -> Option<&Decl> {
+-        if let Some(d) = self.decls.iter().find(|d| d.name == name && d.exported) {
++        if let Some(d) = self.decls.iter().find(|d| d.name == name) {
+             return Some(d);
+         }
+         let local = self
+@@ -307,7 +307,7 @@ impl FileInfo {
+         let mut out: Vec<(String, &Decl)> = self
+             .decls
+             .iter()
+-            .filter(|d| d.exported)
++            .filter(|_| true)
+             .map(|d| (d.name.clone(), d))
+             .collect();
+         for (e, l) in &self.local_exports {

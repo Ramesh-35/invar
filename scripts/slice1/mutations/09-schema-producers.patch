@@ -1,0 +1,34 @@
+# mutation: proposes schema files as producers again
+# catch: i01_schema_files_are_inventory_only
+
+diff --git a/crates/invar-falsify/src/init.rs b/crates/invar-falsify/src/init.rs
+index 46e40a7..cf2f34c 100644
+--- a/crates/invar-falsify/src/init.rs
++++ b/crates/invar-falsify/src/init.rs
+@@ -346,6 +346,26 @@ pub fn discover(root: &Path) -> Discovery {
+         });
+     }
+ 
++    for sc in &d.schemas {
++        for c in &d.consumers {
++            if sc.fields.intersection(&c.reads).next().is_some() {
++                let id = format!("schema:{}->{}", sc.path, c.path);
++                d.proposals.push(Proposal {
++                    id: id.clone(),
++                    producer: sc.path.clone(),
++                    pointer: sc.pointer.clone(),
++                    consumer: c.path.clone(),
++                    overlap: BTreeSet::new(),
++                    evidence: vec![
++                        PROPOSAL_STATUS.to_string(),
++                        "E1 m".into(), "E2 m".into(), "E3 m".into(), "E4 m".into(), "E5 m fields read: x (m)".into(), "E6 m".into(),
++                        "category: production".into(),
++                        LOCK_NOTE.to_string(),
++                    ],
++                });
++            }
++        }
++    }
+     // Slice 1: TypeScript code pairs across qualifying workspace packages.
+     let rel_files: Vec<String> = files.iter().map(|p| rel(root, p)).collect();
+     let rel_over: Vec<String> = oversized.iter().map(|p| rel(root, p)).collect();

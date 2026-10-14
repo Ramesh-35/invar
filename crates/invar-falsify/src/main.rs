@@ -889,23 +889,20 @@ fn cmd_init(args: InitArgs) -> Result<i32> {
         d.files_scanned,
         if d.truncated { " (truncated)" } else { "" }
     );
-    println!("  schemas found      : {}", d.schemas.len());
-    println!("  consumers found    : {}", d.consumers.len());
+    println!("  packages           : {} qualifying workspace package(s)", d.packages);
+    println!("  candidates         : {} named import(s) across packages examined", d.candidates);
     println!(
-        "  contracts proposed : {} (heuristic; review before trusting)",
+        "  contracts proposed : {} (heuristic; receiver of field reads not verified; review before trusting)",
         d.proposals.len()
     );
-    println!(
-        "  inventory only     : {} item(s) found but not yet checkable",
-        d.inventory.len()
-    );
-    if d.proposals.is_empty() {
-        println!("  note               : zero proposals is expected inside a single repo; INVAR checks contracts BETWEEN repos (next step is in the template inside invar.toml)");
-    }
+    println!("  abstentions        : {} (init declined; see ABSTAIN lines)", d.abstentions.len());
+    println!("  inventory only     : {} item(s), schema files included, never proposed", d.inventory.len());
     println!("  wrote              : {}", out.display());
     // Discovery hint ratified 2026-10-12. `invar lock` is named first because
     // backtest replays LOCKED bindings; without a lock it has nothing to replay.
+    println!("  next               : run `invar lock` before `invar check`; without a lock, check evaluates only payload.<field> reads and says nothing about these proposals");
     println!("  hint               : after `invar lock`, run `invar backtest` to replay your locked fields over this repository's git history");
+    println!("{}", invar_falsify::init::summary(&d));
     Ok(0)
 }
 

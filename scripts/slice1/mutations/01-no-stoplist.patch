@@ -1,0 +1,16 @@
+# mutation: removes the stoplist
+# catch: n04_stoplist_naming_form
+
+diff --git a/crates/invar-falsify/src/codepairs.rs b/crates/invar-falsify/src/codepairs.rs
+index 34a8f15..2dfde43 100644
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1207,7 +1207,7 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
+     }
+ 
+     let mut pairs: BTreeMap<(String, String), CodePair> = BTreeMap::new();
+-    let stop: BTreeSet<String> = STOPLIST.iter().map(|s| name_key(s)).collect();
++    let stop: BTreeSet<String> = BTreeSet::new();
+     // Exported object shapes per package: (file, exported name, decl).
+     let mut pkg_shapes: BTreeMap<usize, Vec<(String, String, Decl)>> = BTreeMap::new();
+     for (g, gi) in &infos {

@@ -1,0 +1,54 @@
+# mutation: pairs field overlap without a named import
+# catch: n02_overlap_without_import u01_inferred_type_abstains_r6
+
+diff --git a/crates/invar-falsify/src/codepairs.rs b/crates/invar-falsify/src/codepairs.rs
+index 34a8f15..312acfd 100644
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1329,6 +1329,46 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
+                 }
+             }
+         }
++        for p in 0..pkgs.len() {
++            if p == c {
++                continue;
++            }
++            for (g, ename, d) in pkg_shapes.get(&p).into_iter().flatten() {
++                let Kind::Object(members) = &d.kind else { continue };
++                let fields: Vec<(String, usize)> = members
++                    .iter()
++                    .filter_map(|(m, _)| {
++                        let k = name_key(m);
++                        if stop.contains(&k) {
++                            return None;
++                        }
++                        fi.reads.get(&k).map(|(_, l)| (m.clone(), *l))
++                    })
++                    .collect();
++                if fields.len() >= MIN_FIELDS {
++                    let pair = pairs.entry((g.clone(), f.clone())).or_insert_with(|| CodePair {
++                        producer: g.clone(),
++                        consumer: f.clone(),
++                        producer_pkg: pkgs[p].clone(),
++                        consumer_pkg: pkgs[c].clone(),
++                        category: "production",
++                        shapes: Vec::new(),
++                    });
++                    if !pair.shapes.iter().any(|s| &s.shape == ename) {
++                        pair.shapes.push(ShapeEvidence {
++                            shape: ename.clone(),
++                            decl_line: d.line,
++                            import_line: 0,
++                            specifier: String::new(),
++                            resolved: g.clone(),
++                            barrel: None,
++                            fields,
++                            stoplisted: Vec::new(),
++                        });
++                    }
++                }
++            }
++        }
+         // R6: shapes of an imported-from package read but not imported by name.
+         for (p, first_line) in &imported_from {
+             if *p == c {

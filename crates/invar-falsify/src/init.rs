@@ -1,21 +1,21 @@
 //! `invar init`: zero-touch topology discovery.
 //!
 //! Scans a workspace and emits an `invar.toml`. HONEST SCOPE: discovery is
-//! HEURISTIC. It recognizes files by name and content patterns; the only real
-//! parsing is JSON (serde_json). It proposes runnable contracts only where it
-//! can actually run them today: a JSON Schema, or an OpenAPI-JSON component
-//! schema, paired with a source file that reads at least one of that schema's
-//! field names via `payload.<field>`. Everything else it finds (YAML specs,
-//! AsyncAPI, protobuf, framework routes, Pydantic models) is reported as
-//! inventory, explicitly NOT checkable yet. Every generated block is a
-//! proposal for a human to review, never an asserted contract.
+//! HEURISTIC. Since INIT-DISCOVERY slice 1 it proposes contracts only between
+//! TypeScript code producers and consumers in different qualifying workspace
+//! packages (see `codepairs`), each with its evidence and the status line
+//! "PROPOSED (heuristic; receiver of field reads not verified)". Schema files
+//! (JSON Schema, OpenAPI-JSON components) are INVENTORY ONLY (ruling H1): they
+//! are listed, never proposed. Everything else it finds (YAML specs,
+//! AsyncAPI, protobuf, framework routes, Pydantic models) is inventory too.
+//! What init cannot resolve is an explicit ABSTAIN line, never a guess.
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use crate::invariant::payload_reads;
 
-const SKIP_DIRS: &[&str] = &[
+pub(crate) const SKIP_DIRS: &[&str] = &[
     ".git", "target", "node_modules", "dist", "build", ".venv", "venv", "__pycache__",
     "vendor", ".next", ".idea", ".vscode",
 ];
@@ -54,6 +54,9 @@ pub struct Proposal {
     pub pointer: Option<String>,
     pub consumer: String,
     pub overlap: BTreeSet<String>,
+    /// Comment lines (without `# `) written above the block: E1 to E6,
+    /// status, category, lock note.
+    pub evidence: Vec<String>,
 }
 
 #[derive(Debug, Default)]
@@ -64,7 +67,41 @@ pub struct Discovery {
     pub consumers: Vec<ConsumerFound>,
     pub inventory: Vec<InventoryItem>,
     pub proposals: Vec<Proposal>,
+    /// Qualifying workspace packages (slice 1).
+    pub packages: usize,
+    /// Named imports examined that point at another qualifying package.
+    pub candidates: usize,
+    pub abstentions: Vec<crate::codepairs::Abstention>,
+    /// A repository-level abstention (H2, SLICE-SCOPE) stopped discovery.
+    pub repo_abstained: bool,
 }
+
+/// The status reported in the summary line.
+pub fn status(d: &Discovery) -> &'static str {
+    if d.repo_abstained {
+        "ABSTAINED"
+    } else if d.truncated {
+        "TRUNCATED"
+    } else {
+        "COMPLETE"
+    }
+}
+
+/// The summary line (without `# `), always the last line of the manifest.
+pub fn summary(d: &Discovery) -> String {
+    format!(
+        "SUMMARY packages={} candidates={} proposals={} abstentions={} inventory={} status={}",
+        d.packages,
+        d.candidates,
+        d.proposals.len(),
+        d.abstentions.len(),
+        d.inventory.len(),
+        status(d)
+    )
+}
+
+pub const PROPOSAL_STATUS: &str = "status: PROPOSED (heuristic; receiver of field reads not verified)";
+pub const LOCK_NOTE: &str = "lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.";
 
 fn rel(root: &Path, p: &Path) -> String {
     p.strip_prefix(root)
@@ -75,7 +112,7 @@ fn rel(root: &Path, p: &Path) -> String {
         .join("/")
 }
 
-fn walk(dir: &Path, out: &mut Vec<PathBuf>, truncated: &mut bool) {
+fn walk(dir: &Path, out: &mut Vec<PathBuf>, truncated: &mut bool, oversized: &mut Vec<PathBuf>) {
     let mut entries: Vec<PathBuf> = match std::fs::read_dir(dir) {
         Ok(rd) => rd.filter_map(|e| e.ok()).map(|e| e.path()).collect(),
         Err(_) => return,
@@ -99,10 +136,12 @@ fn walk(dir: &Path, out: &mut Vec<PathBuf>, truncated: &mut bool) {
                 .map(|n| n.to_string_lossy().to_string())
                 .unwrap_or_default();
             if !SKIP_DIRS.contains(&name.as_str()) {
-                walk(&p, out, truncated);
+                walk(&p, out, truncated, oversized);
             }
         } else if md.is_file() && md.len() <= MAX_FILE_BYTES {
             out.push(p);
+        } else if md.is_file() {
+            oversized.push(p);
         }
     }
 }
@@ -197,7 +236,8 @@ fn file_name(p: &str) -> &str {
 pub fn discover(root: &Path) -> Discovery {
     let mut files = Vec::new();
     let mut truncated = false;
-    walk(root, &mut files, &mut truncated);
+    let mut oversized = Vec::new();
+    walk(root, &mut files, &mut truncated, &mut oversized);
     let mut d = Discovery {
         files_scanned: files.len(),
         truncated,
@@ -294,48 +334,99 @@ pub fn discover(root: &Path) -> Discovery {
         }
     }
 
-    for s in &d.schemas {
-        for c in &d.consumers {
-            let overlap: BTreeSet<String> = s.fields.intersection(&c.reads).cloned().collect();
-            if overlap.is_empty() {
-                continue;
-            }
-            let base_id = format!("schema:{}:{}->{}", file_name(&s.path), s.label, file_name(&c.path));
-            // Ids key contracts in invar.lock, so they must be unique. Producers that
-            // share a basename (`schema.json` in several directories) used to collide,
-            // the lock kept one, and the first `invar check` failed with a mismatch
-            // (found by Experiment B, 2026-10-13). Non-colliding ids stay byte-identical;
-            // a collision gets a deterministic `#2`, `#3` suffix in discovery order.
-            let mut id = base_id.clone();
-            let mut n = 2;
-            while d.proposals.iter().any(|p| p.id == id) {
-                id = format!("{base_id}#{n}");
-                n += 1;
-            }
-            if ![&id, &s.path, &c.path].iter().all(|v| toml_safe(v))
-                || !s.pointer.as_deref().map_or(true, toml_safe)
-            {
-                d.inventory.push(InventoryItem {
-                    category: "skipped",
-                    location: format!("{} -> {}", s.path, c.path),
-                    note: "path not representable in flat TOML".into(),
-                });
-                continue;
-            }
-            if d.proposals.len() >= MAX_PROPOSALS {
-                d.truncated = true;
-                break;
-            }
-            d.proposals.push(Proposal {
-                id,
-                producer: s.path.clone(),
-                pointer: s.pointer.clone(),
-                consumer: c.path.clone(),
-                overlap,
-            });
-        }
+    // H1: schema files are inventory only; they are never paired.
+    for sc in &d.schemas {
+        d.inventory.push(InventoryItem {
+            category: "schema",
+            location: match &sc.pointer {
+                Some(ptr) => format!("{}#{}", sc.path, ptr),
+                None => sc.path.clone(),
+            },
+            note: "schema file; inventory only (H1), never proposed".into(),
+        });
     }
+
+    // Slice 1: TypeScript code pairs across qualifying workspace packages.
+    let rel_files: Vec<String> = files.iter().map(|p| rel(root, p)).collect();
+    let rel_over: Vec<String> = oversized.iter().map(|p| rel(root, p)).collect();
+    let code = crate::codepairs::discover_code(root, &rel_files, &rel_over, SKIP_DIRS);
+    d.packages = code.packages.len();
+    d.candidates = code.candidates;
+    d.repo_abstained = code.repo_abstained;
+    d.truncated |= code.truncated;
+    d.abstentions = code.abstentions;
+    for pair in &code.pairs {
+        let base_id = format!("code:{}->{}", file_name(&pair.producer), file_name(&pair.consumer));
+        // alpha.29 uniqueness rule: deterministic `#2`, `#3` in discovery
+        // order (byte order of producer, then consumer path).
+        let mut id = base_id.clone();
+        let mut n = 2;
+        while d.proposals.iter().any(|p| p.id == id) {
+            id = format!("{base_id}#{n}");
+            n += 1;
+        }
+        if ![&id, &pair.producer, &pair.consumer].iter().all(|v| toml_safe(v)) {
+            d.abstentions.push(crate::codepairs::Abstention {
+                code: "UNREPRESENTABLE",
+                location: format!("{} -> {}", pair.producer, pair.consumer).replace(['\n', '\r'], " "),
+                reason: "path not representable in flat TOML; not proposed".into(),
+            });
+            continue;
+        }
+        if d.proposals.len() >= MAX_PROPOSALS {
+            d.truncated = true;
+            break;
+        }
+        let overlap: BTreeSet<String> = pair
+            .shapes
+            .iter()
+            .flat_map(|s| s.fields.iter().map(|(f, _)| f.clone()))
+            .collect();
+        d.proposals.push(Proposal {
+            id,
+            producer: pair.producer.clone(),
+            pointer: None,
+            consumer: pair.consumer.clone(),
+            overlap,
+            evidence: evidence_lines(pair),
+        });
+    }
+    d.abstentions.sort();
+    d.abstentions.dedup();
     d
+}
+
+fn evidence_lines(p: &crate::codepairs::CodePair) -> Vec<String> {
+    let pkg = |k: &crate::codepairs::Package| format!("{} at {}/package.json ({})", k.name, k.dir, k.marker);
+    let mut v = vec![PROPOSAL_STATUS.to_string()];
+    v.push(format!("E1 producer package {}", pkg(&p.producer_pkg)));
+    for s in &p.shapes {
+        v.push(format!("E2 {} declared at {}:{}", s.shape, p.producer, s.decl_line));
+    }
+    v.push(format!("E3 consumer package {}", pkg(&p.consumer_pkg)));
+    for s in &p.shapes {
+        let via = match &s.barrel {
+            Some((b, l)) => format!(", re-exported by barrel {b}:{l} from {}", p.producer),
+            None => String::new(),
+        };
+        v.push(format!(
+            "E4 {} imported at {}:{} from {:?}, resolved to {}{via}",
+            s.shape, p.consumer, s.import_line, s.specifier, s.resolved
+        ));
+    }
+    for s in &p.shapes {
+        let f: Vec<String> = s.fields.iter().map(|(n, l)| format!("{n} ({}:{l})", p.consumer)).collect();
+        v.push(format!("E5 {} fields read: {}", s.shape, f.join(", ")));
+        v.push(format!(
+            "E5 {} stoplisted reads: {}",
+            s.shape,
+            if s.stoplisted.is_empty() { "(none)".to_string() } else { s.stoplisted.join(", ") }
+        ));
+    }
+    v.push(format!("E6 pair {} -> {}", p.producer, p.consumer));
+    v.push(format!("category: {}", p.category));
+    v.push(LOCK_NOTE.to_string());
+    v
 }
 
 /// Render the discovery as an `invar.toml` the flat parser can read back.
@@ -351,21 +442,28 @@ pub fn render_manifest(d: &Discovery) -> String {
 pub fn render_manifest_opts(d: &Discovery, full_inventory: bool) -> String {
     let mut s = String::new();
     s.push_str("# invar.toml generated by `invar init`.\n#\n");
-    s.push_str("# HONEST SCOPE: discovery is HEURISTIC (file names and text patterns; only\n");
-    s.push_str("# JSON is actually parsed). Each [[invariant]] block below is a PROPOSAL,\n");
-    s.push_str("# paired because the consumer reads at least one field the schema names.\n");
-    s.push_str("# Review every block before trusting a verdict. Paths are relative to this\n");
-    s.push_str("# file. A consumer in another repo can be referenced remotely under --ci as\n");
-    s.push_str("# github:OWNER/REPO@REF:PATH (REF may be {base}).\n\n");
+    s.push_str("# HONEST SCOPE: discovery is HEURISTIC (text patterns, not a parser). Each\n");
+    s.push_str("# [[invariant]] block below is a PROPOSAL: a TypeScript shape exported by one\n");
+    s.push_str("# workspace package, imported by name in another, with at least 2 of its\n");
+    s.push_str("# direct fields read there. The receiver of those reads is NOT verified.\n");
+    s.push_str("# Review every block before trusting a verdict. Schema files are inventory\n");
+    s.push_str("# only. ABSTAIN lines are refusals to propose, not negative findings. Paths\n");
+    s.push_str("# are relative to this file.\n\n");
 
     s.push_str("[discovery]\n");
     s.push_str(&format!("files_scanned = \"{}\"\n", d.files_scanned));
     s.push_str(&format!("truncated = \"{}\"\n", d.truncated));
-    s.push_str(&format!("schemas_found = \"{}\"\n", d.schemas.len()));
-    s.push_str(&format!("consumers_found = \"{}\"\n", d.consumers.len()));
-    s.push_str(&format!("contracts_proposed = \"{}\"\n\n", d.proposals.len()));
+    s.push_str(&format!("packages = \"{}\"\n", d.packages));
+    s.push_str(&format!("candidates = \"{}\"\n", d.candidates));
+    s.push_str(&format!("contracts_proposed = \"{}\"\n", d.proposals.len()));
+    s.push_str(&format!("abstentions = \"{}\"\n", d.abstentions.len()));
+    s.push_str(&format!("inventory = \"{}\"\n\n", d.inventory.len()));
 
     for p in &d.proposals {
+        s.push_str(&format!("# PROPOSED {}\n", p.id));
+        for e in &p.evidence {
+            s.push_str(&format!("# {e}\n"));
+        }
         s.push_str("[[invariant]]\n");
         s.push_str("kind = \"schema\"\n");
         s.push_str(&format!("id = \"{}\"\n", p.id));
@@ -373,44 +471,45 @@ pub fn render_manifest_opts(d: &Discovery, full_inventory: bool) -> String {
         if let Some(ptr) = &p.pointer {
             s.push_str(&format!("pointer = \"{ptr}\"\n"));
         }
-        s.push_str(&format!("consumer = \"{}\"\n", p.consumer));
-        let ov: Vec<&str> = p.overlap.iter().map(String::as_str).collect();
-        s.push_str(&format!("# proposed because both mention: {}\n\n", ov.join(", ")));
+        s.push_str(&format!("consumer = \"{}\"\n\n", p.consumer));
     }
 
     if d.proposals.is_empty() {
-        s.push_str("# ZERO PROPOSALS IS THE EXPECTED RESULT INSIDE A SINGLE REPOSITORY.\n");
-        s.push_str("# INVAR checks contracts BETWEEN repositories, and one clone usually\n");
-        s.push_str(&format!(
-            "# holds only one side (this scan found {} consumer read-site(s) and {} local\n",
-            d.consumers.len(),
-            d.schemas.len()
-        ));
-        s.push_str("# schema(s); the other side lives in the repositories this code talks to).\n");
-        s.push_str("# Next step: name the other side explicitly, local path or remote ref.\n");
-        s.push_str("# Template:\n");
+        s.push_str("# No contracts proposed. The ABSTAIN lines below say where init declined.\n");
+        s.push_str("# To name a pair by hand (local path or remote ref github:OWNER/REPO@REF:PATH):\n");
         s.push_str("# [[invariant]]\n# kind = \"schema\"          # schema | event | lock_order\n");
         s.push_str("# id = \"my-contract\"\n# producer = \"path/to/schema.json\"\n");
         s.push_str("# consumer = \"path/to/client.js\"\n\n");
     }
 
-    s.push_str("# ---- Found but NOT yet checkable (inventory only) ----\n");
-    if d.inventory.is_empty() {
+    s.push_str("# ---- Abstentions (init declined to propose; not negative findings) ----\n");
+    if d.abstentions.is_empty() {
         s.push_str("# (none)\n");
     }
-    let shown = if full_inventory {
-        d.inventory.len()
-    } else {
-        d.inventory.len().min(INVENTORY_CAP)
-    };
-    for i in &d.inventory[..shown] {
-        s.push_str(&format!("# {:<9} {}  {}\n", i.category, i.location, i.note));
+    for a in &d.abstentions {
+        s.push_str(&format!("# {}\n", a.line().replace(['\n', '\r'], " ")));
     }
-    if shown < d.inventory.len() {
+
+    s.push_str("# ---- Found but NOT proposed (inventory only) ----\n");
+    let mut inv: Vec<String> = d
+        .inventory
+        .iter()
+        .map(|i| format!("INVENTORY {} {}  {}", i.category, i.location, i.note).replace(['\n', '\r'], " "))
+        .collect();
+    inv.sort();
+    if inv.is_empty() {
+        s.push_str("# (none)\n");
+    }
+    let shown = if full_inventory { inv.len() } else { inv.len().min(INVENTORY_CAP) };
+    for i in &inv[..shown] {
+        s.push_str(&format!("# {i}\n"));
+    }
+    if shown < inv.len() {
         s.push_str(&format!(
             "# ... {} more item(s) not shown; run `invar init --stdout --full-inventory` for the complete list\n",
-            d.inventory.len() - shown
+            inv.len() - shown
         ));
     }
+    s.push_str(&format!("# {}\n", summary(d)));
     s
 }

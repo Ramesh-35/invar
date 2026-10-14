@@ -2,7 +2,9 @@
 
 Status: DRAFT, rulings R1 to R6 and H1 to H2 recorded (2026-10-13;
 R1-R3 directive 48216, R4-R6 directive 58317, H1-H2 directive 64182).
-Implementation NOT authorized.
+Slice 1 implemented (directive 86427): TypeScript only, contract and
+evidence in INIT-DISCOVERY-SLICE1.md. Detection capability NOT
+ESTABLISHED; the Experiment C evaluation has not been run.
 Ground truth: docs/falsification/experiment-c/. Motivated by
 Experiment B (docs/falsification/experiment-b/), which measured the
 first-run experience on 30 seeded public monorepos: 1 TRUE proposal in
@@ -54,8 +56,11 @@ the 70% precision target explicitly allows (directive 73814).
    followed one level, stated. Variable names play no part. The shape
    must be imported BY NAME (R6): consumers that read an inferred type
    without importing it are out of v1 scope.
-4. Evidence rule. Within each consumer, field reads come from
-   surface::broad_reads, intersected with the imported type's fields. A
+4. Evidence rule. Within each consumer, field reads are property
+   accesses only (`.f`, `?.f`, `["f"]`; not surface::broad_reads, whose
+   declarations and tags are not reads), intersected with the DIRECT
+   members of the imported shape (D2; nested members never count). The
+   receiver of a read is not verified (D1): every proposal says so. A
    proposal needs at least 2 overlapping fields that are NOT on the
    generic stoplist (id, name, type, description, data, value, payload,
    key, label, title, status, error, message, result, items, url, path,
@@ -83,7 +88,9 @@ the 70% precision target explicitly allows (directive 73814).
    re-enter through another producer classification. This path is OUT
    OF ACTIONABLE PROPOSAL SCOPE for v1, not solved. The 3 builder-schema
    cases (minipuft/claude-prompts-mcp, *_builder/schema.json) are
-   regression fixtures. Cross-repository contracts are untouched. Ids
+   regression fixtures. Checking and locking of existing or hand-written
+   contracts, including cross-repository ones, is unchanged; contract
+   discovery by init changes (schema files are no longer proposed). Ids
    follow alpha.29's uniqueness rule.
 7. Outcome classes (directive 73814). Init's output keeps three classes
    in separate sections, and each item gets exactly one class, once:
@@ -174,6 +181,14 @@ contract is a stated limit; a spurious one is the failure to minimize.
   frame unchanged.
 - Outcome classes (directive 73814): abstentions and inventory-only
   observations are not proposals (step 7).
+- Slice 1 (directives 63824, 86427): D1 option (a), receiver not
+  verified; D2 direct members only; D3 schema inventory is an init
+  behavior change; D4 F01 (easyeda-copilot) is an exposed development
+  case (docs/falsification/experiment-c/EXPOSURE-LOG.md); D5 consumer
+  category path rules; C1 `[[invariant]] kind = "schema"`; C2 run errors
+  keep exit 1 and `error:`; C3 UNSUPPORTED-SHAPE; C4 import resolution
+  rules; C5 no silently lost files; D6 option (a): proposals tell the
+  user to lock before check, check unchanged.
 
 ## Acceptance
 

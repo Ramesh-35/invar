@@ -1,0 +1,21 @@
+# mutation: counts undeclared directories (and the root) as packages
+# catch: n09_undeclared_directory_is_not_a_package u03_single_declared_package_abstains_h2
+
+diff --git a/crates/invar-falsify/src/codepairs.rs b/crates/invar-falsify/src/codepairs.rs
+index 34a8f15..ace06b8 100644
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -879,9 +879,12 @@ fn membership(
+             }
+         }
+     }
++    for d in expand(root, &["**".to_string()], truncated) {
++        included.entry(d).or_insert_with(|| ("mutation".into(), "**".into()));
++    }
+     let mut pkgs = Vec::new();
+     for (dir, (marker, raw)) in included {
+-        if excluded.contains(&dir) || dir.is_empty() {
++        if excluded.contains(&dir) {
+             continue; // the root never counts (H2 table)
+         }
+         let pjp = root.join(&dir).join("package.json");

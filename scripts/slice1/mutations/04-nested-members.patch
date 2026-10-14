@@ -1,0 +1,24 @@
+# mutation: counts nested members as fields of the shape
+# catch: n06_nested_members_do_not_count
+
+diff --git a/crates/invar-falsify/src/codepairs.rs b/crates/invar-falsify/src/codepairs.rs
+index 34a8f15..c093749 100644
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -335,13 +335,11 @@ fn members(t: &Text, open: usize) -> Option<(Vec<(String, usize)>, usize)> {
+                     seg_start = false; // index signature, not a field
+                 }
+                 depth += 1;
+-                if depth == 1 {
+-                    seg_start = true;
+-                }
++                seg_start = true;
+             }
+             b'}' | b')' | b']' => depth -= 1,
+-            b';' | b',' | b'\n' if depth == 1 => seg_start = true,
+-            _ if depth == 1 && seg_start && !c.is_ascii_whitespace() => {
++            b';' | b',' | b'\n' if depth >= 1 => seg_start = true,
++            _ if depth >= 1 && seg_start && !c.is_ascii_whitespace() => {
+                 seg_start = false;
+                 if let Some(m) = member_at(t, j) {
+                     out.push(m);
