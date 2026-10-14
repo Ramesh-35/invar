@@ -2,10 +2,10 @@
 # catch: n02_overlap_without_import u01_inferred_type_abstains_r6
 
 diff --git a/crates/invar-falsify/src/codepairs.rs b/crates/invar-falsify/src/codepairs.rs
-index 34a8f15..312acfd 100644
+index 095203f..dfd91dc 100644
 --- a/crates/invar-falsify/src/codepairs.rs
 +++ b/crates/invar-falsify/src/codepairs.rs
-@@ -1329,6 +1329,46 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
+@@ -1342,6 +1342,46 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
                  }
              }
          }

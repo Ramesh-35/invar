@@ -190,7 +190,7 @@ fn schema_outcome(
     b: &[(String, String)],
     resolver: &Resolver,
     prov: &mut Vec<Fetched>,
-) -> Result<(Vec<String>, Vec<Witness>, Vec<String>)> {
+) -> Result<(Vec<String>, Vec<Witness>, Vec<String>, Option<String>)> {
     let p = getk(b, "producer").context("schema invariant needs producer")?;
     let c = getk(b, "consumer").context("schema invariant needs consumer")?;
     let ptr = getk(b, "pointer");
@@ -204,6 +204,21 @@ fn schema_outcome(
 
     if base.is_none() && code.is_none() {
         let cr = fetch(resolver, &c, prov)?;
+        // Directive 86428 pass 3: without a lock, the strict check below
+        // compares only literal `payload.<field>` reads. A code producer
+        // whose consumer has none would get a HOLDS in which NOTHING was
+        // evaluated; that is reported as not evaluated, never as HOLDS.
+        if is_code(&p) && payload_read_sites(&cr).is_empty() {
+            return Ok((
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+                Some(format!(
+                    "not evaluated: no invar.lock entry, and {} has no literal payload.<field> reads for the unlocked strict check; run `invar lock` first",
+                    artifact_name(&c)
+                )),
+            ));
+        }
         let defined: serde_json::Value = if is_code(&p) {
             let f = source_fields(id, &p, &pr, None)?;
             let props: serde_json::Map<String, serde_json::Value> = field_names(&f)
@@ -223,7 +238,7 @@ fn schema_outcome(
             artifact_name(&p),
             ptr.unwrap_or_default()
         );
-        return Ok((r.clone(), read_witnesses(&r, &c, &cr, &missing), Vec::new()));
+        return Ok((r.clone(), read_witnesses(&r, &c, &cr, &missing), Vec::new(), None));
     }
 
     // Change-scoped: collect what changed in each producer source.
@@ -353,7 +368,7 @@ fn schema_outcome(
             ));
         }
     }
-    Ok((residue, witnesses, unevaluated))
+    Ok((residue, witnesses, unevaluated, None))
 }
 
 /// E1: keys of runtime payloads that moved into a new envelope:
@@ -764,6 +779,7 @@ pub fn evaluate_with(
         let witnesses: Vec<Witness>;
         let mut notes: Vec<String> = Vec::new();
         let mut unevaluated: Vec<String> = Vec::new();
+        let mut skipped: Option<String> = None;
         let residue = match kind.as_str() {
             "schema" => match lock.and_then(|l| l.contracts.iter().find(|c| c.id == id)) {
                 Some(entry) => {
@@ -785,9 +801,10 @@ pub fn evaluate_with(
                     if lock.is_some() {
                         notes.push("not in invar.lock; run `invar lock --update` to lock it".into());
                     }
-                    let (r, w, u) = schema_outcome(&id, b, resolver, &mut prov)?;
+                    let (r, w, u, sk) = schema_outcome(&id, b, resolver, &mut prov)?;
                     witnesses = w;
                     unevaluated = u;
+                    skipped = sk;
                     r
                 }
             },
@@ -842,6 +859,7 @@ pub fn evaluate_with(
             witnesses,
             notes,
             unevaluated,
+            skipped,
             ..Default::default()
         };
         if let Some(l) = lock {

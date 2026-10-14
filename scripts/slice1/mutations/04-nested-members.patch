@@ -2,7 +2,7 @@
 # catch: n06_nested_members_do_not_count
 
 diff --git a/crates/invar-falsify/src/codepairs.rs b/crates/invar-falsify/src/codepairs.rs
-index 34a8f15..c093749 100644
+index 095203f..d9391ce 100644
 --- a/crates/invar-falsify/src/codepairs.rs
 +++ b/crates/invar-falsify/src/codepairs.rs
 @@ -335,13 +335,11 @@ fn members(t: &Text, open: usize) -> Option<(Vec<(String, usize)>, usize)> {

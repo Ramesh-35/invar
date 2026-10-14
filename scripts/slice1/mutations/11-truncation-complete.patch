@@ -2,10 +2,10 @@
 # catch: t01_truncation_is_reported
 
 diff --git a/crates/invar-falsify/src/init.rs b/crates/invar-falsify/src/init.rs
-index 46e40a7..b9422a3 100644
+index 72f43cc..6840120 100644
 --- a/crates/invar-falsify/src/init.rs
 +++ b/crates/invar-falsify/src/init.rs
-@@ -80,7 +80,7 @@ pub struct Discovery {
+@@ -84,7 +84,7 @@ pub struct Discovery {
  pub fn status(d: &Discovery) -> &'static str {
      if d.repo_abstained {
          "ABSTAINED"

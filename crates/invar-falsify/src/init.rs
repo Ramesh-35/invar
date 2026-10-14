@@ -57,6 +57,10 @@ pub struct Proposal {
     /// Comment lines (without `# `) written above the block: E1 to E6,
     /// status, category, lock note.
     pub evidence: Vec<String>,
+    /// Machine-readable evidence keys, one per shape: "<Shape> <field>...".
+    /// `invar lock` restricts a contract's bindings to these (directive
+    /// 86428, pass 2); comments never reach the parser, these keys do.
+    pub evidence_keys: Vec<String>,
 }
 
 #[derive(Debug, Default)]
@@ -365,7 +369,27 @@ pub fn discover(root: &Path) -> Discovery {
             id = format!("{base_id}#{n}");
             n += 1;
         }
-        if ![&id, &pair.producer, &pair.consumer].iter().all(|v| toml_safe(v)) {
+        let evidence_keys: Vec<String> = pair
+            .shapes
+            .iter()
+            .map(|s| {
+                let mut k = s.shape.clone();
+                for (f, _) in &s.fields {
+                    k.push(' ');
+                    k.push_str(f);
+                }
+                k
+            })
+            .collect();
+        // The evidence travels as space-separated identifiers, so a shape or
+        // field name with whitespace or a quote cannot be represented; such a
+        // pair is abstained like any other unrepresentable one (M04 rule).
+        let representable = [&id, &pair.producer, &pair.consumer].iter().all(|v| toml_safe(v))
+            && pair.shapes.iter().all(|s| {
+                let ok = |x: &str| toml_safe(x) && !x.chars().any(char::is_whitespace);
+                ok(&s.shape) && s.fields.iter().all(|(f, _)| ok(f))
+            });
+        if !representable {
             d.abstentions.push(crate::codepairs::Abstention {
                 code: "UNREPRESENTABLE",
                 location: format!("{} -> {}", pair.producer, pair.consumer).replace(['\n', '\r'], " "),
@@ -389,6 +413,7 @@ pub fn discover(root: &Path) -> Discovery {
             consumer: pair.consumer.clone(),
             overlap,
             evidence: evidence_lines(pair),
+            evidence_keys,
         });
     }
     d.abstentions.sort();
@@ -471,7 +496,11 @@ pub fn render_manifest_opts(d: &Discovery, full_inventory: bool) -> String {
         if let Some(ptr) = &p.pointer {
             s.push_str(&format!("pointer = \"{ptr}\"\n"));
         }
-        s.push_str(&format!("consumer = \"{}\"\n\n", p.consumer));
+        s.push_str(&format!("consumer = \"{}\"\n", p.consumer));
+        for e in &p.evidence_keys {
+            s.push_str(&format!("evidence = \"{e}\"\n"));
+        }
+        s.push('\n');
     }
 
     if d.proposals.is_empty() {

@@ -714,6 +714,82 @@ fn c01_category_precedence_and_id_collisions() {
     );
 }
 
+// ------------------------------------------------- 86428 correction passes
+
+const CM_ORDER: &str = "export interface Order {\n    total_minor: number;\n    currency_code: string;\n    zoom: { render_mode: string } | { render_mode: string; crop_box: { x_off: number } };\n}\nexport type Reply = { render_flag: boolean; body_text: string };\n";
+const CM_USE: &str = "import { Order } from 'a/order';\nexport function f(o: Order, z: any) {\n    const flag = z.render_mode === 'fast';\n    return { render_flag: flag, total: o.total_minor, code: o.currency_code };\n}\n";
+
+// U10 (Pass 1, defect C): a pnpm flow list is outside the slice 1 contract;
+// membership must abstain, never parse it into packages.
+#[test]
+fn u10_pnpm_flow_list_abstains() {
+    let d = ws(
+        "u10",
+        &[
+            ("pnpm-workspace.yaml", "packages: [a, b]\n"),
+            PKG_A,
+            PKG_B,
+            ("a/order.ts", ORDER),
+            ("b/src/x.ts", USE_ORDER),
+        ],
+    );
+    expect(
+        &init(&d),
+        &[],
+        &["ABSTAIN H2 . unsupported marker pnpm-workspace.yaml (packages is not a block list)"],
+        &[],
+        "SUMMARY packages=0 candidates=0 proposals=0 abstentions=1 inventory=0 status=ABSTAINED",
+    );
+}
+
+// L01 (Pass 2, defect A): every locked binding of a slice 1 contract is one
+// of the proposal's E5 fields, scoped to its shape. The countermodel offers
+// a nested member (render_mode, read on an unrelated value) and a neighboring
+// type (Reply.render_flag, constructed in the consumer); neither may bind.
+#[test]
+fn l01_lock_bindings_are_evidence_bounded() {
+    let d = ws("l01", &[ROOT_AB, PKG_A, PKG_B, ("a/order.ts", CM_ORDER), ("b/src/x.ts", CM_USE)]);
+    let bin = env!("CARGO_BIN_EXE_invar");
+    let run = |args: &[&str]| std::process::Command::new(bin).args(args).current_dir(&d).output().unwrap();
+    assert_eq!(run(&["init"]).status.code(), Some(0));
+    let toml = std::fs::read_to_string(d.join("invar.toml")).unwrap();
+    assert!(toml.contains("evidence = \"Order currency_code total_minor\""), "{toml}");
+    assert_eq!(run(&["lock"]).status.code(), Some(0));
+    let lock = std::fs::read_to_string(d.join("invar.lock")).unwrap();
+    let binds: Vec<&str> = lock
+        .lines()
+        .filter_map(|l| l.trim().strip_prefix("bind = \""))
+        .map(|l| l.trim_end_matches('"'))
+        .collect();
+    let fields: Vec<&str> = binds.iter().map(|b| b.split(' ').nth(2).unwrap_or("")).collect();
+    assert_eq!(
+        fields,
+        vec!["Order.currency_code", "Order.total_minor"],
+        "bindings must equal the evidence, scoped: {lock}"
+    );
+    let _ = std::fs::remove_dir_all(&d);
+}
+
+// B01 (Pass 3, defect B): without a lock, a slice 1 contract is reported as
+// not evaluated (exit 4), never as a vacuous HOLDS; after `invar lock` the
+// same check holds with exit 0.
+#[test]
+fn b01_unlocked_check_is_not_evaluated() {
+    let d = ws("b01", &[ROOT_AB, PKG_A, PKG_B, ("a/order.ts", ORDER), ("b/src/use.ts", USE_ORDER)]);
+    let bin = env!("CARGO_BIN_EXE_invar");
+    let run = |args: &[&str]| std::process::Command::new(bin).args(args).current_dir(&d).output().unwrap();
+    assert_eq!(run(&["init"]).status.code(), Some(0));
+    let check = run(&["check"]);
+    let out = String::from_utf8_lossy(&check.stdout).to_string();
+    assert_eq!(check.status.code(), Some(4), "no lock must mean not evaluated, never HOLDS:\n{out}");
+    assert!(out.contains("payload.<field>") && out.contains("invar lock"), "{out}");
+    assert!(!out.contains("[HOLDS]"), "{out}");
+    assert_eq!(run(&["lock"]).status.code(), Some(0));
+    let again = run(&["check"]);
+    assert_eq!(again.status.code(), Some(0), "{}", String::from_utf8_lossy(&again.stdout));
+    let _ = std::fs::remove_dir_all(&d);
+}
+
 // --------------------------------------------------------------- run error
 
 #[test]

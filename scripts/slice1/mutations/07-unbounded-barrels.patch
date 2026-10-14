@@ -2,10 +2,10 @@
 # catch: u02_barrel_depth_two_abstains
 
 diff --git a/crates/invar-falsify/src/codepairs.rs b/crates/invar-falsify/src/codepairs.rs
-index 34a8f15..4d0a9a8 100644
+index 095203f..29541ea 100644
 --- a/crates/invar-falsify/src/codepairs.rs
 +++ b/crates/invar-falsify/src/codepairs.rs
-@@ -1105,8 +1105,8 @@ fn find_shape(ctx: &Ctx, infos: &BTreeMap<String, FileInfo>, name: &str, file: &
+@@ -1118,8 +1118,8 @@ fn find_shape(ctx: &Ctx, infos: &BTreeMap<String, FileInfo>, name: &str, file: &
              if !found.iter().any(|(f, _, _)| f == &t2) {
                  found.push((t2, d.clone(), re.line));
              }

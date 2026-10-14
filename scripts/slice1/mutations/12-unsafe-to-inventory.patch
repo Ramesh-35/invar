@@ -2,13 +2,13 @@
 # catch: m04_unrepresentable_pair_is_abstained_not_inventoried
 
 diff --git a/crates/invar-falsify/src/init.rs b/crates/invar-falsify/src/init.rs
-index 46e40a7..0f841ff 100644
+index 72f43cc..869ca33 100644
 --- a/crates/invar-falsify/src/init.rs
 +++ b/crates/invar-falsify/src/init.rs
-@@ -366,10 +366,10 @@ pub fn discover(root: &Path) -> Discovery {
-             n += 1;
-         }
-         if ![&id, &pair.producer, &pair.consumer].iter().all(|v| toml_safe(v)) {
+@@ -390,10 +390,10 @@ pub fn discover(root: &Path) -> Discovery {
+                 ok(&s.shape) && s.fields.iter().all(|(f, _)| ok(f))
+             });
+         if !representable {
 -            d.abstentions.push(crate::codepairs::Abstention {
 -                code: "UNREPRESENTABLE",
 -                location: format!("{} -> {}", pair.producer, pair.consumer).replace(['\n', '\r'], " "),

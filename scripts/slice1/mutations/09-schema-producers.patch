@@ -2,10 +2,10 @@
 # catch: i01_schema_files_are_inventory_only
 
 diff --git a/crates/invar-falsify/src/init.rs b/crates/invar-falsify/src/init.rs
-index 46e40a7..cf2f34c 100644
+index 72f43cc..18b66fc 100644
 --- a/crates/invar-falsify/src/init.rs
 +++ b/crates/invar-falsify/src/init.rs
-@@ -346,6 +346,26 @@ pub fn discover(root: &Path) -> Discovery {
+@@ -350,6 +350,27 @@ pub fn discover(root: &Path) -> Discovery {
          });
      }
  
@@ -25,6 +25,7 @@ index 46e40a7..cf2f34c 100644
 +                        "category: production".into(),
 +                        LOCK_NOTE.to_string(),
 +                    ],
++                    evidence_keys: Vec::new(),
 +                });
 +            }
 +        }

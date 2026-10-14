@@ -1498,3 +1498,23 @@ unchanged. Detection capability NOT ESTABLISHED; the Experiment C
 evaluation has not been run. Recorded defect, not fixed: without a lock,
 `invar check` on these proposals is a vacuous HOLDS. Record:
 docs/architecture/INIT-DISCOVERY-SLICE1.md.
+
+2026-10-14: INIT-DISCOVERY slice 1 corrected (directive 86428, passes 1
+to 3), on top of commit 42a3522. Investigation 86428-A reproduced
+three defects: (A) lock bound 13 fields for the F01 preview pair's 7
+evidence fields, nested and neighboring names included, and an executed
+countermodel showed a VIOLATED alarm on a field outside the proposal's
+evidence; (B) check without a lock returned HOLDS, exit 0, with nothing
+evaluated; (C) pnpm flow lists were accepted against the slice contract.
+Fixes: init writes machine-readable evidence keys and invar lock
+restricts such contracts to their scoped evidence fields (F01: 19
+bindings across 6 contracts, was 87; preview pair exactly its 7); an
+unlocked schema check of a code producer with zero literal payload reads
+is SKIPPED, exit 4, never HOLDS; flow lists abstain (H2). Each fix
+landed against a regression test that failed first (L01, B01, U10), and
+mutations 14 to 16 prove the rules load-bearing. 93 tests pass; mutation
+harness 16 of 16 caught (run log in the evidence package). check.rs and
+lock.rs changed under the 86428 scope expansion; surface.rs,
+backtest.rs, invariant.rs, config.rs, yaml.rs, Cargo.toml, Cargo.lock
+and the five frozen Experiment C files unchanged. Detection capability
+NOT ESTABLISHED; the Experiment C evaluation has not been run.

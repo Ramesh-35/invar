@@ -21,6 +21,10 @@ of them. Entries are appended, never removed or reworded.
   abstentions), `invar lock` and `invar check` on the clone at fe7b2a5
   were run and read. No other corpus repository was run through the
   slice 1 engine.
+- 2026-10-14, biosshot/easyeda-copilot, directive 86428 passes: `invar
+  init`, `lock` and `check` were re-run on the clone at fe7b2a5 after
+  each correction pass, and the resulting invar.toml and invar.lock
+  were read. No other corpus repository was run or read.
 
 ## Sensitivity analysis, specified before any result
 

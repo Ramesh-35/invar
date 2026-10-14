@@ -2,10 +2,10 @@
 # catch: n11_fields_never_pooled_across_shapes
 
 diff --git a/crates/invar-falsify/src/codepairs.rs b/crates/invar-falsify/src/codepairs.rs
-index 34a8f15..9a64c0e 100644
+index 095203f..5191d11 100644
 --- a/crates/invar-falsify/src/codepairs.rs
 +++ b/crates/invar-falsify/src/codepairs.rs
-@@ -1223,6 +1223,7 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
+@@ -1236,6 +1236,7 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
          let Some(c) = ctx.pkg_of(f) else { continue };
          let mut imported_from: BTreeMap<usize, usize> = BTreeMap::new(); // pkg -> first import line
          let mut imported_shapes: BTreeSet<(String, String)> = BTreeSet::new();
@@ -13,7 +13,7 @@ index 34a8f15..9a64c0e 100644
          // Names imported by name from each package, resolved or not: R6 is
          // about shapes NOT imported by name.
          let mut imported_names: BTreeMap<usize, BTreeSet<String>> = BTreeMap::new();
-@@ -1296,6 +1297,9 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
+@@ -1309,6 +1310,9 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
                                  fields.dedup_by(|a, b| a.0 == b.0);
                                  stoplisted.sort();
                                  stoplisted.dedup();

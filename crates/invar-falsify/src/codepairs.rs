@@ -814,6 +814,19 @@ fn membership(
             }
             Ok(v) => {
                 if let Some(p) = v.get("packages") {
+                    // Slice 1 contract (U10): only a block list under
+                    // `packages:` is accepted. A flow list or any other
+                    // same-line form is abstained, never interpreted.
+                    let same_line = text.lines().any(|l| {
+                        let l = l.split('#').next().unwrap_or("");
+                        l.strip_prefix("packages:").is_some_and(|rest| !rest.trim().is_empty())
+                    });
+                    if same_line {
+                        ab.push(repo(
+                            "unsupported marker pnpm-workspace.yaml (packages is not a block list)".into(),
+                        ));
+                        return Err(Vec::new());
+                    }
                     match string_list(p) {
                         Some(l) => entries.extend(l.into_iter().map(|e| ("pnpm-workspace.yaml".into(), e))),
                         None => {

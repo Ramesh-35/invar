@@ -2,10 +2,10 @@
 # catch: n09_undeclared_directory_is_not_a_package u03_single_declared_package_abstains_h2
 
 diff --git a/crates/invar-falsify/src/codepairs.rs b/crates/invar-falsify/src/codepairs.rs
-index 34a8f15..ace06b8 100644
+index 095203f..e5c4ae3 100644
 --- a/crates/invar-falsify/src/codepairs.rs
 +++ b/crates/invar-falsify/src/codepairs.rs
-@@ -879,9 +879,12 @@ fn membership(
+@@ -892,9 +892,12 @@ fn membership(
              }
          }
      }

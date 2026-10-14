@@ -1,0 +1,16 @@
+# mutation: lock ignores the manifest evidence keys
+# catch: l01_lock_bindings_are_evidence_bounded
+
+diff --git a/crates/invar-falsify/src/lock.rs b/crates/invar-falsify/src/lock.rs
+index 3802080..3550bef 100644
+--- a/crates/invar-falsify/src/lock.rs
++++ b/crates/invar-falsify/src/lock.rs
+@@ -477,7 +477,7 @@ pub fn compute(sections: &Sections, resolver: &Resolver, prev: &Lock, today: i64
+         // Directive 86428 pass 2: a contract carrying evidence keys binds
+         // nothing outside them. LockedBindings(p) is a subset of the
+         // evidence-supported fields, scoped to their shapes.
+-        if !d.evidence.is_empty() {
++        if false && !d.evidence.is_empty() {
+             bindings.retain(|b| {
+                 d.evidence.iter().any(|(shape, fields)| {
+                     b.scope == *shape && fields.iter().any(|f| name_key(f) == name_key(&b.field))

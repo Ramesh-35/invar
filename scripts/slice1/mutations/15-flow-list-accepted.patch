@@ -1,0 +1,16 @@
+# mutation: accepts a pnpm flow list against the contract
+# catch: u10_pnpm_flow_list_abstains
+
+diff --git a/crates/invar-falsify/src/codepairs.rs b/crates/invar-falsify/src/codepairs.rs
+index 095203f..6d33f3b 100644
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -821,7 +821,7 @@ fn membership(
+                         let l = l.split('#').next().unwrap_or("");
+                         l.strip_prefix("packages:").is_some_and(|rest| !rest.trim().is_empty())
+                     });
+-                    if same_line {
++                    if false && same_line {
+                         ab.push(repo(
+                             "unsupported marker pnpm-workspace.yaml (packages is not a block list)".into(),
+                         ));

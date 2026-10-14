@@ -1,6 +1,8 @@
 # INIT-DISCOVERY slice 1: contract, implementation, evidence
 
-Status: IMPLEMENTED (directive 86427, 2026-10-14). Detection capability
+Status: IMPLEMENTED (directive 86427, 2026-10-14), corrected by the
+three 86428 passes the same day (defects A, B, C below, each with a
+regression test that failed before its fix). Detection capability
 NOT ESTABLISHED. The Experiment C evaluation has not been run and is not
 part of slice 1. Parent spec: INIT-DISCOVERY.md. Evaluation authority:
 docs/falsification/experiment-c/ (unchanged).
@@ -33,7 +35,10 @@ schema files (JSON Schema, OpenAPI-JSON components) are inventory only
 - Proposal: comment lines `# PROPOSED <id>`, the status line, E1 to E6,
   `# category: ...`, `# lock: ...`, then `[[invariant]]` with
   `kind = "schema"`, id, producer (the declaring file, never a barrel),
-  consumer. The only `[[invariant]]` blocks are proposals.
+  consumer, and one machine-readable `evidence = "<Shape> <field>..."`
+  key per shape (86428 pass 2). The only `[[invariant]]` blocks are
+  proposals. A shape or field name that cannot be written as a
+  space-separated identifier makes the pair UNREPRESENTABLE.
 - Abstention: `# ABSTAIN <code> <location> <reason>`, sorted, never
   capped. Not a negative finding.
 - Inventory: `# INVENTORY <kind> <location>  <note>`, sorted, display
@@ -111,13 +116,41 @@ silent limit.
 | F01, release binary | easyeda-copilot @ fe7b2a5: init exit 0 (6 proposals incl. the F01 pair with exactly its 7 fields; mcp-client.ts not paired with preview.ts), lock exit 0, check exit 0 | PRODUCTION-REACHABLE (one exposed case) |
 | Detection on real repositories | not measured | NOT ESTABLISHED |
 
+## The 86428 correction passes (directive 86428, rulings 1 to 3)
+
+Investigation 86428-A reproduced three defects on minimal fixtures;
+each pass below landed with a regression test that failed first.
+- Pass 1, defect C: a pnpm flow list (`packages: [a, b]`) was accepted
+  against the revision 2 contract. Membership now abstains (H2,
+  "packages is not a block list") on any same-line form. Test U10.
+- Pass 2, defect A: `invar lock` bound whole-file surface times
+  any-mention (13 bindings for the F01 preview pair's 7 evidence
+  fields, including nested `mode`/`x` and the neighboring type's
+  `renderer`, a construction miscounted as a read), so a drift alarm
+  could fire on a field outside the proposal's evidence (executed:
+  renaming the unsupported field produced VIOLATED, exit 1). init now
+  writes the `evidence` keys above, and lock restricts a contract
+  carrying them to those scoped fields; hand-written contracts without
+  evidence keys keep the old behavior. Test L01 (countermodel: exactly
+  Order.total_minor and Order.currency_code bind); F01 re-run: exactly
+  the 7 evidence fields, 0 unscoped (19 bindings across all 6 F01
+  contracts, down from 87). The lock's `members` lines still describe
+  each bound shape's full surface; bindings are what check evaluates.
+- Pass 3, defect B: with no invar.lock, check's strict schema path
+  compares only literal `payload.<field>` reads, so a slice 1 contract
+  got HOLDS (exit 0) with nothing evaluated. An unlocked schema check
+  of a code producer whose consumer has zero payload reads is now
+  SKIPPED ("not evaluated ... run `invar lock` first"), exit 4. Test
+  B01; F01 re-run: init, then check exits 4 with all 6 skipped, then
+  lock, then check exits 0.
+Mutations 14 to 16 (lock ignores evidence keys; flow list accepted;
+unlocked HOLDS restored) each make their test fail, so the three rules
+are load-bearing.
+
 ## Deviations and corrections, recorded
 
-1. pnpm-workspace.yaml flow lists (`packages: [a, b]`) are accepted, as
-   yaml.rs parses them explicitly; revision 2 said abstain. Not guessing,
-   but a deviation from the written contract. Checked once in a scratch
-   run (a flow list of two packages yields the expected pair); there is
-   no committed fixture for it.
+1. (resolved by 86428 pass 1) pnpm flow lists were accepted against
+   revision 2; they now abstain, pinned by U10.
 2. init_discovers_and_emits_runnable_manifest: its manifest now has no
    blocks, and `check`'s unchanged behavior on a manifest without blocks
    is an error ("has no [[invariant]] blocks"). Revision 2 said the
@@ -132,11 +165,10 @@ silent limit.
 ## Limitations
 
 - D1: receivers not verified; N10 is a known false-positive pattern.
-- Lock binds wider than the evidence (recorded, unchanged): on F01, the
-  preview pair's 7 evidence fields became 13 lock bindings, including
-  unscoped `mode`, `x` and `renderer` from nested and sibling types.
-- Without a lock, `invar check` on a slice 1 proposal is a vacuous HOLDS
-  (D6 a: every proposal says to lock first; check unchanged).
+- Lock narrowing applies only to contracts carrying evidence keys;
+  hand-written contracts still bind surface times any-mention.
+- An unlocked check now refuses to evaluate (exit 4) rather than
+  overclaim; it still evaluates nothing until `invar lock` runs.
 - A manifest with zero proposals makes `invar check` error (pre-existing).
 - UNSUPPORTED-SHAPE is common: on F01, 73 of 79 abstentions, mostly
   `z.infer` aliases (zod is a non-goal).

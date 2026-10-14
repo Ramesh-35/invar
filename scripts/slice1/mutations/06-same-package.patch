@@ -2,10 +2,10 @@
 # catch: n08_same_package_is_not_cross_package
 
 diff --git a/crates/invar-falsify/src/codepairs.rs b/crates/invar-falsify/src/codepairs.rs
-index 34a8f15..4bbfd09 100644
+index 095203f..4072116 100644
 --- a/crates/invar-falsify/src/codepairs.rs
 +++ b/crates/invar-falsify/src/codepairs.rs
-@@ -986,9 +986,7 @@ impl<'a> Ctx<'a> {
+@@ -999,9 +999,7 @@ impl<'a> Ctx<'a> {
              let Some(pkg) = self.pkg_of(&format!("{base}/x")).or_else(|| self.pkg_of(&base)) else {
                  return (None, Res::NotCandidate);
              };
@@ -16,7 +16,7 @@ index 34a8f15..4bbfd09 100644
              return match self.probe(&base) {
                  Some(f) => (Some(pkg), Res::File(f)),
                  None => (Some(pkg), Res::Unresolved(format!("no TypeScript file for {spec:?}"))),
-@@ -1267,9 +1265,6 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
+@@ -1280,9 +1278,6 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
                      Found::Decl { file: d, decl, barrel } => {
                          imported_shapes.insert((d.clone(), decl.name.clone()));
                          let Some(p) = ctx.pkg_of(&d) else { continue };

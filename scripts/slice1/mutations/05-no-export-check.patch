@@ -2,7 +2,7 @@
 # catch: n07_non_exported_type_is_not_a_shape
 
 diff --git a/crates/invar-falsify/src/codepairs.rs b/crates/invar-falsify/src/codepairs.rs
-index 34a8f15..2d8530d 100644
+index 095203f..0d5f1e4 100644
 --- a/crates/invar-falsify/src/codepairs.rs
 +++ b/crates/invar-falsify/src/codepairs.rs
 @@ -293,7 +293,7 @@ struct FileInfo {

@@ -1,0 +1,16 @@
+# mutation: returns HOLDS from an unlocked check with nothing evaluated
+# catch: b01_unlocked_check_is_not_evaluated
+
+diff --git a/crates/invar-falsify/src/check.rs b/crates/invar-falsify/src/check.rs
+index 5bcf3d8..83f6812 100644
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -208,7 +208,7 @@ fn schema_outcome(
+         // compares only literal `payload.<field>` reads. A code producer
+         // whose consumer has none would get a HOLDS in which NOTHING was
+         // evaluated; that is reported as not evaluated, never as HOLDS.
+-        if is_code(&p) && payload_read_sites(&cr).is_empty() {
++        if false && is_code(&p) && payload_read_sites(&cr).is_empty() {
+             return Ok((
+                 Vec::new(),
+                 Vec::new(),

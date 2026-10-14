@@ -390,6 +390,11 @@ struct Declared {
     pointer: Option<String>,
     producer_code: Option<String>,
     consumer: String,
+    /// `evidence = "<Shape> <field>..."` keys written by `invar init`
+    /// (directive 86428, pass 2). When present, the lock binds ONLY fields
+    /// of these shapes that the evidence names; a hand-written contract
+    /// without evidence keys keeps the full surface-times-reads behavior.
+    evidence: Vec<(String, Vec<String>)>,
 }
 
 fn declared(sections: &Sections) -> Result<Vec<Declared>> {
@@ -399,11 +404,22 @@ fn declared(sections: &Sections) -> Result<Vec<Declared>> {
             continue;
         }
         let id = getk(&b, "id").context("a locked schema invariant needs an id")?;
+        let evidence = b
+            .iter()
+            .filter(|(k, _)| k == "evidence")
+            .filter_map(|(_, v)| {
+                let mut it = v.split_whitespace().map(str::to_string);
+                let shape = it.next()?;
+                let fields: Vec<String> = it.collect();
+                (!fields.is_empty()).then_some((shape, fields))
+            })
+            .collect();
         out.push(Declared {
             producer: getk(&b, "producer").with_context(|| format!("{id}: needs producer"))?,
             consumer: getk(&b, "consumer").with_context(|| format!("{id}: needs consumer"))?,
             pointer: getk(&b, "pointer"),
             producer_code: getk(&b, "producer_code"),
+            evidence,
             id,
         });
     }
@@ -458,6 +474,16 @@ pub fn compute(sections: &Sections, resolver: &Resolver, prev: &Lock, today: i64
                 b
             })
             .collect();
+        // Directive 86428 pass 2: a contract carrying evidence keys binds
+        // nothing outside them. LockedBindings(p) is a subset of the
+        // evidence-supported fields, scoped to their shapes.
+        if !d.evidence.is_empty() {
+            bindings.retain(|b| {
+                d.evidence.iter().any(|(shape, fields)| {
+                    b.scope == *shape && fields.iter().any(|f| name_key(f) == name_key(&b.field))
+                })
+            });
+        }
         bindings.sort();
         let members = members_of(&live.surface, &bindings);
         let mut c = LockedContract {
