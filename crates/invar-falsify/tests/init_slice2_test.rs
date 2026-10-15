@@ -1,5 +1,5 @@
 //! INIT-DISCOVERY slice 2 fixtures (docs/architecture/INIT-DISCOVERY-SLICE2.md,
-//! FROZEN revision 2, section D). Twenty-three tests: the twenty-two named
+//! FROZEN revision 2, section D; cm6 amended by the 2026-10-15 slice 2b ruling). Twenty-three tests: the twenty-two named
 //! fixtures K1-F1..F3, K1-N1..N3, K1-U1..U4, K2-F1..F4, K2-N1..N4, K2-U1,
 //! K2-U2, CM-6, CM-7, plus the shared determinism and disclaimer scan
 //! (D-SHARED). Every fixture is synthetic, built in a temporary directory, and
@@ -122,6 +122,8 @@ fn parse(m: &str) -> Out {
                     assert!(!b.evkeys.is_empty(), "{} lacks evidence keys", b.id);
                 }
             }
+            // Slice 2b (ruled 2026-10-15): strings blocks are asserted by init_slice2b_test.rs.
+            "strings" => {}
             other => panic!("unexpected kind {other}"),
         }
     }
@@ -577,11 +579,21 @@ fn k2_u2_spread_and_computed_members_are_unsupported_dynamic() {
 }
 
 #[test]
-fn cm6_string_field_list_is_k3_territory_and_never_proposes() {
+fn cm6_string_field_list_is_a_k3_positive_since_slice_2b() {
+    // Amended by the founder's ruling of 2026-10-15 (slice 2b Gate 4): before
+    // slice 2b this fixture asserted that slice 2 does not absorb string lists.
+    // With K3 implemented it is an exact K3 positive: three distinctive names,
+    // all of the list, a query-named list, import-linked to the shape.
     let c = "import { OrderIn } from \"../lib/order\";\nexport const SELECT_FIELDS = ['total_minor', 'currency_code', 'unread_flag'];\nexport function pick() {\n  return SELECT_FIELDS.join(',');\n}\n";
     let d = ws("cm6", &[("lib/order.ts", ORDER_IN), ("src/c.js", c)]);
     let o = init(&d);
-    assert!(o.blocks.is_empty(), "string couplings are slice 2b: {}", o.raw);
+    assert_eq!(o.blocks.len(), 1, "{}", o.raw);
+    let b = &o.blocks[0];
+    assert_eq!(b.kind, "strings");
+    assert_eq!(b.keys["shape"], "OrderIn");
+    assert_eq!(b.keys["list"], "src/c.js");
+    assert_eq!(b.keys["listat"], "const:SELECT_FIELDS");
+    assert_eq!(b.keys["overlap"], "currency_code total_minor unread_flag");
     assert!(s2(&o).is_empty(), "{:?}", s2(&o));
 }
 

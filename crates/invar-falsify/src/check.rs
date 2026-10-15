@@ -875,7 +875,35 @@ pub fn evaluate_with(
                     }
                 }
             }
-            other => bail!("unknown invariant kind {other:?} (schema|event|lock_order|egress)"),
+            "strings" => {
+                let p = getk(b, "producer").context("strings invariant needs producer")?;
+                let shape = getk(b, "shape").context("strings invariant needs shape")?;
+                let list = getk(b, "list").context("strings invariant needs list")?;
+                let listat = getk(b, "listat").context("strings invariant needs listat")?;
+                match lock.and_then(|l| l.contracts.iter().find(|c| c.id == id)) {
+                    Some(entry) => {
+                        let (r, w, n, sk) = strings_outcome(entry, &p, &shape, &list, &listat, resolver, &mut prov)?;
+                        witnesses = w;
+                        notes = n;
+                        skipped = sk;
+                        r
+                    }
+                    None => {
+                        // R-K3: no lock, no verdict.
+                        if lock.is_some() {
+                            notes.push("not in invar.lock; run `invar lock --update` to lock it".into());
+                        }
+                        skipped = Some(format!(
+                            "not evaluated: no invar.lock entry for this strings contract ({listat} in {} against {shape} in {}); run `invar lock` first, an unlocked strings contract cannot hold",
+                            artifact_name(&list),
+                            artifact_name(&p)
+                        ));
+                        witnesses = Vec::new();
+                        Vec::new()
+                    }
+                }
+            }
+            other => bail!("unknown invariant kind {other:?} (schema|event|lock_order|egress|strings)"),
         };
         let mut o = ContractOutcome {
             id,
@@ -972,6 +1000,100 @@ fn egress_outcome(
                 added.iter().take(5).map(|x| x.as_str()).collect::<Vec<_>>().join(", ")
             ));
         }
+    }
+    Ok((residue, witnesses, notes, None))
+}
+
+/// Check one locked strings contract (INIT-DISCOVERY-SLICE2B, R-K3-7) with
+/// "no stale reference" semantics. For each locked name n, using the freshly
+/// extracted list L and shape S: n in L and n not in S is residue (VIOLATED);
+/// n not in L holds (removed or renamed on the consumer); n in S and not in L
+/// holds (a list may narrow); n in both holds. If either side is no longer
+/// statically extractable, or an inline list can no longer be located by its
+/// locked names, the contract is NOT EVALUATED (exit 4), never a pass.
+fn strings_outcome(
+    entry: &crate::lock::LockedContract,
+    producer: &str,
+    shape: &str,
+    list: &str,
+    listat: &str,
+    resolver: &Resolver,
+    prov: &mut Vec<Fetched>,
+) -> Result<(Vec<String>, Vec<Witness>, Vec<String>, Option<String>)> {
+    use crate::surface::name_key;
+    use crate::valuepairs::strings::{read_any_shape, read_list, ListRead};
+    use crate::valuepairs::ShapeRead;
+    if entry.producer != producer {
+        bail!(
+            "{}: invar.toml names a different producer than invar.lock; run `invar lock --update`",
+            entry.id
+        );
+    }
+    let text = fetch(resolver, producer, prov)?;
+    let list_text = fetch(resolver, list, prov)?;
+    let pname = artifact_name(producer);
+    let lname = artifact_name(list);
+    let mut notes = vec![
+        format!(
+            "string-coupling contract: list {listat} in {lname} against the key set of {shape} in {pname}; a name still in the list but gone from the shape is a stale reference; that the list reaches the store is not verified"
+        ),
+        if blake3::hash(text.as_bytes()).to_hex().to_string() == entry.blake3 {
+            format!("shape file unchanged since lock ({})", entry.recorded_at)
+        } else {
+            format!("shape file changed since lock ({})", entry.recorded_at)
+        },
+    ];
+    let live = match read_any_shape(&text, shape) {
+        ShapeRead::Found(f) => f,
+        ShapeRead::Dynamic(why) => {
+            return Ok((Vec::new(), Vec::new(), notes, Some(format!("not evaluated: {shape} in {pname} is no longer statically extractable ({why}); the locked shape cannot be compared"))));
+        }
+        ShapeRead::NotFound => {
+            return Ok((Vec::new(), Vec::new(), notes, Some(format!("not evaluated: no shape {shape:?} found in {pname}; the locked shape cannot be compared"))));
+        }
+    };
+    let elems = match read_list(&list_text, listat) {
+        ListRead::Found(e) => e,
+        ListRead::Dynamic(why) => {
+            return Ok((Vec::new(), Vec::new(), notes, Some(format!("not evaluated: list {listat} in {lname} is no longer statically extractable ({why}); the locked list cannot be compared"))));
+        }
+        ListRead::NotFound => {
+            return Ok((Vec::new(), Vec::new(), notes, Some(format!("not evaluated: list {listat} no longer found in {lname}; the locked list cannot be compared"))));
+        }
+    };
+    let locked: Vec<&crate::lock::Binding> = entry.bindings.iter().filter(|b| b.scope == shape).collect();
+    if listat.starts_with("call:") && !locked.iter().any(|b| elems.iter().any(|(s, _)| name_key(s) == name_key(&b.field))) {
+        return Ok((
+            Vec::new(),
+            Vec::new(),
+            notes,
+            Some(format!("not evaluated: inline list {listat} in {lname} no longer contains any locked name, so it cannot be told apart from an unrelated list")),
+        ));
+    }
+    let mut residue = Vec::new();
+    let mut witnesses = Vec::new();
+    for b in &locked {
+        let in_list: Vec<usize> = elems.iter().filter(|(s, _)| name_key(s) == name_key(&b.field)).map(|(_, l)| *l).collect();
+        let in_shape = live.iter().any(|k| name_key(k) == name_key(&b.field));
+        if !in_list.is_empty() && !in_shape {
+            let shown = b.display();
+            residue.push(shown.clone());
+            witnesses.push(Witness {
+                residue: shown,
+                sites: in_list.iter().map(|l| format!("{lname}:{l}")).collect(),
+                missing_from: Some(format!("{pname} {shape}")),
+                type_change: None,
+                read_as: Vec::new(),
+            });
+        }
+    }
+    let added: Vec<&String> = live.iter().filter(|k| !locked.iter().any(|b| name_key(&b.field) == name_key(k))).collect();
+    if !added.is_empty() {
+        notes.push(format!(
+            "{} key(s) of the shape not in the lock, tolerated ({}); `invar lock --update` records them",
+            added.len(),
+            added.iter().take(5).map(|x| x.as_str()).collect::<Vec<_>>().join(", ")
+        ));
     }
     Ok((residue, witnesses, notes, None))
 }

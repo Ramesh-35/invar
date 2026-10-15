@@ -1,0 +1,13 @@
+# mutation: overlap threshold lowered from 3 to 2
+# catch: k3_n1_receiver_collision_below_the_distinctive_bar_never_proposes
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -22,7 +22,7 @@
+ use crate::surface::name_key;
+ 
+ /// R-K3-1: minimum distinctive shared names.
+-pub const MIN_OVERLAP: usize = 3;
++pub const MIN_OVERLAP: usize = 2;
+ /// Frozen query vocabulary (ruling D2): word segments of a bound name or key.
+ pub const QUERY_SEGMENTS: &[&str] = &["select", "fields", "columns", "populate", "attributes"];
+ /// Frozen call markers (ruling D2).

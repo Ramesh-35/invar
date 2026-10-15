@@ -1,0 +1,13 @@
+# mutation: check never reports a stale reference
+# catch: k3_f3_producer_rename_is_a_stale_reference k3_f4_merge_skew_reintroducing_a_stale_string_is_violated
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -1075,7 +1075,7 @@
+     for b in &locked {
+         let in_list: Vec<usize> = elems.iter().filter(|(s, _)| name_key(s) == name_key(&b.field)).map(|(_, l)| *l).collect();
+         let in_shape = live.iter().any(|k| name_key(k) == name_key(&b.field));
+-        if !in_list.is_empty() && !in_shape {
++        if false && !in_list.is_empty() && !in_shape {
+             let shown = b.display();
+             residue.push(shown.clone());
+             witnesses.push(Witness {

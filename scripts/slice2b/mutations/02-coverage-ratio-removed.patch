@@ -1,0 +1,13 @@
+# mutation: coverage ratio (half of the list) check removed
+# catch: k3_n1_receiver_collision_below_the_distinctive_bar_never_proposes
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -589,7 +589,7 @@
+                     }
+                 }
+             }
+-            let qualifies = |c: &(usize, usize)| c.1 >= MIN_OVERLAP && c.1 * 2 >= ld.len();
++            let qualifies = |c: &(usize, usize)| c.1 >= MIN_OVERLAP;
+             let mut inscope: Vec<(usize, &'static str, (usize, usize))> = Vec::new();
+             let mut outscope: Vec<(usize, (usize, usize))> = Vec::new();
+             for (&si, &c) in &counts {

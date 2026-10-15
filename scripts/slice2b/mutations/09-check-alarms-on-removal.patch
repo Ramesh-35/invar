@@ -1,0 +1,13 @@
+# mutation: check alarms on a name absent from both sides
+# catch: k3_f5_consistent_rename_and_list_narrowing_hold
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -1075,7 +1075,7 @@
+     for b in &locked {
+         let in_list: Vec<usize> = elems.iter().filter(|(s, _)| name_key(s) == name_key(&b.field)).map(|(_, l)| *l).collect();
+         let in_shape = live.iter().any(|k| name_key(k) == name_key(&b.field));
+-        if !in_list.is_empty() && !in_shape {
++        if !in_shape {
+             let shown = b.display();
+             residue.push(shown.clone());
+             witnesses.push(Witness {

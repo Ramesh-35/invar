@@ -433,6 +433,8 @@ pub fn discover(root: &Path) -> Discovery {
     // single-repository self-contract), so slice 1's repository-level
     // abstention does not stop it.
     slice2(root, &rel_files, &rel_over, &mut d);
+    // Slice 2b: string-coupling contracts (K3), appended after slice 2.
+    slice2b(root, &rel_files, &rel_over, &mut d);
     d.abstentions.sort();
     d.abstentions.dedup();
     d
@@ -540,6 +542,80 @@ fn slice2(root: &Path, rel_files: &[String], rel_over: &[String], d: &mut Discov
             keys: Vec::new(),
         });
     }
+}
+
+pub const STRINGS_STATUS: &str = "status: PROPOSED (heuristic; string list in a query position overlaps one shape; runtime store binding not verified)";
+
+fn slice2b(root: &Path, rel_files: &[String], rel_over: &[String], d: &mut Discovery) {
+    use crate::codepairs::Abstention;
+    let sd = crate::valuepairs::strings::discover_strings(root, rel_files, rel_over);
+    d.abstentions.extend(sd.abstentions);
+    let ok = |x: &str| toml_safe(x) && !x.chars().any(char::is_whitespace);
+    for p in &sd.proposals {
+        let id = unique_id(d, format!("strings:{}@{}", p.shape, p.list_at));
+        let representable = ok(&id)
+            && ok(&p.producer)
+            && ok(&p.shape)
+            && ok(&p.list_file)
+            && ok(&p.list_at)
+            && p.overlap.iter().all(|(f, _, _)| ok(f));
+        if !representable {
+            d.abstentions.push(Abstention {
+                code: "UNREPRESENTABLE",
+                location: format!("{}:{}", p.list_file, p.list_line).replace(['\n', '\r'], " "),
+                reason: "path or name not representable in flat TOML; not proposed".into(),
+            });
+            continue;
+        }
+        if d.proposals.len() >= MAX_PROPOSALS {
+            d.truncated = true;
+            break;
+        }
+        let names: Vec<String> = p.overlap.iter().map(|(f, _, _)| f.clone()).collect();
+        d.proposals.push(Proposal {
+            id,
+            producer: p.producer.clone(),
+            pointer: None,
+            consumer: String::new(),
+            overlap: names.iter().cloned().collect(),
+            evidence: strings_lines(p),
+            evidence_keys: Vec::new(),
+            kind: "strings",
+            keys: vec![
+                ("shape".into(), p.shape.clone()),
+                ("list".into(), p.list_file.clone()),
+                ("listat".into(), p.list_at.clone()),
+                ("scope".into(), p.scope.to_string()),
+                ("overlap".into(), names.join(" ")),
+            ],
+        });
+    }
+}
+
+fn strings_lines(p: &crate::valuepairs::strings::StringsProposal) -> Vec<String> {
+    let names: Vec<&str> = p.overlap.iter().map(|(f, _, _)| f.as_str()).collect();
+    let mut v = vec![STRINGS_STATUS.to_string()];
+    v.push("S1 STRING-COUPLING contract: a string list that names fields of one shape; no consumer code is read and no runtime store binding is claimed".to_string());
+    v.push(format!(
+        "S2 {} declared at {}:{} with {} direct keys",
+        p.shape,
+        p.producer,
+        p.shape_line,
+        p.shape_keys.len()
+    ));
+    v.push(format!("S3 list {} at {}:{} holds {} string entries ({} distinctive after the stoplist)", p.list_at, p.list_file, p.list_line, p.list_len, p.distinctive));
+    v.push(format!("S4 scope: {}", p.scope));
+    let o: Vec<String> = p.overlap.iter().map(|(f, _, l)| format!("{f} ({}:{l})", p.list_file)).collect();
+    v.push(format!("S5 distinctive overlap ({} of {} list entries): {}", names.len(), p.distinctive, o.join(", ")));
+    v.push(format!(
+        "S6 DISCLAIMER: that this list reaches the store the shape describes is not verified; a name overlap is not proof (display column lists and unrelated lists can overlap)"
+    ));
+    v.push(format!("category: {}", p.category));
+    v.push(format!(
+        "lock: run `invar lock` before `invar check`. Without a lock a strings contract is SKIPPED (exit 4), never HOLDS. The lock binds exactly the S5 names; at check a locked name still in the list but no longer a key of {} is VIOLATED (stale reference); removal from the list, narrowing and additions HOLD.",
+        p.shape
+    ));
+    v
 }
 
 fn egress_lines(e: &crate::valuepairs::EgressProposal) -> Vec<String> {
@@ -684,6 +760,9 @@ pub fn render_manifest_opts(d: &Discovery, full_inventory: bool) -> String {
     if d.proposals.iter().any(|p| p.kind == "egress") {
         s.push_str("# Slice 2: blocks with kind = \"egress\" are EMITTED-SHAPE contracts: a promise\n# about the direct keys of a zod schema this repository emits at a boundary\n# (versioned path or [egress] marking, plus a response-position reference).\n# They carry no consumer evidence, and runtime serialization is NOT verified.\n\n");
     }
+    if d.proposals.iter().any(|p| p.kind == "strings") {
+        s.push_str("# Slice 2b: blocks with kind = \"strings\" are STRING-COUPLING contracts: a string\n# list in a query position that names fields of one shape. A locked name that stays\n# in the list after it leaves the shape is a stale reference. They carry no consumer\n# evidence, and that the list reaches the store is NOT verified.\n\n");
+    }
     if !d.egress_marks.is_empty() {
         s.push_str("# Egress boundary markings (read from the previous invar.toml; kept so a\n# regenerated manifest does not lose them). Marking makes a file ELIGIBLE for\n# discovery only; it never establishes an emitted contract by itself.\n[egress]\n");
         for m in &d.egress_marks {
@@ -707,7 +786,7 @@ pub fn render_manifest_opts(d: &Discovery, full_inventory: bool) -> String {
         for (k, v) in &p.keys {
             s.push_str(&format!("{k} = \"{v}\"\n"));
         }
-        if p.kind != "egress" {
+        if p.kind != "egress" && p.kind != "strings" {
             s.push_str(&format!("consumer = \"{}\"\n", p.consumer));
         }
         for e in &p.evidence_keys {

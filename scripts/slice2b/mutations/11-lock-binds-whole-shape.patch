@@ -1,0 +1,13 @@
+# mutation: lock binds the whole shape instead of the overlap
+# catch: k3_f1_attributes_literal_and_string_list_one_strings_contract
+--- a/crates/invar-falsify/src/lock.rs
++++ b/crates/invar-falsify/src/lock.rs
+@@ -661,7 +661,7 @@
+         ListRead::Dynamic(why) => bail!("{}: cannot lock, list {list_at} in {} is not statically extractable ({why})", d.id, artifact_name(&list_path)),
+         ListRead::NotFound => bail!("{}: cannot lock, no list {list_at} in {}", d.id, artifact_name(&list_path)),
+     }
+-    let wanted: Vec<String> = d.evidence.iter().filter(|(s, _)| *s == shape).flat_map(|(_, f)| f.clone()).collect();
++    let wanted: Vec<String> = keys.clone();
+     if wanted.is_empty() {
+         bail!("{}: a strings invariant needs an overlap key naming the locked fields", d.id);
+     }

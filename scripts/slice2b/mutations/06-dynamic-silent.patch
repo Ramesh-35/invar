@@ -1,0 +1,13 @@
+# mutation: dynamic list is skipped silently instead of abstaining
+# catch: k3_u3_dynamic_string_lists_abstain
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -603,7 +603,7 @@
+                 v.iter().map(|(si, _, _)| format!("{} ({})", shapes[*si].name, shapes[*si].file)).collect::<Vec<_>>().join(", ")
+             };
+             if let Some(why) = &list.dynamic {
+-                if list.query && !q.is_empty() {
++                if false {
+                     out.abstentions.push(Abstention {
+                         code: "UNSUPPORTED-STRING-DYNAMIC",
+                         location: loc,

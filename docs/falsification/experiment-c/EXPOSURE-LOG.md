@@ -43,3 +43,7 @@ Read-only probes of the slice 2 engine on sparse checkouts, run as development w
 
 - formbricks, sparse checkout at HEAD 062a49126: the pre-F1 engine produced 2 egress proposals, both judged likely request-side (the trigger of finding F1), and 1133 alias-UNRESOLVED lines. F1 was then remediated (response markers restricted to call and constructor positions). The probe was not re-run after the fix.
 - hoppscotch, sparse checkout at HEAD 63273f8e: 0 proposals in 0.4s, consistent with the verzod negative control K1-N2 (versioned schema family abstains).
+
+## Slice 2b record, 2026-10-15
+
+No real-repository probe was run for slice 2b. K3 was developed and calibrated on synthetic fixtures only (18 fixtures, 12 mutations) and one synthetic scale run (3200 generated files, 0.74s). Strapi (e3961fb2~1 and fix e54e5f7d) remains a DEVELOPMENT case under S2-D5, excluded from any Stage 3 corpus; its string-list mechanism is reproduced synthetically in fixtures K3-F1, F3 and F4, not measured on the repository. Nothing in this entry is an evaluation result.

@@ -1,0 +1,14 @@
+# mutation: a list turned dynamic is a pass instead of not evaluated
+# catch: k3_u2_list_turned_dynamic_after_lock_is_not_evaluated
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -1054,6 +1054,9 @@
+     };
+     let elems = match read_list(&list_text, listat) {
+         ListRead::Found(e) => e,
++        ListRead::Dynamic(_) => {
++            return Ok((Vec::new(), Vec::new(), notes, None));
++        }
+         ListRead::Dynamic(why) => {
+             return Ok((Vec::new(), Vec::new(), notes, Some(format!("not evaluated: list {listat} in {lname} is no longer statically extractable ({why}); the locked list cannot be compared"))));
+         }

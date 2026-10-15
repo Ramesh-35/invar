@@ -1,0 +1,13 @@
+# mutation: stoplist not applied when counting distinctive overlap
+# catch: k3_n2_stoplisted_overlap_never_proposes k3_n6_list_of_only_generic_names_never_proposes
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -583,7 +583,7 @@
+                     for &si in v {
+                         let c = counts.entry(si).or_default();
+                         c.0 += 1;
+-                        if !stop.contains(nk) {
++                        if true {
+                             c.1 += 1;
+                         }
+                     }

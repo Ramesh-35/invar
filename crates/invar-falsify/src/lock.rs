@@ -416,10 +416,12 @@ fn declared(sections: &Sections) -> Result<Vec<Declared>> {
         let kind = match getk(&b, "kind").as_deref() {
             Some("schema") => "schema",
             Some("egress") => "egress",
+            Some("strings") => "strings",
             _ => continue,
         };
         let id = getk(&b, "id").context("a locked schema invariant needs an id")?;
-        let evidence = b
+        let strings_shape = getk(&b, "shape");
+        let mut evidence: Vec<(String, Vec<String>)> = b
             .iter()
             .filter(|(k, _)| k == "evidence")
             .filter_map(|(_, v)| {
@@ -429,9 +431,18 @@ fn declared(sections: &Sections) -> Result<Vec<Declared>> {
                 (!fields.is_empty()).then_some((shape, fields))
             })
             .collect();
+        if kind == "strings" {
+            // Slice 2b: the lock binds exactly the `overlap` names, scoped to the shape.
+            if let (Some(sh), Some(ov)) = (&strings_shape, getk(&b, "overlap")) {
+                let fields: Vec<String> = ov.split_whitespace().map(str::to_string).collect();
+                if !fields.is_empty() {
+                    evidence.push((sh.clone(), fields));
+                }
+            }
+        }
         out.push(Declared {
             producer: getk(&b, "producer").with_context(|| format!("{id}: needs producer"))?,
-            consumer: if kind == "egress" {
+            consumer: if kind == "egress" || kind == "strings" {
                 String::new()
             } else {
                 getk(&b, "consumer").with_context(|| format!("{id}: needs consumer"))?
@@ -464,6 +475,10 @@ pub fn compute(sections: &Sections, resolver: &Resolver, prev: &Lock, today: i64
         }
         if d.kind == "egress" {
             contracts.push(egress_entry(&d, resolver, prev, today, &now)?);
+            continue;
+        }
+        if d.kind == "strings" {
+            contracts.push(strings_entry(&d, &declared_list(sections, &d.id), resolver, prev, today, &now)?);
             continue;
         }
         let zod_shapes: Vec<String> = d.evidence.iter().map(|(sh, _)| sh.clone()).collect();
@@ -581,6 +596,90 @@ fn egress_entry(d: &Declared, resolver: &Resolver, prev: &Lock, today: i64, now:
         .collect();
     bindings.sort();
     let mut sorted = fields.clone();
+    sorted.sort();
+    let mut c = LockedContract {
+        id: d.id.clone(),
+        producer: d.producer.clone(),
+        pointer: None,
+        blake3: blake3::hash(text.as_bytes()).to_hex().to_string(),
+        producer_code: None,
+        blake3_code: None,
+        recorded_at: now.to_string(),
+        bindings,
+        members: vec![("code".into(), shape, sorted)],
+    };
+    if let Some(o) = old {
+        let mut same = o.clone();
+        same.recorded_at = c.recorded_at.clone();
+        if same == c {
+            c.recorded_at = o.recorded_at.clone();
+        }
+    }
+    Ok(c)
+}
+
+/// The `list` and `listat` keys of the declared strings contract `id`.
+fn declared_list(sections: &Sections, id: &str) -> (Option<String>, Option<String>) {
+    for b in crate::check::gather_blocks(sections).unwrap_or_default() {
+        if getk(&b, "id").as_deref() == Some(id) {
+            return (getk(&b, "list"), getk(&b, "listat"));
+        }
+    }
+    (None, None)
+}
+
+/// The lock entry of a strings contract (INIT-DISCOVERY-SLICE2B, K3): the
+/// `overlap` names, each scoped to the shape. The shape and the list must
+/// both be statically extractable and every bound name must be a current key
+/// of the shape; nothing is locked on a guess.
+fn strings_entry(
+    d: &Declared,
+    list: &(Option<String>, Option<String>),
+    resolver: &Resolver,
+    prev: &Lock,
+    today: i64,
+    now: &str,
+) -> Result<LockedContract> {
+    use crate::valuepairs::strings::{read_any_shape, read_list, ListRead};
+    use crate::valuepairs::ShapeRead;
+    let shape = d.shape.clone().with_context(|| format!("{}: a strings invariant needs shape", d.id))?;
+    let list_path = list.0.clone().with_context(|| format!("{}: a strings invariant needs list", d.id))?;
+    let list_at = list.1.clone().with_context(|| format!("{}: a strings invariant needs listat", d.id))?;
+    let text = fetch_text(resolver, &d.producer, &mut Vec::new())?;
+    let keys = match read_any_shape(&text, &shape) {
+        ShapeRead::Found(f) => f,
+        ShapeRead::Dynamic(why) => bail!(
+            "{}: cannot lock, {shape} in {} is not statically extractable ({why})",
+            d.id,
+            artifact_name(&d.producer)
+        ),
+        ShapeRead::NotFound => bail!("{}: cannot lock, no shape {shape:?} in {}", d.id, artifact_name(&d.producer)),
+    };
+    let list_text = fetch_text(resolver, &list_path, &mut Vec::new())?;
+    match read_list(&list_text, &list_at) {
+        ListRead::Found(_) => {}
+        ListRead::Dynamic(why) => bail!("{}: cannot lock, list {list_at} in {} is not statically extractable ({why})", d.id, artifact_name(&list_path)),
+        ListRead::NotFound => bail!("{}: cannot lock, no list {list_at} in {}", d.id, artifact_name(&list_path)),
+    }
+    let wanted: Vec<String> = d.evidence.iter().filter(|(s, _)| *s == shape).flat_map(|(_, f)| f.clone()).collect();
+    if wanted.is_empty() {
+        bail!("{}: a strings invariant needs an overlap key naming the locked fields", d.id);
+    }
+    let old = prev.contracts.iter().find(|c| c.id == d.id);
+    let mut bindings = Vec::new();
+    for w in &wanted {
+        let Some(k) = keys.iter().find(|k| name_key(k) == name_key(w)) else {
+            bail!("{}: cannot lock, {w:?} is not a key of {shape} in {}", d.id, artifact_name(&d.producer));
+        };
+        let mut b = Binding { source: "code".into(), scope: shape.clone(), field: k.clone(), ty: None, since: format_date(today) };
+        if let Some(ob) = old.and_then(|o| o.bindings.iter().find(|x| x.key() == b.key())) {
+            b.since = ob.since.clone();
+        }
+        bindings.push(b);
+    }
+    bindings.sort();
+    bindings.dedup();
+    let mut sorted = keys.clone();
     sorted.sort();
     let mut c = LockedContract {
         id: d.id.clone(),

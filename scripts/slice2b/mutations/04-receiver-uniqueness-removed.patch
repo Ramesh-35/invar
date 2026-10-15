@@ -1,0 +1,13 @@
+# mutation: unique-receiver check removed (first shape wins)
+# catch: k3_u1_two_qualifying_shapes_abstain_ambig_receiver
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -684,7 +684,7 @@
+                 });
+                 continue;
+             }
+-            if q.len() > 1 {
++            if false {
+                 out.abstentions.push(Abstention {
+                     code: "AMBIG-RECEIVER",
+                     location: loc,

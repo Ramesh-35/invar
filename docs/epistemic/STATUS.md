@@ -1536,3 +1536,9 @@ Record: docs/architecture/INIT-DISCOVERY-SLICE2.md.
 Implementation complete against the frozen revision 2: 25 of 25 slice 2 fixtures, 14 of 14 mutations caught, 125 of 125 tests, zero warnings, Class 1 files and the five Experiment C artifacts byte-identical. Finding F1 (bare `return` as response marker) was remediated before commit. `backtest` covers slice 1 schema shapes only and does not evaluate zod or egress contracts.
 
 Not claimed: general detection capability remains NOT ESTABLISHED. Real-repository runs were development probes only (see EXPOSURE-LOG.md). No Stage 3 evaluation has run. Record: docs/architecture/INIT-DISCOVERY-SLICE2.md section K.
+
+## 2026-10-15: INIT-DISCOVERY-SLICE2B implemented (K3 string-coupling contracts)
+
+Implementation complete against the frozen revision 1: 18 of 18 slice 2b fixtures, 12 of 12 mutations caught, 149 of 149 tests, zero warnings, Class 1 files and the five Experiment C artifacts byte-identical. One frozen slice 2 fixture (cm6) was amended by ruling because it had become an exact K3 positive.
+
+Not claimed: general detection capability remains NOT ESTABLISHED. K3 was calibrated on synthetic fixtures only; no real-repository probe was run and no Stage 3 evaluation has run. Display column lists remain a measured residual noise class. Record: docs/architecture/INIT-DISCOVERY-SLICE2B.md section M.

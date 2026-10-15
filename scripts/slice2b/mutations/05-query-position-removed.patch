@@ -1,0 +1,13 @@
+# mutation: query-position requirement removed
+# catch: k3_n3_generic_helper_list_is_not_a_query_position
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -612,7 +612,7 @@
+                 }
+                 continue;
+             }
+-            if !list.query {
++            if false {
+                 if !q.is_empty() {
+                     out.abstentions.push(Abstention {
+                         code: "AMBIG-RECEIVER",

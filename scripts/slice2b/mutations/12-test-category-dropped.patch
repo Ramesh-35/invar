@@ -1,0 +1,13 @@
+# mutation: test-path category label dropped
+# catch: k3_f6_test_lists_are_labeled_never_production
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -712,7 +712,7 @@
+                 distinctive: ld.len(),
+                 overlap,
+                 scope,
+-                category: category(file),
++                category: "production",
+             });
+         }
+     }

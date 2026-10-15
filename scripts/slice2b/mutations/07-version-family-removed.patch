@@ -1,0 +1,13 @@
+# mutation: version-family refusal removed
+# catch: k3_n4_version_family_never_pairs
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -675,7 +675,7 @@
+                 }
+                 continue;
+             }
+-            if q.iter().any(|(si, _, _)| shapes[*si].family.is_some()) {
++            if false {
+                 let fam = q.iter().find_map(|(si, _, _)| shapes[*si].family.clone()).unwrap_or_default();
+                 out.abstentions.push(Abstention {
+                     code: "VERSION-FAMILY",

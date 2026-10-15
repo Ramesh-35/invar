@@ -1,5 +1,5 @@
 # mutation: absorbs string field lists as reads (slice 2b territory)
-# catch: cm6_string_field_list_is_k3_territory_and_never_proposes
+# catch: cm6_string_field_list_is_a_k3_positive_since_slice_2b
 --- a/crates/invar-falsify/src/valuepairs.rs
 +++ b/crates/invar-falsify/src/valuepairs.rs
 @@ -540,6 +540,24 @@

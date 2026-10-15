@@ -254,3 +254,34 @@ AST or new dependency.
   never papered over with heuristics.
 - Acceptance bound carried from the freeze message: K3-N* controls and the
   hoppscotch-class control (K3-N4) must produce zero alarms.
+
+## M. Implementation Evidence Ledger (appended at Gate 5; sections A to L above are unchanged)
+
+Status: IMPLEMENTED against the frozen revision 1. Detection capability on real repositories remains NOT ESTABLISHED. Nothing here is an evaluation result, and no real-repository probe was run for slice 2b: K3 was calibrated on synthetic fixtures only (strapi stays a development case, S2-D5).
+
+### M1. Gate results
+
+| Gate | Result |
+|---|---|
+| 0 baseline hash ledger | PASS (Class 1 files, Cargo files and the five Experiment C artifacts byte-identical to GATE0-LEDGER.md) |
+| 1 implementation | landed: valuepairs/strings.rs (new child module), valuepairs.rs (one `pub mod strings;` line), init.rs, lock.rs, check.rs, main.rs |
+| 2 fixtures | PASS: 18 of 18 in init_slice2b_test.rs (F1 to F7, N1 to N6, U1 to U5) |
+| 3 mutations | PASS: 12 of 12 CAUGHT by assertion failure, control green, none SURVIVED, BUILD-FAILED or APPLY-FAILED |
+| 4 regression | PASS after ruling: 149 of 149 (16 lib, 50, 40, 25 slice 2, 18 slice 2b), zero warnings; slice 2 harness 14 of 14 still CAUGHT |
+| 5 documentation | this section, STATUS.md entry, EXPOSURE-LOG.md record |
+
+### M2. Mutation table
+
+01-threshold-lowered, 02-coverage-ratio-removed, 03-stoplist-ignored, 04-receiver-uniqueness-removed, 05-query-position-removed, 06-dynamic-silent, 07-version-family-removed, 08-check-never-alarms, 09-check-alarms-on-removal, 10-dynamic-list-holds, 11-lock-binds-whole-shape, 12-test-category-dropped. Harness: scripts/slice2b/mutate.sh, patches in scripts/slice2b/mutations/. In the first run mutation 03 SURVIVED because fixture N6 could not distinguish it; N6 was strengthened (shape now owns the generic names) and the whole harness re-run.
+
+### M3. Findings and rulings
+
+- F2B-1 Gate 4 conflict: the frozen slice 2 fixture cm6 expected zero proposals on a repository that is an exact K3 positive. RULED 2026-10-15: amendment granted. cm6 is now `cm6_string_field_list_is_a_k3_positive_since_slice_2b` and asserts one `strings` block (shape OrderIn, list const:SELECT_FIELDS, overlap currency_code total_minor unread_flag); slice 2's block parser accepts kind `strings`. K3 was not narrowed to exclude `.js` consumers. The `# catch:` header of slice 2 mutation patch 13 was updated to the renamed test (patch hunk unchanged); both harnesses re-run on the final tree: slice 2 14 of 14 CAUGHT, slice 2b 12 of 12 CAUGHT.
+- Interpretations RATIFIED: (1) attribute shapes are named `<decl>@attributes` (`module_exports@attributes`), because a dot breaks the lock's Type.field grammar; (2) UNSUPPORTED-STRING-DYNAMIC fires only when the list's literal part alone qualifies against an in-scope shape; (3) NON-DISTINCTIVE-KEY fires only on a near miss (3 raw names or 2 distinctive); (4) ORM detection is `.prisma` and `.sql` whole-word containment only, no parser, decorators not detected; (5) module location valuepairs/strings.rs instead of stringpairs.rs.
+- Performance probe: 3200 synthetic files, full `invar init` 0.74s.
+- Residual (D7, unchanged): a same-package display list with 3 or more shared distinctive names is indistinguishable from a query list; measured, not solved.
+- Not implemented, by design: the 32-bit Murmur3 namespace hashing, strict_projection, break-glass and other items in the red-team directive of 2026-10-15 are backlog, not part of frozen revision 1.
+
+### M4. Protected hashes (first 12 hex), verified byte-identical after the change
+
+surface.rs 71b521ce7528, backtest.rs df9ef6e87de4, invariant.rs 49972028d11b, config.rs d30f5e4bf6b3, yaml.rs 1254fde8cdd6, codepairs.rs 004a26dec58e, crates/invar-falsify/Cargo.toml a8023ba46533, root Cargo.toml 7c5f4cee5d13, Cargo.lock 81bcb0ff4e12. Experiment C artifacts unchanged (full hashes in GATE0-LEDGER.md).

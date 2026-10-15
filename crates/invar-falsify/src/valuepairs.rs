@@ -22,6 +22,8 @@ use std::path::Path;
 use crate::codepairs::{Abstention, MIN_FIELDS, STOPLIST};
 use crate::surface::name_key;
 
+pub mod strings;
+
 const SRC_EXTS: &[&str] = &["ts", "tsx", "js", "jsx", "mjs"];
 const OBJECT_CTORS: &[&str] = &["object", "strictObject", "looseObject"];
 /// Builder chains that change the key set (R-X-2 plus the section C

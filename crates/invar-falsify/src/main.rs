@@ -1097,7 +1097,7 @@ fn cmd_fix(args: FixArgs) -> Result<i32> {
         let get = |k: &str| b.iter().find(|(kk, _)| kk == k).map(|(_, v)| v.clone());
         let Some(id) = get("id") else { continue };
         // Egress contracts (slice 2) have no consumer to patch.
-        if get("kind").as_deref() == Some("egress") {
+        if matches!(get("kind").as_deref(), Some("egress") | Some("strings")) {
             continue;
         }
         let Some(entry) = lock_file.contracts.iter().find(|c| c.id == id) else { continue };
