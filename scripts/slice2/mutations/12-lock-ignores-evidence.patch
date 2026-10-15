@@ -1,0 +1,13 @@
+# mutation: the lock ignores evidence keys
+# catch: k2_f2_js_consumer_lock_binds_exactly_the_evidence
+--- a/crates/invar-falsify/src/lock.rs
++++ b/crates/invar-falsify/src/lock.rs
+@@ -504,7 +504,7 @@
+         // Directive 86428 pass 2: a contract carrying evidence keys binds
+         // nothing outside them. LockedBindings(p) is a subset of the
+         // evidence-supported fields, scoped to their shapes.
+-        if !d.evidence.is_empty() {
++        if false && !d.evidence.is_empty() {
+             bindings.retain(|b| {
+                 d.evidence.iter().any(|(shape, fields)| {
+                     b.scope == *shape && fields.iter().any(|f| name_key(f) == name_key(&b.field))

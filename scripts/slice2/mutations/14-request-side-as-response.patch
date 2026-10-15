@@ -1,0 +1,13 @@
+# mutation: treats a request-side reference as response-side
+# catch: k1_u4_request_side_only_reference_abstains
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -702,7 +702,7 @@
+         || has_word(stmt, "searchParams")
+         || stmt.contains("safeParse(");
+     if req {
+-        Side::Request
++        Side::Response
+     } else {
+         Side::Unclassified
+     }

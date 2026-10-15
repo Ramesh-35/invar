@@ -1,0 +1,13 @@
+# mutation: proposes a schema that is imported but not referenced
+# catch: k1_n3_schema_imported_but_never_referenced_abstains k1_u1_two_schemas_imported_none_referenced
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -1156,7 +1156,7 @@
+                         }
+                         let refs = classify_refs(&t, local, imp.span);
+                         let resp: Vec<usize> = refs.iter().filter(|(_, s)| *s == Side::Response).map(|(l, _)| *l).collect();
+-                        if resp.is_empty() {
++                        if false && resp.is_empty() {
+                             let why = if refs.is_empty() {
+                                 "imported but never referenced".to_string()
+                             } else {

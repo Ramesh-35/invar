@@ -1,0 +1,15 @@
+# mutation: pools the fields of every schema in a file
+# catch: k2_n3_two_schemas_in_one_file_never_pool
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -1257,7 +1257,9 @@
+                         let mut fields = Vec::new();
+                         let mut stoplisted = Vec::new();
+                         let mut dot_hits = 0usize;
+-                        for (m, _) in members {
++                        let pooled: Vec<(String, usize)> = w.mods[&pf].decls.iter().flat_map(|d| match &d.body { ShapeBody::Fields(f) => f.clone(), _ => Vec::new() }).collect();
++                        let _ = members;
++                        for (m, _) in &pooled {
+                             let k = name_key(m);
+                             let d = dot.get(&k);
+                             let b = brk.get(&k);

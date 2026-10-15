@@ -344,3 +344,38 @@ control alarming; a mutation kill that is actually a load failure; any
 need to expand the corpus or alter Stage 2 criteria; a path-list
 conflict with 86427; any frozen Experiment C artifact or
 section-A-untouched file needing change.
+
+## K. Implementation Evidence Ledger (appended at Gate 5; sections A to J above are unchanged)
+
+Status: IMPLEMENTED against the frozen revision 2. Detection capability on real repositories remains NOT ESTABLISHED. Nothing here is an evaluation result.
+
+### K1. Gate results
+
+| Gate | Result |
+|---|---|
+| 0 baseline hash ledger | PASS (GATE0-LEDGER.md; Class 1 and Experiment C hashes recorded) |
+| 1 implementation | landed: valuepairs.rs (new), init.rs, lock.rs, check.rs, main.rs (4-line `fix --suggest` egress skip, granted), lib.rs |
+| 2 fixtures | PASS: 25 of 25 in init_slice2_test.rs (22 named, K1-U5, K1-U6, shared scan) |
+| 3 mutations | PASS: 14 of 14 CAUGHT by assertion failure, control green, no SURVIVED, BUILD-FAILED and APPLY-FAILED not counted as kills |
+| 4 regression | PASS: full suite 125 of 125 (10 + 50 + 40 + 25), zero warnings; F01 six proposals and lock identical to slice 1 |
+| 5 documentation | this section, STATUS.md entry, EXPOSURE-LOG.md probe records |
+
+### K2. Mutation table
+
+01-nested-members, 02-dynamic-extracted, 03-pooled-fields, 04-typed-proposed, 05-unversioned-proposed, 06-cross-version, 07-no-reference-proposed, 08-addition-alarms, 09-removal-holds, 10-unextractable-holds, 11-unlocked-holds, 12-lock-ignores-evidence, 13-string-lists-absorbed, 14-request-side-as-response. All CAUGHT; harness at scripts/slice2/mutate.sh, patches in scripts/slice2/mutations/.
+
+### K3. Rulings applied and findings
+
+- F1 (bare `return` produced response-side false positives on formbricks, a development probe): REMEDIATED. Response markers are now call and constructor positions only: `.json(`, `.send(`, `new Response`, `successResponse(`. Fixtures K1-U5 (schema factory returning a Zod schema via bare `return`) and K1-U6 (returned client configuration containing a schema property) both ABSTAIN AMBIG-EGRESS. The sparse probe trees were not re-run after the fix; verification is by fixtures and the full suite.
+- `.json(` receiver filter (receivers `req` and `request` excluded): RATIFIED.
+- `main.rs` 4-line `fix --suggest` egress bypass: GRANTED.
+- Extra builder-chain abstentions (`catchall`, `and`, `setKey`): RATIFIED.
+- Test count reconciled to 25.
+- K1 runs regardless of slice 1's H2 threshold; K2 pairs apply across packages or within the same package.
+- F2: `backtest` operates on slice 1 schema shapes only; it does not model zod values or egress. backtest.rs is Class 1 and was not modified.
+- F3: path aliases (`@/`, `~/`, `#`) stay UNRESOLVED; tsconfig is not read.
+- F4, F5: as designed.
+
+### K4. Protected hashes (sha256, first 12 hex), verified byte-identical after the F1 change
+
+surface.rs 71b521ce7528, backtest.rs df9ef6e87de4, invariant.rs 49972028d11b, config.rs d30f5e4bf6b3, yaml.rs 1254fde8cdd6, codepairs.rs 004a26dec58e, crates/invar-falsify/Cargo.toml a8023ba46533, root Cargo.toml 7c5f4cee5d13, Cargo.lock 81bcb0ff4e12. Experiment C artifacts unchanged (full hashes in GATE0-LEDGER.md). New: valuepairs.rs dd8cd24d3893, init_slice2_test.rs 743cb94cbbdd.

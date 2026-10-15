@@ -849,7 +849,33 @@ pub fn evaluate_with(
                     .collect();
                 r
             }
-            other => bail!("unknown invariant kind {other:?} (schema|event|lock_order)"),
+            "egress" => {
+                let p = getk(b, "producer").context("egress invariant needs producer")?;
+                let shape = getk(b, "shape").context("egress invariant needs shape")?;
+                match lock.and_then(|l| l.contracts.iter().find(|c| c.id == id)) {
+                    Some(entry) => {
+                        let (r, w, n, sk) = egress_outcome(entry, &p, &shape, resolver, &mut prov)?;
+                        witnesses = w;
+                        notes = n;
+                        skipped = sk;
+                        r
+                    }
+                    None => {
+                        // R-K1-5: no lock, no verdict. An egress contract has
+                        // no unlocked comparison to fall back to.
+                        if lock.is_some() {
+                            notes.push("not in invar.lock; run `invar lock --update` to lock it".into());
+                        }
+                        skipped = Some(format!(
+                            "not evaluated: no invar.lock entry for this egress contract ({shape} in {}); run `invar lock` first, an unlocked egress contract cannot hold",
+                            artifact_name(&p)
+                        ));
+                        witnesses = Vec::new();
+                        Vec::new()
+                    }
+                }
+            }
+            other => bail!("unknown invariant kind {other:?} (schema|event|lock_order|egress)"),
         };
         let mut o = ContractOutcome {
             id,
@@ -868,6 +894,86 @@ pub fn evaluate_with(
         out.push(o);
     }
     Ok(out)
+}
+
+/// Check one locked egress contract (INIT-DISCOVERY-SLICE2, K1) against the
+/// producer's current shape. Additive tolerance (R-K1-3): a locked field that
+/// is no longer a direct key of the shape is residue; fields added since the
+/// lock are noted and tolerated. A shape that is no longer statically
+/// extractable is NOT EVALUATED (R-K1-4), never a pass.
+fn egress_outcome(
+    entry: &crate::lock::LockedContract,
+    producer: &str,
+    shape: &str,
+    resolver: &Resolver,
+    prov: &mut Vec<Fetched>,
+) -> Result<(Vec<String>, Vec<Witness>, Vec<String>, Option<String>)> {
+    if entry.producer != producer {
+        bail!(
+            "{}: invar.toml names a different producer than invar.lock; run `invar lock --update`",
+            entry.id
+        );
+    }
+    let text = fetch(resolver, producer, prov)?;
+    let name = artifact_name(producer);
+    let mut notes = vec![
+        format!(
+            "emitted-shape contract on the schema value surface of {shape}; additions are tolerated; runtime serialization is not verified"
+        ),
+        if blake3::hash(text.as_bytes()).to_hex().to_string() == entry.blake3 {
+            format!("producer unchanged since lock ({})", entry.recorded_at)
+        } else {
+            format!("producer changed since lock ({})", entry.recorded_at)
+        },
+    ];
+    let live = match crate::valuepairs::read_shape(&text, shape) {
+        crate::valuepairs::ShapeRead::Dynamic(why) => {
+            return Ok((
+                Vec::new(),
+                Vec::new(),
+                notes,
+                Some(format!(
+                    "not evaluated: {shape} in {name} is no longer statically extractable ({why}); the locked emitted shape cannot be compared"
+                )),
+            ));
+        }
+        crate::valuepairs::ShapeRead::NotFound => None,
+        crate::valuepairs::ShapeRead::Found(f) => Some(f),
+    };
+    let mut residue = Vec::new();
+    let mut witnesses = Vec::new();
+    for b in entry.bindings.iter().filter(|b| b.scope == shape) {
+        let present = live.as_ref().is_some_and(|f| f.iter().any(|x| *x == b.field));
+        if present {
+            continue;
+        }
+        let shown = b.display();
+        residue.push(shown.clone());
+        witnesses.push(Witness {
+            residue: shown,
+            sites: Vec::new(),
+            missing_from: Some(match &live {
+                Some(_) => format!("{name} {shape}"),
+                None => format!("{name} (no `export const {shape} = z.object(...)` found)"),
+            }),
+            type_change: None,
+            read_as: Vec::new(),
+        });
+    }
+    if let Some(f) = &live {
+        let added: Vec<&String> = f
+            .iter()
+            .filter(|x| !entry.bindings.iter().any(|b| b.scope == shape && b.field == **x))
+            .collect();
+        if !added.is_empty() {
+            notes.push(format!(
+                "{} field(s) added since lock, tolerated ({}); `invar lock --update` records them",
+                added.len(),
+                added.iter().take(5).map(|x| x.as_str()).collect::<Vec<_>>().join(", ")
+            ));
+        }
+    }
+    Ok((residue, witnesses, notes, None))
 }
 
 /// Move waived residue out of `residue`; record expired waivers (which fail

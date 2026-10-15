@@ -36,3 +36,10 @@ listed), and precision over proposals emitted in repositories not
 listed as development cases. The audit and h2.py entries are not
 development cases and do not change these denominators. This analysis
 never replaces the official figures.
+
+## Slice 2 development probes, 2026-10-15
+
+Read-only probes of the slice 2 engine on sparse checkouts, run as development work during implementation. Both repositories are DEVELOPMENT cases (S2-D5) and are excluded from any Stage 3 evaluation corpus. Neither run is an evaluation result.
+
+- formbricks, sparse checkout at HEAD 062a49126: the pre-F1 engine produced 2 egress proposals, both judged likely request-side (the trigger of finding F1), and 1133 alias-UNRESOLVED lines. F1 was then remediated (response markers restricted to call and constructor positions). The probe was not re-run after the fix.
+- hoppscotch, sparse checkout at HEAD 63273f8e: 0 proposals in 0.4s, consistent with the verzod negative control K1-N2 (versioned schema family abstains).

@@ -36,3 +36,4 @@ pub mod yaml;
 pub mod report;
 pub mod resolver;
 pub mod surface;
+pub mod valuepairs;

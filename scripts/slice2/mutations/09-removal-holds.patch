@@ -1,0 +1,13 @@
+# mutation: breaks detection: a removed field holds
+# catch: k1_f1_versioned_route_one_egress_contract_lock_and_additive_check
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -944,7 +944,7 @@
+     let mut witnesses = Vec::new();
+     for b in entry.bindings.iter().filter(|b| b.scope == shape) {
+         let present = live.as_ref().is_some_and(|f| f.iter().any(|x| *x == b.field));
+-        if present {
++        if true || present {
+             continue;
+         }
+         let shown = b.display();

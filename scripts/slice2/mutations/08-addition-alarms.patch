@@ -1,0 +1,14 @@
+# mutation: breaks additive tolerance: an added field alarms
+# catch: k1_f1_versioned_route_one_egress_contract_lock_and_additive_check
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -965,6 +965,9 @@
+             .iter()
+             .filter(|x| !entry.bindings.iter().any(|b| b.scope == shape && b.field == **x))
+             .collect();
++        for a in &added {
++            residue.push(format!("{shape}.{a}"));
++        }
+         if !added.is_empty() {
+             notes.push(format!(
+                 "{} field(s) added since lock, tolerated ({}); `invar lock --update` records them",

@@ -1,0 +1,29 @@
+# mutation: absorbs string field lists as reads (slice 2b territory)
+# catch: cm6_string_field_list_is_k3_territory_and_never_proposes
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -540,6 +540,24 @@
+                     }
+                 }
+             }
++            b'[' => {
++                let mut j = i + 1;
++                loop {
++                    j = t.ws(j);
++                    match t.string_at(j) {
++                        Some((s, e)) if !s.is_empty() => {
++                            brk.entry(name_key(&s)).or_insert((s, t.line(j)));
++                            j = t.ws(e);
++                            if b.get(j) == Some(&b',') {
++                                j += 1;
++                                continue;
++                            }
++                            break;
++                        }
++                        _ => break,
++                    }
++                }
++            }
+             _ => {}
+         }
+     }

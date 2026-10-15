@@ -1530,3 +1530,9 @@ byte-identical. Gates 0-5 frozen before implementation; the hoppscotch
 verzod negative control (K1-N2) is a mandatory acceptance condition. No
 evaluation or general-detection claim is authorized by the freeze.
 Record: docs/architecture/INIT-DISCOVERY-SLICE2.md.
+
+## 2026-10-15: INIT-DISCOVERY-SLICE2 implemented (K1 egress locks, K2 zod value producers)
+
+Implementation complete against the frozen revision 2: 25 of 25 slice 2 fixtures, 14 of 14 mutations caught, 125 of 125 tests, zero warnings, Class 1 files and the five Experiment C artifacts byte-identical. Finding F1 (bare `return` as response marker) was remediated before commit. `backtest` covers slice 1 schema shapes only and does not evaluate zod or egress contracts.
+
+Not claimed: general detection capability remains NOT ESTABLISHED. Real-repository runs were development probes only (see EXPOSURE-LOG.md). No Stage 3 evaluation has run. Record: docs/architecture/INIT-DISCOVERY-SLICE2.md section K.

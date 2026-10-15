@@ -1,0 +1,14 @@
+# mutation: counts nested zod members as fields of the shape
+# catch: k2_n1_nested_members_do_not_count
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -262,7 +262,8 @@
+         let mut k = e2;
+         while k < stop {
+             match t.m[k] {
+-                b'(' | b'[' | b'{' => d += 1,
++                b'{' => break,
++                b'(' | b'[' => d += 1,
+                 b')' | b']' | b'}' => d -= 1,
+                 b',' if d == 0 => break,
+                 _ => {}

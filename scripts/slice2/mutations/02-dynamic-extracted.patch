@@ -1,0 +1,22 @@
+# mutation: extracts .extend chains and derived shapes anyway
+# catch: k2_u1_extend_chain_is_unsupported_dynamic
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -286,7 +286,7 @@
+     if a != "z" {
+         // `Other.extend(...)`: a shape derived from another one.
+         if DYNAMIC_CHAIN.contains(&b.as_str()) && t.m.get(t.ws(be)) == Some(&b'(') {
+-            return Some(ShapeBody::Dynamic(format!("derived from {a} via .{b}()")));
++            return Some(ShapeBody::Fields(vec![("total_minor".into(), 1), ("currency_code".into(), 1)]));
+         }
+         return None;
+     }
+@@ -308,7 +308,7 @@
+     let mut c = t.ws(paren_end);
+     while t.m.get(c) == Some(&b'.') {
+         let Some((id, ie)) = t.ident(t.ws(c + 1)) else { break };
+-        if DYNAMIC_CHAIN.contains(&id.as_str()) {
++        if false && DYNAMIC_CHAIN.contains(&id.as_str()) {
+             return Some(ShapeBody::Dynamic(format!(".{id}() chain changes the key set")));
+         }
+         let mut n = t.ws(ie);

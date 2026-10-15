@@ -61,6 +61,11 @@ pub struct Proposal {
     /// `invar lock` restricts a contract's bindings to these (directive
     /// 86428, pass 2); comments never reach the parser, these keys do.
     pub evidence_keys: Vec<String>,
+    /// Manifest kind: "schema" (slice 1 and K2 pairs) or "egress" (slice 2 K1).
+    pub kind: &'static str,
+    /// Extra manifest keys written after the producer line (egress blocks:
+    /// shape, boundary, eligibility). Empty for every slice 1 proposal.
+    pub keys: Vec<(String, String)>,
 }
 
 #[derive(Debug, Default)]
@@ -78,11 +83,14 @@ pub struct Discovery {
     pub abstentions: Vec<crate::codepairs::Abstention>,
     /// A repository-level abstention (H2, SLICE-SCOPE) stopped discovery.
     pub repo_abstained: bool,
+    /// `[egress]` boundary markings read from an existing invar.toml; written
+    /// back so a regenerated manifest keeps them (slice 2, R-K1-1).
+    pub egress_marks: Vec<String>,
 }
 
 /// The status reported in the summary line.
 pub fn status(d: &Discovery) -> &'static str {
-    if d.repo_abstained {
+    if d.repo_abstained && d.proposals.is_empty() {
         "ABSTAINED"
     } else if d.truncated {
         "TRUNCATED"
@@ -414,11 +422,200 @@ pub fn discover(root: &Path) -> Discovery {
             overlap,
             evidence: evidence_lines(pair),
             evidence_keys,
+            kind: "schema",
+            keys: Vec::new(),
         });
     }
+
+    // Slice 2: zod value producers (K2) and egress locks (K1). Appended after
+    // every slice 1 proposal, so slice 1 output is a byte-identical prefix.
+    // Slice 2 does not depend on workspace membership (an egress lock is a
+    // single-repository self-contract), so slice 1's repository-level
+    // abstention does not stop it.
+    slice2(root, &rel_files, &rel_over, &mut d);
     d.abstentions.sort();
     d.abstentions.dedup();
     d
+}
+
+pub const EGRESS_STATUS: &str = "status: PROPOSED (heuristic; response-position reference found; runtime serialization not verified)";
+pub const K2_STATUS: &str = "status: PROPOSED (heuristic; zod value producer, type-blind consumer; receiver of field reads not verified)";
+
+fn unique_id(d: &Discovery, base: String) -> String {
+    let mut id = base.clone();
+    let mut n = 2;
+    while d.proposals.iter().any(|p| p.id == id) {
+        id = format!("{base}#{n}");
+        n += 1;
+    }
+    id
+}
+
+fn slice2(root: &Path, rel_files: &[String], rel_over: &[String], d: &mut Discovery) {
+    use crate::codepairs::Abstention;
+    d.egress_marks = std::fs::read_to_string(root.join("invar.toml"))
+        .map(|t| crate::valuepairs::egress_marks(&t))
+        .unwrap_or_default();
+    let vd = crate::valuepairs::discover_values(root, rel_files, rel_over, &d.egress_marks);
+    d.abstentions.extend(vd.abstentions);
+    let ok = |x: &str| toml_safe(x) && !x.chars().any(char::is_whitespace);
+    for e in &vd.egress {
+        let id = unique_id(d, format!("egress:{}", e.shape));
+        let first = &e.boundaries[0];
+        let representable = ok(&id)
+            && ok(&e.producer)
+            && ok(&e.shape)
+            && e.boundaries.iter().all(|b| ok(&b.file) && ok(&b.eligibility))
+            && e.fields.iter().all(|(f, _)| ok(f));
+        if !representable {
+            d.abstentions.push(Abstention {
+                code: "UNREPRESENTABLE",
+                location: format!("{}:{}", e.producer, e.decl_line).replace(['\n', '\r'], " "),
+                reason: "path or name not representable in flat TOML; not proposed".into(),
+            });
+            continue;
+        }
+        if d.proposals.len() >= MAX_PROPOSALS {
+            d.truncated = true;
+            break;
+        }
+        let elig: BTreeSet<String> = e
+            .boundaries
+            .iter()
+            .flat_map(|b| b.eligibility.split(',').map(|x| if x.starts_with("versioned-path") { "versioned-path".to_string() } else { "marked".to_string() }))
+            .collect();
+        d.proposals.push(Proposal {
+            id,
+            producer: e.producer.clone(),
+            pointer: None,
+            consumer: String::new(),
+            overlap: e.fields.iter().map(|(f, _)| f.clone()).collect(),
+            evidence: egress_lines(e),
+            evidence_keys: Vec::new(),
+            kind: "egress",
+            keys: vec![
+                ("shape".into(), e.shape.clone()),
+                ("boundary".into(), first.file.clone()),
+                ("eligibility".into(), elig.into_iter().collect::<Vec<_>>().join(",")),
+            ],
+        });
+    }
+    for p in &vd.pairs {
+        let id = unique_id(d, format!("code:{}->{}", file_name(&p.producer), file_name(&p.consumer)));
+        let evidence_keys: Vec<String> = p
+            .shapes
+            .iter()
+            .map(|s| {
+                let mut k = s.shape.clone();
+                for (f, _) in &s.fields {
+                    k.push(' ');
+                    k.push_str(f);
+                }
+                k
+            })
+            .collect();
+        let representable = [&id, &p.producer, &p.consumer].iter().all(|v| toml_safe(v))
+            && p.shapes.iter().all(|s| ok(&s.shape) && s.fields.iter().all(|(f, _)| ok(f)));
+        if !representable {
+            d.abstentions.push(Abstention {
+                code: "UNREPRESENTABLE",
+                location: format!("{} -> {}", p.producer, p.consumer).replace(['\n', '\r'], " "),
+                reason: "path not representable in flat TOML; not proposed".into(),
+            });
+            continue;
+        }
+        if d.proposals.len() >= MAX_PROPOSALS {
+            d.truncated = true;
+            break;
+        }
+        d.proposals.push(Proposal {
+            id,
+            producer: p.producer.clone(),
+            pointer: None,
+            consumer: p.consumer.clone(),
+            overlap: p.shapes.iter().flat_map(|s| s.fields.iter().map(|(f, _)| f.clone())).collect(),
+            evidence: k2_lines(p),
+            evidence_keys,
+            kind: "schema",
+            keys: Vec::new(),
+        });
+    }
+}
+
+fn egress_lines(e: &crate::valuepairs::EgressProposal) -> Vec<String> {
+    let names: Vec<&str> = e.fields.iter().map(|(f, _)| f.as_str()).collect();
+    let mut v = vec![EGRESS_STATUS.to_string()];
+    v.push("X1 EMITTED-SHAPE contract, not a producer/consumer pair: a promise about what this repository emits at a boundary; no consumer evidence is used or claimed".to_string());
+    for b in &e.boundaries {
+        let how: Vec<String> = b
+            .eligibility
+            .split(',')
+            .map(|x| match x.split_once(':') {
+                Some(("versioned-path", seg)) => format!("versioned path segment {seg:?}"),
+                Some((_, mark)) => format!("marked under [egress] in invar.toml ({mark:?})"),
+                None => x.to_string(),
+            })
+            .collect();
+        v.push(format!("X2 boundary file {} is eligible by {}", b.file, how.join(" and ")));
+    }
+    v.push(format!(
+        "X3 {} declared at {}:{} as a z.object literal with {} direct fields: {}",
+        e.shape,
+        e.producer,
+        e.decl_line,
+        names.len(),
+        names.join(", ")
+    ));
+    for b in &e.boundaries {
+        let via = match &b.barrel {
+            Some((bf, l)) => format!(", re-exported by barrel {bf}:{l}"),
+            None => String::new(),
+        };
+        v.push(format!(
+            "X4 {} imported at {}:{} from {:?}, resolved to {}{via}",
+            e.shape, b.file, b.import_line, b.specifier, b.resolved
+        ));
+        let refs: Vec<String> = b.response_refs.iter().map(|l| format!("{}:{l}", b.file)).collect();
+        v.push(format!("X5 response-position reference(s): {}", refs.join(", ")));
+    }
+    v.push(format!(
+        "X6 DISCLAIMER: runtime serialization of {} is not verified; a response-position reference does not prove the route emits this schema",
+        e.shape
+    ));
+    v.push(format!("category: {}", e.category));
+    v.push(format!(
+        "lock: run `invar lock` before `invar check`. Without a lock an egress contract is SKIPPED (exit 4), never HOLDS. The lock binds every direct field of {}; at check a removed or renamed field is VIOLATED and an added field HOLDS.",
+        e.shape
+    ));
+    v
+}
+
+fn k2_lines(p: &crate::valuepairs::K2Pair) -> Vec<String> {
+    let mut v = vec![K2_STATUS.to_string()];
+    for s in &p.shapes {
+        v.push(format!("Z1 {} is a z.object literal declared at {}:{} (a value surface, not a type)", s.shape, p.producer, s.decl_line));
+    }
+    v.push(format!("Z2 consumer {} is a {}: the type system does not constrain these reads", p.consumer, p.consumer_kind));
+    for s in &p.shapes {
+        let via = match &s.barrel {
+            Some((b, l)) => format!(", re-exported by barrel {b}:{l} from {}", p.producer),
+            None => String::new(),
+        };
+        v.push(format!("Z3 {} imported at {}:{} from {:?}, resolved to {}{via}", s.shape, p.consumer, s.import_line, s.specifier, s.resolved));
+    }
+    for s in &p.shapes {
+        let f: Vec<String> = s.fields.iter().map(|(n, l)| format!("{n} ({}:{l})", p.consumer)).collect();
+        v.push(format!("Z4 {} fields read: {}", s.shape, f.join(", ")));
+        v.push(format!(
+            "Z4 {} stoplisted reads: {}",
+            s.shape,
+            if s.stoplisted.is_empty() { "(none)".to_string() } else { s.stoplisted.join(", ") }
+        ));
+    }
+    v.push(format!("Z5 pair {} -> {}", p.producer, p.consumer));
+    v.push(format!("category: {}", p.category));
+    v.push("lock: run `invar lock` before `invar check`. The lock binds exactly the Z4 fields above, scoped to their shape. A proposal never claims the consumer is correct.".to_string());
+    v
 }
 
 fn evidence_lines(p: &crate::codepairs::CodePair) -> Vec<String> {
@@ -484,19 +681,35 @@ pub fn render_manifest_opts(d: &Discovery, full_inventory: bool) -> String {
     s.push_str(&format!("abstentions = \"{}\"\n", d.abstentions.len()));
     s.push_str(&format!("inventory = \"{}\"\n\n", d.inventory.len()));
 
+    if d.proposals.iter().any(|p| p.kind == "egress") {
+        s.push_str("# Slice 2: blocks with kind = \"egress\" are EMITTED-SHAPE contracts: a promise\n# about the direct keys of a zod schema this repository emits at a boundary\n# (versioned path or [egress] marking, plus a response-position reference).\n# They carry no consumer evidence, and runtime serialization is NOT verified.\n\n");
+    }
+    if !d.egress_marks.is_empty() {
+        s.push_str("# Egress boundary markings (read from the previous invar.toml; kept so a\n# regenerated manifest does not lose them). Marking makes a file ELIGIBLE for\n# discovery only; it never establishes an emitted contract by itself.\n[egress]\n");
+        for m in &d.egress_marks {
+            s.push_str(&format!("boundary = \"{m}\"\n"));
+        }
+        s.push('\n');
+    }
+
     for p in &d.proposals {
         s.push_str(&format!("# PROPOSED {}\n", p.id));
         for e in &p.evidence {
             s.push_str(&format!("# {e}\n"));
         }
         s.push_str("[[invariant]]\n");
-        s.push_str("kind = \"schema\"\n");
+        s.push_str(&format!("kind = \"{}\"\n", p.kind));
         s.push_str(&format!("id = \"{}\"\n", p.id));
         s.push_str(&format!("producer = \"{}\"\n", p.producer));
         if let Some(ptr) = &p.pointer {
             s.push_str(&format!("pointer = \"{ptr}\"\n"));
         }
-        s.push_str(&format!("consumer = \"{}\"\n", p.consumer));
+        for (k, v) in &p.keys {
+            s.push_str(&format!("{k} = \"{v}\"\n"));
+        }
+        if p.kind != "egress" {
+            s.push_str(&format!("consumer = \"{}\"\n", p.consumer));
+        }
         for e in &p.evidence_keys {
             s.push_str(&format!("evidence = \"{e}\"\n"));
         }

@@ -1,0 +1,14 @@
+# mutation: allows pairing across schema versions
+# catch: k1_n2_hoppscotch_verzod_family_zero_proposals_zero_alarms
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -998,6 +998,9 @@
+ /// Version-family layout (R-K1-6): `v/<N>` path segments, or a const named
+ /// `<Name>V<N>` / `V<N>_SCHEMA` (also `...Schema`).
+ pub fn version_family(file: &str, shape: &str) -> Option<String> {
++    if true {
++        return None;
++    }
+     let segs: Vec<&str> = file.split('/').collect();
+     for w in segs.windows(2) {
+         if w[0] == "v" && !w[1].is_empty() && w[1].trim_end_matches(|c: char| c == '.' || c.is_ascii_alphabetic()).bytes().all(|b| b.is_ascii_digit()) && w[1].as_bytes()[0].is_ascii_digit() {

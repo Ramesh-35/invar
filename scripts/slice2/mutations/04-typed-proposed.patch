@@ -1,0 +1,13 @@
+# mutation: proposes typed consumers instead of abstaining
+# catch: k2_n4_typed_consumer_is_tsc_governed
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -1283,7 +1283,7 @@
+                         stoplisted.dedup();
+                         if typed_ext {
+                             let infers = text.contains(&format!("typeof {local}")) || text.contains(&format!("typeof {imported}"));
+-                            if infers || (fields.len() >= MIN_FIELDS && dot_hits > 0) {
++                            if false && (infers || (fields.len() >= MIN_FIELDS && dot_hits > 0)) {
+                                 out.abstentions.push(Abstention {
+                                     code: "TSC-GOVERNED",
+                                     location: loc.clone(),

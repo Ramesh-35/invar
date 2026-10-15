@@ -341,6 +341,7 @@ fn producer_surface(
     code: Option<&str>,
     resolver: &Resolver,
     prov: &mut Vec<Fetched>,
+    zod_shapes: &[String],
 ) -> Result<Live> {
     let mut s = Surface::new();
     let mut put = |source: &str, fields: Fields, scope_override: Option<&str>| {
@@ -351,10 +352,15 @@ fn producer_surface(
     };
     let text = fetch_text(resolver, producer, prov)?;
     let blake3 = blake3::hash(text.as_bytes()).to_hex().to_string();
+    let mut zod_extra: Vec<(String, String)> = Vec::new();
     if is_code(producer) {
         let f = code_fields(&artifact_name(producer), &text)
             .ok_or_else(|| anyhow!("{id}: cannot read fields from {}", artifact_name(producer)))?;
         put("code", f, None);
+        // Slice 2 (INIT-DISCOVERY-SLICE2, K2): shape-attributed zod entries
+        // for the named shapes only, never replacing a typed entry. With no
+        // zod shape named (every slice 1 contract) this adds nothing.
+        zod_extra = crate::valuepairs::zod_surface(&text, zod_shapes);
     } else {
         let obj = load_object(id, producer, &text, pointer)?;
         put("spec", spec_fields(&obj), Some(&pointer_scope(pointer)));
@@ -366,6 +372,9 @@ fn producer_surface(
         let f = code_fields(&artifact_name(c), &t)
             .ok_or_else(|| anyhow!("{id}: cannot read fields from {}", artifact_name(c)))?;
         put("code", f, None);
+    }
+    for (scope, field) in zod_extra {
+        s.entry(("code".into(), scope, field)).or_insert(None);
     }
     Ok(Live {
         surface: s,
@@ -395,14 +404,20 @@ struct Declared {
     /// of these shapes that the evidence names; a hand-written contract
     /// without evidence keys keeps the full surface-times-reads behavior.
     evidence: Vec<(String, Vec<String>)>,
+    /// "schema" or "egress" (slice 2).
+    kind: String,
+    /// Egress only: the exported zod const whose direct keys are locked.
+    shape: Option<String>,
 }
 
 fn declared(sections: &Sections) -> Result<Vec<Declared>> {
     let mut out = Vec::new();
     for b in crate::check::gather_blocks(sections)? {
-        if getk(&b, "kind").as_deref() != Some("schema") {
-            continue;
-        }
+        let kind = match getk(&b, "kind").as_deref() {
+            Some("schema") => "schema",
+            Some("egress") => "egress",
+            _ => continue,
+        };
         let id = getk(&b, "id").context("a locked schema invariant needs an id")?;
         let evidence = b
             .iter()
@@ -416,10 +431,16 @@ fn declared(sections: &Sections) -> Result<Vec<Declared>> {
             .collect();
         out.push(Declared {
             producer: getk(&b, "producer").with_context(|| format!("{id}: needs producer"))?,
-            consumer: getk(&b, "consumer").with_context(|| format!("{id}: needs consumer"))?,
+            consumer: if kind == "egress" {
+                String::new()
+            } else {
+                getk(&b, "consumer").with_context(|| format!("{id}: needs consumer"))?
+            },
             pointer: getk(&b, "pointer"),
             producer_code: getk(&b, "producer_code"),
             evidence,
+            kind: kind.to_string(),
+            shape: getk(&b, "shape"),
             id,
         });
     }
@@ -441,6 +462,11 @@ pub fn compute(sections: &Sections, resolver: &Resolver, prev: &Lock, today: i64
         ]) {
             bail!("{}: cannot lock, {lang}", d.id);
         }
+        if d.kind == "egress" {
+            contracts.push(egress_entry(&d, resolver, prev, today, &now)?);
+            continue;
+        }
+        let zod_shapes: Vec<String> = d.evidence.iter().map(|(sh, _)| sh.clone()).collect();
         let live = producer_surface(
             &d.id,
             &d.producer,
@@ -448,6 +474,7 @@ pub fn compute(sections: &Sections, resolver: &Resolver, prev: &Lock, today: i64
             d.producer_code.as_deref(),
             resolver,
             &mut Vec::new(),
+            &zod_shapes,
         )?;
         let reads = consumer_reads(
             &d.consumer,
@@ -512,6 +539,68 @@ pub fn compute(sections: &Sections, resolver: &Resolver, prev: &Lock, today: i64
         waivers: prev.waivers.clone(),
         samples: prev.samples.clone(),
     })
+}
+
+/// The lock entry of an egress contract (INIT-DISCOVERY-SLICE2, K1): every
+/// direct key of the named zod const, scoped to it. No consumer is read.
+fn egress_entry(d: &Declared, resolver: &Resolver, prev: &Lock, today: i64, now: &str) -> Result<LockedContract> {
+    let shape = d
+        .shape
+        .clone()
+        .with_context(|| format!("{}: an egress invariant needs shape", d.id))?;
+    let text = fetch_text(resolver, &d.producer, &mut Vec::new())?;
+    let fields = match crate::valuepairs::read_shape(&text, &shape) {
+        crate::valuepairs::ShapeRead::Found(f) => f,
+        crate::valuepairs::ShapeRead::Dynamic(why) => bail!(
+            "{}: cannot lock, {shape} in {} is not statically extractable ({why})",
+            d.id,
+            artifact_name(&d.producer)
+        ),
+        crate::valuepairs::ShapeRead::NotFound => bail!(
+            "{}: cannot lock, no `export const {shape} = z.object(...)` in {}",
+            d.id,
+            artifact_name(&d.producer)
+        ),
+    };
+    let old = prev.contracts.iter().find(|c| c.id == d.id);
+    let mut bindings: Vec<Binding> = fields
+        .iter()
+        .map(|f| {
+            let mut b = Binding {
+                source: "code".into(),
+                scope: shape.clone(),
+                field: f.clone(),
+                ty: None,
+                since: format_date(today),
+            };
+            if let Some(ob) = old.and_then(|o| o.bindings.iter().find(|x| x.key() == b.key())) {
+                b.since = ob.since.clone();
+            }
+            b
+        })
+        .collect();
+    bindings.sort();
+    let mut sorted = fields.clone();
+    sorted.sort();
+    let mut c = LockedContract {
+        id: d.id.clone(),
+        producer: d.producer.clone(),
+        pointer: None,
+        blake3: blake3::hash(text.as_bytes()).to_hex().to_string(),
+        producer_code: None,
+        blake3_code: None,
+        recorded_at: now.to_string(),
+        bindings,
+        members: vec![("code".into(), shape, sorted)],
+    };
+    if let Some(o) = old {
+        let mut same = o.clone();
+        same.recorded_at = c.recorded_at.clone();
+        if same == c {
+            c.recorded_at = o.recorded_at.clone();
+        }
+    }
+    Ok(c)
 }
 
 /// All field names of each (source, scope) that has a binding.
@@ -934,7 +1023,15 @@ pub fn check_contract(
             entry.id
         );
     }
-    let live = producer_surface(&entry.id, producer, pointer, code, resolver, prov)?;
+    let zod_shapes: Vec<String> = entry
+        .bindings
+        .iter()
+        .map(|b| b.scope.clone())
+        .filter(|sc| !sc.is_empty())
+        .collect::<BTreeSet<_>>()
+        .into_iter()
+        .collect();
+    let live = producer_surface(&entry.id, producer, pointer, code, resolver, prov, &zod_shapes)?;
     let consumer_text = fetch_text(resolver, consumer, prov)?;
     let reads = consumer_reads(consumer, &consumer_text);
     let cname = artifact_name(consumer);

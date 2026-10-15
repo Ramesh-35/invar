@@ -1096,6 +1096,10 @@ fn cmd_fix(args: FixArgs) -> Result<i32> {
     for b in invar_falsify::check::gather_blocks(&sections)? {
         let get = |k: &str| b.iter().find(|(kk, _)| kk == k).map(|(_, v)| v.clone());
         let Some(id) = get("id") else { continue };
+        // Egress contracts (slice 2) have no consumer to patch.
+        if get("kind").as_deref() == Some("egress") {
+            continue;
+        }
         let Some(entry) = lock_file.contracts.iter().find(|c| c.id == id) else { continue };
         let (producer, consumer) = (get("producer").unwrap_or_default(), get("consumer").unwrap_or_default());
         let r = lock::check_contract(

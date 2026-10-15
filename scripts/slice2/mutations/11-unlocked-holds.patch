@@ -1,0 +1,16 @@
+# mutation: an unlocked egress contract returns HOLDS
+# catch: k1_u3_no_lock_means_no_verdict
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -866,10 +866,7 @@
+                         if lock.is_some() {
+                             notes.push("not in invar.lock; run `invar lock --update` to lock it".into());
+                         }
+-                        skipped = Some(format!(
+-                            "not evaluated: no invar.lock entry for this egress contract ({shape} in {}); run `invar lock` first, an unlocked egress contract cannot hold",
+-                            artifact_name(&p)
+-                        ));
++                        skipped = None;
+                         witnesses = Vec::new();
+                         Vec::new()
+                     }

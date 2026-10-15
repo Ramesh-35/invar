@@ -1,0 +1,15 @@
+# mutation: an unextractable locked schema returns HOLDS
+# catch: k1_u2_locked_schema_turned_dynamic_is_not_evaluated
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -932,9 +932,7 @@
+                 Vec::new(),
+                 Vec::new(),
+                 notes,
+-                Some(format!(
+-                    "not evaluated: {shape} in {name} is no longer statically extractable ({why}); the locked emitted shape cannot be compared"
+-                )),
++                { let _ = (&why, &name); None },
+             ));
+         }
+         crate::valuepairs::ShapeRead::NotFound => None,

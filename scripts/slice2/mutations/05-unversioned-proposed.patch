@@ -1,0 +1,13 @@
+# mutation: treats every route as an eligible boundary
+# catch: k1_n1_unversioned_unmarked_route_never_proposes
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -1082,7 +1082,7 @@
+         let v = versioned_segment(f).map(|s| format!("versioned-path:{s}"));
+         let m = marked_by(f, marks).map(|s| format!("marked:{s}"));
+         match (v, m) {
+-            (None, None) => None,
++            (None, None) => Some("versioned-path:v0".to_string()),
+             (Some(a), None) | (None, Some(a)) => Some(a),
+             (Some(a), Some(b)) => Some(format!("{a},{b}")),
+         }
