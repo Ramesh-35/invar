@@ -1,12 +1,23 @@
 # INVAR-PROOF-001: cross-repository egress attestation (`invar.proof`)
 
-Status: DRAFT revision 1 for ruling. Implementation NOT authorized. Prepared to
-the 86427 and slice 2 standard: numbered requirements with falsifiable
+Status: REVISION 2, rulings D1 to D9 RATIFIED (2026-10-15 20:00). Revision 2 is a
+syntax alignment only: it applies the ratified D4 binding syntax (`[[proof.import]]`)
+and D6 file layout, and records the ratified engine fingerprint. Implementation of
+the proof engine is NOT yet authorized (it is on hold per the same ruling). Prepared
+to the 86427 and slice 2 standard: numbered requirements with falsifiable
 acceptance, abstention contract, fixtures with declared outcomes before code,
 mutation set, gates 0 to 5. Parents: INIT-DISCOVERY-SLICE2.md (K1 egress locks,
 landed e27fd8a) and INIT-DISCOVERY-SLICE2B.md (landed 34f1e52, probes 431b9aa).
 No capability, adoption or evaluation claim is made. There is no real-repository
 evidence for proofs; this document is design only.
+
+Changes from revision 1: the consumer binding is a `[[proof.import]]` table with
+`contract_id`, `anchor`, `accepted_epoch`, `accepted_digest` (D4) plus the two keys
+`proof` and `fields` that B4 requires and the ruling did not list (section K, item
+I1); proof files live at `invar.proof` or `.invar/proofs/<name>.proof` (D6); a
+`rule_fingerprint` is added to the proof (section K, ruling of the volunteered items);
+a missing proof file gets its own code; section K records the rulings and three open
+items. Nothing else changed.
 
 ## 0. What a proof is, and the honest bounds
 
@@ -59,6 +70,7 @@ lock-file grammar; consumer acceptance state lives in invar.toml (D2).
 [proof]
 format = "1"
 level = "0"                 # 0 = digest only; 1 reserved for signatures
+rule_fingerprint = "<64 hex>"   # blake3 over the engine's rule table (R-P-10)
 
 [producer]
 repo = "acme/orders-api"    # declared name; NOT verified
@@ -92,6 +104,20 @@ Counterexample fixture: PRF-M1.
 R-P-2 Self-reference is avoided by binding to `source_blob` and the pre-proof
 `commit`, never to a tree that contains the proof file itself.
 
+R-P-2a Layout (D6). A provider writes its proof to `invar.proof` at the repository
+root (default) or to `.invar/proofs/<name>.proof`, where `<name>` matches
+`[A-Za-z0-9_-]+`. `--out` outside these two forms is exit 3. One file holds exactly
+one contract. A provider with several contracts uses `.invar/proofs/`.
+
+R-P-10 Rule fingerprint. `rule_fingerprint` is the blake3 hex digest of the engine's
+rule table for the proof's kind, serialized as sorted `key=value` lines: the engine
+version, the response markers, the stoplist, MIN_FIELDS, and the proof format and
+level. It is inside the digest. Its only effect is traceability: `check --proof`
+prints the fingerprint, and a fingerprint that differs from the verifying engine's is
+a printed NOTE, never an alarm and never a verdict change. (The ruling named SHA-256;
+the tree has blake3 and no SHA-256 crate, and a new dependency is a stop condition,
+so blake3 is used. See section K, item I2.) Fixtures: PRF-M5, PRF-M6.
+
 ## C. Provider side: `invar lock --emit-proof <contract-id> [--out invar.proof]`
 
 R-P-3 Preconditions, checked in order; any failure is exit 3 (authoring error)
@@ -110,39 +136,55 @@ R-P-5 Exit 0 on success, printing the path, epoch and digest. Never exit 2.
 
 ## D. Consumer side
 
-D-1 Binding (manifest, explicit):
+D-1 Binding (invar.toml, explicit, one table per imported contract):
 
 ```
-[[invariant]]
-kind = "proof"
-id = "orders-api-orders"
-proof = "vendor/orders-api/invar.proof"     # path to the proof file
-contract = "egress:OrderResponse"
-anchor = "GET /v1/orders"                   # MUST equal the proof's anchor
+[[proof.import]]
+proof = ".invar/proofs/orders-api.proof"    # a file, or a directory of *.proof files
+contract_id = "egress:OrderResponse"        # MUST equal the proof's producer contract
+anchor = "GET /v1/orders"                   # MUST equal the proof's producer anchor
 fields = "id total_minor currency_code"     # the fields this repo relies on, by hand
-accept_epoch = "7"                          # epoch last reviewed and accepted
-accept_digest = "<hex>"                     # digest last reviewed and accepted
+accepted_epoch = "7"                        # epoch last reviewed and accepted
+accepted_digest = "<hex>"                   # digest last reviewed and accepted
+max_age_days = "30"                         # optional, opt-in clock check (R-P-8)
 ```
+
+`contract_id`, `anchor`, `accepted_epoch` and `accepted_digest` are the keys the
+ruling fixed; `proof` and `fields` are required by B4 (the engine cannot find a file
+or know what the consumer relies on without being told). The consumer's copy of the
+provider's proof may live anywhere inside the consumer repository; only the provider
+side is bound to the D6 layout. Unknown keys in the table are exit 3 (a typo in a
+trust binding must not be silently ignored).
+
+Plain `invar check` does not evaluate `[[proof.import]]` tables; only
+`invar check --proof` does, so adding a binding cannot change any existing verdict
+(fixture PRF-N3). Whether plain `check` should evaluate them once the feature is
+stable is open item I3.
 
 `invar init` never proposes a proof block (B4). A tool may print a template; the
-human or agent writes `fields`, `anchor`, `accept_*` deliberately.
+human or agent writes `fields`, `anchor`, `accepted_*` deliberately.
 
-R-P-6 Verification order for `invar check`, first failing step decides:
+R-P-6 Verification order for `invar check --proof`, per `[[proof.import]]`, first
+failing step decides (the process exit is the worst code over all imports, ordered
+3 over 1 over 4 over 0, and every import prints its own line):
+0. Resolve: the `proof` path is absent, or a directory with no `*.proof` file whose
+   contract equals `contract_id`: exit 4 PROOF-NOT-FOUND. Unknown binding keys: exit 3.
 1. Parse and digest (exit 3 on malformed file, unknown format, or digest mismatch:
    PROOF-TAMPERED, a stated error, not a verdict).
-2. Kind: `proof.kind` other than egress: exit 4 PROOF-UNSUPPORTED-KIND.
-3. Scope: contract or anchor differ from the binding: exit 4 PROOF-SCOPE-MISMATCH.
+2. Kind: the proof's contract kind other than egress: exit 4 PROOF-UNSUPPORTED-KIND.
+3. Scope: `contract_id` or `anchor` differ from the proof's: exit 4
+   PROOF-SCOPE-MISMATCH.
 4. Ambiguity: more than one proof file resolves for the binding: exit 4
-   PROOF-AMBIG-SCHEMA. (The binding names one path; ambiguity arises when that
-   path is a directory holding several proofs for the same contract id.)
-5. Freshness anchor: `accept_epoch` or `accept_digest` absent: exit 4
+   PROOF-AMBIG-SCHEMA. (Ambiguity arises when `proof` is a directory holding several
+   proofs for the same `contract_id`.)
+5. Freshness anchor: `accepted_epoch` or `accepted_digest` absent: exit 4
    TEMPORAL-STALENESS-UNANCHORED (freshness cannot be established; HOLDS is not
-   offered). Present: proof epoch lower than `accept_epoch` is exit 4
+   offered; ruling D3). Present: proof epoch lower than `accepted_epoch` is exit 4
    STALE-PROOF-COMMIT (rollback or replay of an older proof); equal epoch with a
    different digest is exit 3 PROOF-FORK; equal epoch and equal digest, or a higher
    epoch, passes this step. A higher epoch whose `parent_digest` does not chain to
-   `accept_digest` when epoch = accept_epoch + 1 is exit 3 PROOF-FORK; a larger gap
-   cannot be chained offline and is noted, not alarmed.
+   `accepted_digest` when epoch = accepted_epoch + 1 is exit 3 PROOF-FORK; a larger
+   gap cannot be chained offline and is noted, not alarmed.
 6. Fields: every name in `fields` present in the proof's `names` holds; any missing
    is residue and the contract is VIOLATED (exit 1), naming each missing field,
    the proof path and epoch. Extra names in the proof are noted and tolerated
@@ -154,7 +196,7 @@ spec; the break-glass design (red-team directive, GAP-09) is a separate ruling a
 a separate document, because it changes the meaning of an exit code path.
 
 R-P-8 Determinism and clock. Default verification reads no clock. An optional
-`max_age_days` on the binding adds one clock-dependent step (proof `generated_at`
+`max_age_days` on the `[[proof.import]]` table adds one clock-dependent step (proof `generated_at`
 older than the window yields exit 4 TEMPORAL-STALENESS-UNANCHORED). It is opt-in,
 it is the only non-hermetic check, and results that depend on it say so.
 Fixture: PRF-U6, PRF-M2.
@@ -167,8 +209,9 @@ proof file and the manifest, and adds no dependency. Gate 4 measures both.
 
 | Code | Exit | Fires when |
 |---|---|---|
-| PROOF-TAMPERED | 3 | digest mismatch, malformed file, unknown format or level |
+| PROOF-TAMPERED | 3 | digest mismatch, malformed file, unknown format or level, unknown binding key |
 | PROOF-FORK | 3 | equal epoch with different digest, or broken parent chain at epoch + 1 |
+| PROOF-NOT-FOUND | 4 | the `proof` path is absent or holds no proof for `contract_id` |
 | PROOF-UNSUPPORTED-KIND | 4 | proof or binding names a kind other than egress |
 | PROOF-SCOPE-MISMATCH | 4 | contract or anchor in the proof differs from the binding |
 | PROOF-AMBIG-SCHEMA | 4 | the binding resolves to more than one proof for the contract |
@@ -184,9 +227,10 @@ All synthetic, built in temporary directories, run through the real binary twice
 (byte-identical output).
 
 F (positive):
-- PRF-F1 provider emits epoch 1; consumer binds three fields, records accept_epoch 1 and the digest; `check` exits 0.
-- PRF-F2 provider adds a field and re-emits epoch 2 (chains to epoch 1); consumer with accept_epoch 1 still exits 0 and notes the added field; after the consumer records epoch 2, exit 0.
-- PRF-F3 two bindings to two contracts in one proof directory resolve independently.
+- PRF-F1 provider emits epoch 1; consumer binds three fields, records accepted_epoch 1 and the digest; `check --proof` exits 0.
+- PRF-F2 provider adds a field and re-emits epoch 2 (chains to epoch 1); consumer with accepted_epoch 1 still exits 0 and notes the added field; after the consumer records epoch 2, exit 0.
+- PRF-F3 two `[[proof.import]]` tables to two contracts in one proof directory resolve independently.
+- PRF-F4 layout: a provider emits to `.invar/proofs/orders.proof` and to the root `invar.proof`; both verify; `--out` elsewhere is exit 3.
 
 V (violations):
 - PRF-V1 provider removes a relied-on field, re-locks, re-emits epoch 2; consumer exits 1 naming the field and epoch.
@@ -197,16 +241,16 @@ E (authoring refusals, exit 3, no file written):
 - PRF-E1 no invar.lock entry for the contract. PRF-E2 shape turned dynamic. PRF-E3 current keys differ from the locked set. PRF-E4 uncommitted edits to the shape file. PRF-E5 `anchor` undeclared.
 
 U (abstentions and errors, exact code and exit):
-- PRF-U1 anchor mismatch (PROOF-SCOPE-MISMATCH, 4). PRF-U2 two proofs for one contract id in the bound directory (PROOF-AMBIG-SCHEMA, 4). PRF-U3 epoch below accept_epoch (STALE-PROOF-COMMIT, 4). PRF-U4 equal epoch, different digest (PROOF-FORK, 3). PRF-U5 no accept_epoch (TEMPORAL-STALENESS-UNANCHORED, 4, never HOLDS). PRF-U6 max_age_days exceeded (4, labeled clock-dependent). PRF-U7 proof of a `strings` contract (PROOF-UNSUPPORTED-KIND, 4). PRF-U8 hand-edited field list, digest unchanged (PROOF-TAMPERED, 3). PRF-U9 higher epoch whose parent_digest does not chain at accept_epoch + 1 (PROOF-FORK, 3).
+- PRF-U1 anchor mismatch (PROOF-SCOPE-MISMATCH, 4). PRF-U2 two proofs for one contract id in the bound directory (PROOF-AMBIG-SCHEMA, 4). PRF-U3 epoch below accepted_epoch (STALE-PROOF-COMMIT, 4). PRF-U4 equal epoch, different digest (PROOF-FORK, 3). PRF-U5 no accepted_epoch (TEMPORAL-STALENESS-UNANCHORED, 4, never HOLDS). PRF-U6 max_age_days exceeded (4, labeled clock-dependent). PRF-U7 proof of a `strings` contract (PROOF-UNSUPPORTED-KIND, 4). PRF-U8 hand-edited field list, digest unchanged (PROOF-TAMPERED, 3). PRF-U9 higher epoch whose parent_digest does not chain at accepted_epoch + 1 (PROOF-FORK, 3). PRF-U10 `proof` path absent (PROOF-NOT-FOUND, 4). PRF-U11 an unknown key in a `[[proof.import]]` table (exit 3).
 
 N (negative controls, zero verdict change):
-- PRF-N1 repository without proof blocks: output and exit codes byte-identical to today on every slice 1, 2 and 2b fixture. PRF-N2 `invar init` on a repository holding an invar.proof proposes nothing from it (B4).
+- PRF-N1 repository without proof blocks: output and exit codes byte-identical to today on every slice 1, 2 and 2b fixture. PRF-N2 `invar init` on a repository holding an invar.proof proposes nothing from it (B4). PRF-N3 a repository with `[[proof.import]]` tables: plain `invar check` output and exit codes are byte-identical to the same repository without them.
 
-M (shared): PRF-M1 re-emit at unchanged state is byte-identical (generated_at preserved); PRF-M2 default check output does not vary with the system clock (run under two faked dates); PRF-M3 `cargo tree` shows no new dependency; PRF-M4 no socket is opened (no network-capable crate in the dependency tree of the new module, asserted by a source scan test).
+M (shared): PRF-M1 re-emit at unchanged state is byte-identical (generated_at preserved); PRF-M2 default check output does not vary with the system clock (run under two faked dates); PRF-M3 `cargo tree` shows no new dependency; PRF-M4 no socket is opened (no network-capable crate in the dependency tree of the new module, asserted by a source scan test). PRF-M5 `rule_fingerprint` is identical across repeated emits and changes when one rule-table constant changes. PRF-M6 a proof whose fingerprint differs from the verifying engine's prints a NOTE and the verdict and exit code are unchanged.
 
 ## G. Mutation set (CAUGHT / SURVIVED / BUILD-FAILED; the last two are not kills)
 
-1 digest not verified. 2 missing field treated as held. 3 extra provider field treated as violation. 4 scope check removed. 5 ambiguity check removed. 6 epoch rollback accepted. 7 fork accepted. 8 unanchored freshness returns HOLDS. 9 emit proceeds with unlocked drift. 10 any proof path returns exit 2. 11 canonical form depends on field order. 12 clock read by default. 13 emit overwrites a proof that fails verification. 14 anchor ignored at emit. Each must die by a named assertion failure.
+1 digest not verified. 2 missing field treated as held. 3 extra provider field treated as violation. 4 scope check removed. 5 ambiguity check removed. 6 epoch rollback accepted. 7 fork accepted. 8 unanchored freshness returns HOLDS. 9 emit proceeds with unlocked drift. 10 any proof path returns exit 2. 11 canonical form depends on field order. 12 clock read by default. 13 emit overwrites a proof that fails verification. 14 anchor ignored at emit. 15 fingerprint mismatch changes the verdict. 16 plain `check` evaluates `[[proof.import]]`. 17 unknown binding key ignored. 18 `--out` outside the D6 layout accepted. 19 missing proof file returns HOLDS. Each must die by a named assertion failure.
 
 ## H. Gates 0 to 5
 
@@ -214,7 +258,7 @@ Gate 0 hash ledger of Class 1 files plus landed slices 2 and 2b (clean tree at 4
 
 ## I. Path classes
 
-Class 1 untouched and hash-verified: surface, backtest, invariant, config, yaml, codepairs, Cargo files, the five Experiment C artifacts. Class 2: tests/proof_test.rs, scripts/proof/. Class 3 (REQUESTED, not assumed): main.rs (`lock --emit-proof`, `check --proof`), check.rs (kind `proof` evaluation), lock.rs only if emit needs the egress entry reader (read-only use preferred). Class 4: src/proof.rs (new, self-contained), lib.rs.
+Class 1 untouched and hash-verified: surface, backtest, invariant, yaml, codepairs, Cargo files, the five Experiment C artifacts. Class 2: tests/proof_test.rs, scripts/proof/. Class 3 GRANTED by ruling D9: src/proof.rs (new), lock.rs (`--emit-proof` handler), check.rs (`--proof` verification runner), config.rs (`[[proof.import]]` schema; config.rs leaves Class 1 for this change only, and its pre-change hash is recorded at Gate 0). Class 3 NOT granted and REQUESTED (open item I1b): main.rs, because the two CLI flags are parsed there. Class 4: lib.rs (module registration).
 
 ## J. Rejected or deferred from the red-team input, with reasons
 
@@ -225,17 +269,31 @@ Class 1 untouched and hash-verified: surface, backtest, invariant, config, yaml,
 - Break-glass downgrade of exit 1 to exit 2: a separate ruling (R-P-7).
 - `strict_projection` closed-world mode: an egress (K1) change, separate document.
 
-## K. Decision points for ruling
+## K. Rulings (2026-10-15 20:00) and open items
 
-D1 Level 0 only (digest, integrity) now, signatures later; or require signatures in v1 with a named dependency and key-distribution model.
-D2 Consumer acceptance state in invar.toml (`accept_epoch`, `accept_digest`), avoiding any lock grammar change; or a new invar.lock section (grammar change).
-D3 Freshness policy: mandatory anchor (this draft) versus HOLDS with a note when unanchored.
-D4 Binding syntax of D-1 and the required `anchor` on both sides.
-D5 v1 supports kind egress only.
-D6 Proof file naming and location, and whether one file may hold several contracts (this draft: one file per contract directory entry, multiple files allowed).
-D7 Opt-in `max_age_days` clock check, or none.
-D8 RFC 3161 deferral.
-D9 Class 3 grants for main.rs, check.rs and lock.rs (read-only use) and the new proof.rs.
+Ratified and frozen: D1 level 0 blake3 digest only (signatures deferred to
+INVAR-PROOF-002); D2 acceptance state in invar.toml, invar.lock stays a generated
+contract artifact; D3 mandatory freshness anchor; D4 explicit `[[proof.import]]`
+blocks; D5 egress only in v1; D6 proof at `invar.proof` or `.invar/proofs/<name>.proof`;
+D7 opt-in `max_age_days`; D8 RFC 3161 deferred; D9 Class 3 grants for proof.rs,
+lock.rs, check.rs and config.rs. Ruling of 20:05 on the volunteered items: the rule
+fingerprint is ratified for this spec (R-P-10).
+
+Open items created by applying the rulings, each needing a one-line ruling before the
+proof engine's Gate 1:
+I1 The ruling fixed four binding keys; B4 forces two more, `proof` (where the file is)
+and `fields` (what the consumer relies on). Ratify them, or name another way to supply
+them. I1b D9 did not list main.rs, which parses `--emit-proof` and `--proof`: grant it.
+I2 The ruling named a SHA-256 fingerprint; the tree has blake3 only and a new
+dependency is a stop condition. Recommended: blake3 (as written in R-P-10). I2b The
+ruling said "embed in generated locks": a new line in every lock changes every
+generated lock byte and the byte-identical gates of slices 1, 2 and 2b. This spec
+places the fingerprint in the proof only; adding it to the lock as an evidence line is
+a separate ruling with its own migration fixtures.
+I3 Whether plain `invar check` should evaluate `[[proof.import]]` once stable (today
+only `--proof` does, so a CI that omits the flag silently skips proofs). Recommended:
+keep opt-in for v1, add a printed one-line NOTE from plain `check` when imports exist
+and `--proof` was not passed (requires its own byte-identity analysis).
 
 ## L. Stop conditions
 
