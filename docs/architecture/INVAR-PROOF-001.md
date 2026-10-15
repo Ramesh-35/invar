@@ -1,0 +1,242 @@
+# INVAR-PROOF-001: cross-repository egress attestation (`invar.proof`)
+
+Status: DRAFT revision 1 for ruling. Implementation NOT authorized. Prepared to
+the 86427 and slice 2 standard: numbered requirements with falsifiable
+acceptance, abstention contract, fixtures with declared outcomes before code,
+mutation set, gates 0 to 5. Parents: INIT-DISCOVERY-SLICE2.md (K1 egress locks,
+landed e27fd8a) and INIT-DISCOVERY-SLICE2B.md (landed 34f1e52, probes 431b9aa).
+No capability, adoption or evaluation claim is made. There is no real-repository
+evidence for proofs; this document is design only.
+
+## 0. What a proof is, and the honest bounds
+
+A provider repository that has locked an egress contract (K1) can emit a small
+file, `invar.proof`, stating: "at this source state, this boundary emits at
+least these direct fields." A consumer repository declares which provider
+contract and which fields it relies on, and `invar check` verifies the declared
+fields against the proof offline, with no network, in one deterministic pass.
+
+Four bounds are stated up front and are not negotiable by wording:
+
+B1. Offline freshness is relative. A consumer with no network cannot know the
+provider has moved on. Freshness can only be judged against state the consumer
+itself holds (an accepted epoch it recorded). A proof can therefore never prove
+"the provider still emits this today". Everything this spec calls staleness is
+staleness relative to the consumer's recorded acceptance, nothing more.
+
+B2. Integrity, not authenticity, at level 0. A content digest shows a proof was
+not edited after emission. It does not show who emitted it. Authenticity needs a
+signature (level 1), which needs a new dependency and a key-distribution answer;
+that is ruling D1, not assumed.
+
+B3. Keys only. Like K1, a proof attests depth-1 field names, not types, values or
+serialization. It inherits K1's disclaimer: runtime serialization is not verified.
+
+B4. Explicit bindings only. The K3 probes (431b9aa) measured 35% wrong-receiver
+noise from name overlap. Nothing in this spec discovers pairings. A consumer
+states its receiver binding by hand; the engine never infers one.
+
+## A. Frozen-at-ruling scope
+
+A1. Pattern extraction and no new dependency at level 0. Digest is blake3, already
+in the tree. Level 1 (signatures) and RFC 3161 timestamps are deferred (D1, D8).
+
+A2. Supported contract kind in v1: `egress` only. Proofs of `strings` or `schema`
+contracts abstain PROOF-UNSUPPORTED-KIND.
+
+A3. Zero network, always. Neither emit nor check opens a socket. Git is invoked
+only as a local subprocess on the provider side at emit time, exactly as
+`backtest` already does; the consumer check invokes nothing.
+
+A4. ISA invariance. No change to the five exit codes or their meaning. Authoring
+commands use 0 and 3 only. `check` uses 0, 1, 3, 4 for proofs; exit 2 keeps its
+meaning (ledger break) and is never returned by proof verification. No new
+lock-file grammar; consumer acceptance state lives in invar.toml (D2).
+
+## B. Artifact format (`invar.proof`, flat TOML, deterministic)
+
+```
+[proof]
+format = "1"
+level = "0"                 # 0 = digest only; 1 reserved for signatures
+
+[producer]
+repo = "acme/orders-api"    # declared name; NOT verified
+commit = "<40 hex>"         # HEAD at emit time (the commit before the one adding the proof)
+source_blob = "<40 hex>"    # git blob OID of the shape file at emit time
+boundary = "app/api/v1/orders/route.ts"
+shape_file = "lib/schemas.ts"
+shape = "OrderResponse"
+contract = "egress:OrderResponse"
+anchor = "GET /v1/orders"   # the provider's declared receiver anchor, required
+
+[fields]
+names = "currency_code id nested total_minor"     # sorted, space separated
+
+[chain]
+epoch = "7"                 # strictly increasing integer, +1 per emit
+parent_digest = "<hex or none>"
+
+[attestation]
+digest = "<blake3 hex over the canonical bytes of every section above>"
+generated_at = "2026-10-15T12:00:00Z"   # informational, NOT in the digest, not used by default
+```
+
+R-P-1 Canonical form. The digest covers the exact bytes of sections `proof`,
+`producer`, `fields`, `chain`, emitted in the fixed key order above with LF line
+endings and sorted `names`. Re-emitting an unchanged contract at the same source
+state yields a byte-identical file except `generated_at`, which is preserved from
+the previous proof when nothing else changed (the `recorded_at` rule of invar.lock).
+Counterexample fixture: PRF-M1.
+
+R-P-2 Self-reference is avoided by binding to `source_blob` and the pre-proof
+`commit`, never to a tree that contains the proof file itself.
+
+## C. Provider side: `invar lock --emit-proof <contract-id> [--out invar.proof]`
+
+R-P-3 Preconditions, checked in order; any failure is exit 3 (authoring error)
+with the reason, and no file is written: (a) the contract exists, is kind egress
+and has an invar.lock entry; (b) the shape is statically extractable; (c) the
+current direct keys equal the locked set (no unlocked drift: otherwise "run
+`invar lock --update`"); (d) the invar.toml block declares `anchor`; (e) `git` is
+available and the working tree file equals the committed blob (no uncommitted
+edits to the shape file). Fixtures: PRF-E1, PRF-E2, PRF-E3.
+
+R-P-4 Epoch. If an `invar.proof` already exists and verifies, the new epoch is its
+epoch plus 1 and `parent_digest` is its digest; if absent, epoch 1 and
+`parent_digest = none`. An existing proof that fails verification is exit 3.
+
+R-P-5 Exit 0 on success, printing the path, epoch and digest. Never exit 2.
+
+## D. Consumer side
+
+D-1 Binding (manifest, explicit):
+
+```
+[[invariant]]
+kind = "proof"
+id = "orders-api-orders"
+proof = "vendor/orders-api/invar.proof"     # path to the proof file
+contract = "egress:OrderResponse"
+anchor = "GET /v1/orders"                   # MUST equal the proof's anchor
+fields = "id total_minor currency_code"     # the fields this repo relies on, by hand
+accept_epoch = "7"                          # epoch last reviewed and accepted
+accept_digest = "<hex>"                     # digest last reviewed and accepted
+```
+
+`invar init` never proposes a proof block (B4). A tool may print a template; the
+human or agent writes `fields`, `anchor`, `accept_*` deliberately.
+
+R-P-6 Verification order for `invar check`, first failing step decides:
+1. Parse and digest (exit 3 on malformed file, unknown format, or digest mismatch:
+   PROOF-TAMPERED, a stated error, not a verdict).
+2. Kind: `proof.kind` other than egress: exit 4 PROOF-UNSUPPORTED-KIND.
+3. Scope: contract or anchor differ from the binding: exit 4 PROOF-SCOPE-MISMATCH.
+4. Ambiguity: more than one proof file resolves for the binding: exit 4
+   PROOF-AMBIG-SCHEMA. (The binding names one path; ambiguity arises when that
+   path is a directory holding several proofs for the same contract id.)
+5. Freshness anchor: `accept_epoch` or `accept_digest` absent: exit 4
+   TEMPORAL-STALENESS-UNANCHORED (freshness cannot be established; HOLDS is not
+   offered). Present: proof epoch lower than `accept_epoch` is exit 4
+   STALE-PROOF-COMMIT (rollback or replay of an older proof); equal epoch with a
+   different digest is exit 3 PROOF-FORK; equal epoch and equal digest, or a higher
+   epoch, passes this step. A higher epoch whose `parent_digest` does not chain to
+   `accept_digest` when epoch = accept_epoch + 1 is exit 3 PROOF-FORK; a larger gap
+   cannot be chained offline and is noted, not alarmed.
+6. Fields: every name in `fields` present in the proof's `names` holds; any missing
+   is residue and the contract is VIOLATED (exit 1), naming each missing field,
+   the proof path and epoch. Extra names in the proof are noted and tolerated
+   (additive tolerance, as K1).
+Counterexamples: PRF-V1 to PRF-V3, PRF-U1 to PRF-U5.
+
+R-P-7 A proof never converts a violation into a pass. There is no override in this
+spec; the break-glass design (red-team directive, GAP-09) is a separate ruling and
+a separate document, because it changes the meaning of an exit code path.
+
+R-P-8 Determinism and clock. Default verification reads no clock. An optional
+`max_age_days` on the binding adds one clock-dependent step (proof `generated_at`
+older than the window yields exit 4 TEMPORAL-STALENESS-UNANCHORED). It is opt-in,
+it is the only non-hermetic check, and results that depend on it say so.
+Fixture: PRF-U6, PRF-M2.
+
+R-P-9 Zero network and budget. Verification of one proof completes in under 2 ms
+on the release build (stop condition if exceeded on the fixture), reads only the
+proof file and the manifest, and adds no dependency. Gate 4 measures both.
+
+## E. Abstention and error contract
+
+| Code | Exit | Fires when |
+|---|---|---|
+| PROOF-TAMPERED | 3 | digest mismatch, malformed file, unknown format or level |
+| PROOF-FORK | 3 | equal epoch with different digest, or broken parent chain at epoch + 1 |
+| PROOF-UNSUPPORTED-KIND | 4 | proof or binding names a kind other than egress |
+| PROOF-SCOPE-MISMATCH | 4 | contract or anchor in the proof differs from the binding |
+| PROOF-AMBIG-SCHEMA | 4 | the binding resolves to more than one proof for the contract |
+| STALE-PROOF-COMMIT | 4 | proof epoch below the consumer's accepted epoch |
+| TEMPORAL-STALENESS-UNANCHORED | 4 | no accepted epoch/digest recorded, or opt-in age window exceeded |
+
+Codes follow the slice 2 print form `ABSTAIN <CODE> <path>:<line> <reason>`.
+Exit 1 is reserved for a missing relied-on field (R-P-6 step 6) and nothing else.
+
+## F. Fixtures (declared outcomes, before any code)
+
+All synthetic, built in temporary directories, run through the real binary twice
+(byte-identical output).
+
+F (positive):
+- PRF-F1 provider emits epoch 1; consumer binds three fields, records accept_epoch 1 and the digest; `check` exits 0.
+- PRF-F2 provider adds a field and re-emits epoch 2 (chains to epoch 1); consumer with accept_epoch 1 still exits 0 and notes the added field; after the consumer records epoch 2, exit 0.
+- PRF-F3 two bindings to two contracts in one proof directory resolve independently.
+
+V (violations):
+- PRF-V1 provider removes a relied-on field, re-locks, re-emits epoch 2; consumer exits 1 naming the field and epoch.
+- PRF-V2 provider renames a field (old name gone); exit 1.
+- PRF-V3 consumer relies on a field the proof never listed; exit 1.
+
+E (authoring refusals, exit 3, no file written):
+- PRF-E1 no invar.lock entry for the contract. PRF-E2 shape turned dynamic. PRF-E3 current keys differ from the locked set. PRF-E4 uncommitted edits to the shape file. PRF-E5 `anchor` undeclared.
+
+U (abstentions and errors, exact code and exit):
+- PRF-U1 anchor mismatch (PROOF-SCOPE-MISMATCH, 4). PRF-U2 two proofs for one contract id in the bound directory (PROOF-AMBIG-SCHEMA, 4). PRF-U3 epoch below accept_epoch (STALE-PROOF-COMMIT, 4). PRF-U4 equal epoch, different digest (PROOF-FORK, 3). PRF-U5 no accept_epoch (TEMPORAL-STALENESS-UNANCHORED, 4, never HOLDS). PRF-U6 max_age_days exceeded (4, labeled clock-dependent). PRF-U7 proof of a `strings` contract (PROOF-UNSUPPORTED-KIND, 4). PRF-U8 hand-edited field list, digest unchanged (PROOF-TAMPERED, 3). PRF-U9 higher epoch whose parent_digest does not chain at accept_epoch + 1 (PROOF-FORK, 3).
+
+N (negative controls, zero verdict change):
+- PRF-N1 repository without proof blocks: output and exit codes byte-identical to today on every slice 1, 2 and 2b fixture. PRF-N2 `invar init` on a repository holding an invar.proof proposes nothing from it (B4).
+
+M (shared): PRF-M1 re-emit at unchanged state is byte-identical (generated_at preserved); PRF-M2 default check output does not vary with the system clock (run under two faked dates); PRF-M3 `cargo tree` shows no new dependency; PRF-M4 no socket is opened (no network-capable crate in the dependency tree of the new module, asserted by a source scan test).
+
+## G. Mutation set (CAUGHT / SURVIVED / BUILD-FAILED; the last two are not kills)
+
+1 digest not verified. 2 missing field treated as held. 3 extra provider field treated as violation. 4 scope check removed. 5 ambiguity check removed. 6 epoch rollback accepted. 7 fork accepted. 8 unanchored freshness returns HOLDS. 9 emit proceeds with unlocked drift. 10 any proof path returns exit 2. 11 canonical form depends on field order. 12 clock read by default. 13 emit overwrites a proof that fails verification. 14 anchor ignored at emit. Each must die by a named assertion failure.
+
+## H. Gates 0 to 5
+
+Gate 0 hash ledger of Class 1 files plus landed slices 2 and 2b (clean tree at 431b9aa or later). Gate 1 implementation to allowed paths. Gate 2 all fixtures. Gate 3 mutation harness, control green. Gate 4 full suite green, zero warnings, slice 1/2/2b outputs byte-identical, 2 ms verification and no-new-dependency checks. Gate 5 Section evidence ledger appended here, STATUS.md entry, EXPOSURE-LOG.md record. A failure at any gate stops the arc for ruling. No real-repository probe applies to proofs until an upstream/downstream pair exists that agrees to be probed; none is claimed.
+
+## I. Path classes
+
+Class 1 untouched and hash-verified: surface, backtest, invariant, config, yaml, codepairs, Cargo files, the five Experiment C artifacts. Class 2: tests/proof_test.rs, scripts/proof/. Class 3 (REQUESTED, not assumed): main.rs (`lock --emit-proof`, `check --proof`), check.rs (kind `proof` evaluation), lock.rs only if emit needs the egress entry reader (read-only use preferred). Class 4: src/proof.rs (new, self-contained), lib.rs.
+
+## J. Rejected or deferred from the red-team input, with reasons
+
+- HMAC-SHA256 envelope: symmetric, needs a shared secret, so any holder can forge a proof; it is not an attestation. Rejected. Level 1 would be an asymmetric signature (D1).
+- Git Tree OID of the provider repo: the proof file lives in that tree, so the OID changes when the proof is added. Replaced by `source_blob` plus the pre-proof commit (R-P-2).
+- RFC 3161 timestamp tokens: need ASN.1 and certificate-chain parsing (new dependencies) and a TSA at sign time. Deferred (D8); clock use is opt-in (R-P-8).
+- Murmur3 namespace hashing: not needed once bindings are explicit (B4).
+- Break-glass downgrade of exit 1 to exit 2: a separate ruling (R-P-7).
+- `strict_projection` closed-world mode: an egress (K1) change, separate document.
+
+## K. Decision points for ruling
+
+D1 Level 0 only (digest, integrity) now, signatures later; or require signatures in v1 with a named dependency and key-distribution model.
+D2 Consumer acceptance state in invar.toml (`accept_epoch`, `accept_digest`), avoiding any lock grammar change; or a new invar.lock section (grammar change).
+D3 Freshness policy: mandatory anchor (this draft) versus HOLDS with a note when unanchored.
+D4 Binding syntax of D-1 and the required `anchor` on both sides.
+D5 v1 supports kind egress only.
+D6 Proof file naming and location, and whether one file may hold several contracts (this draft: one file per contract directory entry, multiple files allowed).
+D7 Opt-in `max_age_days` clock check, or none.
+D8 RFC 3161 deferral.
+D9 Class 3 grants for main.rs, check.rs and lock.rs (read-only use) and the new proof.rs.
+
+## L. Stop conditions
+
+Stop and report on: any change to an exit code's meaning or a new exit code; any new dependency or network capability; a lock grammar change not ruled; a slice 1, 2 or 2b output change; a Class 1 hash change; a mutation kill that is a build or load failure; verification over 2 ms on the fixture; any need to infer a binding; any claim in docs of freshness beyond B1.
