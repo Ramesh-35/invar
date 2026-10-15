@@ -47,3 +47,41 @@ Read-only probes of the slice 2 engine on sparse checkouts, run as development w
 ## Slice 2b record, 2026-10-15
 
 No real-repository probe was run for slice 2b. K3 was developed and calibrated on synthetic fixtures only (18 fixtures, 12 mutations) and one synthetic scale run (3200 generated files, 0.74s). Strapi (e3961fb2~1 and fix e54e5f7d) remains a DEVELOPMENT case under S2-D5, excluded from any Stage 3 corpus; its string-list mechanism is reproduced synthetically in fixtures K3-F1, F3 and F4, not measured on the repository. Nothing in this entry is an evaluation result.
+
+## Slice 2b development probes on real repositories, 2026-10-15
+
+DEVELOPMENT probes under S2-D5, read-only: `git archive` of the pinned commits from the existing local clones into fresh directories, then `invar init --stdout` at 34f1e52. No clone, worktree or manifest was modified. Single rater (the engineer), triage from source reading, no second rater. These are NOT evaluation results; none of these repositories may enter a Stage 3 corpus. Pins: formbricks 062a49126382, hoppscotch 63273f8e599e, strapi c8af2cef6b05 (= e3961fb2~1, the tree before the lastUsed rename).
+
+### Yield
+
+| Repo | Files | `strings` proposals | Time | K3 abstentions |
+|---|---|---|---|---|
+| hoppscotch | 2495 | 0 | 0.94s | 0 (negative control holds) |
+| formbricks | 6023 | 13 | 3.6s | AMBIG-RECEIVER 17, NON-DISTINCTIVE-KEY 9, VERSION-FAMILY 1 |
+| strapi | 3587 | 13 | 1.0s | AMBIG-RECEIVER 8, NON-DISTINCTIVE-KEY 3 |
+
+Abstentions were counted, not triaged for correctness.
+
+### Triage of all 26 proposals (classification from source)
+
+| Class | formbricks | strapi |
+|---|---|---|
+| TRUE coupling, not type-governed | 2 (SEND_EMAIL_PII_FIELDS, SEND_EMAIL_REQUIRED_CONTENT_FIELDS vs ZWorkflowSendEmailActionConfig) | 11 (admin User fieldsToPick x8 incl. 6 in one test file, Permission fields x3) |
+| TRUE coupling but tsc-governed (`as const satisfies readonly (keyof TBaseStyling)[]`) | 3 (THEME_DIMENSION, FONT_WEIGHT, COLOR fields vs ZBaseStyling) | 0 |
+| UNCLEAR | 1 (requiredAttributes: attribute keys loosely mapped to ZContactTableData) | 0 |
+| FALSE, wrong receiver | 7 (ContactInfo survey-element field lists vs ZContactTableData) | 2 (users-permissions field-permission lists vs the admin User shape) |
+
+Strict precision (true and not type-governed): formbricks 2 of 13, strapi 11 of 13, pooled 13 of 26. False-receiver rate: formbricks 7 of 13, strapi 2 of 13, pooled 9 of 26 (35%). Strapi's 11 true proposals include 6 near-duplicates in one test file, so distinct couplings are fewer.
+
+### Findings
+
+- P1, recall on the motivating case: the strapi break pair (SELECT_FIELDS in packages/core/admin/server/services/api-token.js against the api-token content type) was NOT proposed. The list is id, name, description, lastUsed, type, createdAt, updatedAt; after the frozen stoplist only `lastUsed` is distinctive, so the engine abstained NON-DISTINCTIVE-KEY (1 distinctive; needs 3). Correction to the record: the feasibility probe's "lastUsed and three others" counted stoplisted words; synthetic fixture K3-F1 modelled the case with extra distinctive names and so overstated capture. At D1 as ruled, K3 misses the one real break it was chartered around. No threshold was changed.
+- P2, dominant noise is wrong receiver on generic personal-field names (firstName, lastName, email, phone) shared by unrelated concepts in one package; the unique-receiver rule cannot fire when only one shape qualifies.
+- P3, type-governed lists: lists declared `satisfies readonly (keyof T)[]` are checked by tsc and add nothing; 3 of 26.
+- P4, category labels: `testUtils` paths were labeled production and `server/` paths unknown; one proposal (strapi data.js) was a test fixture labeled production.
+- P5, near-duplicate proposals: 6 strapi proposals come from one test file.
+- Scale: 6023-file tree in 3.6s including slice 1 and 2 passes (slice 1 alias-UNRESOLVED lines dominate output: 7650 on formbricks).
+
+### Candidate remedies (none applied; each needs a ruling and a revision)
+
+(a) abstain TSC-GOVERNED on `satisfies ... keyof` lists (principled, by construction); (b) harden test-path categories (`testUtils`, `__mocks__`, `fixtures`); (c) collapse same-file same-shape duplicates into one proposal with multiple list sites; (d) for P1 and P2 no rule change is recommended from one missed case and one noise class on development data alone: the choices are to keep D1 and accept the miss, to add a containment rule (all literal names found in the shape, raw overlap of at least 4) which would still miss this list because createdAt and updatedAt are not declared attributes, or to widen evidence with a usage cue (list passed to pick, select or populate calls). Any such change must be fixture-first and validated on an unseen repository set, not tuned on these three.
