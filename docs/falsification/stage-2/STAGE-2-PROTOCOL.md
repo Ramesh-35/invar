@@ -141,3 +141,31 @@ BLOCKED if: mining cannot reach the section 4 minimum; a case needs
 engine changes to run (engine changes are a separate directive, never
 mid-evaluation); baseline tooling for a case cannot be reproduced
 (record and drop the case before its engine run, never after).
+
+## Amendments (founder ruling 2026-10-15, before any engine run)
+
+A1. Wave 2 cap (Option 1): one further mining wave of about 16
+repositories selected for tsc blind spots (JS or JSX consumer packages,
+absent or partial typecheck in CI, distinctive shape members). If the
+corpus then meets section 4's minimum, run 1 proceeds; if not,
+BLOCKED-INSUFFICIENT-CORPUS is recorded with the logged mining effort.
+No further waves without a new ruling.
+
+A2. External-boundary column (Option 2): the corpus table gains an
+EXTERNAL BOUNDARY column for cases where the drift broke consumers of
+the repository's published contract (API clients, SDK users) while the
+intra-workspace code was updated atomically (the formbricks class).
+Scientific fence, ruled explicitly: external-boundary cases NEVER count
+toward Category C, are expected to score E or NOT-PROPOSED for slice 1,
+and leave every H-S2 threshold and the noise-rate denominator untouched.
+They document where the break mass sits, nothing more.
+
+A3. Record correction: the INVAR exit-code ISA has five codes, in the
+binary's own words (main.rs): 0 holds, 1 violated, 2 ledger break,
+3 error or lock drift, 4 skipped or not evaluated.
+
+A4. Miner method note: member-name matching is receiver-blind (the D1
+limitation applies to the miner too), so wave 2 adds a distinctiveness
+filter (compound or repo-rare member names) before surviving-read
+analysis.
+
