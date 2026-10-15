@@ -1518,3 +1518,15 @@ lock.rs changed under the 86428 scope expansion; surface.rs,
 backtest.rs, invariant.rs, config.rs, yaml.rs, Cargo.toml, Cargo.lock
 and the five frozen Experiment C files unchanged. Detection capability
 NOT ESTABLISHED; the Experiment C evaluation has not been run.
+
+2026-10-15: INIT-DISCOVERY-SLICE2 (egress locks K1 + zod-value producers
+K2) FROZEN as revision 2 (founder ruling 17:10, after a
+return-for-revision pass on R-K1-1/R-K1-2 and path accounting). K3
+string couplings deferred to slice 2b. Four-class path model governs:
+lock.rs and check.rs granted as Class 3 expansions; surface.rs,
+backtest.rs, invariant.rs, config.rs, yaml.rs, both Cargo.toml,
+Cargo.lock and the five frozen Experiment C artifacts remain
+byte-identical. Gates 0-5 frozen before implementation; the hoppscotch
+verzod negative control (K1-N2) is a mandatory acceptance condition. No
+evaluation or general-detection claim is authorized by the freeze.
+Record: docs/architecture/INIT-DISCOVERY-SLICE2.md.
