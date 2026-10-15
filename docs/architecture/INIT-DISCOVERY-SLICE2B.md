@@ -1,12 +1,15 @@
 # INIT-DISCOVERY-SLICE2B: string-coupling contracts (K3)
 
-Status: DRAFT revision 1 for ruling. Implementation NOT authorized. Prepared
-to the 86427 and slice 2 standard: numbered requirements with falsifiable
-acceptance, abstention contract, countermodels and fixtures with declared
-outcomes, mutation set, and gates 0 to 5, all frozen before any Rust is
-written. Parent: docs/architecture/EMITTED-SHAPE-DISCOVERY.md (K3, section 2)
-and the frozen INIT-DISCOVERY-SLICE2.md (landed e27fd8a, local until pushed).
-No evaluation or general-detection claim is made or authorized here.
+Status: FROZEN as revision 1, ratified by the founder's ruling of 2026-10-15
+18:35 (D1 to D7, section L), which also granted the lock.rs, check.rs and
+main.rs expansions (Class 3, additive, `kind = "strings"` only) and authorized
+gates 0 and 1. Changes after this freeze require an explicit revision and
+renewed review. Prepared to the 86427 and slice 2 standard: numbered
+requirements with falsifiable acceptance, abstention contract, countermodels
+and fixtures with declared outcomes, mutation set, and gates 0 to 5, all
+frozen before any Rust is written. Parent: docs/architecture/EMITTED-SHAPE-DISCOVERY.md
+(K3, section 2) and the frozen INIT-DISCOVERY-SLICE2.md (landed e27fd8a). No
+evaluation or general-detection claim is made or authorized here.
 
 ## 0. Purpose and honest bound
 
@@ -47,11 +50,12 @@ shape's file, or both files in the same directory. Anything else is not
 paired.
 
 A5. Query-position evidence is required. A list qualifies only if it is
-(i) bound to a name matching the frozen set `{fields, select, columns,
-attributes, populate, pick, projection}` as a case-insensitive word segment
-(`SELECT_FIELDS`, `userColumns`), or (ii) passed as the argument or value at
-a frozen call or key marker: `.select(`, `.pick(`, `.populate(`, `fields:`,
-`select:`, `columns:`, `attributes:`. A list with neither is not a candidate
+(i) bound to a name matching the frozen set `{select, fields, columns,
+populate, attributes}` as a case-insensitive word segment (`SELECT_FIELDS`,
+`userColumns`), or (ii) passed as the argument or value at a frozen call or
+key marker: `.select(`, `.populate(`, `fields:`, `select:`, `columns:`,
+`populate:`, `attributes:`. (Ruling D2: `pick` and `projection` from the
+draft are removed.) A list with neither is not a candidate
 (no abstention noise; counted in the scan summary only).
 
 A6. ISA invariance: one new manifest `kind` value, `strings`, with evidence
@@ -230,3 +234,23 @@ any slice 1 or slice 2 output change; a Class 1 hash change; a mutation kill tha
 a build or load failure; the unique-receiver rule failing on a development probe in a
 way fixtures cannot reproduce; any need to widen scope past A2 or A4; any need for an
 AST or new dependency.
+
+## L. Rulings of 2026-10-15 18:35 (D1 to D7), recorded verbatim in effect
+
+- D1 RATIFIED: |O| >= 3 and |O|/|L| >= 0.5.
+- D2 RATIFIED: marker set {select, fields, columns, populate, attributes}. A list
+  outside a query position is not touched. Interpretation recorded for this
+  freeze: a non-query list that would otherwise satisfy R-K3-1 and R-K3-2 emits
+  AMBIG-RECEIVER, one that fails R-K3-1 only by the distinctive count emits
+  NON-DISTINCTIVE-KEY when it is in a query position, and a non-query list that
+  qualifies on nothing is silent (a repository holds thousands of string arrays;
+  an abstention per array would be the noise this slice exists to avoid).
+- D3 RATIFIED: `kind = "strings"`.
+- D4 RATIFIED: zod and `attributes` literals only; no ORM parsers.
+- D5 RATIFIED: no-stale-reference semantics, VIOLATED exit 1.
+- D6 GRANTED: additive lock.rs, check.rs, main.rs handling of `kind = "strings"`
+  only; Class 1 paths stay byte-locked.
+- D7 RATIFIED: display column lists are residual noise, measured and labeled,
+  never papered over with heuristics.
+- Acceptance bound carried from the freeze message: K3-N* controls and the
+  hoppscotch-class control (K3-N4) must produce zero alarms.
