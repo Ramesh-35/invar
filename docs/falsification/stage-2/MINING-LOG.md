@@ -65,3 +65,28 @@ deliberate compat). Batch 2 mining resumed: immich-app/immich (mined, 1
 event), medusajs/medusa (mined, 3 events), then payloadcms/payload,
 triggerdotdev/trigger.dev, infisical/infisical, hoppscotch/hoppscotch,
 nocodb/nocodb, dubinc/dub. Still NO engine run on any mined repository.
+
+Wave 2 under amendment A1 (2026-10-15), 16 repositories, all mined
+before any engine run; distinctiveness filter active at source:
+strapi/strapi (28 events), gatsbyjs/gatsby (4), redwoodjs/redwood (2),
+ToolJet/ToolJet (3), budibase/budibase (19), directus/directus (0),
+storybookjs/storybook (13), withastro/astro (14), facebook/docusaurus
+(3), n8n-io/n8n (15), Automattic/wp-calypso (9), WordPress/gutenberg
+(7), mui/material-ui (1), expo/expo (27), TryGhost/Ghost (2),
+chakra-ui/chakra-ui (2). History bounded to 2023+ for the wave (A1 cap
+economics); batches 1 and 2 were unbounded.
+
+Wave 2 curation verdicts (2026-10-15), evidence in WAVE2-CLOSURE.md:
+hoppscotch e8ed938b REJECTED (versioned-schema reorganization,
+compatibility preserved); documenso 8448e333 REJECTED (dead type, zero
+consumers); strapi e3961fb2 REJECTED for scope (real type-blind
+runtime break via merge skew, same package, JS era); wp-calypso
+fd8b63b2 REJECTED (type mirrors external API data; receiver
+collisions); expo 7aec4eb1 REJECTED (fix 15 months later, after
+reintroduction). About 20 shortlist leads remain UNRESOLVED within the
+cap; none showed the Category C shape on first inspection.
+
+Closure (2026-10-15): the A1 cap is exhausted; C-eligible accepted
+cases 0 of the 12 minimum; S2-EB-01 (formbricks) stands in the
+external-boundary column. Status per the preregistered rules:
+BLOCKED-INSUFFICIENT-CORPUS. Zero engine runs on mined repositories.
