@@ -610,6 +610,10 @@ fn strings_lines(p: &crate::valuepairs::strings::StringsProposal) -> Vec<String>
     v.push(format!(
         "S6 DISCLAIMER: that this list reaches the store the shape describes is not verified; a name overlap is not proof (display column lists and unrelated lists can overlap)"
     ));
+    if !p.also.is_empty() {
+        let sites: Vec<String> = p.also.iter().map(|(at, line, n)| format!("{at}@{line} |O|={n}")).collect();
+        v.push(format!("S7 also: {} (other sites are not locked; add a block by hand to lock them)", sites.join("; ")));
+    }
     v.push(format!("category: {}", p.category));
     v.push(format!(
         "lock: run `invar lock` before `invar check`. Without a lock a strings contract is SKIPPED (exit 4), never HOLDS. The lock binds exactly the S5 names; at check a locked name still in the list but no longer a key of {} is VIOLATED (stale reference); removal from the list, narrowing and additions HOLD.",

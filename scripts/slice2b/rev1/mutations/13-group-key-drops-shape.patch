@@ -1,0 +1,13 @@
+# mutation: collapse ignores the shape
+# catch: r1_c3_lists_matching_different_shapes_are_not_collapsed
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -853,7 +853,7 @@
+     let mut order: Vec<(String, String, String)> = Vec::new();
+     let mut groups: BTreeMap<(String, String, String), Vec<StringsProposal>> = BTreeMap::new();
+     for p in all {
+-        let key = (p.list_file.clone(), p.producer.clone(), p.shape.clone());
++        let key = (p.list_file.clone(), String::new(), String::new());
+         if !groups.contains_key(&key) {
+             order.push(key.clone());
+         }

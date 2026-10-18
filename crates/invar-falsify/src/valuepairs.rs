@@ -958,7 +958,7 @@ fn category(rel: &str) -> &'static str {
     let file = file.first().copied().unwrap_or("");
     let has = |set: &[&str]| dirs.iter().any(|d| set.contains(d));
     let test_file = [".test.ts", ".test.tsx", ".spec.ts", ".spec.tsx", ".test.js", ".spec.js"].iter().any(|s| file.ends_with(s));
-    if has(&["test", "tests", "__tests__"]) || test_file {
+    if has(&["test", "tests", "__tests__", "testUtils", "__mocks__", "fixtures"]) || test_file {
         "test"
     } else if has(&["example", "examples", "demo"]) {
         "example"

@@ -254,3 +254,81 @@ V5 Stage 3 evaluation: a pre-registered protocol on unseen repositories with lab
 fixed before any run, publishing pooled precision and the wrong-receiver rate with
 intervals. Without it, D1 and every future threshold remain unjustified by anything
 but fixtures.
+
+## N. Rulings of 2026-10-15 20:05 (recorded)
+
+RD1 to RD5 RATIFIED AND FROZEN as recommended. Volunteered items: V1 scope tiers
+ratified as telemetry only (no filtering change); V2 `invar explain <CODE>` to the
+backlog; V3 metamorphic invariance suite mandated for Gate 4; V4 engine fingerprint
+ratified for the proof spec; V5 Stage 3 pre-registered evaluation ratified.
+
+Interpretations applied during implementation (for ratification):
+- N1 RD4 lists `keyof typeof X` as a fifth form. It is implemented as an operand that
+  every wrapper accepts, e.g. `readonly (keyof typeof X)[]`, because a bare
+  `keyof typeof X` is not an array type and cannot annotate a list.
+- N2 V1 (scope tier telemetry): every proposal already prints its tier as the S4 line
+  (`same-file`, `import`, `same-directory`, `same-package`). A collapsed group shares
+  one list file and one shape, so every site has the representative's tier; S7 carries
+  no extra tier text. No output change was needed.
+- N3 The code `TSC-GOVERNED` already exists from slice 2 (K2: a shape consumed through
+  types). K3 reuses the name with its own reason text for the same underlying idea (the
+  compiler governs it). Section C above described it as new; it is a reuse.
+
+## O. Implementation Evidence Ledger (appended at Gate 5; sections A to N are unchanged)
+
+Status: IMPLEMENTED against the ratified revision. Detection capability on real
+repositories remains NOT ESTABLISHED. Nothing here is an evaluation result.
+
+### O1. Gate results
+
+| Gate | Result |
+|---|---|
+| 0 baseline | PASS: Class 1 files, Cargo files and the five Experiment C artifacts byte-identical; landed 2b files identical between the build tree and the repository |
+| 1 fixtures first | 33 tests written before any engine edit; against the unchanged engine 19 failed for their declared reasons and 14 (negative controls and the metamorphic suite) passed |
+| 2 implementation | strings.rs (keyof recognizer, TSC-GOVERNED, collapse), valuepairs.rs (one line in `category()`), init.rs (S7 line) |
+| 3 mutations | PASS: 18 of 18 CAUGHT by assertion failure, control green, none SURVIVED, BUILD-FAILED or APPLY-FAILED (scripts/slice2b/rev1/mutate.sh) |
+| 4 regression | PASS: 182 of 182 (16 lib, 50, 40, 25, 18 slice 2b, 33 REV1), zero warnings; slice 2 harness 14 of 14 and slice 2b harness 12 of 12 still CAUGHT |
+| 5 documentation | this section, STATUS.md entry, EXPOSURE-LOG.md regression record |
+
+### O2. Corrections made during the arc (stated, not hidden)
+
+- Fixture r1_m4 first expected `abstentions=0`; the SUMMARY line counts slice 1's H2 line, so the correct value is 1. Fixture error, engine unchanged.
+- Mutation 16 listed fixture r1_c1 as a catcher. r1_c1's representative already holds every name, so a union equals it and the fixture cannot distinguish the mutant. Mutant 16 is killed by r1_c5 and r1_c8; the `# catch:` header was corrected. Declaration error, not an engine change.
+- Mutation R1-M3 of section F ("masking bypassed") is an equivalent mutant in this implementation: no scan path reads comment or string text, because the recognizer starts at the list's closing bracket and accepts only `as const` or `satisfies`. It was replaced by 03-trailing-form-ignored. The masking cases remain fixtures (a9).
+- One 2b mutation patch (12-test-category-dropped) no longer applied because the one-line `category()` change and the `also` field moved its context. It was regenerated with the same mutation and the same catching test; the slice 2b harness re-ran 12 of 12.
+- An earlier overlapping harness run shared a build directory with another run and gave false control failures; it was discarded and the harness re-run alone.
+
+### O3. Metamorphic suite (ruling V3)
+
+CRLF line endings, a UTF-8 BOM on source files, trailing comments on every line, and
+reversed file creation order each leave `invar init --stdout` byte-identical on four
+bases (plain, governed, collapsed, test-support). All four passed against the
+UNCHANGED engine as well, so no engine change was needed for invariance. Not covered:
+a BOM on package.json (invalid JSON for strict parsers), comments that shift line
+numbers, Windows paths.
+
+### O4. Regression record on the development trees (read-only; NOT an evaluation)
+
+| Tree | Blocks before | Predicted | Actual | Notes |
+|---|---|---|---|---|
+| hoppscotch | 0 | 0 | 0 | control holds |
+| formbricks | 13 | 10 | 8 | 3 TSC-GOVERNED lists, plus 3 `prop:fields` lists in one file collapsed to 1 (not foreseen) |
+| strapi | 13 | 8 | 6 | six `fieldsToPick` lists collapsed to 1 as predicted, plus two more same-file pairs (`prop:fields` x2, `permissionFields` and `sanitizedPermissionFields`) not foreseen |
+
+Two predictions were falsified, in the same direction and for the same reason: the
+rule collapsed more same-file same-shape groups than I enumerated. The engine did what
+R-R1-4 says; the predictions undercounted. Per stop condition K this is reported for
+ruling and not adjusted. No precision figure is derived: the wrong-receiver class (B2)
+is untouched, and by the earlier triage 5 of the 6 remaining formbricks ZContactTableData blocks are the
+false-receiver pattern and 1 is unclear. The labels moved as intended: strapi had 6 test-labeled
+proposals (all in reducer.test.js) and now has 2 test-labeled blocks, the collapsed
+reducer.test.js block and testUtils/data.js, which was labeled production before.
+Clean timings on an idle machine: hoppscotch 0.93s, formbricks 3.5s, strapi 0.87s.
+
+### O5. Protected hashes (first 12 hex), verified unchanged after the change
+
+surface.rs 71b521ce7528, backtest.rs df9ef6e87de4, invariant.rs 49972028d11b, config.rs d30f5e4bf6b3, yaml.rs 1254fde8cdd6, codepairs.rs 004a26dec58e, crates/invar-falsify/Cargo.toml a8023ba46533, root Cargo.toml 7c5f4cee5d13, Cargo.lock 81bcb0ff4e12; lock.rs 357d26c28503, check.rs 0dcbe09af5f8, main.rs 7b4768b0543f, lib.rs af72c0c7d1d5; Experiment C: DEFINITION.md 090d8574fb2f, EVALUATION-PROTOCOL.md 02d0c4299aa4, GROUND-TRUTH-REPORT.md 00daf71769bb, corpus.tsv 6c3982b2105f, labels.tsv 8b8d1b9002c7.
+
+### O6. Files changed
+
+strings.rs 07e91fae4374, valuepairs.rs 42e158a9e22f (one line), init.rs 7b8a8a80b05e (one block), tests/init_slice2b_rev1_test.rs, scripts/slice2b/rev1/ (harness and 18 patches), scripts/slice2b/mutations/12-test-category-dropped.patch (regenerated).

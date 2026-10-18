@@ -1,0 +1,13 @@
+# mutation: TSC-GOVERNED never fires
+# catch: r1_a1_trailing_satisfies_keyof_array_abstains_tsc_governed r1_a2_annotation_keyof_array_abstains r1_a3_array_and_readonlyarray_generics_abstain_two_lists r1_a4_keyof_typeof_object_abstains r1_a5_keyof_of_an_unrelated_type_still_abstains_conservatively r1_a11_trailing_form_on_a_call_site_list r1_c7_governed_siblings_leave_before_grouping
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -806,7 +806,7 @@
+                 continue;
+             }
+             // REV1 R-R1-1/R-R1-2: decided last, only for a would-be proposal.
+-            if let Some((form, target)) = &list.governed {
++            if let Some((form, target)) = list.governed.as_ref().filter(|_| false) {
+                 out.abstentions.push(Abstention {
+                     code: "TSC-GOVERNED",
+                     location: loc,

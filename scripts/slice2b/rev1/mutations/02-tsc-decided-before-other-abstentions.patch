@@ -1,0 +1,15 @@
+# mutation: TSC-GOVERNED decided before the near-miss abstention (R-R1-2 broken)
+# catch: r1_a10_a_governed_list_below_the_bar_keeps_its_own_abstention_code
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -736,6 +736,10 @@
+                 continue;
+             }
+             if q.is_empty() {
++                if let Some((form, target)) = &list.governed {
++                    out.abstentions.push(Abstention { code: "TSC-GOVERNED", location: loc, reason: format!("list {label} is constrained by {form}; the compiler checks its names against {target}") });
++                    continue;
++                }
+                 // near miss among in-scope shapes
+                 let near = inscope.iter().filter(|(_, _, c)| c.0 >= 3 || c.1 >= 2).max_by_key(|(_, _, c)| (c.1, c.0));
+                 if let Some((si, _, c)) = near {

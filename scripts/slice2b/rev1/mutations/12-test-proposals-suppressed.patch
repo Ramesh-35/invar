@@ -1,0 +1,14 @@
+# mutation: test-labeled K3 proposals are dropped instead of labeled
+# catch: r1_b1_testutils_directory_is_test r1_b7_a_test_labeled_proposal_is_still_emitted
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -837,6 +837,9 @@
+                 category: category(file),
+                 also: Vec::new(),
+             });
++            if category(file) == "test" {
++                out.proposals.pop();
++            }
+         }
+     }
+     out.proposals = collapse(std::mem::take(&mut out.proposals));

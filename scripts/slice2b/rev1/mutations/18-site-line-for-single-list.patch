@@ -1,0 +1,13 @@
+# mutation: S7 printed even when no list was collapsed
+# catch: r1_c6_a_single_list_prints_no_site_line
+--- a/crates/invar-falsify/src/init.rs
++++ b/crates/invar-falsify/src/init.rs
+@@ -610,7 +610,7 @@
+     v.push(format!(
+         "S6 DISCLAIMER: that this list reaches the store the shape describes is not verified; a name overlap is not proof (display column lists and unrelated lists can overlap)"
+     ));
+-    if !p.also.is_empty() {
++    if true {
+         let sites: Vec<String> = p.also.iter().map(|(at, line, n)| format!("{at}@{line} |O|={n}")).collect();
+         v.push(format!("S7 also: {} (other sites are not locked; add a block by hand to lock them)", sites.join("; ")));
+     }

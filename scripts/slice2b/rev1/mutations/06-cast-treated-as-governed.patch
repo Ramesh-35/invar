@@ -1,0 +1,14 @@
+# mutation: an `as (keyof T)[]` cast is recognized
+# catch: r1_a8_a_keyof_cast_is_an_assertion_not_a_check
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -227,7 +227,8 @@
+     if t.kw(p, "as") {
+         p = t.ws(p + 2);
+         if !t.kw(p, "const") {
+-            return None;
++            let ty = type_text(t, p);
++            return keyof_form(&ty).map(|(f, x)| (format!("cast {f}"), x));
+         }
+         p = t.ws(p + 5);
+     }

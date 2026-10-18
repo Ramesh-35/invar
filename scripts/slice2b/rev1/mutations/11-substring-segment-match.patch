@@ -1,0 +1,13 @@
+# mutation: directory match loosened from equality to substring
+# catch: r1_b5_near_names_are_not_matched
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -956,7 +956,7 @@
+     let segs: Vec<&str> = rel.split('/').collect();
+     let (dirs, file) = segs.split_at(segs.len().saturating_sub(1));
+     let file = file.first().copied().unwrap_or("");
+-    let has = |set: &[&str]| dirs.iter().any(|d| set.contains(d));
++    let has = |set: &[&str]| dirs.iter().any(|d| set.iter().any(|s| d.contains(s)));
+     let test_file = [".test.ts", ".test.tsx", ".spec.ts", ".spec.tsx", ".test.js", ".spec.js"].iter().any(|s| file.ends_with(s));
+     if has(&["test", "tests", "__tests__", "testUtils", "__mocks__", "fixtures"]) || test_file {
+         "test"

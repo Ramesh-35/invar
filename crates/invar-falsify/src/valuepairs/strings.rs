@@ -77,6 +77,9 @@ pub struct StrList {
     /// Some(reason) when any element is not a plain string literal.
     pub dynamic: Option<String>,
     pub query: bool,
+    /// REV1 R-R1-1: `(form, target)` when a recognized `keyof` constraint ties the
+    /// list to a type, e.g. ("satisfies readonly (keyof T)[]", "T").
+    pub governed: Option<(String, String)>,
 }
 
 /// Parse the array literal opened at `open` (a `[`).
@@ -134,6 +137,111 @@ fn parse_array(t: &Text, open: usize) -> (Vec<(String, usize)>, Option<String>) 
     (elems, dynamic)
 }
 
+// ------------------------------------------------- REV1 R-R1-1: keyof constraints
+
+fn ident_path(tok: &str) -> bool {
+    !tok.is_empty()
+        && !matches!(tok, "keyof" | "typeof" | "readonly")
+        && tok.split('.').all(|seg| !seg.is_empty() && seg.bytes().next().map_or(false, is_ident_start) && seg.bytes().all(is_ident))
+}
+
+/// `keyof X` or `keyof typeof X` at `toks[i]`: (rendered operand, target, next index).
+fn keyof_operand(toks: &[String], i: usize) -> Option<(String, String, usize)> {
+    if toks.get(i).map(String::as_str) != Some("keyof") {
+        return None;
+    }
+    if toks.get(i + 1).map(String::as_str) == Some("typeof") {
+        let id = toks.get(i + 2)?;
+        return ident_path(id).then(|| (format!("keyof typeof {id}"), format!("typeof {id}"), i + 3));
+    }
+    let id = toks.get(i + 1)?;
+    ident_path(id).then(|| (format!("keyof {id}"), id.clone(), i + 2))
+}
+
+/// RD4: exactly `(keyof X)[]`, `readonly (keyof X)[]`, `Array<keyof X>`,
+/// `ReadonlyArray<keyof X>`, with X an identifier path or `typeof` path. Anything
+/// else (a cast, `string[]`, a generic argument, a multi-line type) is unrecognized.
+fn keyof_form(ty: &str) -> Option<(String, String)> {
+    let b = ty.as_bytes();
+    let mut toks: Vec<String> = Vec::new();
+    let mut i = 0;
+    while i < b.len() {
+        let c = b[i];
+        if c.is_ascii_whitespace() {
+            i += 1;
+        } else if matches!(c, b'(' | b')' | b'[' | b']' | b'<' | b'>') {
+            toks.push((c as char).to_string());
+            i += 1;
+        } else if is_ident_start(c) {
+            let mut j = i;
+            while j < b.len() && (is_ident(b[j]) || b[j] == b'.') {
+                j += 1;
+            }
+            toks.push(ty[i..j].to_string());
+            i = j;
+        } else {
+            return None;
+        }
+    }
+    let t = |k: usize| toks.get(k).map(String::as_str);
+    let (readonly, open) = match t(0) {
+        Some("(") => (false, 1),
+        Some("readonly") if t(1) == Some("(") => (true, 2),
+        Some(g @ ("Array" | "ReadonlyArray")) if t(1) == Some("<") => {
+            let (op, target, n) = keyof_operand(&toks, 2)?;
+            return (t(n) == Some(">") && toks.len() == n + 1).then(|| (format!("{g}<{op}>"), target));
+        }
+        _ => return None,
+    };
+    let (op, target, n) = keyof_operand(&toks, open)?;
+    (t(n) == Some(")") && t(n + 1) == Some("[") && t(n + 2) == Some("]") && toks.len() == n + 3)
+        .then(|| (format!("{}({op})[]", if readonly { "readonly " } else { "" }), target))
+}
+
+/// The type text from `a` up to the first `;`, `,`, `=` or line end at bracket depth 0,
+/// or the closer that ends the enclosing expression.
+fn type_text(t: &Text, a: usize) -> String {
+    let mut d = 0i64;
+    let mut k = a;
+    while k < t.m.len() {
+        match t.m[k] {
+            b'(' | b'[' | b'<' | b'{' => d += 1,
+            b')' | b']' | b'>' | b'}' => {
+                if d == 0 {
+                    break;
+                }
+                d -= 1;
+            }
+            b';' | b',' | b'\n' | b'=' if d <= 0 => break,
+            _ => {}
+        }
+        k += 1;
+    }
+    String::from_utf8_lossy(&t.m[a..k]).to_string()
+}
+
+/// `] [as const] satisfies <keyof form>` directly after the list's closing bracket
+/// (`end` is the index after it). A cast (`as (keyof T)[]`) is never recognized.
+fn trailing_keyof(t: &Text, end: usize) -> Option<(String, String)> {
+    let mut p = t.ws(end);
+    if t.kw(p, "as") {
+        p = t.ws(p + 2);
+        if !t.kw(p, "const") {
+            return None;
+        }
+        p = t.ws(p + 5);
+    }
+    if !t.kw(p, "satisfies") {
+        return None;
+    }
+    let ty = type_text(t, t.ws(p + 9));
+    keyof_form(&ty).map(|(f, x)| (format!("satisfies {f}"), x))
+}
+
+fn list_governed(t: &Text, open: usize) -> Option<(String, String)> {
+    trailing_keyof(t, t.close(open)?)
+}
+
 /// Every string-array literal bound to a name or placed at a query position.
 pub fn scan_lists(text: &str) -> Vec<StrList> {
     let t = Text::new(text);
@@ -153,6 +261,7 @@ fn scan_lists_t(t: &Text) -> Vec<StrList> {
             let kwlen = if t.kw(i, "const") { 5 } else { 3 };
             if let Some((name, e)) = t.ident(t.ws(i + kwlen)) {
                 let mut p = t.ws(e);
+                let mut ann_gov: Option<(String, String)> = None;
                 if t.m.get(p) == Some(&b':') {
                     // skip a type annotation up to `=` at bracket depth 0
                     let mut d = 0i64;
@@ -171,6 +280,9 @@ fn scan_lists_t(t: &Text) -> Vec<StrList> {
                         }
                         k += 1;
                     }
+                    if k < n && t.m[k] == b'=' {
+                        ann_gov = keyof_form(&String::from_utf8_lossy(&t.m[p + 1..k])).map(|(f, x)| (format!("annotation {f}"), x));
+                    }
                     p = k;
                 }
                 if t.m.get(p) == Some(&b'=') && t.m.get(p + 1) != Some(&b'=') {
@@ -183,6 +295,7 @@ fn scan_lists_t(t: &Text) -> Vec<StrList> {
                             elems,
                             dynamic,
                             query: is_query_name(&name),
+                            governed: ann_gov.or_else(|| list_governed(t, q)),
                         });
                     }
                 }
@@ -198,7 +311,7 @@ fn scan_lists_t(t: &Text) -> Vec<StrList> {
                         let c = prop_n.entry(name.clone()).or_insert(0);
                         *c += 1;
                         let (elems, dynamic) = parse_array(t, q);
-                        out.push(StrList { at: format!("prop:{name}#{c}"), line: t.line(q), elems, dynamic, query: true });
+                        out.push(StrList { at: format!("prop:{name}#{c}"), line: t.line(q), elems, dynamic, query: true, governed: list_governed(t, q) });
                     }
                 }
             }
@@ -212,7 +325,7 @@ fn scan_lists_t(t: &Text) -> Vec<StrList> {
                         let c = call_n.entry(mk).or_insert(0);
                         *c += 1;
                         let (elems, dynamic) = parse_array(t, q);
-                        out.push(StrList { at: format!("call:{mk}#{c}"), line: t.line(q), elems, dynamic, query: true });
+                        out.push(StrList { at: format!("call:{mk}#{c}"), line: t.line(q), elems, dynamic, query: true, governed: list_governed(t, q) });
                     }
                 }
             }
@@ -411,6 +524,9 @@ pub struct StringsProposal {
     pub overlap: Vec<(String, String, usize)>,
     pub scope: &'static str,
     pub category: &'static str,
+    /// REV1 R-R1-4: other same-file lists collapsed into this proposal, as
+    /// (list locator, list line, |O|), sorted by line then locator. Evidence only.
+    pub also: Vec<(String, usize, usize)>,
 }
 
 #[derive(Debug, Default)]
@@ -689,6 +805,15 @@ pub fn discover_strings(root: &Path, files: &[String], oversized: &[String]) -> 
                 });
                 continue;
             }
+            // REV1 R-R1-1/R-R1-2: decided last, only for a would-be proposal.
+            if let Some((form, target)) = &list.governed {
+                out.abstentions.push(Abstention {
+                    code: "TSC-GOVERNED",
+                    location: loc,
+                    reason: format!("list {label} is constrained by {form}; the compiler checks its names against {target}, so a lock adds nothing; not proposed"),
+                });
+                continue;
+            }
             let (si, scope, _) = *q[0];
             let s = &shapes[si];
             let shape_keys: BTreeMap<String, &String> = s.keys.iter().map(|(k, _)| (name_key(k), k)).collect();
@@ -710,11 +835,42 @@ pub fn discover_strings(root: &Path, files: &[String], oversized: &[String]) -> 
                 overlap,
                 scope,
                 category: category(file),
+                also: Vec::new(),
             });
         }
     }
+    out.proposals = collapse(std::mem::take(&mut out.proposals));
     out.abstentions.sort();
     out.abstentions.dedup();
+    out
+}
+
+/// REV1 R-R1-4: one proposal per (list file, shape file, shape name). The
+/// representative has the largest overlap, then the lowest list line, then the
+/// smallest locator; the others become sites (evidence only, never locked). The
+/// group sits where its first member sat.
+fn collapse(all: Vec<StringsProposal>) -> Vec<StringsProposal> {
+    let mut order: Vec<(String, String, String)> = Vec::new();
+    let mut groups: BTreeMap<(String, String, String), Vec<StringsProposal>> = BTreeMap::new();
+    for p in all {
+        let key = (p.list_file.clone(), p.producer.clone(), p.shape.clone());
+        if !groups.contains_key(&key) {
+            order.push(key.clone());
+        }
+        groups.entry(key).or_default().push(p);
+    }
+    let mut out = Vec::new();
+    for key in order {
+        let mut g = groups.remove(&key).unwrap_or_default();
+        g.sort_by(|a, b| {
+            b.overlap.len().cmp(&a.overlap.len()).then(a.list_line.cmp(&b.list_line)).then_with(|| a.list_at.cmp(&b.list_at))
+        });
+        let mut rep = g.remove(0);
+        let mut also: Vec<(String, usize, usize)> = g.iter().map(|o| (o.list_at.clone(), o.list_line, o.overlap.len())).collect();
+        also.sort_by(|a, b| a.1.cmp(&b.1).then_with(|| a.0.cmp(&b.0)));
+        rep.also = also;
+        out.push(rep);
+    }
     out
 }
 

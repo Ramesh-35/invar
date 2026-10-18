@@ -1,0 +1,14 @@
+# mutation: any later satisfies in the next 300 bytes binds to the list
+# catch: r1_a9_comment_string_and_next_statement_do_not_govern
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -224,6 +224,9 @@
+ /// (`end` is the index after it). A cast (`as (keyof T)[]`) is never recognized.
+ fn trailing_keyof(t: &Text, end: usize) -> Option<(String, String)> {
+     let mut p = t.ws(end);
++    if let Some(off) = (end..(end + 300).min(t.m.len())).find(|&i| t.kw(i, "satisfies")) {
++        p = off;
++    }
+     if t.kw(p, "as") {
+         p = t.ws(p + 2);
+         if !t.kw(p, "const") {

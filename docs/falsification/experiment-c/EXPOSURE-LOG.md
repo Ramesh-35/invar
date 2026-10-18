@@ -85,3 +85,15 @@ Strict precision (true and not type-governed): formbricks 2 of 13, strapi 11 of 
 ### Candidate remedies (none applied; each needs a ruling and a revision)
 
 (a) abstain TSC-GOVERNED on `satisfies ... keyof` lists (principled, by construction); (b) harden test-path categories (`testUtils`, `__mocks__`, `fixtures`); (c) collapse same-file same-shape duplicates into one proposal with multiple list sites; (d) for P1 and P2 no rule change is recommended from one missed case and one noise class on development data alone: the choices are to keep D1 and accept the miss, to add a containment rule (all literal names found in the shape, raw overlap of at least 4) which would still miss this list because createdAt and updatedAt are not declared attributes, or to widen evidence with a usage cue (list passed to pick, select or populate calls). Any such change must be fixture-first and validated on an unseen repository set, not tuned on these three.
+
+## K3 REV1 regression record (read-only, development trees, NOT an evaluation)
+
+Re-run of the three K3 probe trees after INIT-DISCOVERY-SLICE2B-REV1 (TSC-GOVERNED, test-support categories, same-file collapse). Predictions were recorded in the spec before the run.
+
+| Repo | Blocks before | Predicted | Actual |
+|---|---|---|---|
+| hoppscotch | 0 | 0 | 0 |
+| formbricks | 13 | 10 | 8 |
+| strapi | 13 | 8 | 6 |
+
+Both misses undercount the collapse: formbricks had three `prop:fields` lists in one file for the same shape; strapi had two more same-file pairs beside the six `fieldsToPick` lists. The rule behaved as written. Time on an idle machine: hoppscotch 0.93s, formbricks 3.5s, strapi 0.87s (unchanged from the earlier probe; a first re-run made while a background build was running took longer and is discarded). No precision is computed; the false-receiver class (P2) is unchanged, and D1 (P1, the missed strapi pair) stays frozen. P3, P4 and P5 are addressed: three tsc-governed lists now abstain, strapi testUtils/data.js is labeled test, and the six near-duplicates are one block.

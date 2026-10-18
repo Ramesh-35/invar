@@ -1,0 +1,13 @@
+# mutation: a locked list that gains a keyof constraint is not evaluated
+# catch: r1_a6_a_locked_contract_whose_list_gains_keyof_is_still_checked
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -357,7 +357,7 @@
+ /// check`: the locked list is re-extracted with this same code).
+ pub fn read_list(text: &str, at: &str) -> ListRead {
+     match scan_lists(text).into_iter().find(|l| l.at == at) {
+-        Some(l) => match l.dynamic {
++        Some(l) => match l.dynamic.or_else(|| l.governed.as_ref().map(|_| "governed".to_string())) {
+             Some(why) => ListRead::Dynamic(why),
+             None => ListRead::Found(l.elems),
+         },

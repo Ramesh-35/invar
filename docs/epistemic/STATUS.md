@@ -1542,3 +1542,9 @@ Not claimed: general detection capability remains NOT ESTABLISHED. Real-reposito
 Implementation complete against the frozen revision 1: 18 of 18 slice 2b fixtures, 12 of 12 mutations caught, 149 of 149 tests, zero warnings, Class 1 files and the five Experiment C artifacts byte-identical. One frozen slice 2 fixture (cm6) was amended by ruling because it had become an exact K3 positive.
 
 Not claimed: general detection capability remains NOT ESTABLISHED. K3 was calibrated on synthetic fixtures only; no real-repository probe was run and no Stage 3 evaluation has run. Display column lists remain a measured residual noise class. Record: docs/architecture/INIT-DISCOVERY-SLICE2B.md section M.
+
+## 2026-10-15: INIT-DISCOVERY-SLICE2B REV1 implemented (TSC-GOVERNED, test-support categories, same-file collapse)
+
+Implementation complete against the ratified revision: 33 of 33 REV1 fixtures (including the four-part metamorphic invariance suite), 18 of 18 REV1 mutations caught, slice 2b harness 12 of 12 and slice 2 harness 14 of 14 still caught, 182 of 182 tests, zero warnings, Class 1 files and the five Experiment C artifacts byte-identical. D1 stays frozen. On the three development trees the proposal counts fell (formbricks 13 to 8, strapi 13 to 6, hoppscotch 0 to 0); two predictions were undercounts and are recorded as findings.
+
+Not claimed: general detection capability remains NOT ESTABLISHED. The wrong-receiver noise class is untouched. The counts above are a regression record on development trees, not an evaluation. Record: docs/architecture/INIT-DISCOVERY-SLICE2B-REV1.md sections N and O.

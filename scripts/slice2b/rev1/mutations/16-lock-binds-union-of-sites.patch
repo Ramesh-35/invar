@@ -1,0 +1,19 @@
+# mutation: the representative absorbs every site's overlap names
+# catch: r1_c5_a_name_present_only_in_a_site_is_not_locked_and_holds r1_c8_a_site_with_names_outside_the_representative_is_never_merged
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -866,6 +866,14 @@
+             b.overlap.len().cmp(&a.overlap.len()).then(a.list_line.cmp(&b.list_line)).then_with(|| a.list_at.cmp(&b.list_at))
+         });
+         let mut rep = g.remove(0);
++        for o in &g {
++            for x in &o.overlap {
++                if !rep.overlap.iter().any(|y| y.0 == x.0) {
++                    rep.overlap.push(x.clone());
++                }
++            }
++        }
++        rep.overlap.sort();
+         let mut also: Vec<(String, usize, usize)> = g.iter().map(|o| (o.list_at.clone(), o.list_line, o.overlap.len())).collect();
+         also.sort_by(|a, b| a.1.cmp(&b.1).then_with(|| a.0.cmp(&b.0)));
+         rep.also = also;

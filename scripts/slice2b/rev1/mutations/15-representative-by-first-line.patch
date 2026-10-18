@@ -1,0 +1,13 @@
+# mutation: representative chosen by lowest line, not largest overlap
+# catch: r1_c1_six_same_shape_lists_in_one_file_collapse_to_one_proposal r1_c2_largest_overlap_wins_and_ties_go_to_the_lowest_line
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -863,7 +863,7 @@
+     for key in order {
+         let mut g = groups.remove(&key).unwrap_or_default();
+         g.sort_by(|a, b| {
+-            b.overlap.len().cmp(&a.overlap.len()).then(a.list_line.cmp(&b.list_line)).then_with(|| a.list_at.cmp(&b.list_at))
++            a.list_line.cmp(&b.list_line)
+         });
+         let mut rep = g.remove(0);
+         let mut also: Vec<(String, usize, usize)> = g.iter().map(|o| (o.list_at.clone(), o.list_line, o.overlap.len())).collect();

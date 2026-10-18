@@ -1,0 +1,12 @@
+# mutation: every list stays its own proposal
+# catch: r1_c1_six_same_shape_lists_in_one_file_collapse_to_one_proposal r1_c2_largest_overlap_wins_and_ties_go_to_the_lowest_line r1_c5_a_name_present_only_in_a_site_is_not_locked_and_holds r1_c7_governed_siblings_leave_before_grouping r1_m4_summary_counts_proposals_after_collapse
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -839,7 +839,6 @@
+             });
+         }
+     }
+-    out.proposals = collapse(std::mem::take(&mut out.proposals));
+     out.abstentions.sort();
+     out.abstentions.dedup();
+     out
