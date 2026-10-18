@@ -1,0 +1,13 @@
+# mutation: the wording drifts from R-H-1
+# catch: h_f1_fresh_lock_holds_since_today_zero_days
+--- a/crates/invar-falsify/src/main.rs
++++ b/crates/invar-falsify/src/main.rs
+@@ -819,7 +819,7 @@
+                 if let Some(day) = lock::parse_date(since) {
+                     let n = today - day;
+                     if n >= 0 {
+-                        println!("  durability: held since {since} ({n} day{})", if n == 1 { "" } else { "s" });
++                        println!("  durability: alive since {since} ({n} day{})", if n == 1 { "" } else { "s" });
+                     }
+                 }
+             }

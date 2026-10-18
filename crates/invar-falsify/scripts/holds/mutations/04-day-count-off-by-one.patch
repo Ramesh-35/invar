@@ -1,0 +1,13 @@
+# mutation: the age is inflated by one day
+# catch: h_f1_fresh_lock_holds_since_today_zero_days h_f2_edited_since_dates_drive_the_line_not_recorded_at
+--- a/crates/invar-falsify/src/main.rs
++++ b/crates/invar-falsify/src/main.rs
+@@ -817,7 +817,7 @@
+                 .and_then(|c| c.bindings.iter().map(|b| b.since.as_str()).max())
+             {
+                 if let Some(day) = lock::parse_date(since) {
+-                    let n = today - day;
++                    let n = today - day + 1;
+                     if n >= 0 {
+                         println!("  durability: held since {since} ({n} day{})", if n == 1 { "" } else { "s" });
+                     }

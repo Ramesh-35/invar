@@ -172,3 +172,53 @@ byte change to an existing output line, a receipt, SARIF, report-md or an
 MCP response; any frozen fixture failing; any second clock read; any
 pressure to claim per-commit history that belongs to backtest; any new
 dependency, code or exit change.
+
+## J. Rulings of 2026-10-18 (recorded)
+
+H-D1 to H-D6 APPROVED as drafted (21:59): sub-line placement as standing
+doctrine, date plus day count from the one `today` the check already reads,
+max(since), machine surfaces frozen, strict omission, proof imports excluded.
+Class 3 granted for main.rs only; check.rs explicitly untouched.
+Implementation GO under baseline c0144d4.
+
+## K. Implementation Evidence Ledger (appended at Gate 5; sections 0 to J are unchanged)
+
+Status: IMPLEMENTED. The whole engine change is one guarded block of
+fourteen lines inside main.rs's existing outcome loop; Class 4 is empty, as
+chartered.
+
+### K1. Gate results
+
+| Gate | Result |
+|---|---|
+| 0 baseline | the clean tree at c0144d4; every protected hash byte-identical after implementation |
+| 1 fixtures first | 11 fixtures written before the line existed; 6 failed for the declared reason and 5 invariance controls passed |
+| 2 implementation | main.rs only (the durability block in the outcome loop); check.rs, lock.rs and every other engine file byte-identical |
+| 3 mutations | PASS: 10 of 10 CAUGHT by named assertion, control green, none SURVIVED, BUILD-FAILED or APPLY-FAILED (scripts/holds/mutate.sh), measured on a full re-run from scratch after the fixture strengthening of K2 |
+| 4 regression | 255 of 255 tests green, zero warnings, zero frozen-suite edits; receipts, SARIF, report-md and proof outputs asserted silent |
+| 5 documentation | sections J and K, STATUS.md entry |
+
+### K2. What the gates taught (stated, not hidden)
+
+- H-INT-1: spec A3's unparsable-since arm is unreachable by construction;
+  lock::parse_bind bails on any bind line whose t_v does not parse, so the
+  lock grammar is the stronger guard. The planned mutation became the
+  singular/plural rule mutant instead.
+- Gate 1 falsified the first reset fixture twice, and the engine was right
+  both times: a blanket date replace poisoned recorded_at (whose RFC3339
+  value begins with the same date), and renaming an UNBOUND field does not
+  reset durability because nothing was re-accepted. The final fixture models
+  the full honest loop: rename on both sides, re-declare the evidence in the
+  manifest (the lock is evidence-bounded, slice 1 L01), then
+  `lock --update`; only that re-acceptance resets the clock.
+- Gate 3's first run produced two SURVIVING mutants, both convicting
+  fixtures, not the engine: the aged-binding fixture had aged recorded_at
+  (the first date occurrence in the lock) instead of a bind line, so
+  min-versus-max was indistinguishable; and the no-lock skip scenario made
+  the age-on-skipped mutant unreachable, since there was nothing to date.
+  Both fixtures were strengthened (one bind line aged surgically with the
+  other asserted to remain at today; a locked strings contract turned
+  dynamic, the k3_u2 pattern, now asserts no age under a real lock entry)
+  and the full harness was re-run from scratch.
+- H-INT-2: a future-dated since (clock skew) is omitted, never printed as a
+  negative age.

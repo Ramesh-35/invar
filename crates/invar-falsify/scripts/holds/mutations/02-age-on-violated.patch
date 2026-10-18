@@ -1,0 +1,13 @@
+# mutation: a violated contract carries a proud age
+# catch: h_f4_a_violated_contract_carries_no_age
+--- a/crates/invar-falsify/src/main.rs
++++ b/crates/invar-falsify/src/main.rs
+@@ -810,7 +810,7 @@
+         // acceptance age, not correctness-at-every-commit (that is
+         // backtest's job). Reuses the one `today` this check already read;
+         // a future-dated since is omitted, never a negative age (H-INT-2).
+-        if tag == "HOLDS" {
++        if tag == "HOLDS" || tag == "VIOLATED" {
+             if let Some(since) = lock_file
+                 .as_ref()
+                 .and_then(|l| l.contracts.iter().find(|c| c.id == o.id))

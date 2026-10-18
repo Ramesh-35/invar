@@ -1,0 +1,13 @@
+# mutation: the machine surface gains human text
+# catch: h_n1_machine_surfaces_stay_silent
+--- a/crates/invar-falsify/src/main.rs
++++ b/crates/invar-falsify/src/main.rs
+@@ -929,7 +929,7 @@
+             lock_b3.as_deref(),
+             &outcomes,
+         );
+-        if let Err(e) = std::fs::write(path, receipt::render(&body)) {
++        if let Err(e) = std::fs::write(path, receipt::render(&body) + "durability: held since 1970-01-01 (0 days)\n") {
+             eprintln!("ERROR (not a verdict): writing receipt {path}: {e}");
+             return Ok(3);
+         }

@@ -1,0 +1,16 @@
+# mutation: two time semantics blended into one line
+# catch: h_n2_proof_imports_keep_their_own_time_axis
+--- a/crates/invar-falsify/src/main.rs
++++ b/crates/invar-falsify/src/main.rs
+@@ -666,6 +666,11 @@
+             for l in lines {
+                 println!("{l}");
+             }
++            for l in lines {
++                if l.starts_with("[HOLDS] proof") {
++                    println!("  durability: held since 1970-01-01 (0 days)");
++                }
++            }
+             print_code_pointer(lines);
+             return Ok(*pcode);
+         }

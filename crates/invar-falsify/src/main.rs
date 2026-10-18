@@ -804,6 +804,26 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
     for o in &outcomes {
         let (tag, text) = invar_falsify::check::outcome_lines(o);
         print!("{text}");
+        // INVAR-HOLDS-001 (rulings H-D1 to H-D6): one indented durability
+        // sub-line under HOLDS outcomes only, from the lock's own since
+        // dates (t_v, the youngest acceptance), never recorded_at. B1:
+        // acceptance age, not correctness-at-every-commit (that is
+        // backtest's job). Reuses the one `today` this check already read;
+        // a future-dated since is omitted, never a negative age (H-INT-2).
+        if tag == "HOLDS" {
+            if let Some(since) = lock_file
+                .as_ref()
+                .and_then(|l| l.contracts.iter().find(|c| c.id == o.id))
+                .and_then(|c| c.bindings.iter().map(|b| b.since.as_str()).max())
+            {
+                if let Some(day) = lock::parse_date(since) {
+                    let n = today - day;
+                    if n >= 0 {
+                        println!("  durability: held since {since} ({n} day{})", if n == 1 { "" } else { "s" });
+                    }
+                }
+            }
+        }
         match tag {
             "VIOLATED" => violations += 1,
             "SKIPPED" | "NOT_EVALUATED" => skipped += 1,

@@ -1,0 +1,13 @@
+# mutation: the durability line is gone
+# catch: h_f1_fresh_lock_holds_since_today_zero_days h_f7_every_held_kind_gets_its_own_line
+--- a/crates/invar-falsify/src/main.rs
++++ b/crates/invar-falsify/src/main.rs
+@@ -810,7 +810,7 @@
+         // acceptance age, not correctness-at-every-commit (that is
+         // backtest's job). Reuses the one `today` this check already read;
+         // a future-dated since is omitted, never a negative age (H-INT-2).
+-        if tag == "HOLDS" {
++        if false && tag == "HOLDS" {
+             if let Some(since) = lock_file
+                 .as_ref()
+                 .and_then(|l| l.contracts.iter().find(|c| c.id == o.id))

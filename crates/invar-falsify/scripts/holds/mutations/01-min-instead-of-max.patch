@@ -1,0 +1,13 @@
+# mutation: the oldest acceptance overstates the contract
+# catch: h_f6_the_youngest_acceptance_wins
+--- a/crates/invar-falsify/src/main.rs
++++ b/crates/invar-falsify/src/main.rs
+@@ -814,7 +814,7 @@
+             if let Some(since) = lock_file
+                 .as_ref()
+                 .and_then(|l| l.contracts.iter().find(|c| c.id == o.id))
+-                .and_then(|c| c.bindings.iter().map(|b| b.since.as_str()).max())
++                .and_then(|c| c.bindings.iter().map(|b| b.since.as_str()).min())
+             {
+                 if let Some(day) = lock::parse_date(since) {
+                     let n = today - day;

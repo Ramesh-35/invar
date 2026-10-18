@@ -1,0 +1,13 @@
+# mutation: one day prints as 1 days
+# catch: h_f9_one_day_prints_singular
+--- a/crates/invar-falsify/src/main.rs
++++ b/crates/invar-falsify/src/main.rs
+@@ -819,7 +819,7 @@
+                 if let Some(day) = lock::parse_date(since) {
+                     let n = today - day;
+                     if n >= 0 {
+-                        println!("  durability: held since {since} ({n} day{})", if n == 1 { "" } else { "s" });
++                        println!("  durability: held since {since} ({n} day{})", if n == 1 { "s" } else { "s" });
+                     }
+                 }
+             }
