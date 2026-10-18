@@ -1,0 +1,13 @@
+# mutation: the command is joined and handed to a shell
+# catch: g_f7_argv_reaches_the_command_verbatim_no_shell
+--- a/crates/invar-falsify/src/gate.rs
++++ b/crates/invar-falsify/src/gate.rs
+@@ -120,7 +120,7 @@
+     let watch = watch_set(config, proof);
+     let before: Vec<(PathBuf, String)> = watch.iter().map(|p| (p.clone(), digest(p))).collect();
+     eprintln!("GATE: pre-check held; running the command ({} file(s) watched)", before.len());
+-    let cmd_code = match Command::new(&command[0]).args(&command[1..]).status() {
++    let cmd_code = match Command::new("sh").arg("-c").arg(command.join(" ")).status() {
+         Ok(st) => match st.code() {
+             Some(c) => c,
+             None => {

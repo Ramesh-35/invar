@@ -1,0 +1,13 @@
+# mutation: watched-file drift is never stated
+# catch: g_f4_clean_command_that_breaks_a_contract_inherits_the_post_check
+--- a/crates/invar-falsify/src/gate.rs
++++ b/crates/invar-falsify/src/gate.rs
+@@ -137,7 +137,7 @@
+     };
+     for (p, d0) in &before {
+         if &digest(p) != d0 {
+-            eprintln!("GATE DRIFT: {} changed while the command ran", p.display());
++            let _ = p;
+         }
+     }
+     let post = run_check(config, proof, "post");

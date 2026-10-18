@@ -1,0 +1,13 @@
+# mutation: a refusal reports success
+# catch: g_f2_violated_repo_refuses_and_runs_nothing
+--- a/crates/invar-falsify/src/gate.rs
++++ b/crates/invar-falsify/src/gate.rs
+@@ -115,7 +115,7 @@
+     let pre = run_check(config, proof, "pre");
+     if pre != 0 {
+         eprintln!("GATE REFUSED (pre-check exit {pre}): command not run");
+-        return pre;
++        return 0;
+     }
+     let watch = watch_set(config, proof);
+     let before: Vec<(PathBuf, String)> = watch.iter().map(|p| (p.clone(), digest(p))).collect();

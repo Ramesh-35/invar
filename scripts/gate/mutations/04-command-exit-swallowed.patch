@@ -1,0 +1,13 @@
+# mutation: a failing command is reported as the post-check
+# catch: g_f3_failing_command_code_is_forwarded_untouched
+--- a/crates/invar-falsify/src/gate.rs
++++ b/crates/invar-falsify/src/gate.rs
+@@ -141,7 +141,7 @@
+         }
+     }
+     let post = run_check(config, proof, "post");
+-    if cmd_code != 0 {
++    if false && cmd_code != 0 {
+         eprintln!("GATE: command exit {cmd_code} forwarded (post-check exit {post} stated, never masking the command)");
+         return cmd_code;
+     }

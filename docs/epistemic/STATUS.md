@@ -1575,3 +1575,20 @@ completions amendment), 229 of 229 tests, zero warnings, Class 1 byte-identical.
 The existing completions guard caught the missing subcommand and, in passing,
 the proof arc's missing flags in the shell completions; both amended and
 recorded. Record: docs/architecture/INVAR-EXPLAIN-001.md sections J and K.
+
+## 2026-10-18: INVAR-GATE-001 implemented (the execution gate and the diagnostic link)
+
+Implementation complete against the ratified rulings G-D1 to G-D7 and the
+R-L-2 Option B amendment: `invar gate [--proof] -- <command>` (refusal carries
+the pre-check code and runs nothing; a failing command keeps its own code; a
+clean command inherits the post-check code; drift in the watched manifest,
+lock, producers and proofs is stated, never prevented; argv is executed
+verbatim with no shell; gate lines live on stderr and the wrapped stdout stays
+byte-clean), plus the diagnostic pointer: one `codes: run invar explain` line
+per run that printed an ABSTAIN, penultimate in init (the SUMMARY line stays
+the machine-readable terminator), final in check --proof. 15 fixtures written
+first (13 failed pre-change), 13 of 13 mutations caught (the declared 12 plus the 09b pointer-surface split), 244 of 244 tests, zero warnings,
+zero frozen-suite edits. Gate 2 surfaced and the ruling resolved a real
+interface fact: 17 frozen slice 1 fixtures machine-read init's last line as
+the summary, so SUMMARY-last is now an explicit immutable contract. Record:
+docs/architecture/INVAR-GATE-001.md sections K and M.

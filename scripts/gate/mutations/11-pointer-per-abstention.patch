@@ -1,0 +1,15 @@
+# mutation: one pointer per abstention instead of one per run
+# catch: l_f1_init_prints_exactly_one_trailing_pointer_only_with_abstentions
+--- a/crates/invar-falsify/src/init.rs
++++ b/crates/invar-falsify/src/init.rs
+@@ -840,7 +840,9 @@
+         // 2026-10-18): one pointer, only when an ABSTAIN line was printed,
+         // placed immediately BEFORE the SUMMARY line so the summary stays
+         // the machine-readable terminator; `# ` keeps a written file valid.
+-        s.push_str("# codes: run `invar explain <CODE>` for any ABSTAIN code above\n");
++        for _ in &d.abstentions {
++            s.push_str("# codes: run `invar explain <CODE>` for any ABSTAIN code above\n");
++        }
+     }
+     s.push_str(&format!("# {}\n", summary(d)));
+     s

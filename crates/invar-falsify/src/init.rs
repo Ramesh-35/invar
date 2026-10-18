@@ -835,6 +835,13 @@ pub fn render_manifest_opts(d: &Discovery, full_inventory: bool) -> String {
             inv.len() - shown
         ));
     }
+    if !d.abstentions.is_empty() {
+        // INVAR-GATE-001 R-L-1 and R-L-2 as amended (Option B, ruling of
+        // 2026-10-18): one pointer, only when an ABSTAIN line was printed,
+        // placed immediately BEFORE the SUMMARY line so the summary stays
+        // the machine-readable terminator; `# ` keeps a written file valid.
+        s.push_str("# codes: run `invar explain <CODE>` for any ABSTAIN code above\n");
+    }
     s.push_str(&format!("# {}\n", summary(d)));
     s
 }

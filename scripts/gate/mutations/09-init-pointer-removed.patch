@@ -1,0 +1,13 @@
+# mutation: the init pointer line is gone
+# catch: l_f1_init_prints_exactly_one_trailing_pointer_only_with_abstentions l_f4_the_pointer_names_invar_explain_verbatim
+--- a/crates/invar-falsify/src/init.rs
++++ b/crates/invar-falsify/src/init.rs
+@@ -840,7 +840,7 @@
+         // 2026-10-18): one pointer, only when an ABSTAIN line was printed,
+         // placed immediately BEFORE the SUMMARY line so the summary stays
+         // the machine-readable terminator; `# ` keeps a written file valid.
+-        s.push_str("# codes: run `invar explain <CODE>` for any ABSTAIN code above\n");
++        let _ = &d.abstentions;
+     }
+     s.push_str(&format!("# {}\n", summary(d)));
+     s

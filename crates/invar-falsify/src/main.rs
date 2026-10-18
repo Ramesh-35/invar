@@ -67,6 +67,10 @@ enum Command {
     /// Print a code's definition, exact firing condition and sanctioned next
     /// action from the engine's registry (static; reads nothing; exit 0 or 3).
     Explain(ExplainArgs),
+    /// Run a command only if every contract holds; re-check after and state
+    /// drift. Exit: a refusal carries the pre-check code; a failing command
+    /// keeps its own code; a clean command inherits the post-check code.
+    Gate(GateArgs),
     /// Read-only MCP server on stdio (tools: check, contract, dependents,
     /// coverage).
     Mcp(McpArgs),
@@ -234,6 +238,18 @@ struct ExplainArgs {
     code: Option<String>,
 }
 
+#[derive(Parser)]
+struct GateArgs {
+    #[arg(long, default_value = "invar.toml")]
+    config: String,
+    /// Also evaluate [[proof.import]] tables in both checks (INVAR-PROOF-001).
+    #[arg(long, default_value_t = false)]
+    proof: bool,
+    /// The command to run, after `--` (executed verbatim, never via a shell).
+    #[arg(last = true)]
+    command: Vec<String>,
+}
+
 #[derive(clap::Subcommand)]
 enum ReceiptCmd {
     /// Convert a format 1 receipt into another view. Never alters format 1.
@@ -381,6 +397,7 @@ fn main() {
             print!("{out}");
             code
         }
+        Command::Gate(a) => invar_falsify::gate::run(&a.config, a.proof, &a.command),
         Command::VerifyReceipt(a) => dispatch_r2(cmd_verify_receipt(a)),
         Command::Receipt(a) => dispatch_r2(cmd_receipt(a)),
         Command::Dependents(a) => dispatch_r2(cmd_dependents(a)),
@@ -393,6 +410,14 @@ fn main() {
         Command::Replay(a) => dispatch(cmd_replay(a)),
     };
     std::process::exit(code);
+}
+
+/// INVAR-GATE-001 R-L-1: one trailing pointer line, printed only when at
+/// least one ABSTAIN line went out, so no one meets a code without its exit.
+fn print_code_pointer(lines: &[String]) {
+    if lines.iter().any(|l| l.starts_with("ABSTAIN ")) {
+        println!("codes: run `invar explain <CODE>` for any ABSTAIN code above");
+    }
 }
 
 /// Map a handler result to a process exit code. Handlers return the intended
@@ -641,6 +666,7 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
             for l in lines {
                 println!("{l}");
             }
+            print_code_pointer(lines);
             return Ok(*pcode);
         }
     }
@@ -814,6 +840,7 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
             for l in lines {
                 println!("{l}");
             }
+            print_code_pointer(lines);
             invar_falsify::proof::worse(code, *pcode)
         }
         None => code,

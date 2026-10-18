@@ -24,6 +24,7 @@ pub mod config;
 pub mod evaluator;
 pub mod explain;
 pub mod fix;
+pub mod gate;
 pub mod init;
 pub mod invariant;
 pub mod ledger;

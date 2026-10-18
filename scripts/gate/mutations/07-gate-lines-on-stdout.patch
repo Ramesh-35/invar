@@ -1,0 +1,13 @@
+# mutation: gate telemetry pollutes the wrapped stdout
+# catch: g_f6_wrapped_stdout_is_byte_identical_and_gate_lines_stay_on_stderr
+--- a/crates/invar-falsify/src/gate.rs
++++ b/crates/invar-falsify/src/gate.rs
+@@ -119,7 +119,7 @@
+     }
+     let watch = watch_set(config, proof);
+     let before: Vec<(PathBuf, String)> = watch.iter().map(|p| (p.clone(), digest(p))).collect();
+-    eprintln!("GATE: pre-check held; running the command ({} file(s) watched)", before.len());
++    println!("GATE: pre-check held; running the command ({} file(s) watched)", before.len());
+     let cmd_code = match Command::new(&command[0]).args(&command[1..]).status() {
+         Ok(st) => match st.code() {
+             Some(c) => c,

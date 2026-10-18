@@ -1,0 +1,13 @@
+# mutation: the post-check never runs
+# catch: g_f4_clean_command_that_breaks_a_contract_inherits_the_post_check
+--- a/crates/invar-falsify/src/gate.rs
++++ b/crates/invar-falsify/src/gate.rs
+@@ -140,7 +140,7 @@
+             eprintln!("GATE DRIFT: {} changed while the command ran", p.display());
+         }
+     }
+-    let post = run_check(config, proof, "post");
++    let post = 0;
+     if cmd_code != 0 {
+         eprintln!("GATE: command exit {cmd_code} forwarded (post-check exit {post} stated, never masking the command)");
+         return cmd_code;

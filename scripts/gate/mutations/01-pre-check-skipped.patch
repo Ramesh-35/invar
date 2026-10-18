@@ -1,0 +1,13 @@
+# mutation: the command runs even when the pre-check fails
+# catch: g_f2_violated_repo_refuses_and_runs_nothing
+--- a/crates/invar-falsify/src/gate.rs
++++ b/crates/invar-falsify/src/gate.rs
+@@ -113,7 +113,7 @@
+         return 3;
+     }
+     let pre = run_check(config, proof, "pre");
+-    if pre != 0 {
++    if false && pre != 0 {
+         eprintln!("GATE REFUSED (pre-check exit {pre}): command not run");
+         return pre;
+     }

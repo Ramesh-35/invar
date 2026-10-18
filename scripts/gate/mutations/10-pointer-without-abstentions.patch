@@ -1,0 +1,13 @@
+# mutation: the pointer prints on every init run
+# catch: l_f1_init_prints_exactly_one_trailing_pointer_only_with_abstentions
+--- a/crates/invar-falsify/src/init.rs
++++ b/crates/invar-falsify/src/init.rs
+@@ -835,7 +835,7 @@
+             inv.len() - shown
+         ));
+     }
+-    if !d.abstentions.is_empty() {
++    if true || !d.abstentions.is_empty() {
+         // INVAR-GATE-001 R-L-1 and R-L-2 as amended (Option B, ruling of
+         // 2026-10-18): one pointer, only when an ABSTAIN line was printed,
+         // placed immediately BEFORE the SUMMARY line so the summary stays
