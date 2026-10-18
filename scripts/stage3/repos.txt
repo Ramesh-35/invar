@@ -1,0 +1,11 @@
+# STAGE3-EVAL-001 pinned manifest, written by select.py from the one recorded search
+freeCodeCamp__freeCodeCamp https://github.com/freeCodeCamp/freeCodeCamp.git d8ad7a793290261e24d18a98b48775bf92b100f2
+vuejs__vue https://github.com/vuejs/vue.git 9e88707940088cb1f4cd7dd210c9168a50dc347c
+excalidraw__excalidraw https://github.com/excalidraw/excalidraw.git 4c37956ba5f04ec342a9d9d5891a38f22c5b7b4e
+earendil-works__pi https://github.com/earendil-works/pi.git 482c1381a00d8d00bc81697e4a980c593db6803e
+thedotmack__claude-mem https://github.com/thedotmack/claude-mem.git b85cd123daf8e5bd59edb2d1c7b98e0bba28b3a0
+microsoft__playwright https://github.com/microsoft/playwright.git b335271cdc2b57cac2be8ad37c5dd283ac6b8938
+puppeteer__puppeteer https://github.com/puppeteer/puppeteer.git ff3103c8e46f1b97e00a6a4a72f8e2509cbc796f
+ChatGPTNextWeb__NextChat https://github.com/ChatGPTNextWeb/NextChat.git 9b4ac8e1c54318148234bce71e32d3d272907dc5
+Egonex-AI__Understand-Anything https://github.com/Egonex-AI/Understand-Anything.git f2d0164f72fe678805c34245a6df36acededfebd
+diegosouzapw__OmniRoute https://github.com/diegosouzapw/OmniRoute.git 3b52f62d9cc3cff0296ba0b13bebbfce050e584f

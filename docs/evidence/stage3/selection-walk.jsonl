@@ -1,0 +1,35 @@
+{"rank": 1, "repo": "freeCodeCamp/freeCodeCamp", "verdict": "QUALIFY", "ts_files": 989, "truncated": false, "spdx": "BSD-3-Clause"}
+{"rank": 2, "repo": "nilbuild/developer-roadmap", "verdict": "FAIL-LICENSE", "spdx": "NOASSERTION"}
+{"rank": 3, "repo": "deepseek-ai/deepseek-harness", "verdict": "QUALIFY", "ts_files": 5786, "truncated": false, "spdx": "MIT"}
+{"rank": 4, "repo": "vuejs/vue", "verdict": "QUALIFY", "ts_files": 364, "truncated": false, "spdx": "MIT"}
+{"rank": 5, "repo": "n8n-io/n8n", "verdict": "FAIL-LICENSE", "spdx": "NOASSERTION"}
+{"rank": 6, "repo": "microsoft/vscode", "verdict": "QUALIFY", "ts_files": 14752, "truncated": false, "spdx": "MIT"}
+{"rank": 7, "repo": "anthropics/claude-code", "verdict": "FAIL-LICENSE", "spdx": null}
+{"rank": 8, "repo": "iptv-org/iptv", "verdict": "FAIL-FILES", "ts_files": 59, "truncated": false}
+{"rank": 9, "repo": "excalidraw/excalidraw", "verdict": "QUALIFY", "ts_files": 668, "truncated": false, "spdx": "MIT"}
+{"rank": 10, "repo": "immich-app/immich", "verdict": "QUALIFY", "ts_files": 1089, "truncated": false, "spdx": "AGPL-3.0"}
+{"rank": 11, "repo": "earendil-works/pi", "verdict": "QUALIFY", "ts_files": 1590, "truncated": false, "spdx": "MIT"}
+{"rank": 12, "repo": "paperclipai/paperclip", "verdict": "QUALIFY", "ts_files": 7569, "truncated": false, "spdx": "MIT"}
+{"rank": 13, "repo": "thedotmack/claude-mem", "verdict": "QUALIFY", "ts_files": 1544, "truncated": false, "spdx": "Apache-2.0"}
+{"rank": 14, "repo": "ant-design/ant-design", "verdict": "QUALIFY", "ts_files": 3076, "truncated": false, "spdx": "MIT"}
+{"rank": 15, "repo": "microsoft/playwright", "verdict": "QUALIFY", "ts_files": 1363, "truncated": false, "spdx": "Apache-2.0"}
+{"rank": 16, "repo": "tailwindlabs/tailwindcss", "verdict": "QUALIFY", "ts_files": 309, "truncated": false, "spdx": "MIT"}
+{"rank": 17, "repo": "puppeteer/puppeteer", "verdict": "QUALIFY", "ts_files": 403, "truncated": false, "spdx": "Apache-2.0"}
+{"rank": 18, "repo": "Stirling-Tools/Stirling-PDF", "verdict": "FAIL-LICENSE", "spdx": "NOASSERTION"}
+{"rank": 19, "repo": "mermaid-js/mermaid", "verdict": "QUALIFY", "ts_files": 939, "truncated": false, "spdx": "MIT"}
+{"rank": 20, "repo": "ChatGPTNextWeb/NextChat", "verdict": "QUALIFY", "ts_files": 182, "truncated": false, "spdx": "MIT"}
+{"rank": 21, "repo": "koala73/worldmonitor", "verdict": "QUALIFY", "ts_files": 2091, "truncated": false, "spdx": "AGPL-3.0"}
+{"rank": 22, "repo": "Egonex-AI/Understand-Anything", "verdict": "QUALIFY", "ts_files": 260, "truncated": false, "spdx": "MIT"}
+{"rank": 23, "repo": "lobehub/lobehub", "verdict": "FAIL-LICENSE", "spdx": "NOASSERTION"}
+{"rank": 24, "repo": "hoppscotch/hoppscotch", "verdict": "QUALIFY", "ts_files": 1087, "truncated": false, "spdx": "MIT"}
+{"rank": 25, "repo": "diegosouzapw/OmniRoute", "verdict": "QUALIFY", "ts_files": 13541, "truncated": false, "spdx": "MIT"}
+{"repo": "freeCodeCamp/freeCodeCamp", "verdict": "PINNED", "sha": "d8ad7a793290261e24d18a98b48775bf92b100f2"}
+{"repo": "vuejs/vue", "verdict": "PINNED", "sha": "9e88707940088cb1f4cd7dd210c9168a50dc347c"}
+{"repo": "excalidraw/excalidraw", "verdict": "PINNED", "sha": "4c37956ba5f04ec342a9d9d5891a38f22c5b7b4e"}
+{"repo": "earendil-works/pi", "verdict": "PINNED", "sha": "482c1381a00d8d00bc81697e4a980c593db6803e"}
+{"repo": "thedotmack/claude-mem", "verdict": "PINNED", "sha": "b85cd123daf8e5bd59edb2d1c7b98e0bba28b3a0"}
+{"repo": "microsoft/playwright", "verdict": "PINNED", "sha": "b335271cdc2b57cac2be8ad37c5dd283ac6b8938"}
+{"repo": "puppeteer/puppeteer", "verdict": "PINNED", "sha": "ff3103c8e46f1b97e00a6a4a72f8e2509cbc796f"}
+{"repo": "ChatGPTNextWeb/NextChat", "verdict": "PINNED", "sha": "9b4ac8e1c54318148234bce71e32d3d272907dc5"}
+{"repo": "Egonex-AI/Understand-Anything", "verdict": "PINNED", "sha": "f2d0164f72fe678805c34245a6df36acededfebd"}
+{"repo": "diegosouzapw/OmniRoute", "verdict": "PINNED", "sha": "3b52f62d9cc3cff0296ba0b13bebbfce050e584f"}
