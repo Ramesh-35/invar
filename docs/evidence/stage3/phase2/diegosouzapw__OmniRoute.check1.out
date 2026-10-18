@@ -1,0 +1,29 @@
+INVAR check (5 contract(s))
+  [HOLDS]    strings:pricingFieldsSchema@const:PRICING_FIELDS (strings)
+      note: string-coupling contract: list const:PRICING_FIELDS in src/app/(dashboard)/dashboard/settings/components/PricingTab.tsx against the key set of pricingFieldsSchema in src/shared/validation/schemas/pricing.ts; a name still in the list but gone from the shape is a stale reference; that the list reaches the store is not verified
+      note: shape file unchanged since lock (2026-10-18T16:35:00Z)
+      note: 14 key(s) of the shape not in the lock, tolerated (long_context, mode, input_cost_per_second, output_cost_per_second, input_cost_per_image); `invar lock --update` records them
+  durability: held since 2026-10-18 (0 days)
+  [HOLDS]    strings:updateProviderConnectionSchema@const:CONNECTION_COLUMNS (strings)
+      note: string-coupling contract: list const:CONNECTION_COLUMNS in src/app/api/resilience/connections/route.ts against the key set of updateProviderConnectionSchema in src/shared/validation/schemas/provider.ts; a name still in the list but gone from the shape is a stale reference; that the list reaches the store is not verified
+      note: shape file unchanged since lock (2026-10-18T16:35:00Z)
+      note: 17 key(s) of the shape not in the lock, tolerated (name, globalPriority, defaultModel, apiKey, lastError); `invar lock --update` records them
+  durability: held since 2026-10-18 (0 days)
+  [HOLDS]    strings:pricingFieldsSchema@const:PRICING_FIELDS#2 (strings)
+      note: string-coupling contract: list const:PRICING_FIELDS in src/lib/catalogUserPricing.ts against the key set of pricingFieldsSchema in src/shared/validation/schemas/pricing.ts; a name still in the list but gone from the shape is a stale reference; that the list reaches the store is not verified
+      note: shape file unchanged since lock (2026-10-18T16:35:00Z)
+      note: 15 key(s) of the shape not in the lock, tolerated (reasoning, long_context, mode, input_cost_per_second, output_cost_per_second); `invar lock --update` records them
+  durability: held since 2026-10-18 (0 days)
+  [HOLDS]    strings:updateProviderConnectionSchema@const:optionalFields (strings)
+      note: string-coupling contract: list const:optionalFields in src/lib/db/providers.ts against the key set of updateProviderConnectionSchema in src/shared/validation/schemas/provider.ts; a name still in the list but gone from the shape is a stale reference; that the list reaches the store is not verified
+      note: shape file unchanged since lock (2026-10-18T16:35:00Z)
+      note: 4 key(s) of the shape not in the lock, tolerated (name, priority, isActive, providerSpecificData); `invar lock --update` records them
+  durability: held since 2026-10-18 (0 days)
+  [HOLDS]    strings:updateProviderConnectionSchema@const:COLUMNS (strings)
+      note: string-coupling contract: list const:COLUMNS in src/lib/resilience/cooldownManager.ts against the key set of updateProviderConnectionSchema in src/shared/validation/schemas/provider.ts; a name still in the list but gone from the shape is a stale reference; that the list reaches the store is not verified
+      note: shape file unchanged since lock (2026-10-18T16:35:00Z)
+      note: 16 key(s) of the shape not in the lock, tolerated (name, globalPriority, defaultModel, apiKey, lastErrorSource); `invar lock --update` records them
+  durability: held since 2026-10-18 (0 days)
+result: ALL 5 contract(s) hold
+summary: held 5 | violated 0 | skipped or not evaluated 0
+measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)

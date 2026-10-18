@@ -1,0 +1,229 @@
+{
+ "repo": "Egonex-AI__Understand-Anything",
+ "packages_superset": 7,
+ "eligible_files": 34,
+ "sample": [
+  "understand-anything-plugin/packages/dashboard/src/__tests__/edgeCategories.test.ts",
+  "understand-anything-plugin/packages/dashboard/src/utils/filters.ts",
+  "understand-anything-plugin/packages/dashboard/src/store.ts",
+  "understand-anything-plugin/packages/dashboard/src/utils/__tests__/filters.test.ts",
+  "understand-anything-plugin/packages/dashboard/src/utils/elk-layout.ts",
+  "understand-anything-plugin/packages/dashboard/src/__tests__/store-navigation.test.ts",
+  "understand-anything-plugin/src/understand-chat.ts",
+  "understand-anything-plugin/packages/dashboard/src/utils/__tests__/edgeAggregation.test.ts",
+  "understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx",
+  "understand-anything-plugin/packages/dashboard/src/utils/layerStats.ts"
+ ],
+ "sampled_constructs": 16,
+ "sampled_silent": 0,
+ "rows": [
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/__tests__/edgeCategories.test.ts",
+   "line": 3,
+   "spec": "@understand-anything/core/types",
+   "name": "EdgeType",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/__tests__/edgeCategories.test.ts:3 EdgeType from \"@understand-anything/core/types\": packa",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/__tests__/edgeCategories.test.ts:3 EdgeType from \"@understand-anything/core/types\": package @unders"
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/utils/filters.ts",
+   "line": 1,
+   "spec": "@understand-anything/core/types",
+   "name": "GraphNode",
+   "kind": "object",
+   "reads": [
+    "complexity",
+    "id",
+    "type"
+   ],
+   "accounted_by": "# ABSTAIN R6 understand-anything-plugin/packages/dashboard/src/utils/filters.ts:1 reads source, target of DroppedEdge (understand-anything-plugin/packages/core/",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/utils/filters.ts:1 GraphNode from \"@understand-anything/core/types\": package @understand-anything/c"
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/utils/filters.ts",
+   "line": 1,
+   "spec": "@understand-anything/core/types",
+   "name": "GraphEdge",
+   "kind": "object",
+   "reads": [
+    "source",
+    "target",
+    "type"
+   ],
+   "accounted_by": "# ABSTAIN R6 understand-anything-plugin/packages/dashboard/src/utils/filters.ts:1 reads source, target of DroppedEdge (understand-anything-plugin/packages/core/",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/utils/filters.ts:1 GraphEdge from \"@understand-anything/core/types\": package @understand-anything/c"
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/store.ts",
+   "line": 4,
+   "spec": "@understand-anything/core/schema",
+   "name": "GraphIssue",
+   "kind": "object",
+   "reads": [
+    "level",
+    "message"
+   ],
+   "accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/store.ts:2 SearchEngine from \"@understand-anything/core/search\": package @understand-anyt",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/store.ts:4 GraphIssue from \"@understand-anything/core/schema\": package @understand-anything/core de"
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/store.ts",
+   "line": 5,
+   "spec": "@understand-anything/core/types",
+   "name": "KnowledgeGraph",
+   "kind": "object",
+   "reads": [
+    "layers",
+    "nodes",
+    "tour"
+   ],
+   "accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/store.ts:2 SearchEngine from \"@understand-anything/core/search\": package @understand-anyt",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/store.ts:5 KnowledgeGraph from \"@understand-anything/core/types\": package @understand-anything/core"
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/store.ts",
+   "line": 5,
+   "spec": "@understand-anything/core/types",
+   "name": "TourStep",
+   "kind": "object",
+   "reads": [
+    "nodeIds",
+    "order"
+   ],
+   "accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/store.ts:2 SearchEngine from \"@understand-anything/core/search\": package @understand-anyt",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/store.ts:5 TourStep from \"@understand-anything/core/types\": package @understand-anything/core decla"
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/utils/__tests__/filters.test.ts",
+   "line": 3,
+   "spec": "@understand-anything/core/types",
+   "name": "GraphNode",
+   "kind": "object",
+   "reads": [
+    "id",
+    "type"
+   ],
+   "accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/utils/__tests__/filters.test.ts:3 GraphEdge from \"@understand-anything/core/types\": packa",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/utils/__tests__/filters.test.ts:3 GraphNode from \"@understand-anything/core/types\": package @unders"
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/utils/__tests__/filters.test.ts",
+   "line": 3,
+   "spec": "@understand-anything/core/types",
+   "name": "Layer",
+   "kind": "object",
+   "reads": [
+    "id",
+    "nodeIds"
+   ],
+   "accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/utils/__tests__/filters.test.ts:3 GraphEdge from \"@understand-anything/core/types\": packa",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/utils/__tests__/filters.test.ts:3 Layer from \"@understand-anything/core/types\": package @understand"
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/utils/elk-layout.ts",
+   "line": 2,
+   "spec": "@understand-anything/core/schema",
+   "name": "GraphIssue",
+   "kind": "object",
+   "reads": [
+    "level",
+    "message"
+   ],
+   "accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/utils/elk-layout.ts:2 GraphIssue from \"@understand-anything/core/schema\": package @unders",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/utils/elk-layout.ts:2 GraphIssue from \"@understand-anything/core/schema\": package @understand-anyth"
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/utils/__tests__/edgeAggregation.test.ts",
+   "line": 3,
+   "spec": "@understand-anything/core/types",
+   "name": "EdgeType",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/utils/__tests__/edgeAggregation.test.ts:3 EdgeType from \"@understand-anything/core/types\"",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/utils/__tests__/edgeAggregation.test.ts:3 EdgeType from \"@understand-anything/core/types\": package "
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx",
+   "line": 4,
+   "spec": "@understand-anything/core/types",
+   "name": "NodeType",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN R6 understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:4 reads backlinks, category, content, wikilinks of KnowledgeMeta (underst",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:4 NodeType from \"@understand-anything/core/types\": package @understand-anyt"
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx",
+   "line": 4,
+   "spec": "@understand-anything/core/types",
+   "name": "EdgeType",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN R6 understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:4 reads backlinks, category, content, wikilinks of KnowledgeMeta (underst",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:4 EdgeType from \"@understand-anything/core/types\": package @understand-anyt"
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx",
+   "line": 4,
+   "spec": "@understand-anything/core/types",
+   "name": "KnowledgeGraph",
+   "kind": "object",
+   "reads": [
+    "edges",
+    "nodes"
+   ],
+   "accounted_by": "# ABSTAIN R6 understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:4 reads backlinks, category, content, wikilinks of KnowledgeMeta (underst",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:4 KnowledgeGraph from \"@understand-anything/core/types\": package @understan"
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx",
+   "line": 4,
+   "spec": "@understand-anything/core/types",
+   "name": "GraphNode",
+   "kind": "object",
+   "reads": [
+    "complexity",
+    "domainMeta",
+    "figmaMeta",
+    "filePath",
+    "id",
+    "knowledgeMeta",
+    "languageNotes",
+    "lineRange"
+   ],
+   "accounted_by": "# ABSTAIN R6 understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:4 reads backlinks, category, content, wikilinks of KnowledgeMeta (underst",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:4 GraphNode from \"@understand-anything/core/types\": package @understand-any"
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/utils/layerStats.ts",
+   "line": 1,
+   "spec": "@understand-anything/core/types",
+   "name": "GraphNode",
+   "kind": "object",
+   "reads": [
+    "complexity",
+    "id"
+   ],
+   "accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/utils/layerStats.ts:1 GraphNode from \"@understand-anything/core/types\": package @understa",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/utils/layerStats.ts:1 GraphNode from \"@understand-anything/core/types\": package @understand-anythin"
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/utils/layerStats.ts",
+   "line": 1,
+   "spec": "@understand-anything/core/types",
+   "name": "Layer",
+   "kind": "object",
+   "reads": [
+    "id",
+    "nodeIds"
+   ],
+   "accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/utils/layerStats.ts:1 GraphNode from \"@understand-anything/core/types\": package @understa",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED understand-anything-plugin/packages/dashboard/src/utils/layerStats.ts:1 Layer from \"@understand-anything/core/types\": package @understand-anything/co"
+  }
+ ],
+ "exploratory_all_files_constructs": 48,
+ "exploratory_all_files_unaccounted": 0,
+ "repo_level_abstain": []
+}

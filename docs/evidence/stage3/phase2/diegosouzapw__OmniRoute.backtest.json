@@ -1,0 +1,570 @@
+{
+  "backtest": [
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "pricingFieldsSchema.cache_creation",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "pricingFieldsSchema.cached",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "pricingFieldsSchema.input",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "pricingFieldsSchema.output",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "pricingFieldsSchema.reasoning",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 1,
+      "contract": "strings:pricingFieldsSchema@const:PRICING_FIELDS",
+      "producer": "src/shared/validation/schemas/pricing.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "pricingFieldsSchema.cache_creation",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "pricingFieldsSchema.cached",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "pricingFieldsSchema.input",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "pricingFieldsSchema.output",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 1,
+      "contract": "strings:pricingFieldsSchema@const:PRICING_FIELDS#2",
+      "producer": "src/shared/validation/schemas/pricing.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.errorCode",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.isActive",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.lastError",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.lastErrorAt",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.lastErrorType",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.priority",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.rateLimitedUntil",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.testStatus",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 3,
+      "contract": "strings:updateProviderConnectionSchema@const:COLUMNS",
+      "producer": "src/shared/validation/schemas/provider.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.errorCode",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.isActive",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.lastErrorAt",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.lastErrorType",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.priority",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.rateLimitedUntil",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.testStatus",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 3,
+      "contract": "strings:updateProviderConnectionSchema@const:CONNECTION_COLUMNS",
+      "producer": "src/shared/validation/schemas/provider.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.apiKey",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.defaultModel",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.errorCode",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.globalPriority",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.group",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.healthCheckInterval",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.lastError",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.lastErrorAt",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.lastErrorSource",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.lastErrorType",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.lastTested",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.maxConcurrent",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.perKeyProxyEnabled",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.projectId",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.proxyEnabled",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.quotaVisible",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.quotaWindowThresholds",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.rateLimitOverrides",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.rateLimitedUntil",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "updateProviderConnectionSchema.testStatus",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f9ec93d99176",
+              "date": "2026-10-16",
+              "state": "absent"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 3,
+      "contract": "strings:updateProviderConnectionSchema@const:optionalFields",
+      "producer": "src/shared/validation/schemas/provider.ts"
+    }
+  ],
+  "coda": "Timelines replay today's extraction over past file contents. They are\nnot replayed verdicts: waivers, selectors and samples are today's, and a\npast consumer may not have read the field yet. Unreadable commits are\nstated, never guessed.",
+  "depth": 100,
+  "skipped": []
+}

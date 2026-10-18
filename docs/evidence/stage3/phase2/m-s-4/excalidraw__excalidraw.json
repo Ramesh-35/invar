@@ -1,0 +1,128 @@
+{
+ "repo": "excalidraw__excalidraw",
+ "packages_superset": 11,
+ "eligible_files": 421,
+ "sample": [
+  "packages/excalidraw/tests/pan.test.tsx",
+  "packages/excalidraw/components/PasteChartDialog.tsx",
+  "packages/excalidraw/components/TTDDialog/useTTDChatStorage.ts",
+  "packages/element/tests/delta.test.tsx",
+  "packages/excalidraw/components/Tools.tsx",
+  "packages/excalidraw/tests/selection.test.tsx",
+  "packages/excalidraw/charts/charts.types.ts",
+  "packages/excalidraw/components/FontPicker/FontPicker.tsx",
+  "packages/excalidraw/components/TTDDialog/utils/chat.ts",
+  "packages/element/src/elbowArrow.ts"
+ ],
+ "sampled_constructs": 10,
+ "sampled_silent": 0,
+ "rows": [
+  {
+   "file": "packages/excalidraw/components/PasteChartDialog.tsx",
+   "line": 5,
+   "spec": "@excalidraw/element/types",
+   "name": "ChartType",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN UNRESOLVED packages/excalidraw/components/PasteChartDialog.tsx:3 newTextElement from \"@excalidraw/element\": package @excalidraw/element declares \"expo",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/excalidraw/components/PasteChartDialog.tsx:5 ChartType from \"@excalidraw/element/types\": package @excalidraw/element declares \"exports\"; not"
+  },
+  {
+   "file": "packages/element/tests/delta.test.tsx",
+   "line": 5,
+   "spec": "@excalidraw/excalidraw/types",
+   "name": "ObservedAppState",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN R6 packages/element/tests/delta.test.tsx:1 reads height, width of AppState (packages/excalidraw/types.ts:329) without importing it by name (out of v1)",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/element/tests/delta.test.tsx:5 ObservedAppState from \"@excalidraw/excalidraw/types\": package @excalidraw/excalidraw declares \"exports\"; not "
+  },
+  {
+   "file": "packages/excalidraw/components/Tools.tsx",
+   "line": 6,
+   "spec": "@excalidraw/element/types",
+   "name": "PointerType",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN UNRESOLVED packages/excalidraw/components/Tools.tsx:4 KEYS from \"@excalidraw/common\": package @excalidraw/common declares \"exports\"; not supported in ",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/excalidraw/components/Tools.tsx:6 PointerType from \"@excalidraw/element/types\": package @excalidraw/element declares \"exports\"; not supporte"
+  },
+  {
+   "file": "packages/excalidraw/tests/selection.test.tsx",
+   "line": 11,
+   "spec": "@excalidraw/math",
+   "name": "LocalPoint",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN R6 packages/excalidraw/tests/selection.test.tsx:5 reads angle, height, width, x, y of RectangleBox (packages/element/src/bounds.ts:68) without importi",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/excalidraw/tests/selection.test.tsx:11 LocalPoint from \"@excalidraw/math\": package @excalidraw/math declares \"exports\"; not supported in sli"
+  },
+  {
+   "file": "packages/excalidraw/charts/charts.types.ts",
+   "line": 1,
+   "spec": "@excalidraw/element/types",
+   "name": "NonDeletedExcalidrawElement",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN UNRESOLVED packages/excalidraw/charts/charts.types.ts:1 NonDeletedExcalidrawElement from \"@excalidraw/element/types\": package @excalidraw/element decl",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/excalidraw/charts/charts.types.ts:1 NonDeletedExcalidrawElement from \"@excalidraw/element/types\": package @excalidraw/element declares \"expo"
+  },
+  {
+   "file": "packages/excalidraw/components/FontPicker/FontPicker.tsx",
+   "line": 11,
+   "spec": "@excalidraw/element/types",
+   "name": "FontFamilyValues",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN UNRESOLVED packages/excalidraw/components/FontPicker/FontPicker.tsx:11 FontFamilyValues from \"@excalidraw/element/types\": package @excalidraw/element ",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/excalidraw/components/FontPicker/FontPicker.tsx:11 FontFamilyValues from \"@excalidraw/element/types\": package @excalidraw/element declares \""
+  },
+  {
+   "file": "packages/element/src/elbowArrow.ts",
+   "line": 1,
+   "spec": "@excalidraw/math",
+   "name": "GlobalPoint",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN R6 packages/element/src/elbowArrow.ts:27 reads end, start of CaretPosition (packages/excalidraw/hooks/useTextEditorFocus.ts:4) without importing it by",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/element/src/elbowArrow.ts:1 GlobalPoint from \"@excalidraw/math\": package @excalidraw/math declares \"exports\"; not supported in slice 1"
+  },
+  {
+   "file": "packages/element/src/elbowArrow.ts",
+   "line": 1,
+   "spec": "@excalidraw/math",
+   "name": "LocalPoint",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN R6 packages/element/src/elbowArrow.ts:27 reads end, start of CaretPosition (packages/excalidraw/hooks/useTextEditorFocus.ts:4) without importing it by",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/element/src/elbowArrow.ts:1 LocalPoint from \"@excalidraw/math\": package @excalidraw/math declares \"exports\"; not supported in slice 1"
+  },
+  {
+   "file": "packages/element/src/elbowArrow.ts",
+   "line": 16,
+   "spec": "@excalidraw/common",
+   "name": "Bounds",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN R6 packages/element/src/elbowArrow.ts:27 reads end, start of CaretPosition (packages/excalidraw/hooks/useTextEditorFocus.ts:4) without importing it by",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/element/src/elbowArrow.ts:16 Bounds from \"@excalidraw/common\": package @excalidraw/common declares \"exports\"; not supported in slice 1"
+  },
+  {
+   "file": "packages/element/src/elbowArrow.ts",
+   "line": 27,
+   "spec": "@excalidraw/excalidraw/types",
+   "name": "AppState",
+   "kind": "object",
+   "reads": [
+    "isBindingEnabled",
+    "isMidpointSnappingEnabled",
+    "zoom"
+   ],
+   "accounted_by": "# ABSTAIN R6 packages/element/src/elbowArrow.ts:27 reads end, start of CaretPosition (packages/excalidraw/hooks/useTextEditorFocus.ts:4) without importing it by",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/element/src/elbowArrow.ts:27 AppState from \"@excalidraw/excalidraw/types\": package @excalidraw/excalidraw declares \"exports\"; not supported "
+  }
+ ],
+ "exploratory_all_files_constructs": 912,
+ "exploratory_all_files_unaccounted": 0,
+ "repo_level_abstain": []
+}

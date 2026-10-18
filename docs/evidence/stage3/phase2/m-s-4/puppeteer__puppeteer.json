@@ -1,0 +1,133 @@
+{
+ "repo": "puppeteer__puppeteer",
+ "packages_superset": 13,
+ "eligible_files": 61,
+ "sample": [
+  "test/src/mouse.test.ts",
+  "test/src/device-request-prompt.test.ts",
+  "packages/puppeteer-core/src/node/ChromeLauncher.ts",
+  "packages/puppeteer/src/puppeteer.ts",
+  "packages/puppeteer/src/getConfiguration.ts",
+  "packages/puppeteer-core/src/node/PuppeteerNode.ts",
+  "packages/browsers/test/src/utils.ts",
+  "test/src/mocha-utils.ts",
+  "test/src/queryhandler.test.ts",
+  "test/src/cdp/bfcache.test.ts"
+ ],
+ "sampled_constructs": 8,
+ "sampled_silent": 0,
+ "rows": [
+  {
+   "file": "test/src/mouse.test.ts",
+   "line": 9,
+   "spec": "puppeteer-core/internal/api/Input.js",
+   "name": "MouseButton",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN R6 test/src/mouse.test.ts:9 reads height, left, top, width of AddScreenParams (packages/puppeteer-core/src/api/Browser.ts:316) without importing it by",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED test/src/mouse.test.ts:9 MouseButton from \"puppeteer-core/internal/api/Input.js\": package puppeteer-core declares \"exports\"; not supported in slice 1"
+  },
+  {
+   "file": "test/src/mouse.test.ts",
+   "line": 11,
+   "spec": "puppeteer-core/internal/common/USKeyboardLayout.js",
+   "name": "KeyInput",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN R6 test/src/mouse.test.ts:9 reads height, left, top, width of AddScreenParams (packages/puppeteer-core/src/api/Browser.ts:316) without importing it by",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED test/src/mouse.test.ts:11 KeyInput from \"puppeteer-core/internal/common/USKeyboardLayout.js\": package puppeteer-core declares \"exports\"; not supporte"
+  },
+  {
+   "file": "packages/puppeteer/src/getConfiguration.ts",
+   "line": 11,
+   "spec": "puppeteer-core",
+   "name": "ChromeHeadlessShellSettings",
+   "kind": "object",
+   "reads": [
+    "downloadBaseUrl",
+    "skipDownload",
+    "version"
+   ],
+   "accounted_by": "# ABSTAIN R6 packages/puppeteer/src/getConfiguration.ts:11 reads env, executablePath of LaunchOptions (packages/puppeteer-core/src/node/LaunchOptions.ts:39) wit",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/puppeteer/src/getConfiguration.ts:11 ChromeHeadlessShellSettings from \"puppeteer-core\": package puppeteer-core declares \"exports\"; not suppo"
+  },
+  {
+   "file": "packages/puppeteer/src/getConfiguration.ts",
+   "line": 11,
+   "spec": "puppeteer-core",
+   "name": "ChromeSettings",
+   "kind": "object",
+   "reads": [
+    "downloadBaseUrl",
+    "skipDownload",
+    "version"
+   ],
+   "accounted_by": "# ABSTAIN R6 packages/puppeteer/src/getConfiguration.ts:11 reads env, executablePath of LaunchOptions (packages/puppeteer-core/src/node/LaunchOptions.ts:39) wit",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/puppeteer/src/getConfiguration.ts:11 ChromeSettings from \"puppeteer-core\": package puppeteer-core declares \"exports\"; not supported in slice"
+  },
+  {
+   "file": "packages/puppeteer/src/getConfiguration.ts",
+   "line": 11,
+   "spec": "puppeteer-core",
+   "name": "Configuration",
+   "kind": "object",
+   "reads": [
+    "cacheDirectory",
+    "chrome",
+    "defaultBrowser",
+    "executablePath",
+    "experiments",
+    "firefox",
+    "logLevel",
+    "skipDownload"
+   ],
+   "accounted_by": "# ABSTAIN R6 packages/puppeteer/src/getConfiguration.ts:11 reads env, executablePath of LaunchOptions (packages/puppeteer-core/src/node/LaunchOptions.ts:39) wit",
+   "strict_accounted_by": "# ABSTAIN R6 packages/puppeteer/src/getConfiguration.ts:11 reads env, executablePath of LaunchOptions (packages/puppeteer-core/src/node/LaunchOptions.ts:39) without impor"
+  },
+  {
+   "file": "packages/puppeteer/src/getConfiguration.ts",
+   "line": 11,
+   "spec": "puppeteer-core",
+   "name": "FirefoxSettings",
+   "kind": "object",
+   "reads": [
+    "downloadBaseUrl",
+    "skipDownload",
+    "version"
+   ],
+   "accounted_by": "# ABSTAIN R6 packages/puppeteer/src/getConfiguration.ts:11 reads env, executablePath of LaunchOptions (packages/puppeteer-core/src/node/LaunchOptions.ts:39) wit",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/puppeteer/src/getConfiguration.ts:11 FirefoxSettings from \"puppeteer-core\": package puppeteer-core declares \"exports\"; not supported in slic"
+  },
+  {
+   "file": "packages/puppeteer/src/getConfiguration.ts",
+   "line": 11,
+   "spec": "puppeteer-core",
+   "name": "SupportedBrowser",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN R6 packages/puppeteer/src/getConfiguration.ts:11 reads env, executablePath of LaunchOptions (packages/puppeteer-core/src/node/LaunchOptions.ts:39) wit",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/puppeteer/src/getConfiguration.ts:11 SupportedBrowser from \"puppeteer-core\": package puppeteer-core declares \"exports\"; not supported in sli"
+  },
+  {
+   "file": "test/src/mocha-utils.ts",
+   "line": 19,
+   "spec": "puppeteer-core/internal/node/LaunchOptions.js",
+   "name": "LaunchOptions",
+   "kind": "object",
+   "reads": [
+    "args",
+    "browser",
+    "env",
+    "executablePath",
+    "extraPrefsFirefox",
+    "headless",
+    "timeout"
+   ],
+   "accounted_by": "# ABSTAIN R6 test/src/mocha-utils.ts:14 reads args, executablePath of ResolvedLaunchArgs (packages/puppeteer-core/src/node/BrowserLauncher.ts:51) without import",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED test/src/mocha-utils.ts:19 LaunchOptions from \"puppeteer-core/internal/node/LaunchOptions.js\": package puppeteer-core declares \"exports\"; not support"
+  }
+ ],
+ "exploratory_all_files_constructs": 18,
+ "exploratory_all_files_unaccounted": 0,
+ "repo_level_abstain": []
+}

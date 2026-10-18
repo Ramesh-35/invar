@@ -12,3 +12,14 @@ tests, zero warnings. Gate 1 and Gate 3 each falsified fixtures while the
 engine was right every time; the corrections are recorded in the spec's
 section K2, including the evidence-bounded re-acceptance loop that is the
 only honest way durability resets. Record: docs/architecture/INVAR-HOLDS-001.md.
+
+## 2026-10-18: STAGE3-EVAL-001 executed (pre-registered evaluation on unseen repositories)
+
+Ten repositories selected by a committed rule before any clone, engine
+frozen at f9c4b29. Hard thresholds met: ISA 10 of 10, determinism 10 of
+10, abstention honesty 0 silent drops, round trip 8 of 8 HOLDS with the
+durability line; precision 8 of 9. One engine defect class found and not
+fixed mid-run: backtest replays strings contracts with the wrong extractor
+(61 of 61 absence events false). One yield lever: "exports" maps cause 83
+percent of UNRESOLVED. Record: docs/architecture/STAGE3-EVAL-001.md section
+K and docs/evidence/stage3/.

@@ -1,0 +1,148 @@
+invar backtest (invar.toml, 5 contract(s), depth 100)
+
+strings:pricingFieldsSchema@const:PRICING_FIELDS: src/shared/validation/schemas/pricing.ts (1 commit(s) replayed)
+  pricingFieldsSchema.cache_creation
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  pricingFieldsSchema.cached
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  pricingFieldsSchema.input
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  pricingFieldsSchema.output
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  pricingFieldsSchema.reasoning
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+
+strings:pricingFieldsSchema@const:PRICING_FIELDS#2: src/shared/validation/schemas/pricing.ts (1 commit(s) replayed)
+  pricingFieldsSchema.cache_creation
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  pricingFieldsSchema.cached
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  pricingFieldsSchema.input
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  pricingFieldsSchema.output
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+
+strings:updateProviderConnectionSchema@const:COLUMNS: src/shared/validation/schemas/provider.ts (3 commit(s) replayed)
+  updateProviderConnectionSchema.errorCode
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.isActive
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.lastError
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.lastErrorAt
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.lastErrorType
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.priority
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.rateLimitedUntil
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.testStatus
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+
+strings:updateProviderConnectionSchema@const:CONNECTION_COLUMNS: src/shared/validation/schemas/provider.ts (3 commit(s) replayed)
+  updateProviderConnectionSchema.errorCode
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.isActive
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.lastErrorAt
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.lastErrorType
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.priority
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.rateLimitedUntil
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.testStatus
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+
+strings:updateProviderConnectionSchema@const:optionalFields: src/shared/validation/schemas/provider.ts (3 commit(s) replayed)
+  updateProviderConnectionSchema.apiKey
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.defaultModel
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.errorCode
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.globalPriority
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.group
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.healthCheckInterval
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.lastError
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.lastErrorAt
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.lastErrorSource
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.lastErrorType
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.lastTested
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.maxConcurrent
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.perKeyProxyEnabled
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.projectId
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.proxyEnabled
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.quotaVisible
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.quotaWindowThresholds
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.rateLimitOverrides
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.rateLimitedUntil
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+  updateProviderConnectionSchema.testStatus
+    2026-10-16 f9ec93d99176 absent
+    never absent after introduction
+
+Timelines replay today's extraction over past file contents. They are
+not replayed verdicts: waivers, selectors and samples are today's, and a
+past consumer may not have read the field yet. Unreadable commits are
+stated, never guessed.

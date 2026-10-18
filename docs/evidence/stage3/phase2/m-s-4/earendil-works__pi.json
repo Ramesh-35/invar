@@ -1,0 +1,248 @@
+{
+ "repo": "earendil-works__pi",
+ "packages_superset": 17,
+ "eligible_files": 541,
+ "sample": [
+  "packages/durable/src/storage/sqlite/migrations.ts",
+  "packages/coding-agent/src/modes/interactive/components/show-images-selector.ts",
+  "packages/coding-agent/test/status-indicator.test.ts",
+  "packages/durable/test/harness-support.ts",
+  "packages/coding-agent/src/core/compaction/utils.ts",
+  "packages/coding-agent/src/core/export-html/tool-renderer.ts",
+  "packages/durable/test/examples/11-extension-state.ts",
+  "packages/durable/src/documents.ts",
+  "packages/durable/test/system-order-cache-e2e.test.ts",
+  "packages/durable/test/harness-inbox.test.ts"
+ ],
+ "sampled_constructs": 19,
+ "sampled_silent": 0,
+ "rows": [
+  {
+   "file": "packages/durable/test/harness-support.ts",
+   "line": 1,
+   "spec": "@earendil-works/pi-ai",
+   "name": "AssistantMessage",
+   "kind": "object",
+   "reads": [
+    "content",
+    "role",
+    "stopReason"
+   ],
+   "accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-support.ts:1 AssistantMessage from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\";",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-support.ts:1 AssistantMessage from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\"; not suppo"
+  },
+  {
+   "file": "packages/durable/test/harness-support.ts",
+   "line": 1,
+   "spec": "@earendil-works/pi-ai",
+   "name": "Message",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-support.ts:1 AssistantMessage from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\";",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-support.ts:1 AssistantMessage from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\"; not suppo"
+  },
+  {
+   "file": "packages/durable/test/harness-support.ts",
+   "line": 1,
+   "spec": "@earendil-works/pi-ai",
+   "name": "StopReason",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-support.ts:1 AssistantMessage from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\";",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-support.ts:1 StopReason from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\"; not supported i"
+  },
+  {
+   "file": "packages/durable/test/harness-support.ts",
+   "line": 1,
+   "spec": "@earendil-works/pi-ai",
+   "name": "SystemMessage",
+   "kind": "object",
+   "reads": [
+    "content",
+    "role",
+    "sections"
+   ],
+   "accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-support.ts:1 AssistantMessage from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\";",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-support.ts:1 SystemMessage from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\"; not supporte"
+  },
+  {
+   "file": "packages/durable/test/harness-support.ts",
+   "line": 1,
+   "spec": "@earendil-works/pi-ai",
+   "name": "ToolCall",
+   "kind": "object",
+   "reads": [
+    "name",
+    "type"
+   ],
+   "accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-support.ts:1 AssistantMessage from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\";",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-support.ts:1 ToolCall from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\"; not supported in "
+  },
+  {
+   "file": "packages/durable/test/harness-support.ts",
+   "line": 1,
+   "spec": "@earendil-works/pi-ai",
+   "name": "ToolResultMessage",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-support.ts:1 AssistantMessage from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\";",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-support.ts:1 ToolResultMessage from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\"; not supp"
+  },
+  {
+   "file": "packages/durable/test/harness-support.ts",
+   "line": 1,
+   "spec": "@earendil-works/pi-ai",
+   "name": "UserMessage",
+   "kind": "object",
+   "reads": [
+    "content",
+    "role"
+   ],
+   "accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-support.ts:1 AssistantMessage from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\";",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-support.ts:1 UserMessage from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\"; not supported "
+  },
+  {
+   "file": "packages/coding-agent/src/core/compaction/utils.ts",
+   "line": 5,
+   "spec": "@earendil-works/pi-agent-core",
+   "name": "AgentMessage",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN R6 packages/coding-agent/src/core/compaction/utils.ts:6 reads content, role of AssistantMessage (packages/ai/src/types.ts:570) without importing it by",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/coding-agent/src/core/compaction/utils.ts:5 AgentMessage from \"@earendil-works/pi-agent-core\": package @earendil-works/pi-agent-core declare"
+  },
+  {
+   "file": "packages/coding-agent/src/core/compaction/utils.ts",
+   "line": 6,
+   "spec": "@earendil-works/pi-ai",
+   "name": "Message",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN R6 packages/coding-agent/src/core/compaction/utils.ts:6 reads content, role of AssistantMessage (packages/ai/src/types.ts:570) without importing it by",
+   "strict_accounted_by": "# ABSTAIN R6 packages/coding-agent/src/core/compaction/utils.ts:6 reads content, role of AssistantMessage (packages/ai/src/types.ts:570) without importing it by name (out"
+  },
+  {
+   "file": "packages/durable/src/documents.ts",
+   "line": 1,
+   "spec": "@earendil-works/chord",
+   "name": "JsonValue",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN UNRESOLVED packages/durable/src/documents.ts:1 JsonValue from \"@earendil-works/chord\": package @earendil-works/chord declares \"exports\"; not supported",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/durable/src/documents.ts:1 JsonValue from \"@earendil-works/chord\": package @earendil-works/chord declares \"exports\"; not supported in slice "
+  },
+  {
+   "file": "packages/durable/src/documents.ts",
+   "line": 2,
+   "spec": "@earendil-works/chord/delta",
+   "name": "Op",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN UNRESOLVED packages/durable/src/documents.ts:1 JsonValue from \"@earendil-works/chord\": package @earendil-works/chord declares \"exports\"; not supported",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/durable/src/documents.ts:2 Op from \"@earendil-works/chord/delta\": package @earendil-works/chord declares \"exports\"; not supported in slice 1"
+  },
+  {
+   "file": "packages/durable/test/system-order-cache-e2e.test.ts",
+   "line": 1,
+   "spec": "@earendil-works/pi-ai",
+   "name": "AssistantMessage",
+   "kind": "object",
+   "reads": [
+    "errorMessage",
+    "model",
+    "role",
+    "stopReason",
+    "usage"
+   ],
+   "accounted_by": "# ABSTAIN R6 packages/durable/test/system-order-cache-e2e.test.ts:1 reads cacheRead, cacheWrite, input of Usage (packages/ai/src/types.ts:451) without importing",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/system-order-cache-e2e.test.ts:1 AssistantMessage from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports"
+  },
+  {
+   "file": "packages/durable/test/system-order-cache-e2e.test.ts",
+   "line": 1,
+   "spec": "@earendil-works/pi-ai",
+   "name": "Message",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN R6 packages/durable/test/system-order-cache-e2e.test.ts:1 reads cacheRead, cacheWrite, input of Usage (packages/ai/src/types.ts:451) without importing",
+   "strict_accounted_by": "# ABSTAIN R6 packages/durable/test/system-order-cache-e2e.test.ts:1 reads errorMessage, model, stopReason, usage of AssistantImages (packages/ai/src/types.ts:655) without"
+  },
+  {
+   "file": "packages/durable/test/system-order-cache-e2e.test.ts",
+   "line": 1,
+   "spec": "@earendil-works/pi-ai",
+   "name": "Models",
+   "kind": "object",
+   "reads": [
+    "model",
+    "options",
+    "type"
+   ],
+   "accounted_by": "# ABSTAIN R6 packages/durable/test/system-order-cache-e2e.test.ts:1 reads cacheRead, cacheWrite, input of Usage (packages/ai/src/types.ts:451) without importing",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/system-order-cache-e2e.test.ts:1 Models from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\"; not sup"
+  },
+  {
+   "file": "packages/durable/test/harness-inbox.test.ts",
+   "line": 4,
+   "spec": "@earendil-works/chord/delta",
+   "name": "Op",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN R6 packages/durable/test/harness-inbox.test.ts:4 reads context, ops of ReplicatedStateSourceFrame (packages/chord/src/state.ts:45) without importing i",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-inbox.test.ts:4 Op from \"@earendil-works/chord/delta\": package @earendil-works/chord declares \"exports\"; not supported "
+  },
+  {
+   "file": "packages/durable/test/harness-inbox.test.ts",
+   "line": 5,
+   "spec": "@earendil-works/pi-ai",
+   "name": "AssistantMessage",
+   "kind": "object",
+   "reads": [
+    "content",
+    "model",
+    "role",
+    "stopReason",
+    "usage"
+   ],
+   "accounted_by": "# ABSTAIN R6 packages/durable/test/harness-inbox.test.ts:4 reads context, ops of ReplicatedStateSourceFrame (packages/chord/src/state.ts:45) without importing i",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-inbox.test.ts:5 AssistantMessage from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\"; not su"
+  },
+  {
+   "file": "packages/durable/test/harness-inbox.test.ts",
+   "line": 5,
+   "spec": "@earendil-works/pi-ai",
+   "name": "FauxResponseStep",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN R6 packages/durable/test/harness-inbox.test.ts:4 reads context, ops of ReplicatedStateSourceFrame (packages/chord/src/state.ts:45) without importing i",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-inbox.test.ts:5 FauxResponseStep from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\"; not su"
+  },
+  {
+   "file": "packages/durable/test/harness-inbox.test.ts",
+   "line": 5,
+   "spec": "@earendil-works/pi-ai",
+   "name": "ToolResultMessage",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN R6 packages/durable/test/harness-inbox.test.ts:4 reads context, ops of ReplicatedStateSourceFrame (packages/chord/src/state.ts:45) without importing i",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-inbox.test.ts:5 ToolResultMessage from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\"; not s"
+  },
+  {
+   "file": "packages/durable/test/harness-inbox.test.ts",
+   "line": 5,
+   "spec": "@earendil-works/pi-ai",
+   "name": "Usage",
+   "kind": "object",
+   "reads": [
+    "input",
+    "output",
+    "totalTokens"
+   ],
+   "accounted_by": "# ABSTAIN R6 packages/durable/test/harness-inbox.test.ts:4 reads context, ops of ReplicatedStateSourceFrame (packages/chord/src/state.ts:45) without importing i",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/durable/test/harness-inbox.test.ts:5 Usage from \"@earendil-works/pi-ai\": package @earendil-works/pi-ai declares \"exports\"; not supported in "
+  }
+ ],
+ "exploratory_all_files_constructs": 764,
+ "exploratory_all_files_unaccounted": 0,
+ "repo_level_abstain": []
+}

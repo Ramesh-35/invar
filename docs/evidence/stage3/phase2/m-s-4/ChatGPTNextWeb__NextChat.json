@@ -1,0 +1,14 @@
+{
+ "repo": "ChatGPTNextWeb__NextChat",
+ "packages_superset": 0,
+ "eligible_files": 0,
+ "sample": [],
+ "sampled_constructs": 0,
+ "sampled_silent": 0,
+ "rows": [],
+ "exploratory_all_files_constructs": 0,
+ "exploratory_all_files_unaccounted": 0,
+ "repo_level_abstain": [
+  "# ABSTAIN H2 . 0 qualifying package(s); a multi-package workspace needs at least 2"
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "repo": "vuejs__vue",
+ "packages_superset": 3,
+ "eligible_files": 0,
+ "sample": [],
+ "sampled_constructs": 0,
+ "sampled_silent": 0,
+ "rows": [],
+ "exploratory_all_files_constructs": 0,
+ "exploratory_all_files_unaccounted": 0,
+ "repo_level_abstain": []
+}

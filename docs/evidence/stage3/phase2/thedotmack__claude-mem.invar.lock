@@ -1,0 +1,44 @@
+# invar.lock: the producer fields this repository depends on.
+# Written by `invar lock`. Accept a reviewed producer change with
+# `invar lock --update`. Waivers are written by hand and kept.
+
+[lock]
+format = "1"
+
+[[contract]]
+id = "strings:MemoryItemSchema@const:OBSERVATION_JSON_FIELDS"
+producer = "src/core/schemas/memory-item.ts"
+blake3 = "b49197238c410cc3334dd2e362eb59d2fe4ee5f9cd7008c1bbb4d1fefe8e37ff"
+recorded_at = "2026-10-18T16:35:00Z"
+bind = "code 2026-10-18 MemoryItemSchema.concepts ?"
+bind = "code 2026-10-18 MemoryItemSchema.facts ?"
+bind = "code 2026-10-18 MemoryItemSchema.filesModified ?"
+bind = "code 2026-10-18 MemoryItemSchema.filesRead ?"
+members = "code MemoryItemSchema concepts createdAtEpoch facts filesModified filesRead id kind legacyObservationId metadata narrative projectId serverSessionId subtitle text title type updatedAtEpoch"
+
+[[contract]]
+id = "strings:MemoryItemSchema@const:indexedFields"
+producer = "src/core/schemas/memory-item.ts"
+blake3 = "b49197238c410cc3334dd2e362eb59d2fe4ee5f9cd7008c1bbb4d1fefe8e37ff"
+recorded_at = "2026-10-18T16:35:00Z"
+bind = "code 2026-10-18 MemoryItemSchema.concepts ?"
+bind = "code 2026-10-18 MemoryItemSchema.facts ?"
+bind = "code 2026-10-18 MemoryItemSchema.narrative ?"
+bind = "code 2026-10-18 MemoryItemSchema.subtitle ?"
+bind = "code 2026-10-18 MemoryItemSchema.text ?"
+members = "code MemoryItemSchema concepts createdAtEpoch facts filesModified filesRead id kind legacyObservationId metadata narrative projectId serverSessionId subtitle text title type updatedAtEpoch"
+
+[[contract]]
+id = "strings:MemoryItemSchema@const:observationsKnownColumns"
+producer = "src/core/schemas/memory-item.ts"
+blake3 = "b49197238c410cc3334dd2e362eb59d2fe4ee5f9cd7008c1bbb4d1fefe8e37ff"
+recorded_at = "2026-10-18T16:35:00Z"
+bind = "code 2026-10-18 MemoryItemSchema.concepts ?"
+bind = "code 2026-10-18 MemoryItemSchema.createdAtEpoch ?"
+bind = "code 2026-10-18 MemoryItemSchema.facts ?"
+bind = "code 2026-10-18 MemoryItemSchema.filesModified ?"
+bind = "code 2026-10-18 MemoryItemSchema.filesRead ?"
+bind = "code 2026-10-18 MemoryItemSchema.narrative ?"
+bind = "code 2026-10-18 MemoryItemSchema.subtitle ?"
+bind = "code 2026-10-18 MemoryItemSchema.text ?"
+members = "code MemoryItemSchema concepts createdAtEpoch facts filesModified filesRead id kind legacyObservationId metadata narrative projectId serverSessionId subtitle text title type updatedAtEpoch"

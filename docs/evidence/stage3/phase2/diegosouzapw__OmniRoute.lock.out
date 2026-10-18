@@ -1,0 +1,6 @@
+  + contract strings:pricingFieldsSchema@const:PRICING_FIELDS (5 bindings)
+  + contract strings:pricingFieldsSchema@const:PRICING_FIELDS#2 (4 bindings)
+  + contract strings:updateProviderConnectionSchema@const:COLUMNS (8 bindings)
+  + contract strings:updateProviderConnectionSchema@const:CONNECTION_COLUMNS (7 bindings)
+  + contract strings:updateProviderConnectionSchema@const:optionalFields (20 bindings)
+wrote ./invar.lock (5 contract(s), 44 binding(s))

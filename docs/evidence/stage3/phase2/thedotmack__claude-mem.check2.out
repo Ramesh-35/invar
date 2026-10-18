@@ -1,0 +1,19 @@
+INVAR check (3 contract(s))
+  [HOLDS]    strings:MemoryItemSchema@const:observationsKnownColumns (strings)
+      note: string-coupling contract: list const:observationsKnownColumns in src/services/sqlite/SessionStore.ts against the key set of MemoryItemSchema in src/core/schemas/memory-item.ts; a name still in the list but gone from the shape is a stale reference; that the list reaches the store is not verified
+      note: shape file unchanged since lock (2026-10-18T16:35:00Z)
+      note: 9 key(s) of the shape not in the lock, tolerated (id, projectId, serverSessionId, legacyObservationId, kind); `invar lock --update` records them
+  durability: held since 2026-10-18 (0 days)
+  [HOLDS]    strings:MemoryItemSchema@const:OBSERVATION_JSON_FIELDS (strings)
+      note: string-coupling contract: list const:OBSERVATION_JSON_FIELDS in src/services/worker/http/routes/DataRoutes.ts against the key set of MemoryItemSchema in src/core/schemas/memory-item.ts; a name still in the list but gone from the shape is a stale reference; that the list reaches the store is not verified
+      note: shape file unchanged since lock (2026-10-18T16:35:00Z)
+      note: 13 key(s) of the shape not in the lock, tolerated (id, projectId, serverSessionId, legacyObservationId, kind); `invar lock --update` records them
+  durability: held since 2026-10-18 (0 days)
+  [HOLDS]    strings:MemoryItemSchema@const:indexedFields (strings)
+      note: string-coupling contract: list const:indexedFields in src/storage/sqlite/memory-items.ts against the key set of MemoryItemSchema in src/core/schemas/memory-item.ts; a name still in the list but gone from the shape is a stale reference; that the list reaches the store is not verified
+      note: shape file unchanged since lock (2026-10-18T16:35:00Z)
+      note: 12 key(s) of the shape not in the lock, tolerated (id, projectId, serverSessionId, legacyObservationId, kind); `invar lock --update` records them
+  durability: held since 2026-10-18 (0 days)
+result: ALL 3 contract(s) hold
+summary: held 3 | violated 0 | skipped or not evaluated 0
+measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)

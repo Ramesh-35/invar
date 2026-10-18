@@ -130,3 +130,42 @@ Stop and report on: any urge to amend selection, thresholds or rubric
 after a repository is opened; any engine or fixture edit during the run;
 any finding left out of the ledger; any repository swapped after the
 manifest commit; any metric computed over normalized rather than raw bytes.
+
+## J. Rulings of 2026-10-18 (recorded)
+
+S-D1 to S-D7 RATIFIED as drafted (23:11). Execution GO: selection search,
+manifest commit, phase 1. Phase 2 GO after adjudication (23:31).
+
+## K. Execution ledger (appended at close; sections 0 to J are unchanged)
+
+Status: EXECUTED. Engine frozen at f9c4b29 (binary eb93c9b16869) for every
+run. Evidence: docs/evidence/stage3/ (selection, phase1, phase2, findings).
+
+### K1. Verdicts against the pre-registered thresholds
+
+| Metric | Verdict |
+|---|---|
+| M-S-1 ISA conformance | PASS, 10 of 10: every init exited 0, no panic |
+| M-S-2 determinism | PASS, 10 of 10: raw byte-identical stdout and invar.toml across two fresh pinned clones |
+| M-S-3 precision | PASS: 8 TRUE of 9 adjudicated (89 percent against a 60 percent floor), TRUE proposals in 2 repositories; S3-F-04 requests a re-ruling of the one NOT TRUE, which cannot change the verdict |
+| M-S-4 abstention honesty | PASS: 55 candidate constructs in 60 sampled files, 0 silent, each matched to an ABSTAIN line naming its exact file:line and imported name (stricter than registered); exploratory over all files: 1,767 constructs, 0 unaccounted |
+| M-S-5 round trip | PASS, 2 of 2 applicable: 8 of 8 TRUE contracts lock, check exit 0 with the durability line, second check byte-identical |
+| M-S-6 backtest | completed 2 of 2 within the ISA (exit 0); adjudication: 61 of 61 absence events are engine errors (S3-F-05, S3-F-06). Backtest is NOT validated for strings contracts |
+| M-S-7 performance | init 0 to 7 seconds, check and backtest under 1 second per repository; recorded, no threshold |
+
+### K2. What the evaluation taught (stated, not hidden)
+
+- The core held on unseen code: deterministic, inside the ISA, and every
+  declined candidate coded, never guessed. An exploratory probe (not
+  pre-registered) renamed one OmniRoute schema field: check exited 1 and
+  named both stale consumers by file and line, untouched contracts HOLD.
+- One engine defect class, in backtest: strings contracts are replayed
+  with the wrong extractor (S3-F-05) and a never-present binding renders
+  as reassurance (S3-F-06). Found because M-S-6 required every absence
+  event to be adjudicated.
+- One yield lever: package.json "exports" maps account for 83 percent of
+  UNRESOLVED and blocked code-pair discovery in 6 of 8 multi-package
+  repositories (S3-F-08).
+- Per B-S-4, nothing was fixed mid-run. Each defect spawns its own
+  chartered arc; a re-measurement after any fix is STAGE3-EVAL-002 on the
+  same pinned manifest, and this result is never overwritten.

@@ -1,0 +1,63 @@
+invar backtest (invar.toml, 3 contract(s), depth 100)
+
+strings:MemoryItemSchema@const:OBSERVATION_JSON_FIELDS: src/core/schemas/memory-item.ts (1 commit(s) replayed)
+  MemoryItemSchema.concepts
+    2026-10-06 0a803bdedb09 absent
+    never absent after introduction
+  MemoryItemSchema.facts
+    2026-10-06 0a803bdedb09 absent
+    never absent after introduction
+  MemoryItemSchema.filesModified
+    2026-10-06 0a803bdedb09 absent
+    never absent after introduction
+  MemoryItemSchema.filesRead
+    2026-10-06 0a803bdedb09 absent
+    never absent after introduction
+
+strings:MemoryItemSchema@const:indexedFields: src/core/schemas/memory-item.ts (1 commit(s) replayed)
+  MemoryItemSchema.concepts
+    2026-10-06 0a803bdedb09 absent
+    never absent after introduction
+  MemoryItemSchema.facts
+    2026-10-06 0a803bdedb09 absent
+    never absent after introduction
+  MemoryItemSchema.narrative
+    2026-10-06 0a803bdedb09 absent
+    never absent after introduction
+  MemoryItemSchema.subtitle
+    2026-10-06 0a803bdedb09 absent
+    never absent after introduction
+  MemoryItemSchema.text
+    2026-10-06 0a803bdedb09 absent
+    never absent after introduction
+
+strings:MemoryItemSchema@const:observationsKnownColumns: src/core/schemas/memory-item.ts (1 commit(s) replayed)
+  MemoryItemSchema.concepts
+    2026-10-06 0a803bdedb09 absent
+    never absent after introduction
+  MemoryItemSchema.createdAtEpoch
+    2026-10-06 0a803bdedb09 absent
+    never absent after introduction
+  MemoryItemSchema.facts
+    2026-10-06 0a803bdedb09 absent
+    never absent after introduction
+  MemoryItemSchema.filesModified
+    2026-10-06 0a803bdedb09 absent
+    never absent after introduction
+  MemoryItemSchema.filesRead
+    2026-10-06 0a803bdedb09 absent
+    never absent after introduction
+  MemoryItemSchema.narrative
+    2026-10-06 0a803bdedb09 absent
+    never absent after introduction
+  MemoryItemSchema.subtitle
+    2026-10-06 0a803bdedb09 absent
+    never absent after introduction
+  MemoryItemSchema.text
+    2026-10-06 0a803bdedb09 absent
+    never absent after introduction
+
+Timelines replay today's extraction over past file contents. They are
+not replayed verdicts: waivers, selectors and samples are today's, and a
+past consumer may not have read the field yet. Unreadable commits are
+stated, never guessed.

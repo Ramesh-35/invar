@@ -1,0 +1,4 @@
+  + contract strings:MemoryItemSchema@const:OBSERVATION_JSON_FIELDS (4 bindings)
+  + contract strings:MemoryItemSchema@const:indexedFields (5 bindings)
+  + contract strings:MemoryItemSchema@const:observationsKnownColumns (8 bindings)
+wrote ./invar.lock (3 contract(s), 17 binding(s))

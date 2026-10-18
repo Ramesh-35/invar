@@ -1,0 +1,44 @@
+{
+ "repo": "microsoft__playwright",
+ "packages_superset": 23,
+ "eligible_files": 48,
+ "sample": [
+  "packages/playwright/src/mcp/test/testContext.ts",
+  "packages/playwright/src/matchers/toEqual.ts",
+  "packages/playwright/src/runner/watchMode.ts",
+  "packages/playwright-core/src/tools/skills/playwright-component-testing/templates/vue/button.spec.ts",
+  "packages/web/src/components/codeMirrorWrapper.spec.ts",
+  "packages/trace-viewer/src/ui/workbench.tsx",
+  "examples/svgomg/tests/example.spec.ts",
+  "packages/html-reporter/playwright.config.ts",
+  "packages/playwright-core/src/tools/skills/playwright-component-testing/templates/react/button.spec.ts",
+  "packages/playwright/src/matchers/toMatchText.ts"
+ ],
+ "sampled_constructs": 2,
+ "sampled_silent": 0,
+ "rows": [
+  {
+   "file": "packages/playwright/src/matchers/toEqual.ts",
+   "line": 22,
+   "spec": "playwright-core",
+   "name": "Locator",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN R6 packages/playwright/src/matchers/toEqual.ts:22 reads signal, timeout of FetchOptions (packages/playwright-core/src/client/fetch.ts:42) without impo",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/playwright/src/matchers/toEqual.ts:22 Locator from \"playwright-core\": package playwright-core declares \"exports\"; not supported in slice 1"
+  },
+  {
+   "file": "packages/playwright/src/matchers/toMatchText.ts",
+   "line": 20,
+   "spec": "playwright-core",
+   "name": "Locator",
+   "kind": "alias",
+   "reads": [],
+   "accounted_by": "# ABSTAIN R6 packages/playwright/src/matchers/toMatchText.ts:20 reads signal, timeout of FetchOptions (packages/playwright-core/src/client/fetch.ts:42) without ",
+   "strict_accounted_by": "# ABSTAIN UNRESOLVED packages/playwright/src/matchers/toMatchText.ts:20 Locator from \"playwright-core\": package playwright-core declares \"exports\"; not supported in slice"
+  }
+ ],
+ "exploratory_all_files_constructs": 9,
+ "exploratory_all_files_unaccounted": 0,
+ "repo_level_abstain": []
+}
