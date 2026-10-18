@@ -1,0 +1,13 @@
+# mutation: the anchor scope check is skipped
+# catch: prf_u1_anchor_mismatch_is_scope_mismatch
+--- a/crates/invar-falsify/src/proof.rs
++++ b/crates/invar-falsify/src/proof.rs
+@@ -447,7 +447,7 @@
+             4,
+         );
+     }
+-    if proof.anchor != anchor {
++    if false && proof.anchor != anchor {
+         return (
+             vec![abstain("PROOF-SCOPE-MISMATCH", format!("the anchor differs: binding \"{anchor}\", proof \"{}\" ({ppath})", proof.anchor))],
+             4,

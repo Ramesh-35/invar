@@ -97,3 +97,10 @@ Re-run of the three K3 probe trees after INIT-DISCOVERY-SLICE2B-REV1 (TSC-GOVERN
 | strapi | 13 | 8 | 6 |
 
 Both misses undercount the collapse: formbricks had three `prop:fields` lists in one file for the same shape; strapi had two more same-file pairs beside the six `fieldsToPick` lists. The rule behaved as written. Time on an idle machine: hoppscotch 0.93s, formbricks 3.5s, strapi 0.87s (unchanged from the earlier probe; a first re-run made while a background build was running took longer and is discarded). No precision is computed; the false-receiver class (P2) is unchanged, and D1 (P1, the missed strapi pair) stays frozen. P3, P4 and P5 are addressed: three tsc-governed lists now abstain, strapi testUtils/data.js is labeled test, and the six near-duplicates are one block.
+
+## INVAR-PROOF-001 (2026-10-18): no real-repository exposure
+
+The proof engine landed on synthetic fixtures only. A real probe needs an
+upstream/downstream repository pair that agrees to be probed; none exists and
+none is claimed. This line records the absence so silence is never mistaken
+for a clean result.

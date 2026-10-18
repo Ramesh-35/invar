@@ -1548,3 +1548,18 @@ Not claimed: general detection capability remains NOT ESTABLISHED. K3 was calibr
 Implementation complete against the ratified revision: 33 of 33 REV1 fixtures (including the four-part metamorphic invariance suite), 18 of 18 REV1 mutations caught, slice 2b harness 12 of 12 and slice 2 harness 14 of 14 still caught, 182 of 182 tests, zero warnings, Class 1 files and the five Experiment C artifacts byte-identical. D1 stays frozen. On the three development trees the proposal counts fell (formbricks 13 to 8, strapi 13 to 6, hoppscotch 0 to 0); two predictions were undercounts and are recorded as findings.
 
 Not claimed: general detection capability remains NOT ESTABLISHED. The wrong-receiver noise class is untouched. The counts above are a regression record on development trees, not an evaluation. Record: docs/architecture/INIT-DISCOVERY-SLICE2B-REV1.md sections N and O.
+
+## 2026-10-18: INVAR-PROOF-001 implemented (cross-repository egress attestation)
+
+Implementation complete against revision 3 (rulings D1 to D9 and I1 to I3):
+`invar lock --emit-proof` (exit 0/3, R-P-3 preconditions in order, no file on
+refusal) and `invar check --proof` (exit 0/1/3/4, never 2; plain `check` never
+evaluates imports, ruling I3). 32 proof fixtures plus the R-P-9 budget check,
+20 of 20 mutations caught (the 19 ruled ones, the fork mutation split into its two arms), 219 tests total, zero warnings, Class 1 files byte-identical;
+lock.rs, check.rs and config.rs were granted but not touched. Verification
+measured under 2 ms per proof in release.
+
+Not claimed: no adoption or capability claim; no real upstream/downstream pair
+has been probed and none is required for the freeze; level-0 proofs carry
+integrity, not identity (signatures are INVAR-PROOF-002). Record:
+docs/architecture/INVAR-PROOF-001.md section M.

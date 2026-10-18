@@ -1,0 +1,13 @@
+# mutation: a foreign rule fingerprint becomes an abstention
+# catch: prf_m6_foreign_fingerprint_is_a_note_never_a_verdict_change
+--- a/crates/invar-falsify/src/proof.rs
++++ b/crates/invar-falsify/src/proof.rs
+@@ -514,6 +514,8 @@
+     let missing: Vec<&String> = relied.iter().filter(|f| !proof.names.contains(f)).collect();
+     let mut out = Vec::new();
+     if proof.fingerprint != engine_fp {
++        return (vec![abstain("PROOF-TAMPERED", "foreign fingerprint".to_string())], 3);
++        #[allow(unreachable_code)]
+         out.push(format!(
+             "NOTE (informational, never a verdict): proof {ppath} carries rule_fingerprint {} but this engine's is {}",
+             &proof.fingerprint[..12.min(proof.fingerprint.len())],

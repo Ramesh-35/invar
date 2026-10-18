@@ -133,6 +133,10 @@ struct CheckArgs {
     /// GITHUB_TOKEN and GITHUB_BASE_REF are read from the environment).
     #[arg(long, default_value_t = false)]
     ci: bool,
+    /// INVAR-PROOF-001: also evaluate every [[proof.import]] table (exit 0,
+    /// 1, 3 or 4; never 2). Plain `check` never evaluates them (ruling I3).
+    #[arg(long, default_value_t = false)]
+    proof: bool,
     /// A4.1: also scan this directory for sibling invar.lock files and state
     /// which of them bind this repository's producer files. Read-only, zero
     /// network, never changes the exit code. Overrides `[dependents]
@@ -279,6 +283,14 @@ struct LockArgs {
     /// out of version control unless scrubbed).
     #[arg(long)]
     sample: Vec<String>,
+    /// INVAR-PROOF-001: emit a cross-repository attestation for this locked
+    /// egress contract (exit 0 or 3 only; writes invar.proof unless --out).
+    #[arg(long, value_name = "CONTRACT-ID")]
+    emit_proof: Option<String>,
+    /// With --emit-proof: write the proof here instead of invar.proof
+    /// (invar.proof or .invar/proofs/<name>.proof only, ruling D6).
+    #[arg(long)]
+    out: Option<String>,
     /// Contract id the sample belongs to (optional when there is exactly one).
     #[arg(long)]
     contract: Option<String>,
@@ -602,6 +614,22 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
         }
     };
     let base_dir = base_dir_of(&args.config);
+    // INVAR-PROOF-001 (P-INT-3): with --proof, a manifest holding only
+    // [[proof.import]] tables and no [[invariant]] blocks is a pure consumer
+    // repository, not an error. Plain `check` keeps today's behavior exactly.
+    let proof_part = if args.proof {
+        Some(invar_falsify::proof::verify(&base_dir, &raw, &sections, lock::today_utc()))
+    } else {
+        None
+    };
+    if args.proof && !sections.iter().any(|(n, _)| n == "invariant") {
+        if let Some((lines, pcode)) = &proof_part {
+            for l in lines {
+                println!("{l}");
+            }
+            return Ok(*pcode);
+        }
+    }
     let env = |k: &str| std::env::var(k).ok().filter(|v| !v.is_empty());
     let max_bytes = match max_remote_bytes(&sections) {
         Ok(m) => m,
@@ -763,6 +791,18 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
             outcomes.len()
         );
         1
+    };
+    // INVAR-PROOF-001: proof import results ride after the contract results;
+    // the process exit is the worst code over both (3 over 2 over 1 over 4
+    // over 0). Absent --proof, nothing here runs or prints.
+    let code = match &proof_part {
+        Some((lines, pcode)) => {
+            for l in lines {
+                println!("{l}");
+            }
+            invar_falsify::proof::worse(code, *pcode)
+        }
+        None => code,
     };
     // Fixed summary, printed on every run whatever the counts (A1): "clean"
     // and "unexamined" are never shown the same way, and the measured record
@@ -996,6 +1036,18 @@ fn max_remote_bytes(sections: &[(String, Vec<(String, String)>)]) -> Result<usiz
 /// creates the file, or confirms it is current; it never overwrites a lock
 /// whose bindings would change (that is a reviewed `--update`).
 fn cmd_lock(args: LockArgs) -> Result<i32> {
+    // INVAR-PROOF-001: `lock --emit-proof` authors, never verifies (exit 0/3).
+    if let Some(contract_id) = &args.emit_proof {
+        let raw = std::fs::read_to_string(&args.config)
+            .with_context(|| format!("reading {}", args.config))?;
+        let sections = invar_falsify::config::parse_sections(&args.config, &raw)?;
+        let msg = invar_falsify::proof::emit(&base_dir_of(&args.config), &sections, contract_id, args.out.as_deref())?;
+        println!("{msg}");
+        return Ok(0);
+    }
+    if args.out.is_some() {
+        anyhow::bail!("--out is only meaningful with --emit-proof");
+    }
     if !args.sample.is_empty() {
         return cmd_lock_sample(&args);
     }

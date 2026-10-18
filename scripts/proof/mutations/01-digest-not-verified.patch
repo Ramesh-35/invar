@@ -1,0 +1,13 @@
+# mutation: the canonical digest is never recomputed
+# catch: prf_u8_edited_names_with_stale_digest_is_tampered
+--- a/crates/invar-falsify/src/proof.rs
++++ b/crates/invar-falsify/src/proof.rs
+@@ -139,7 +139,7 @@
+         return Err("malformed proof: digest is not 64 hex characters".to_string());
+     }
+     let recomputed = canonical_digest(canonical);
+-    if recomputed != digest {
++    if false && recomputed != digest {
+         return Err("digest mismatch: the file was edited after emission".to_string());
+     }
+     let epoch: u64 = get("chain", "epoch")?

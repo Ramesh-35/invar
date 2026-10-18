@@ -29,6 +29,7 @@ pub mod ledger;
 pub mod lock;
 pub mod manifest;
 pub mod mcp;
+pub mod proof;
 pub mod provenance;
 pub mod reality;
 pub mod receipt;

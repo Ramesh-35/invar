@@ -1,0 +1,13 @@
+# mutation: emit proceeds when the current keys differ from the locked set
+# catch: prf_e3_unlocked_drift_refuses_and_points_at_lock_update
+--- a/crates/invar-falsify/src/proof.rs
++++ b/crates/invar-falsify/src/proof.rs
+@@ -246,7 +246,7 @@
+         .find(|(_, scope, _)| scope == &shape)
+         .map(|(_, _, f)| f.clone())
+         .unwrap_or_else(|| entry.bindings.iter().map(|b| b.field.clone()).collect());
+-    if locked != current {
++    if false && locked != current {
+         bail!(
+             "{contract_id}: the current {shape} keys differ from the locked set (locked: {}; current: {}); review the change and run `invar lock --update`, then emit again",
+             locked.join(" "),

@@ -1,0 +1,13 @@
+# mutation: plain `invar check` evaluates [[proof.import]] (ruling I3 broken)
+# catch: prf_n3_proof_import_tables_change_nothing_for_plain_check
+--- a/crates/invar-falsify/src/main.rs
++++ b/crates/invar-falsify/src/main.rs
+@@ -617,7 +617,7 @@
+     // INVAR-PROOF-001 (P-INT-3): with --proof, a manifest holding only
+     // [[proof.import]] tables and no [[invariant]] blocks is a pure consumer
+     // repository, not an error. Plain `check` keeps today's behavior exactly.
+-    let proof_part = if args.proof {
++    let proof_part = if args.proof || true {
+         Some(invar_falsify::proof::verify(&base_dir, &raw, &sections, lock::today_utc()))
+     } else {
+         None

@@ -1,0 +1,21 @@
+# mutation: a corrupt existing proof is silently replaced at epoch 1
+# catch: prf_e6_emit_refuses_to_overwrite_a_proof_that_fails_verification
+--- a/crates/invar-falsify/src/proof.rs
++++ b/crates/invar-falsify/src/proof.rs
+@@ -292,8 +292,14 @@
+     let out_path = base.join(out);
+     if out_path.exists() {
+         let prev_text = std::fs::read_to_string(&out_path)?;
+-        let prev = parse_proof(out, &prev_text)
+-            .map_err(|e| anyhow::anyhow!("the existing proof at {out} fails verification ({e}); refusing to overwrite it"))?;
++        let prev = match parse_proof(out, &prev_text) {
++            Ok(p) => p,
++            Err(_) => {
++                proof.digest = canonical_digest(&render_canonical(&proof));
++                std::fs::write(&out_path, render_file(&proof))?;
++                return Ok(format!("wrote {out} epoch 1 digest {}", proof.digest));
++            }
++        };
+         if prev.identity() == proof.identity() {
+             // R-P-1 / P-INT-2: an emit at an unchanged source state is a
+             // no-op; the file stays byte-identical, generated_at preserved.

@@ -1,0 +1,18 @@
+# mutation: a binding with no accepted state proceeds as if fresh
+# catch: prf_u5_no_accepted_state_is_unanchored_never_holds
+--- a/crates/invar-falsify/src/proof.rs
++++ b/crates/invar-falsify/src/proof.rs
+@@ -459,12 +459,7 @@
+     let mut notes: Vec<String> = Vec::new();
+     let (acc_e, acc_d) = match (get("accepted_epoch"), get("accepted_digest")) {
+         (Some(e), Some(d)) => (e, d),
+-        _ => {
+-            return (
+-                vec![abstain("TEMPORAL-STALENESS-UNANCHORED", "no accepted_epoch/accepted_digest recorded; freshness cannot be established and HOLDS is not offered (record the reviewed epoch and digest)".to_string())],
+-                4,
+-            )
+-        }
++        _ => (proof.epoch.to_string(), proof.digest.clone()),
+     };
+     let Ok(acc_epoch) = acc_e.parse::<u64>() else {
+         return (vec![abstain("PROOF-TAMPERED", format!("accepted_epoch \"{acc_e}\" is not an integer"))], 3);

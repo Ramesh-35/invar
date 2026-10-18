@@ -1,0 +1,13 @@
+# mutation: a proof outcome leaks exit 2 (the ledger code)
+# catch: prf_u10_missing_proof_path_is_not_found
+--- a/crates/invar-falsify/src/proof.rs
++++ b/crates/invar-falsify/src/proof.rs
+@@ -424,7 +424,7 @@
+             }
+         }
+     } else if !p.exists() {
+-        return (vec![abstain("PROOF-NOT-FOUND", format!("{proofv} does not exist"))], 4);
++        return (vec![abstain("PROOF-NOT-FOUND", format!("{proofv} does not exist"))], 2);
+     } else {
+         let text = match std::fs::read_to_string(&p) {
+             Ok(t) => t,

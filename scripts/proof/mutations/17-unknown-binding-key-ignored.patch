@@ -1,0 +1,13 @@
+# mutation: a typo in a trust binding is silently ignored
+# catch: prf_u11_unknown_binding_key_is_exit_3_naming_the_key
+--- a/crates/invar-falsify/src/proof.rs
++++ b/crates/invar-falsify/src/proof.rs
+@@ -361,7 +361,7 @@
+     let abstain = |code: &str, reason: String| format!("ABSTAIN {code} {loc} {reason}");
+     // Step 0: the binding itself. A typo in a trust binding is never ignored.
+     for (k, _) in kv {
+-        if !ALLOWED_KEYS.contains(&k.as_str()) {
++        if false && !ALLOWED_KEYS.contains(&k.as_str()) {
+             return (
+                 vec![abstain("PROOF-TAMPERED", format!("unknown key `{k}` in this [[proof.import]] table; allowed keys: {}", ALLOWED_KEYS.join(" ")))],
+                 3,

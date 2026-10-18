@@ -1,0 +1,13 @@
+# mutation: verification applies an age window nobody opted into
+# catch: prf_m2_default_check_reads_no_clock
+--- a/crates/invar-falsify/src/proof.rs
++++ b/crates/invar-falsify/src/proof.rs
+@@ -492,7 +492,7 @@
+     }
+ 
+     // R-P-8: the one opt-in, clock-dependent step.
+-    if let Some(window) = get("max_age_days") {
++    if let Some(window) = get("max_age_days").or_else(|| Some("365".to_string())) {
+         let Ok(days) = window.parse::<i64>() else {
+             return (vec![abstain("PROOF-TAMPERED", format!("max_age_days \"{window}\" is not an integer"))], 3);
+         };

@@ -305,3 +305,75 @@ arc for ruling.
 ## L. Stop conditions
 
 Stop and report on: any change to an exit code's meaning or a new exit code; any new dependency or network capability; a lock grammar change not ruled; a slice 1, 2 or 2b output change; a Class 1 hash change; a mutation kill that is a build or load failure; verification over 2 ms on the fixture; any need to infer a binding; any claim in docs of freshness beyond B1.
+
+## M. Implementation Evidence Ledger (appended at Gate 5; sections 0 to L are unchanged)
+
+Status: IMPLEMENTED against revision 3 (rulings D1 to D9, I1 to I3). What is
+proven is what the fixtures and mutations below state about this engine on
+synthetic repositories, nothing more: no adoption, capability or real-repository
+claim is made, and no upstream/downstream pair has been probed (section H).
+
+### M1. Gate results
+
+| Gate | Result |
+|---|---|
+| 0 baseline | PASS: GATE0-PROOF-LEDGER.md (tree 8861f63); re-verified after implementation, every Class 1 and untouched Class 3 hash byte-identical |
+| 1 fixtures first | 32 fixtures written before any engine code; against the unchanged engine 28 failed for their declared reasons (27 by the missing flags, which clap rejects with exit 2 today; M4 by the absent module; M6 by its declared stub) and 4 invariance controls passed (N1, N2, N3, M3) |
+| 2 implementation | src/proof.rs (new, self-contained), main.rs (flag dispatch, granted I1b), lib.rs (module registration); lock.rs, check.rs and config.rs granted by D9 but NOT touched (their D9 duties fit proof.rs and the dispatch) |
+| 3 mutations | PASS: 20 of 20 CAUGHT by named assertion failure, control green, none SURVIVED, BUILD-FAILED or APPLY-FAILED (scripts/proof/mutate.sh). 01 digest-not-verified, 02 missing-field-held, 03 extra-field-alarms, 04 scope-check-removed, 05 ambiguity-check-removed, 06 epoch-rollback-accepted, 07 fork-accepted, 07b chain-break-accepted, 08 unanchored-returns-holds, 09 emit-with-unlocked-drift, 10 proof-path-returns-exit-2, 11 canonical-depends-on-field-order, 12 clock-read-by-default, 13 emit-overwrites-failing-proof, 14 anchor-ignored-at-emit, 15 fingerprint-changes-verdict, 16 plain-check-evaluates-imports, 17 unknown-binding-key-ignored, 18 out-path-anywhere, 19 missing-proof-returns-holds |
+| 4 regression | 219 of 219 tests green (the 182 landed tests, the 33 proof fixtures, and 4 proof unit tests including the R-P-9 budget check), zero warnings; slice 1, 2 and 2b byte-identity suites green unchanged; dependency set asserted frozen (PRF-M3); release verification measured under 2 ms per proof (budget test, 200 iterations) |
+| 5 documentation | this section, STATUS.md entry, EXPOSURE-LOG.md note |
+
+### M2. Interpretations applied (for ratification)
+
+- P-INT-1 `[producer] repo` reads an optional `repo` key on the egress block
+  ("declared name; NOT verified"); absent, it is written as "none".
+- P-INT-2 R-P-4's "+1 per emit" is read as +1 per emitted CHANGE: an emit at an
+  unchanged source state is a no-op that leaves the file byte-identical,
+  because R-P-1 (PRF-M1) is unsatisfiable otherwise.
+- P-INT-3 With `--proof` and at least one [[proof.import]] table, an invar.toml
+  holding zero [[invariant]] blocks is a pure consumer repository, not an
+  error; plain `check` keeps today's behavior byte for byte (PRF-N3).
+- P-INT-4 Exit precedence when `--proof` rides with ordinary contracts:
+  3 over 2 over 1 over 4 over 0 (exit 2 never arises from proofs; a ledger
+  break on the plain side that returns early keeps its own path; the
+  combination of a ledger break with proof imports is untested and out of the
+  fixture set).
+- P-INT-5 For a directory binding, parse errors (step 1) surface before
+  contract matching, so the frozen file-binding order of R-P-6 is preserved
+  and directory resolution stays deterministic (sorted file names).
+
+### M3. Corrections and additions made during the arc (stated, not hidden)
+
+- Fixture PRF-N2 first asserted whole-output byte-identity of `invar init`
+  with and without an invar.proof file; the walk honestly counts the extra
+  file in `files_scanned`. The fixture now normalizes that one counter line
+  and asserts the proposal set is byte-identical and the proof file is never
+  mentioned. Fixture error; the engine was right.
+- Fixture PRF-E6 was added at Gate 3 so mutation 13 (emit overwrites a proof
+  that fails verification) dies by a named assertion; the behavior is R-P-4's
+  own sentence. Fixture count 31 to 32 (33 with the budget unit check).
+- Spec mutation 7 (fork accepted) is implemented as two mutants, 07 and 07b,
+  so the equal-epoch fork arm and the broken-chain arm each die
+  independently: 20 mutants cover the 19 ruled ones.
+- PRF-U7 is exercised through the binding side of the kind rule (a
+  contract_id naming a non-egress kind), because a validly sealed non-egress
+  proof cannot exist: emit refuses to author one, and a hand-built one fails
+  the digest first. The proof-side arm of the same rule is implemented and
+  covered by the binding-side fixture only.
+
+### M4. The honest bounds, restated after implementation
+
+B1 holds: freshness is judged only against the consumer's recorded
+accepted_epoch and accepted_digest; nothing claims "the provider still emits
+this today". B2 holds: the blake3 digest proves the file was not edited after
+emission, not who emitted it; level 1 signatures remain INVAR-PROOF-002. B3
+holds: depth-1 field names only, runtime serialization is not verified. B4
+holds: `invar init` proposes nothing from proof files (PRF-N2) and no binding
+is ever inferred.
+
+### M5. Files changed
+
+src/proof.rs (new), src/main.rs (Class 3, granted I1b), src/lib.rs (Class 4),
+tests/proof_test.rs (Class 2), scripts/proof/ (Class 2). lock.rs, check.rs,
+config.rs: granted, untouched, byte-identical to the Gate 0 baseline.

@@ -1,0 +1,15 @@
+# mutation: emit invents an anchor instead of requiring one
+# catch: prf_e5_undeclared_anchor_refuses
+--- a/crates/invar-falsify/src/proof.rs
++++ b/crates/invar-falsify/src/proof.rs
+@@ -255,9 +255,7 @@
+     }
+ 
+     // (d) the block declares the receiver anchor (ruling D3).
+-    let anchor = getk(block, "anchor").with_context(|| {
+-        format!("{contract_id}: the [[invariant]] block declares no anchor; add anchor = \"<METHOD /path>\" (required, ruling D3)")
+-    })?;
++    let anchor = getk(block, "anchor").unwrap_or_else(|| "none".to_string());
+ 
+     // (e) git is available and the working tree equals the committed blob.
+     let commit = git_out(base, &["rev-parse", "HEAD"])?;

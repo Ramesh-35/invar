@@ -1,0 +1,13 @@
+# mutation: emitted names keep source order instead of the canonical sort
+# catch: prf_f1_emit_epoch_1_and_consumer_check_holds
+--- a/crates/invar-falsify/src/proof.rs
++++ b/crates/invar-falsify/src/proof.rs
+@@ -237,7 +237,7 @@
+             bail!("{contract_id}: no `export const {shape} = z.object(...)` in {producer}")
+         }
+     };
+-    current.sort();
++    // (mutated: unsorted)
+ 
+     // (c) the current direct keys equal the locked set (no unlocked drift).
+     let locked: Vec<String> = entry

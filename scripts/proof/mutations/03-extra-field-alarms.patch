@@ -1,0 +1,14 @@
+# mutation: an extra provider field becomes a violation (additive tolerance broken)
+# catch: prf_f1_emit_epoch_1_and_consumer_check_holds prf_f2_added_field_chains_to_epoch_2_and_still_holds
+--- a/crates/invar-falsify/src/proof.rs
++++ b/crates/invar-falsify/src/proof.rs
+@@ -534,7 +534,8 @@
+     let extras: Vec<&String> = proof.names.iter().filter(|n| !relied.contains(n)).collect();
+     if !extras.is_empty() {
+         let names: Vec<&str> = extras.iter().map(|s| s.as_str()).collect();
+-        out.push(format!("  note: the provider also lists field(s) this repository does not rely on: {}", names.join(" ")));
++        out.push(format!("[VIOLATED] extra field(s): {}", names.join(" ")));
++        return (out, 1);
+     }
+     out.extend(notes);
+     (out, 0)

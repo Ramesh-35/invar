@@ -1,0 +1,13 @@
+# mutation: a broken parent chain at accepted+1 passes
+# catch: prf_u9_unchained_parent_at_accepted_plus_one_is_a_fork
+--- a/crates/invar-falsify/src/proof.rs
++++ b/crates/invar-falsify/src/proof.rs
+@@ -481,7 +481,7 @@
+             3,
+         );
+     }
+-    if proof.epoch == acc_epoch + 1 && proof.parent_digest != acc_d {
++    if false && proof.epoch == acc_epoch + 1 && proof.parent_digest != acc_d {
+         return (
+             vec![abstain("PROOF-FORK", format!("proof {ppath} is epoch {} but its parent_digest does not chain to the accepted digest of epoch {acc_epoch}", proof.epoch))],
+             3,

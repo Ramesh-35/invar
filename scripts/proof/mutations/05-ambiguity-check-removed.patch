@@ -1,0 +1,13 @@
+# mutation: several matching proofs silently take the first
+# catch: prf_u2_two_proofs_for_one_contract_in_a_directory_is_ambiguous
+--- a/crates/invar-falsify/src/proof.rs
++++ b/crates/invar-falsify/src/proof.rs
+@@ -412,7 +412,7 @@
+                 Err(e) => return (vec![abstain("PROOF-TAMPERED", format!("proof {full}: {e}"))], 3),
+             }
+         }
+-        match matches.len() {
++        match matches.len().min(1) {
+             0 => return (vec![abstain("PROOF-NOT-FOUND", format!("no *.proof in {proofv} attests {contract_id}"))], 4),
+             1 => matches.remove(0),
+             n => {

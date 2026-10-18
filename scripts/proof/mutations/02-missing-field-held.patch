@@ -1,0 +1,13 @@
+# mutation: a missing relied-on field is treated as held
+# catch: prf_v1_removed_relied_on_field_is_violated prf_v2_renamed_field_is_violated_under_its_old_name prf_v3_field_the_proof_never_listed_is_violated
+--- a/crates/invar-falsify/src/proof.rs
++++ b/crates/invar-falsify/src/proof.rs
+@@ -520,7 +520,7 @@
+             &engine_fp[..12]
+         ));
+     }
+-    if !missing.is_empty() {
++    if false && !missing.is_empty() {
+         let names: Vec<&str> = missing.iter().map(|s| s.as_str()).collect();
+         out.push(format!(
+             "[VIOLATED] proof {contract_id}: relied-on field(s) missing from the proof: {} (proof {ppath}, epoch {})",

@@ -1,0 +1,13 @@
+# mutation: an equal-epoch digest conflict and a broken chain both pass
+# catch: prf_u4_equal_epoch_with_different_digest_is_a_fork
+--- a/crates/invar-falsify/src/proof.rs
++++ b/crates/invar-falsify/src/proof.rs
+@@ -475,7 +475,7 @@
+             4,
+         );
+     }
+-    if proof.epoch == acc_epoch && proof.digest != acc_d {
++    if false && proof.epoch == acc_epoch && proof.digest != acc_d {
+         return (
+             vec![abstain("PROOF-FORK", format!("proof {ppath} carries epoch {} with a digest that differs from the accepted one; two proofs claim the same epoch", proof.epoch))],
+             3,

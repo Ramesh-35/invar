@@ -1,0 +1,13 @@
+# mutation: --out escapes the ruled D6 layout
+# catch: prf_f4_layout_rule_root_or_dot_invar_proofs_only
+--- a/crates/invar-falsify/src/proof.rs
++++ b/crates/invar-falsify/src/proof.rs
+@@ -187,7 +187,7 @@
+ 
+ /// R-P-2a (ruling D6): `invar.proof` at the root, or `.invar/proofs/<name>.proof`.
+ fn valid_out(out: &str) -> bool {
+-    if out == "invar.proof" {
++    if !out.is_empty() {
+         return true;
+     }
+     out.strip_prefix(".invar/proofs/")
