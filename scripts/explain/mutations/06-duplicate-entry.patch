@@ -1,0 +1,15 @@
+# mutation: a code appears twice in the registry
+# catch: x_f2_index_is_sorted_complete_and_exactly_once
+--- a/crates/invar-falsify/src/explain.rs
++++ b/crates/invar-falsify/src/explain.rs
+@@ -151,6 +151,10 @@
+      "the shape belongs to a version family (a v<N> path segment or a ...V<N> name); pairing across versions is refused",
+      "none; version families are never paired by design",
+      "INIT-DISCOVERY-SLICE2.md"),
++    ("VERSION-FAMILY", "abstention", "invar init, slices 2 and 2b",
++     "duplicate",
++     "duplicate",
++     "duplicate"),
+ ];
+ 
+ /// `invar explain [CODE]`: returns (stdout text, exit code). Exit 0 on an

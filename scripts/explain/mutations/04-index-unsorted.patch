@@ -1,0 +1,13 @@
+# mutation: the index prints in reverse order
+# catch: x_f2_index_is_sorted_complete_and_exactly_once
+--- a/crates/invar-falsify/src/explain.rs
++++ b/crates/invar-falsify/src/explain.rs
+@@ -160,7 +160,7 @@
+     match arg {
+         None => {
+             let mut out = String::new();
+-            for (code, kind, _, condition, _, _) in REGISTRY {
++            for (code, kind, _, condition, _, _) in REGISTRY.iter().rev() {
+                 out.push_str(&format!("{code} ({kind}): {condition}\n"));
+             }
+             (out, 0)

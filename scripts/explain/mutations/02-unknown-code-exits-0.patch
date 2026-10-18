@@ -1,0 +1,13 @@
+# mutation: an unknown code is reported but exits 0
+# catch: x_f3_unknown_code_is_exit_3_with_the_known_list x_f4_exit_numerals_are_explained_and_five_is_unknown
+--- a/crates/invar-falsify/src/explain.rs
++++ b/crates/invar-falsify/src/explain.rs
+@@ -174,7 +174,7 @@
+                 let known: Vec<&str> = REGISTRY.iter().map(|e| e.0).collect();
+                 (
+                     format!("UNKNOWN-EXPLAIN-CODE: {code} is not a code this engine emits\nknown codes: {}\n", known.join(" ")),
+-                    3,
++                    0,
+                 )
+             }
+         },

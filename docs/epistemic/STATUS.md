@@ -1563,3 +1563,15 @@ Not claimed: no adoption or capability claim; no real upstream/downstream pair
 has been probed and none is required for the freeze; level-0 proofs carry
 integrity, not identity (signatures are INVAR-PROOF-002). Record:
 docs/architecture/INVAR-PROOF-001.md section M.
+
+## 2026-10-18: INVAR-EXPLAIN-001 implemented (the code registry and `invar explain`)
+
+Implementation complete against rulings D-E1 to D-E6: a 33-entry registry (19
+engine abstention codes, 8 proof codes, UNKNOWN-EXPLAIN-CODE, the 5 exit
+numerals), exact lookup with a five-line entry, a sorted index, exit 0 or 3
+only, no fuzzy suggestions, and zero reads of repository state, locale or
+clock. 7 fixtures written first, 9 of 9 mutations caught (re-run after the
+completions amendment), 229 of 229 tests, zero warnings, Class 1 byte-identical.
+The existing completions guard caught the missing subcommand and, in passing,
+the proof arc's missing flags in the shell completions; both amended and
+recorded. Record: docs/architecture/INVAR-EXPLAIN-001.md sections J and K.

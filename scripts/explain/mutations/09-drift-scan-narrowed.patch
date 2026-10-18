@@ -1,0 +1,15 @@
+# mutation: the drift scan sweeps a single file instead of the crate
+# catch: x_f6_registry_and_emission_sites_cannot_drift
+--- a/crates/invar-falsify/tests/explain_test.rs
++++ b/crates/invar-falsify/tests/explain_test.rs
+@@ -70,8 +70,8 @@
+ /// `code: "X"` struct-literal sites and proof.rs's `abstain("X"` sites.
+ fn emitted_codes() -> (BTreeSet<String>, BTreeSet<String>) {
+     let src_dir = PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/src"));
+-    let mut files = Vec::new();
+-    collect_rs(&src_dir, &mut files);
++    let mut files = vec![src_dir.join("codepairs.rs")];
++    let _ = collect_rs;
+     assert!(files.len() >= 5, "the drift scan must sweep the whole crate, found {} files", files.len());
+     let mut codes = BTreeSet::new();
+     let mut provenance = BTreeSet::new();

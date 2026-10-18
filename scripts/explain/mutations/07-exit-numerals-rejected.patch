@@ -1,0 +1,13 @@
+# mutation: the exit numerals are treated as unknown codes
+# catch: x_f4_exit_numerals_are_explained_and_five_is_unknown
+--- a/crates/invar-falsify/src/explain.rs
++++ b/crates/invar-falsify/src/explain.rs
+@@ -165,7 +165,7 @@
+             }
+             (out, 0)
+         }
+-        Some(code) => match REGISTRY.iter().find(|e| e.0 == code) {
++        Some(code) => match REGISTRY.iter().find(|e| e.0 == code && !(code.len() == 1 && code.bytes().all(|b| b.is_ascii_digit()))) {
+             Some((code, kind, scope, condition, action, doc)) => (
+                 format!("{code} ({kind})\nscope: {scope}\ncondition: {condition}\naction: {action}\ndefined in: {doc}\n"),
+                 0,

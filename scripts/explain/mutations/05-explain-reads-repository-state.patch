@@ -1,0 +1,19 @@
+# mutation: explain reads invar.toml when present
+# catch: x_f5_explain_reads_no_repository_state
+--- a/crates/invar-falsify/src/explain.rs
++++ b/crates/invar-falsify/src/explain.rs
+@@ -157,11 +157,13 @@
+ /// explained code or the index; exit 3 on an unknown code. Reads nothing.
+ pub fn explain(arg: Option<&str>) -> (String, i32) {
+     debug_assert!(REGISTRY.windows(2).all(|w| w[0].0 < w[1].0), "registry must be sorted and unique");
++    let leak = std::fs::read_to_string("invar.toml").ok().and_then(|t| t.lines().next().map(str::to_string)).unwrap_or_default();
+     match arg {
+         None => {
++            let _ = &leak;
+             let mut out = String::new();
+             for (code, kind, _, condition, _, _) in REGISTRY {
+-                out.push_str(&format!("{code} ({kind}): {condition}\n"));
++                out.push_str(&format!("{code} ({kind}): {condition}{leak}\n"));
+             }
+             (out, 0)
+         }

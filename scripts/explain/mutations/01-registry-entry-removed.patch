@@ -1,0 +1,15 @@
+# mutation: the TSC-GOVERNED entry is deleted from the registry
+# catch: x_f1_entry_is_five_lines_and_tsc_governed_names_both_emitters x_f2_index_is_sorted_complete_and_exactly_once x_f6_registry_and_emission_sites_cannot_drift
+--- a/crates/invar-falsify/src/explain.rs
++++ b/crates/invar-falsify/src/explain.rs
+@@ -115,10 +115,6 @@
+      "no accepted_epoch and accepted_digest are recorded in the binding, or the opt-in max_age_days window is exceeded; freshness cannot be established and HOLDS is not offered",
+      "review the proof once, then record accepted_epoch and accepted_digest in the [[proof.import]] table",
+      "INVAR-PROOF-001.md"),
+-    ("TSC-GOVERNED", "abstention", "invar init, slice 2 (K2) and slice 2b REV1 (K3)",
+-     "the pair is already governed by the TypeScript compiler: the shape is consumed through types (z.infer, typeof or typed reads), or the string list carries a recognized keyof constraint (satisfies or annotation); a lock would add nothing",
+-     "none; the compiler is the stronger guarantee here, and INVAR yields to it",
+-     "INIT-DISCOVERY-SLICE2.md and INIT-DISCOVERY-SLICE2B-REV1.md"),
+     ("UNKNOWN-EXPLAIN-CODE", "error", "invar explain",
+      "the argument is not a code this engine emits and not an exit numeral",
+      "run `invar explain` with no argument for the full index",

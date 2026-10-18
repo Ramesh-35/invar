@@ -1,0 +1,13 @@
+# mutation: explain 2 no longer states the proof exclusion
+# catch: x_f4_exit_numerals_are_explained_and_five_is_unknown
+--- a/crates/invar-falsify/src/explain.rs
++++ b/crates/invar-falsify/src/explain.rs
+@@ -28,7 +28,7 @@
+      "fix the consumer, or review the producer change and re-lock deliberately",
+      "the frozen exit-code contract (`invar --help`)"),
+     ("2", "exit", "ledger commands",
+-     "the evidence ledger's bi-temporal chain is broken; this code keeps that one meaning and is never returned by proof verification",
++     "the evidence ledger's bi-temporal chain is broken",
+      "treat the ledger as untrusted and investigate before any further run",
+      "the frozen exit-code contract (`invar --help`)"),
+     ("3", "exit", "every command",

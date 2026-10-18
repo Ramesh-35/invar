@@ -171,3 +171,57 @@ Stop and report on: any need to edit a Class 1 file to expose or rename a code;
 any emission form the drift scan cannot extract textually; any new dependency;
 any output that depends on repository state, locale or clock; any pressure to
 make explain evaluate rather than document.
+
+## J. Rulings of 2026-10-18 (recorded)
+
+D-E1 to D-E6 RATIFIED AND FROZEN as drafted, with two flagged interpretations
+ratified in the same message: explain returns exit 0 or 3 only (exit 1 is the
+VIOLATED verdict and explain issues no verdicts), and the error marker prints
+in the house hyphen style as UNKNOWN-EXPLAIN-CODE.
+
+## K. Implementation Evidence Ledger (appended at Gate 5; sections 0 to J are unchanged)
+
+Status: IMPLEMENTED against the ratified rulings. explain is documentation,
+never evaluation; nothing here claims anything about any repository.
+
+### K1. Gate results
+
+| Gate | Result |
+|---|---|
+| 0 baseline | the clean tree at the proof landing (2c06442); Class 1, Class 3 and landed-engine hashes re-verified byte-identical after implementation |
+| 1 fixtures first | 7 fixtures written before src/explain.rs existed; 6 failed via the unrecognized subcommand (clap exit 2) and X-F5 passed trivially (clap's error is itself state-independent), kept as an invariance control |
+| 2 implementation | src/explain.rs (registry of 33 entries plus lookup, new, self-contained), main.rs (subcommand dispatch, granted D-E5), lib.rs (registration); completions/invar.{bash,zsh,fish} amended (K3 below) |
+| 3 mutations | 9 of 9 CAUGHT by named assertion, control green, none SURVIVED or BUILD-FAILED; re-run in full after the completions amendment with the same result |
+| 4 regression | 229 of 229 tests green, zero warnings; every slice byte-identity suite unchanged; explain output asserted byte-identical across repository states, locales and time zones |
+| 5 documentation | this section and the STATUS.md entry |
+
+### K2. Registry facts and divergences from the draft (stated, not hidden)
+
+- The index holds 33 entries, not the draft's 24: the proof engine landed
+  first (per the ratified sequencing), adding 8 proof codes, not the 7 the
+  draft counted (PROOF-NOT-FOUND joined in spec r2); UNKNOWN-EXPLAIN-CODE is
+  itself an entry, so explain can describe its own refusal.
+- The 33: 19 engine abstention codes, 8 proof codes, UNKNOWN-EXPLAIN-CODE,
+  and the 5 exit numerals.
+- The registry is a tuple table on purpose: the drift scan's patterns
+  (`code: "` and `abstain("`) can never match the registry itself, so the
+  no-drift test cannot be satisfied by its own second copy.
+- The drift test is black-box (R-X-6 strengthened): it extracts emission
+  sites from the crate sources and compares them against the BINARY's own
+  index output in both directions, links no library symbol, and asserts its
+  own scan breadth (at least five files, provenance from at least three),
+  so narrowing the scan is itself a caught mutation (09).
+
+### K3. Corrections and catches during the arc
+
+- The existing guard test (bare_invocation_and_completions_stay_in_step)
+  failed at Gate 4 because the hand-written shell completions lacked the new
+  subcommand. The three completion scripts were amended. The same guard
+  checks subcommands only, so the proof arc's missing flags (--emit-proof,
+  --out on lock; --proof on check) had passed silently; they were added in
+  the same amendment and are recorded here as a proof-arc omission caught
+  late. The completion files were not in any declared path class; they are
+  CLI surface adjacent to main.rs and the change is content-only.
+- Per ruling D-E6, each condition line was read against its defining
+  document or emission site before freezing; TSC-GOVERNED's entry names both
+  of its emitters (K2 typed consumption, K3 keyof lists).

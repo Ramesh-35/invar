@@ -64,6 +64,9 @@ enum Command {
     Receipt(ReceiptArgs),
     /// Suggest consumer patches for unambiguous field renames (never writes).
     Fix(FixArgs),
+    /// Print a code's definition, exact firing condition and sanctioned next
+    /// action from the engine's registry (static; reads nothing; exit 0 or 3).
+    Explain(ExplainArgs),
     /// Read-only MCP server on stdio (tools: check, contract, dependents,
     /// coverage).
     Mcp(McpArgs),
@@ -225,6 +228,12 @@ struct ReceiptArgs {
     cmd: ReceiptCmd,
 }
 
+#[derive(Parser)]
+struct ExplainArgs {
+    /// The abstention, error or exit code to explain; omit for the index.
+    code: Option<String>,
+}
+
 #[derive(clap::Subcommand)]
 enum ReceiptCmd {
     /// Convert a format 1 receipt into another view. Never alters format 1.
@@ -367,6 +376,11 @@ fn main() {
         Command::Lock(a) => dispatch_r2(cmd_lock(a)),
         Command::Mcp(a) => dispatch_r2(cmd_mcp(a)),
         Command::Fix(a) => dispatch_r2(cmd_fix(a)),
+        Command::Explain(a) => {
+            let (out, code) = invar_falsify::explain::explain(a.code.as_deref());
+            print!("{out}");
+            code
+        }
         Command::VerifyReceipt(a) => dispatch_r2(cmd_verify_receipt(a)),
         Command::Receipt(a) => dispatch_r2(cmd_receipt(a)),
         Command::Dependents(a) => dispatch_r2(cmd_dependents(a)),

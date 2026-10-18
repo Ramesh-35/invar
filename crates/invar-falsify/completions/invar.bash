@@ -3,13 +3,13 @@
 _invar() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
   if [ "$COMP_CWORD" -eq 1 ]; then
-    COMPREPLY=( $(compgen -W "demo init check lock coverage dependents backtest verify-receipt receipt fix mcp completions run validate report verify audit replay help" -- "$cur") )
+    COMPREPLY=( $(compgen -W "demo init check lock coverage dependents backtest verify-receipt receipt fix explain mcp completions run validate report verify audit replay help" -- "$cur") )
     return 0
   fi
   case "${COMP_WORDS[1]}" in
     backtest)       COMPREPLY=( $(compgen -W "--config --contract --depth --format --help" -- "$cur") );;
-    check)          COMPREPLY=( $(compgen -W "--config --ledger --ci --locks --report-md --receipt --lock-signers --lock-principal --sample --contract --help" -- "$cur") );;
-    lock)           COMPREPLY=( $(compgen -W "--config --update --lock-signers --lock-principal --sample --contract --help" -- "$cur") );;
+    check)          COMPREPLY=( $(compgen -W "--config --ledger --ci --locks --report-md --receipt --lock-signers --lock-principal --sample --contract --proof --help" -- "$cur") );;
+    lock)           COMPREPLY=( $(compgen -W "--config --update --lock-signers --lock-principal --sample --contract --emit-proof --out --help" -- "$cur") );;
     init)           COMPREPLY=( $(compgen -W "--root --force --stdout --help" -- "$cur") );;
     dependents)     COMPREPLY=( $(compgen -W "--locks --producer --format --help" -- "$cur") );;
     coverage)       COMPREPLY=( $(compgen -W "--config --contract --format --help" -- "$cur") );;

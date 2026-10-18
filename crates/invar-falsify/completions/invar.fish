@@ -9,9 +9,9 @@ complete -c invar -n "__fish_use_subcommand" -a "coverage" -d "What is evaluated
 complete -c invar -n "__fish_use_subcommand" -a "dependents" -d "Who depends on a producer field"
 complete -c invar -n "__fish_use_subcommand" -a "backtest" -d "Replay locked bindings over git history"
 complete -c invar -n "__fish_use_subcommand" -a "verify-receipt" -d "Re-verify an evidence receipt"
-complete -c invar -n "__fish_use_subcommand" -a "receipt fix mcp completions run validate report verify audit replay help"
-complete -c invar -n "__fish_seen_subcommand_from check" -l config -l ledger -l ci -l locks -l report-md -l receipt -l lock-signers -l lock-principal -l sample -l contract
-complete -c invar -n "__fish_seen_subcommand_from lock" -l config -l update -l lock-signers -l lock-principal -l sample -l contract
+complete -c invar -n "__fish_use_subcommand" -a "receipt fix explain mcp completions run validate report verify audit replay help"
+complete -c invar -n "__fish_seen_subcommand_from check" -l config -l ledger -l ci -l locks -l report-md -l receipt -l lock-signers -l lock-principal -l sample -l contract -l proof
+complete -c invar -n "__fish_seen_subcommand_from lock" -l config -l update -l lock-signers -l lock-principal -l sample -l contract -l emit-proof -l out
 complete -c invar -n "__fish_seen_subcommand_from init" -l root -l force -l stdout
 complete -c invar -n "__fish_seen_subcommand_from dependents" -l locks -l producer -l format
 complete -c invar -n "__fish_seen_subcommand_from backtest" -l config -l contract -l depth -l format

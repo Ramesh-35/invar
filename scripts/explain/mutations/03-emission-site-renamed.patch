@@ -1,0 +1,13 @@
+# mutation: an engine emission drifts to a code the registry lacks
+# catch: x_f6_registry_and_emission_sites_cannot_drift
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -808,7 +808,7 @@
+             // REV1 R-R1-1/R-R1-2: decided last, only for a would-be proposal.
+             if let Some((form, target)) = &list.governed {
+                 out.abstentions.push(Abstention {
+-                    code: "TSC-GOVERNED",
++                    code: "TSC-GOVERNED2",
+                     location: loc,
+                     reason: format!("list {label} is constrained by {form}; the compiler checks its names against {target}, so a lock adds nothing; not proposed"),
+                 });

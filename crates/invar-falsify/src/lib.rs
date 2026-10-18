@@ -22,6 +22,7 @@ pub mod demo;
 pub mod dependents;
 pub mod config;
 pub mod evaluator;
+pub mod explain;
 pub mod fix;
 pub mod init;
 pub mod invariant;
