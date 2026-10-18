@@ -1,0 +1,18 @@
+error: unable to write file docs/i18n/fi/CHANGELOG.md
+error: unable to write file docs/i18n/fi/docs/frameworks/MEMORY.md
+error: unable to write file docs/i18n/fi/docs/frameworks/NOTION_CONTEXT.md
+error: unable to write file docs/i18n/fi/docs/frameworks/OBSIDIAN_CONTEXT.md
+error: unable to write file docs/i18n/fi/docs/frameworks/OPENCODE.md
+error: unable to write file docs/i18n/fi/docs/frameworks/OPEN_SSE_ARCHITECTURE.md
+error: unable to write file docs/i18n/fi/docs/frameworks/PLAYGROUND_STUDIO.md
+error: unable to write file docs/i18n/fi/docs/frameworks/PLUGINS.md
+error: unable to write file docs/i18n/fi/docs/frameworks/PLUGIN_MARKETPLACE.md
+error: unable to write file docs/i18n/fi/docs/frameworks/PLUGIN_SDK.md
+error: unable to write file docs/i18n/fi/docs/frameworks/RADAR.md
+error: unable to write file docs/i18n/fi/docs/frameworks/SEARCH_TOOLS_STUDIO.md
+error: unable to write file docs/i18n/fi/docs/frameworks/SKILLS.md
+error: unable to write file docs/i18n/fi/docs/frameworks/TRAFFIC_INSPECTOR.md
+error: unable to write file docs/i18n/fi/docs/frameworks/WEBHOOKS.md
+fatal: cannot create directory at 'docs/i18n/fi/docs/getting-started': No space left on device
+/mnt/user-data/outputs/stage3/scripts/stage3/run.sh: line 50: echo: write error: No space left on device
+ledger: /tmp/claude-0/-home-claude/0ad2ce1c-afee-57af-87cf-f7a4a128779f/scratchpad/s1/s3phase1/ledger.tsv
