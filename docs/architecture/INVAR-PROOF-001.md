@@ -1,9 +1,11 @@
 # INVAR-PROOF-001: cross-repository egress attestation (`invar.proof`)
 
-Status: REVISION 2, rulings D1 to D9 RATIFIED (2026-10-15 20:00). Revision 2 is a
-syntax alignment only: it applies the ratified D4 binding syntax (`[[proof.import]]`)
-and D6 file layout, and records the ratified engine fingerprint. Implementation of
-the proof engine is NOT yet authorized (it is on hold per the same ruling). Prepared
+Status: REVISION 3. Rulings D1 to D9 RATIFIED (2026-10-15 20:00); open items I1 to
+I3 RULED (2026-10-18). Revision 2 was a syntax alignment: it applied the ratified D4
+binding syntax (`[[proof.import]]`) and D6 file layout, and recorded the ratified
+engine fingerprint. Revision 3 records the I1 to I3 rulings and the executed Gate 0
+baseline; no normative requirement changed. Gate 0 (hash baseline) is executed under
+the 2026-10-18 ruling; Gates 1 to 5 await the execution directive. Prepared
 to the 86427 and slice 2 standard: numbered requirements with falsifiable
 acceptance, abstention contract, fixtures with declared outcomes before code,
 mutation set, gates 0 to 5. Parents: INIT-DISCOVERY-SLICE2.md (K1 egress locks,
@@ -258,7 +260,7 @@ Gate 0 hash ledger of Class 1 files plus landed slices 2 and 2b (clean tree at 4
 
 ## I. Path classes
 
-Class 1 untouched and hash-verified: surface, backtest, invariant, yaml, codepairs, Cargo files, the five Experiment C artifacts. Class 2: tests/proof_test.rs, scripts/proof/. Class 3 GRANTED by ruling D9: src/proof.rs (new), lock.rs (`--emit-proof` handler), check.rs (`--proof` verification runner), config.rs (`[[proof.import]]` schema; config.rs leaves Class 1 for this change only, and its pre-change hash is recorded at Gate 0). Class 3 NOT granted and REQUESTED (open item I1b): main.rs, because the two CLI flags are parsed there. Class 4: lib.rs (module registration).
+Class 1 untouched and hash-verified: surface, backtest, invariant, yaml, codepairs, Cargo files, the five Experiment C artifacts. Class 2: tests/proof_test.rs, scripts/proof/. Class 3 GRANTED by ruling D9: src/proof.rs (new), lock.rs (`--emit-proof` handler), check.rs (`--proof` verification runner), config.rs (`[[proof.import]]` schema; config.rs leaves Class 1 for this change only, and its pre-change hash is recorded at Gate 0). Class 3 also GRANTED by ruling I1b (2026-10-18): main.rs, because the two CLI flags are parsed there. Class 4: lib.rs (module registration).
 
 ## J. Rejected or deferred from the red-team input, with reasons
 
@@ -279,21 +281,26 @@ D7 opt-in `max_age_days`; D8 RFC 3161 deferred; D9 Class 3 grants for proof.rs,
 lock.rs, check.rs and config.rs. Ruling of 20:05 on the volunteered items: the rule
 fingerprint is ratified for this spec (R-P-10).
 
-Open items created by applying the rulings, each needing a one-line ruling before the
-proof engine's Gate 1:
-I1 The ruling fixed four binding keys; B4 forces two more, `proof` (where the file is)
-and `fields` (what the consumer relies on). Ratify them, or name another way to supply
-them. I1b D9 did not list main.rs, which parses `--emit-proof` and `--proof`: grant it.
-I2 The ruling named a SHA-256 fingerprint; the tree has blake3 only and a new
-dependency is a stop condition. Recommended: blake3 (as written in R-P-10). I2b The
-ruling said "embed in generated locks": a new line in every lock changes every
-generated lock byte and the byte-identical gates of slices 1, 2 and 2b. This spec
-places the fingerprint in the proof only; adding it to the lock as an evidence line is
-a separate ruling with its own migration fixtures.
-I3 Whether plain `invar check` should evaluate `[[proof.import]]` once stable (today
-only `--proof` does, so a CI that omits the flag silently skips proofs). Recommended:
-keep opt-in for v1, add a printed one-line NOTE from plain `check` when imports exist
-and `--proof` was not passed (requires its own byte-identity analysis).
+Open items I1 to I3 were RULED 2026-10-18; all are closed:
+I1 APPROVED. `proof` (file location) and `fields` (the relied-on names) are locked
+into the `[[proof.import]]` schema as required keys beside the four ruled ones.
+I1b APPROVED. main.rs is granted Class 3 scope for parsing `--emit-proof` and
+`--proof`; section I reflects the grant.
+I2 APPROVED. blake3 is the standard for every INVAR cryptographic primitive; no
+SHA-256 crate enters the tree (the zero-new-dependency stop condition holds). I2b
+APPROVED. `rule_fingerprint` stays in proof files only; lock files keep their exact
+bytes. A future lock-side fingerprint is a separate ruling with its own migration
+fixtures.
+I3 RULED, kept separated. Plain `invar check` never evaluates `[[proof.import]]`
+tables; proof verification is strictly behind `invar check --proof`, so standard
+checks stay fast, local and decoupled. The one-line NOTE floated in r2 is NOT
+adopted: plain check output stays byte-identical on every repository, with or
+without proof imports. Mutation 16 and fixture PRF-N3 enforce this permanently.
+
+Gate 0 was initialized under these rulings. The hash baseline is
+docs/architecture/GATE0-PROOF-LEDGER.md, taken at the clean tree of commit 8861f63
+(slice 2b REV1 landed). A failure against that ledger at any later gate stops the
+arc for ruling.
 
 ## L. Stop conditions
 
