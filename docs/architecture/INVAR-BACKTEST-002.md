@@ -164,3 +164,47 @@ Stop and report on: any need to touch check.rs, strings.rs or any other
 Class 1 file; any byte change to egress or schema replay; any JSON key or
 label change; any new parser for a shape check already reads; any frozen
 fixture failing; any new dependency, code or exit change.
+
+## J. Rulings of 2026-10-18 (recorded)
+
+B-D1 to B-D7 RATIFIED as drafted (23:53): read_any_shape reused, dispatch
+on the `strings:` prefix, NotFound absent before introduction, Dynamic a
+stated blind spot, never-present wording and shallow note text only,
+Class 3 granted for backtest.rs. Implementation GO under baseline b484d3d.
+
+## K. Implementation Evidence Ledger (appended at Gate 5; sections 0 to J are unchanged)
+
+Status: IMPLEMENTED. backtest.rs is the only engine file changed; check.rs,
+valuepairs/strings.rs and every other Class 1 file are byte-identical.
+
+### K1. Gate results
+
+| Gate | Result |
+|---|---|
+| 0 baseline | sandbox tree equal to the Mac at 01f4d0b, 41 of 41 engine files byte-identical |
+| 1 fixtures first | 10 fixtures written before the change; BT-F1 to BT-F4 failed with `["absent"]` where the truth is present (S3-F-05 reproduced), BT-F5 lacked the never-present line, BT-F6 the shallow line; the 4 controls passed, including a byte-exact egress/schema golden recorded from the unchanged engine |
+| 2 implementation | backtest.rs only: strings contracts replay through read_any_shape, a never-present flag on each timeline (text only), one shallow note line |
+| 3 mutations | PASS: 11 of 11 CAUGHT by named assertion, control green, none SURVIVED, BUILD-FAILED or APPLY-FAILED (scripts/backtest2/mutate.sh), measured on a full re-run from scratch after the fixture strengthening of K2 |
+| 4 regression | 265 of 265 tests green, zero warnings, zero frozen-suite edits; JSON key set byte-identical |
+| 5 documentation | sections J and K, STATUS.md entry, STAGE3-EVAL-002-M6 ledger |
+
+### K2. What the gates taught (stated, not hidden)
+
+- Gate 3's first run had one SURVIVING mutant, and it convicted the
+  fixture, not the engine. Patch 05 was generated narrower than its
+  declaration: it dropped only the blind-0 never-present arm, so a
+  never-seen field fell through to the blind-spot arm and printed
+  "never present in the replayed window; 0 commit(s) not readable". That
+  text is wrong, and BT-F5 asserted containment, so it survived. BT-F5 now
+  asserts the exact line. Patch 05 keeps its actual (harder) content under
+  an accurate description, and the declared full revert was added as
+  mutant 11, so the set grew from 10 to 11. The whole harness was then
+  re-run from scratch.
+- Hashes and dates in every fixture are fixed (author and committer
+  dates pinned), which is what lets the egress/schema replay be asserted
+  byte-for-byte rather than by shape.
+- Re-measurement on unseen code is recorded separately as
+  STAGE3-EVAL-002-M6 (docs/evidence/stage3/eval002-m6/), never written
+  over STAGE3-EVAL-001: the 61 false absence events on claude-mem and
+  OmniRoute now read present, 0 absent, the shallow history is stated,
+  and the JSON key set is identical.

@@ -1,0 +1,12 @@
+# mutation: the machine surface gains a key (B4)
+# catch: bt_n2_strings_json_has_exactly_the_schema_key_set
+--- a/crates/invar-falsify/src/backtest.rs
++++ b/crates/invar-falsify/src/backtest.rs
+@@ -273,6 +273,7 @@
+                 })).collect::<Vec<_>>(),
+                 "coda": BACKTEST_CODA,
+                 "depth": depth,
++                "shallow": git(base, &["rev-parse", "--is-shallow-repository"]).is_ok_and(|s| s.trim() == "true"),
+                 "skipped": skipped.iter().map(|(id, why)| json!({"contract": id, "reason": why})).collect::<Vec<_>>(),
+             });
+             let _ = writeln!(out, "{}", serde_json::to_string_pretty(&v).unwrap_or_default());

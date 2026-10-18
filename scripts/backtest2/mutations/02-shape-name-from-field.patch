@@ -1,0 +1,13 @@
+# mutation: the shape name read from the field instead of the scope
+# catch: bt_f1_a_field_present_at_every_commit_is_never_absent
+--- a/crates/invar-falsify/src/backtest.rs
++++ b/crates/invar-falsify/src/backtest.rs
+@@ -123,7 +123,7 @@
+     let strings_shape = c
+         .id
+         .starts_with("strings:")
+-        .then(|| c.bindings.first().map(|b| b.scope.clone()))
++        .then(|| c.bindings.first().map(|b| b.field.clone()))
+         .flatten();
+     let mut surfaces = Vec::with_capacity(commits.len());
+     for (hash, _) in &commits {

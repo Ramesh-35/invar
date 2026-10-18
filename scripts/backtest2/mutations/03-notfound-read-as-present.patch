@@ -1,0 +1,13 @@
+# mutation: a shape that did not exist yet is guessed present
+# catch: bt_f3_absence_before_the_shape_existed_is_not_a_window
+--- a/crates/invar-falsify/src/backtest.rs
++++ b/crates/invar-falsify/src/backtest.rs
+@@ -132,7 +132,7 @@
+             (Err(_), _) => Err(State::Unreadable),
+             (Ok(t), Some(shape)) => match read_any_shape(&t, shape) {
+                 ShapeRead::Found(keys) => Ok(keys.into_iter().map(|k| ((shape.clone(), k), None)).collect()),
+-                ShapeRead::NotFound => Ok(crate::surface::Fields::new()),
++                ShapeRead::NotFound => Ok(c.bindings.iter().map(|b| ((shape.clone(), b.field.clone()), None)).collect()),
+                 ShapeRead::Dynamic(_) => Err(State::Unextractable),
+             },
+             (Ok(t), None) => match source_fields(&c.id, &c.producer, &t, c.pointer.as_deref()) {

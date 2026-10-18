@@ -1,0 +1,13 @@
+# mutation: a dynamic shape is guessed absent instead of stated blind
+# catch: bt_f4_a_dynamic_shape_is_a_stated_blind_spot
+--- a/crates/invar-falsify/src/backtest.rs
++++ b/crates/invar-falsify/src/backtest.rs
+@@ -133,7 +133,7 @@
+             (Ok(t), Some(shape)) => match read_any_shape(&t, shape) {
+                 ShapeRead::Found(keys) => Ok(keys.into_iter().map(|k| ((shape.clone(), k), None)).collect()),
+                 ShapeRead::NotFound => Ok(crate::surface::Fields::new()),
+-                ShapeRead::Dynamic(_) => Err(State::Unextractable),
++                ShapeRead::Dynamic(_) => Ok(crate::surface::Fields::new()),
+             },
+             (Ok(t), None) => match source_fields(&c.id, &c.producer, &t, c.pointer.as_deref()) {
+                 Ok(f) => Ok(f),

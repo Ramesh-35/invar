@@ -1,0 +1,13 @@
+# mutation: an id that merely contains strings routed to the strings reader
+# catch: bt_n3_only_the_strings_prefix_routes_to_the_strings_reader
+--- a/crates/invar-falsify/src/backtest.rs
++++ b/crates/invar-falsify/src/backtest.rs
+@@ -122,7 +122,7 @@
+     // not exist yet, B-D3); Dynamic is a stated blind spot (B-D4).
+     let strings_shape = c
+         .id
+-        .starts_with("strings:")
++        .contains("strings:")
+         .then(|| c.bindings.first().map(|b| b.scope.clone()))
+         .flatten();
+     let mut surfaces = Vec::with_capacity(commits.len());

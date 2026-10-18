@@ -1,0 +1,12 @@
+# mutation: the blind-0 never-present arm dropped, so a never-seen field falls through to "0 commit(s) not readable"
+# catch: bt_f5_a_binding_never_present_in_the_window_says_so
+--- a/crates/invar-falsify/src/backtest.rs
++++ b/crates/invar-falsify/src/backtest.rs
+@@ -298,7 +298,6 @@
+                         let _ = writeln!(out, "    {d} {h} {}", s.label());
+                     }
+                     let _ = match (t.absence_windows, t.blind_spots) {
+-                        (_, 0) if !t.ever_present => writeln!(out, "    never present in the replayed window"),
+                         (_, b) if !t.ever_present => writeln!(out, "    never present in the replayed window; {b} commit(s) not readable (stated, not guessed)"),
+                         (0, 0) => writeln!(out, "    never absent after introduction"),
+                         (w, 0) => writeln!(out, "    {w} absence window(s) after introduction"),

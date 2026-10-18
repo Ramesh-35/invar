@@ -26,6 +26,8 @@ use serde_json::json;
 use crate::check::source_fields;
 use crate::lock::{Binding, LockedContract};
 use crate::surface::name_key;
+use crate::valuepairs::strings::read_any_shape;
+use crate::valuepairs::ShapeRead;
 
 fn git(dir: &Path, args: &[&str]) -> Result<String> {
     let out = Command::new("git")
@@ -83,6 +85,9 @@ struct Timeline {
     /// commit (absence before introduction is not a window).
     absence_windows: usize,
     blind_spots: usize,
+    /// Present at one replayed commit or more. Text only (R-B2-2): a
+    /// binding never seen present is never reassured about absence.
+    ever_present: bool,
 }
 
 struct ContractReplay {
@@ -110,12 +115,27 @@ fn replay_contract(base: &Path, prefix: &str, c: &LockedContract, depth: usize) 
     }
     commits.reverse(); // oldest first
     // Extract once per commit, then read each binding off the same surface.
+    // INVAR-BACKTEST-002 (B-D1, B-D2): a strings contract's producer is a
+    // Zod shape, read with the very reader check uses on the live producer
+    // (read_any_shape), so the two can never disagree on the same bytes.
+    // The shape is the bindings' scope. NotFound is absent (the shape did
+    // not exist yet, B-D3); Dynamic is a stated blind spot (B-D4).
+    let strings_shape = c
+        .id
+        .starts_with("strings:")
+        .then(|| c.bindings.first().map(|b| b.scope.clone()))
+        .flatten();
     let mut surfaces = Vec::with_capacity(commits.len());
     for (hash, _) in &commits {
         let text = git(base, &["show", &format!("{hash}:{rel}")]);
-        surfaces.push(match text {
-            Err(_) => Err(State::Unreadable),
-            Ok(t) => match source_fields(&c.id, &c.producer, &t, c.pointer.as_deref()) {
+        surfaces.push(match (text, &strings_shape) {
+            (Err(_), _) => Err(State::Unreadable),
+            (Ok(t), Some(shape)) => match read_any_shape(&t, shape) {
+                ShapeRead::Found(keys) => Ok(keys.into_iter().map(|k| ((shape.clone(), k), None)).collect()),
+                ShapeRead::NotFound => Ok(crate::surface::Fields::new()),
+                ShapeRead::Dynamic(_) => Err(State::Unextractable),
+            },
+            (Ok(t), None) => match source_fields(&c.id, &c.producer, &t, c.pointer.as_deref()) {
                 Ok(f) => Ok(f),
                 Err(_) => Err(State::Unextractable),
             },
@@ -167,6 +187,7 @@ fn replay_contract(base: &Path, prefix: &str, c: &LockedContract, depth: usize) 
             events,
             absence_windows: windows,
             blind_spots: blind,
+            ever_present: first_present.is_some(),
         });
     }
     Ok(ContractReplay {
@@ -259,9 +280,16 @@ pub fn run(
         _ => {
             let _ = writeln!(
                 out,
-                "invar backtest ({config_path}, {} contract(s), depth {depth})\n",
+                "invar backtest ({config_path}, {} contract(s), depth {depth})",
                 replays.len() + skipped.len()
             );
+            // R-B2-3 (B-D6, text only): a shallow history is stated, since
+            // its oldest replayed commit is a boundary, not a change. An
+            // older git that cannot answer prints nothing new.
+            if git(base, &["rev-parse", "--is-shallow-repository"]).is_ok_and(|s| s.trim() == "true") {
+                let _ = writeln!(out, "note: shallow history; the oldest replayed commit is the shallow boundary, and its date is the cutoff, not a change");
+            }
+            let _ = writeln!(out);
             for r in &replays {
                 let _ = writeln!(out, "{}: {} ({} commit(s) replayed)", r.id, r.producer, r.commits);
                 for t in &r.timelines {
@@ -270,6 +298,8 @@ pub fn run(
                         let _ = writeln!(out, "    {d} {h} {}", s.label());
                     }
                     let _ = match (t.absence_windows, t.blind_spots) {
+                        (_, 0) if !t.ever_present => writeln!(out, "    never present in the replayed window"),
+                        (_, b) if !t.ever_present => writeln!(out, "    never present in the replayed window; {b} commit(s) not readable (stated, not guessed)"),
                         (0, 0) => writeln!(out, "    never absent after introduction"),
                         (w, 0) => writeln!(out, "    {w} absence window(s) after introduction"),
                         (w, b) => writeln!(out, "    {w} absence window(s) after introduction; {b} commit(s) not readable (stated, not guessed)"),

@@ -1,0 +1,13 @@
+# mutation: the never-present condition inverted
+# catch: bt_f1_a_field_present_at_every_commit_is_never_absent
+--- a/crates/invar-falsify/src/backtest.rs
++++ b/crates/invar-falsify/src/backtest.rs
+@@ -187,7 +187,7 @@
+             events,
+             absence_windows: windows,
+             blind_spots: blind,
+-            ever_present: first_present.is_some(),
++            ever_present: first_present.is_none(),
+         });
+     }
+     Ok(ContractReplay {

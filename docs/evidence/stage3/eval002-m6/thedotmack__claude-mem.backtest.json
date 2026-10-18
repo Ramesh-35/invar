@@ -1,0 +1,232 @@
+{
+  "backtest": [
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "MemoryItemSchema.concepts",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "0a803bdedb09",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "MemoryItemSchema.facts",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "0a803bdedb09",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "MemoryItemSchema.filesModified",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "0a803bdedb09",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "MemoryItemSchema.filesRead",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "0a803bdedb09",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 1,
+      "contract": "strings:MemoryItemSchema@const:OBSERVATION_JSON_FIELDS",
+      "producer": "src/core/schemas/memory-item.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "MemoryItemSchema.concepts",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "0a803bdedb09",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "MemoryItemSchema.facts",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "0a803bdedb09",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "MemoryItemSchema.narrative",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "0a803bdedb09",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "MemoryItemSchema.subtitle",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "0a803bdedb09",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "MemoryItemSchema.text",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "0a803bdedb09",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 1,
+      "contract": "strings:MemoryItemSchema@const:indexedFields",
+      "producer": "src/core/schemas/memory-item.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "MemoryItemSchema.concepts",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "0a803bdedb09",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "MemoryItemSchema.createdAtEpoch",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "0a803bdedb09",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "MemoryItemSchema.facts",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "0a803bdedb09",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "MemoryItemSchema.filesModified",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "0a803bdedb09",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "MemoryItemSchema.filesRead",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "0a803bdedb09",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "MemoryItemSchema.narrative",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "0a803bdedb09",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "MemoryItemSchema.subtitle",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "0a803bdedb09",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "MemoryItemSchema.text",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "0a803bdedb09",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 1,
+      "contract": "strings:MemoryItemSchema@const:observationsKnownColumns",
+      "producer": "src/core/schemas/memory-item.ts"
+    }
+  ],
+  "coda": "Timelines replay today's extraction over past file contents. They are\nnot replayed verdicts: waivers, selectors and samples are today's, and a\npast consumer may not have read the field yet. Unreadable commits are\nstated, never guessed.",
+  "depth": 100,
+  "skipped": []
+}

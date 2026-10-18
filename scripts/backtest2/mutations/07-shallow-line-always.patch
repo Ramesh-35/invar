@@ -1,0 +1,13 @@
+# mutation: a full history labelled shallow
+# catch: bt_f6_shallow_history_is_stated_and_full_history_is_not
+--- a/crates/invar-falsify/src/backtest.rs
++++ b/crates/invar-falsify/src/backtest.rs
+@@ -286,7 +286,7 @@
+             // R-B2-3 (B-D6, text only): a shallow history is stated, since
+             // its oldest replayed commit is a boundary, not a change. An
+             // older git that cannot answer prints nothing new.
+-            if git(base, &["rev-parse", "--is-shallow-repository"]).is_ok_and(|s| s.trim() == "true") {
++            if git(base, &["rev-parse", "--is-shallow-repository"]).is_ok() {
+                 let _ = writeln!(out, "note: shallow history; the oldest replayed commit is the shallow boundary, and its date is the cutoff, not a change");
+             }
+             let _ = writeln!(out);

@@ -1,0 +1,13 @@
+# mutation: strings replay through the code-surface reader again (S3-F-05)
+# catch: bt_f1_a_field_present_at_every_commit_is_never_absent
+--- a/crates/invar-falsify/src/backtest.rs
++++ b/crates/invar-falsify/src/backtest.rs
+@@ -122,7 +122,7 @@
+     // not exist yet, B-D3); Dynamic is a stated blind spot (B-D4).
+     let strings_shape = c
+         .id
+-        .starts_with("strings:")
++        .starts_with("never-a-prefix:")
+         .then(|| c.bindings.first().map(|b| b.scope.clone()))
+         .flatten();
+     let mut surfaces = Vec::with_capacity(commits.len());

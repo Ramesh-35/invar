@@ -23,3 +23,14 @@ fixed mid-run: backtest replays strings contracts with the wrong extractor
 (61 of 61 absence events false). One yield lever: "exports" maps cause 83
 percent of UNRESOLVED. Record: docs/architecture/STAGE3-EVAL-001.md section
 K and docs/evidence/stage3/.
+
+## 2026-10-19: INVAR-BACKTEST-002 strings replay (from STAGE3-EVAL-001 S3-F-05 to S3-F-07)
+
+Backtest now reads a strings contract's producer with read_any_shape, the
+same Zod key-set reader check uses, so the two cannot disagree on the same
+bytes. A binding never present in the window says so instead of being
+reassured; a shallow history is stated. Text only: JSON surface and
+egress/schema replay byte-identical. backtest.rs only; 10 fixtures first,
+11 of 11 mutations caught on a clean re-run, 265 of 265 tests, zero warnings. Re-measured on unseen code as
+STAGE3-EVAL-002-M6: the 61 false absences now read present. Record:
+docs/architecture/INVAR-BACKTEST-002.md.
