@@ -1,0 +1,14 @@
+# mutation: a name declared both ways left silent (CM-S3B-7)
+# catch: b_f7_a_name_declared_both_ways_abstains
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1642,7 +1642,8 @@
+                                         );
+                                     }
+                                 }
+-                                Some(_) if ev.value && !imp.type_only.contains(name) => abstain(
++                                Some(_) if ev.value && !imp.type_only.contains(name) => {}
++                                Some(_) if false => abstain(
+                                     "UNRESOLVED",
+                                     format!("{name} from {:?}: declared both as a type and as a value in package {pkg}; not guessed", imp.spec),
+                                 ),

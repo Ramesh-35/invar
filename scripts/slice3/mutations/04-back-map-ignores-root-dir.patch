@@ -1,0 +1,13 @@
+# mutation: the back-map re-roots at the package, ignoring rootDir (CM-S3-4)
+# catch: s3_f3_dist_pattern_maps_back_through_root_dir
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1217,7 +1217,7 @@
+                         continue;
+                     }
+                     let Some(rest) = full.strip_prefix(&format!("{}/", m.out)) else { continue };
+-                    let back = if m.root.is_empty() { rest.to_string() } else { format!("{}/{rest}", m.root) };
++                    let back = format!("{dir}/{rest}");
+                     let back = match back.strip_suffix(".d.ts") {
+                         Some(stem) => format!("{stem}.js"),
+                         None => back,

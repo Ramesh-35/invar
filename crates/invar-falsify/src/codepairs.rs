@@ -271,6 +271,9 @@ struct Import {
     line: usize,
     spec: String,
     named: Vec<String>,
+    /// SLICE3B: names imported type-only (`import type {..}`, or an inline
+    /// `type X` inside the braces), by original name.
+    type_only: BTreeSet<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -468,6 +471,87 @@ fn brace_names(t: &Text, open: usize, close: usize) -> Vec<(String, String)> {
     out
 }
 
+/// SLICE3B: original names of the `type X` / `type X as Y` items in braces.
+fn inline_type_names(t: &Text, open: usize, close: usize) -> BTreeSet<String> {
+    let inner = String::from_utf8_lossy(&t.m[open + 1..close - 1]).to_string();
+    inner
+        .split(',')
+        .filter_map(|item| {
+            let words: Vec<&str> = item.split_whitespace().collect();
+            match words.as_slice() {
+                ["type", a] | ["type", a, "as", _] => Some(a.to_string()),
+                _ => None,
+            }
+        })
+        .collect()
+}
+
+/// SLICE3B: what a package's own sources declare for a name, read by a
+/// plain word scan over the masked text (strings and comments blanked).
+/// It uses no bracket depth, so a scanner miss cannot blind it, and it is
+/// never used to propose: only to decide whether silence is earned.
+#[derive(Default)]
+struct DeclEvidence {
+    /// First `interface X` / `type X` site, in path order.
+    type_site: Option<(String, usize)>,
+    /// `function X`, `const X`, `let X`, `var X`. A `class X` or `enum X`
+    /// records the name with neither flag: present, not a type (S3B-D3).
+    value: bool,
+}
+
+/// Returns the index and the files that could not be read (not UTF-8).
+fn declaration_index<'f>(root: &Path, files: impl Iterator<Item = &'f String>) -> (BTreeMap<String, DeclEvidence>, Vec<String>) {
+    let mut idx: BTreeMap<String, DeclEvidence> = BTreeMap::new();
+    let mut unread = Vec::new();
+    for f in files {
+        let Ok(Ok(text)) = std::fs::read(root.join(f)).map(String::from_utf8) else {
+            unread.push(f.clone());
+            continue;
+        };
+        let t = Text::new(&text);
+        let mut i = 0;
+        while i < t.m.len() {
+            if !is_ident_start(t.m[i]) || (i > 0 && is_ident(t.m[i - 1])) {
+                i += 1;
+                continue;
+            }
+            let mut e = i;
+            while e < t.m.len() && is_ident(t.m[e]) {
+                e += 1;
+            }
+            let kind = match &t.m[i..e] {
+                b"interface" | b"type" => Some(0),
+                b"function" | b"const" | b"let" | b"var" => Some(1),
+                b"class" | b"enum" => Some(2),
+                _ => None,
+            };
+            if let Some(k) = kind {
+                let mut j = e;
+                if &t.m[i..e] == b"function" && t.m.get(j) == Some(&b'*') {
+                    j += 1;
+                }
+                let n = t.ws(j);
+                if n > j {
+                    if let Some((name, _)) = t.ident(n) {
+                        let ev = idx.entry(name).or_default();
+                        match k {
+                            0 => {
+                                if ev.type_site.is_none() {
+                                    ev.type_site = Some((f.clone(), t.line(i)));
+                                }
+                            }
+                            1 => ev.value = true,
+                            _ => {}
+                        }
+                    }
+                }
+            }
+            i = e;
+        }
+    }
+    (idx, unread)
+}
+
 /// After a `{...}` or clause, find `from 'spec'`; returns (spec, end).
 fn from_spec(t: &Text, i: usize) -> Option<(String, usize)> {
     let i = t.ws(i);
@@ -520,13 +604,16 @@ fn top_statement(t: &Text, i: usize, fi: &mut FileInfo) -> Option<usize> {
         if matches!(t.m.get(j), Some(b'(') | Some(b'"') | Some(b'\'') | Some(b'.')) {
             return None; // dynamic import, side-effect import, import.meta
         }
+        let mut statement_type_only = false;
         if t.kw(j, "type") {
             let k = t.ws(j + 4);
             if t.m.get(k) == Some(&b'{') || t.ident(k).is_some() && !t.kw(k, "from") {
                 j = k;
+                statement_type_only = true;
             }
         }
         let mut named = Vec::new();
+        let mut type_only = BTreeSet::new();
         // default identifier
         if let Some((_, e)) = t.ident(j) {
             if !t.kw(j, "from") {
@@ -547,10 +634,11 @@ fn top_statement(t: &Text, i: usize, fi: &mut FileInfo) -> Option<usize> {
         } else if t.m.get(j) == Some(&b'{') {
             let close = t.close(j)?;
             named = brace_names(t, j, close).into_iter().map(|(_, orig)| orig).collect();
+            type_only = if statement_type_only { named.iter().cloned().collect() } else { inline_type_names(t, j, close) };
             j = close;
         }
         let (spec, end) = from_spec(t, j)?;
-        fi.imports.push(Import { line, spec, named });
+        fi.imports.push(Import { line, spec, named, type_only });
         return Some(end);
     }
     if t.kw(i, "export") {
@@ -961,6 +1049,203 @@ struct Ctx<'a> {
     pkgs: &'a [Package],
     files: &'a BTreeSet<String>,
     by_name: BTreeMap<&'a str, Vec<usize>>,
+    /// INIT-DISCOVERY-SLICE3: each package's declared compiler back-maps,
+    /// read once (empty for packages without "exports").
+    backmaps: Vec<Vec<BackMap>>,
+}
+
+// ------------------------------------------------- package "exports" (SLICE3)
+//
+// Rulings S3-D1 to S3-D8. Resolution answers "which source file declares
+// this export", following only what the package itself declares: its
+// exports map and its own tsconfig compiler mapping. Conditions are
+// followed order-free (serde_json stores objects sorted, so a package's own
+// key order is not available) and every branch that reaches a source must
+// name the same file; anything else is UNRESOLVED with an exact reason.
+
+/// One declared compiler mapping from emitted output back to sources,
+/// repository-relative: outDir (for .js and .d.ts) or declarationDir (for
+/// .d.ts only), each to rootDir. rootDir is never computed (S3-D5).
+struct BackMap {
+    declarations_only: bool,
+    out: String,
+    root: String,
+}
+
+const EXPORTS_CONDITIONS: [&str; 4] = ["default", "import", "require", "types"];
+
+/// The package's own tsconfig.json and tsconfig.build.json, both read;
+/// `extends` is not followed. An unreadable or unparsable file adds nothing.
+fn read_backmaps(root: &Path, pkg_dir: &str) -> Vec<BackMap> {
+    let mut maps = Vec::new();
+    for name in ["tsconfig.json", "tsconfig.build.json"] {
+        let Ok(text) = std::fs::read_to_string(root.join(pkg_dir).join(name)) else { continue };
+        let Ok(cfg) = serde_json::from_str::<Value>(&strip_jsonc(&text)) else { continue };
+        let co = &cfg["compilerOptions"];
+        let Some(rd) = co["rootDir"].as_str() else { continue };
+        for (key, declarations_only) in [("outDir", false), ("declarationDir", true)] {
+            let Some(od) = co[key].as_str() else { continue };
+            if let (Ok(o), Ok(r)) = (norm_path(&format!("{pkg_dir}/{od}")), norm_path(&format!("{pkg_dir}/{rd}"))) {
+                maps.push(BackMap { declarations_only, out: o.join("/"), root: r.join("/") });
+            }
+        }
+    }
+    maps
+}
+
+/// tsconfig is JSONC: drop comments outside strings and trailing commas
+/// before `}` or `]`, so serde_json can read it. No other change.
+fn strip_jsonc(text: &str) -> String {
+    let c: Vec<char> = text.chars().collect();
+    let mut out = String::with_capacity(text.len());
+    let (mut i, mut in_str) = (0, false);
+    while i < c.len() {
+        let ch = c[i];
+        if in_str {
+            out.push(ch);
+            if ch == '\\' && i + 1 < c.len() {
+                out.push(c[i + 1]);
+                i += 2;
+                continue;
+            }
+            in_str = ch != '"';
+            i += 1;
+            continue;
+        }
+        match ch {
+            '"' => {
+                in_str = true;
+                out.push(ch);
+            }
+            '/' if c.get(i + 1) == Some(&'/') => {
+                while i < c.len() && c[i] != '\n' {
+                    i += 1;
+                }
+                continue;
+            }
+            '/' if c.get(i + 1) == Some(&'*') => {
+                i += 2;
+                while i + 1 < c.len() && !(c[i] == '*' && c[i + 1] == '/') {
+                    i += 1;
+                }
+                i += 2;
+                continue;
+            }
+            '}' | ']' => {
+                let kept = out.trim_end().len();
+                if out[..kept].ends_with(',') {
+                    out.truncate(kept - 1);
+                }
+                out.push(ch);
+            }
+            _ => out.push(ch),
+        }
+        i += 1;
+    }
+    out
+}
+
+enum Leaf {
+    Target(String),
+    Fail(String),
+}
+
+/// The leaves of the map entry for `sub` (`.` or `./...`).
+fn exports_match(exp: &Value, sub: &str) -> Vec<Leaf> {
+    let is_sub = |k: &String| k.starts_with('.');
+    let map = match exp {
+        Value::Object(m) if !m.is_empty() && m.keys().all(is_sub) => m,
+        Value::Object(m) if m.keys().any(is_sub) => {
+            return vec![Leaf::Fail("the exports map mixes subpath keys and condition keys".into())]
+        }
+        Value::Object(_) | Value::String(_) | Value::Array(_) => {
+            if sub != "." {
+                return vec![Leaf::Fail(format!("no exports entry matches {sub:?}"))];
+            }
+            let mut acc = Vec::new();
+            exports_leaves(exp, None, &mut acc);
+            return acc;
+        }
+        _ => return vec![Leaf::Fail("the exports value is not a string, array or object".into())],
+    };
+    let mut acc = Vec::new();
+    if let Some(t) = map.get(sub) {
+        if t.is_null() {
+            return vec![Leaf::Fail(format!("exports excludes {sub:?} (null)"))];
+        }
+        exports_leaves(t, None, &mut acc);
+        return acc;
+    }
+    // One `*`: longest prefix wins, ties to the longer key (PATTERN_KEY_COMPARE).
+    let mut best: Option<(&String, usize, usize)> = None;
+    for k in map.keys() {
+        let Some((pre, suf)) = k.split_once('*') else { continue };
+        if suf.contains('*') || sub.len() < pre.len() + suf.len() || !sub.starts_with(pre) || !sub.ends_with(suf) {
+            continue;
+        }
+        if best.is_none_or(|(bk, bp, _)| pre.len() > bp || (pre.len() == bp && k.len() > bk.len())) {
+            best = Some((k, pre.len(), suf.len()));
+        }
+    }
+    match best {
+        Some((k, p, s)) => {
+            if map[k].is_null() {
+                return vec![Leaf::Fail(format!("exports excludes {sub:?} (null)"))];
+            }
+            exports_leaves(&map[k], Some(&sub[p..sub.len() - s]), &mut acc);
+            acc
+        }
+        None => vec![Leaf::Fail(format!("no exports entry matches {sub:?}"))],
+    }
+}
+
+/// Strings are leaves, arrays are fallbacks (first valid wins), objects are
+/// conditions (every active branch, order-free), null excludes.
+fn exports_leaves(t: &Value, star: Option<&str>, acc: &mut Vec<Leaf>) {
+    match t {
+        Value::Null => acc.push(Leaf::Fail("exports excludes this entry (null)".into())),
+        Value::String(s) => acc.push(exports_target(s, star)),
+        Value::Array(items) => {
+            for x in items {
+                let mut sub = Vec::new();
+                exports_leaves(x, star, &mut sub);
+                if sub.iter().any(|l| matches!(l, Leaf::Target(_))) {
+                    acc.extend(sub);
+                    return;
+                }
+            }
+            acc.push(Leaf::Fail("no valid fallback in the exports array".into()));
+        }
+        Value::Object(m) => {
+            let mut hit = false;
+            for (k, v) in m {
+                if EXPORTS_CONDITIONS.contains(&k.as_str()) {
+                    hit = true;
+                    exports_leaves(v, star, acc);
+                }
+            }
+            if !hit {
+                acc.push(Leaf::Fail("no exports condition among types, import, require, default".into()));
+            }
+        }
+        _ => acc.push(Leaf::Fail("an exports target is not a string".into())),
+    }
+}
+
+/// Every `*` takes the capture; a target must start with `./` and may not
+/// hold a `..` or `node_modules` segment after substitution.
+fn exports_target(t: &str, star: Option<&str>) -> Leaf {
+    if !t.starts_with("./") {
+        return Leaf::Fail(format!("exports target {t:?} does not start with \"./\""));
+    }
+    let v = match star {
+        Some(cap) => t.replace('*', cap),
+        None => t.to_string(),
+    };
+    if v.split('/').any(|seg| seg == ".." || seg == "node_modules") {
+        return Leaf::Fail(format!("exports target {v:?} escapes the package"));
+    }
+    Leaf::Target(v)
 }
 
 impl<'a> Ctx<'a> {
@@ -986,6 +1271,63 @@ impl<'a> Ctx<'a> {
             ]
         };
         cands.into_iter().find(|c| self.files.contains(c))
+    }
+    /// SLICE3: resolve `sub` through package `pkg`'s exports map. A `.d.ts`
+    /// leaf is never a source itself; any other leaf is probed as init
+    /// always probes, then mapped back through the declared back-maps.
+    /// Exactly one source across all leaves resolves; none or several is
+    /// UNRESOLVED with an exact reason, never a pick (S3-D2).
+    fn resolve_exports(&self, pkg: usize, exp: &Value, sub: &str) -> Res {
+        let dir = &self.pkgs[pkg].dir;
+        let mut sources = BTreeSet::new();
+        let mut why = BTreeSet::new();
+        for leaf in exports_match(exp, sub) {
+            let t = match leaf {
+                Leaf::Fail(r) => {
+                    why.insert(r);
+                    continue;
+                }
+                Leaf::Target(t) => t,
+            };
+            let Ok(segs) = norm_path(&format!("{dir}/{}", &t[2..])) else {
+                why.insert(format!("exports target {t:?} leaves the repository"));
+                continue;
+            };
+            let full = segs.join("/");
+            let decl = full.ends_with(".d.ts");
+            let mut found = BTreeSet::new();
+            if !decl {
+                found.extend(self.probe(&full));
+            }
+            if found.is_empty() {
+                for m in &self.backmaps[pkg] {
+                    if m.declarations_only && !decl {
+                        continue;
+                    }
+                    let Some(rest) = full.strip_prefix(&format!("{}/", m.out)) else { continue };
+                    let back = if m.root.is_empty() { rest.to_string() } else { format!("{}/{rest}", m.root) };
+                    let back = match back.strip_suffix(".d.ts") {
+                        Some(stem) => format!("{stem}.js"),
+                        None => back,
+                    };
+                    found.extend(self.probe(&back));
+                }
+            }
+            if found.is_empty() {
+                why.insert(format!(
+                    "exports target {t:?} is not a TypeScript source and no declared rootDir/outDir pair maps it back; not guessed"
+                ));
+            }
+            sources.extend(found);
+        }
+        match sources.len() {
+            1 => Res::File(sources.into_iter().next().unwrap_or_default()),
+            0 => Res::Unresolved(why.into_iter().next().unwrap_or_else(|| "the exports map yields no target".into())),
+            _ => Res::Unresolved(format!(
+                "exports branches name different sources ({}); not guessed",
+                sources.into_iter().collect::<Vec<_>>().join(", ")
+            )),
+        }
     }
     /// Resolve `spec` imported from `from`. With `cross`, only specifiers
     /// naming a different qualifying package are candidates.
@@ -1024,11 +1366,9 @@ impl<'a> Ctx<'a> {
             return (None, Res::NotCandidate);
         }
         let p = &self.pkgs[pkg];
-        if p.manifest.get("exports").is_some() {
-            return (
-                Some(pkg),
-                Res::Unresolved(format!("package {name} declares \"exports\"; not supported in slice 1")),
-            );
+        if let Some(exp) = p.manifest.get("exports") {
+            let sub = format!(".{}", &spec[name.len()..]);
+            return (Some(pkg), self.resolve_exports(pkg, exp, &sub));
         }
         let sub = spec[name.len()..].trim_start_matches('/');
         if sub.is_empty() {
@@ -1191,7 +1531,11 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
     for (i, p) in pkgs.iter().enumerate() {
         by_name.entry(p.name.as_str()).or_default().push(i);
     }
-    let ctx = Ctx { pkgs: &pkgs, files: &file_set, by_name };
+    let backmaps = pkgs
+        .iter()
+        .map(|p| if p.manifest.get("exports").is_some() { read_backmaps(root, &p.dir) } else { Vec::new() })
+        .collect();
+    let ctx = Ctx { pkgs: &pkgs, files: &file_set, by_name, backmaps };
 
     let mut infos: BTreeMap<String, FileInfo> = BTreeMap::new();
     for f in &file_set {
@@ -1221,6 +1565,10 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
 
     let mut pairs: BTreeMap<(String, String), CodePair> = BTreeMap::new();
     let stop: BTreeSet<String> = STOPLIST.iter().map(|s| name_key(s)).collect();
+    // SLICE3B: each target package's declaration evidence, built on first need.
+    // The second element is the package's first unreadable source file, if
+    // any: evidence is incomplete, so silence cannot be earned there.
+    let mut decl_index: BTreeMap<usize, (BTreeMap<String, DeclEvidence>, Option<String>)> = BTreeMap::new();
     // Exported object shapes per package: (file, exported name, decl).
     let mut pkg_shapes: BTreeMap<usize, Vec<(String, String, Decl)>> = BTreeMap::new();
     for (g, gi) in &infos {
@@ -1268,7 +1616,46 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
                     Res::NotCandidate => continue,
                 };
                 match find_shape(&ctx, &infos, name, &target) {
-                    Found::NotShape => {}
+                    // SLICE3B (S3B-D1): silence must be earned. Silent only
+                    // when the target package declares the name as a value,
+                    // class or enum and nowhere as a type; otherwise abstain
+                    // with a reason that says where to look (S3B-D2).
+                    Found::NotShape => {
+                        let Some(tp) = ctx.pkg_of(&target) else { continue };
+                        let (idx, unread) = decl_index.entry(tp).or_insert_with(|| {
+                            let (idx, bad) = declaration_index(root, file_set.iter().filter(|g| ctx.pkg_of(g) == Some(tp)));
+                            let over = oversized.iter().filter(|g| is_ts(g) && ctx.pkg_of(g) == Some(tp)).cloned();
+                            (idx, over.chain(bad).min())
+                        });
+                        let pkg = &ctx.pkgs[tp].name;
+                        match idx.get(name.as_str()) {
+                            None => abstain(
+                                "UNRESOLVED",
+                                format!("{name} from {:?}: not declared in the sources of package {pkg}; not guessed", imp.spec),
+                            ),
+                            Some(ev) => match &ev.type_site {
+                                None => {
+                                    if let Some(u) = unread {
+                                        abstain(
+                                            "UNRESOLVED",
+                                            format!("{name} from {:?}: package {pkg} has a source file init could not read ({u}); silence is not earned; not guessed", imp.spec),
+                                        );
+                                    }
+                                }
+                                Some(_) if ev.value && !imp.type_only.contains(name) => abstain(
+                                    "UNRESOLVED",
+                                    format!("{name} from {:?}: declared both as a type and as a value in package {pkg}; not guessed", imp.spec),
+                                ),
+                                Some((sf, sl)) => abstain(
+                                    "UNRESOLVED",
+                                    format!(
+                                        "{name} from {:?}: declared as a type at {sf}:{sl}, which init could not reach from {target}; not guessed",
+                                        imp.spec
+                                    ),
+                                ),
+                            },
+                        }
+                    }
                     Found::Barrel2 => abstain(
                         "BARREL2",
                         format!("{name} from {:?} is re-exported through more than one barrel level (from {target})", imp.spec),

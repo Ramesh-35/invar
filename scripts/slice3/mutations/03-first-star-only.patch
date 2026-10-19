@@ -1,0 +1,13 @@
+# mutation: only the first * substituted (CM-S3-3)
+# catch: s3_f5_every_star_is_substituted
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1151,7 +1151,7 @@
+         return Leaf::Fail(format!("exports target {t:?} does not start with \"./\""));
+     }
+     let v = match star {
+-        Some(cap) => t.replace('*', cap),
++        Some(cap) => t.replacen('*', cap, 1),
+         None => t.to_string(),
+     };
+     if v.split('/').any(|seg| seg == ".." || seg == "node_modules") {

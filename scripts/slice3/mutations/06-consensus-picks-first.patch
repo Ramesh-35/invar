@@ -1,0 +1,13 @@
+# mutation: disagreeing branches resolved to one of them (CM-S3-6)
+# catch: s3_f9_disagreeing_branches_are_never_picked
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1232,7 +1232,7 @@
+             }
+             sources.extend(found);
+         }
+-        match sources.len() {
++        match sources.len().min(1) {
+             1 => Res::File(sources.into_iter().next().unwrap_or_default()),
+             0 => Res::Unresolved(why.into_iter().next().unwrap_or_else(|| "the exports map yields no target".into())),
+             _ => Res::Unresolved(format!(

@@ -1,0 +1,13 @@
+# mutation: JSONC comments break the tsconfig read (CM-S3-9)
+# catch: s3_f14_jsonc_tsconfig_is_read
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -992,7 +992,7 @@
+     let mut maps = Vec::new();
+     for name in ["tsconfig.json", "tsconfig.build.json"] {
+         let Ok(text) = std::fs::read_to_string(root.join(pkg_dir).join(name)) else { continue };
+-        let Ok(cfg) = serde_json::from_str::<Value>(&strip_jsonc(&text)) else { continue };
++        let Ok(cfg) = serde_json::from_str::<Value>(&text) else { continue };
+         let co = &cfg["compilerOptions"];
+         let Some(rd) = co["rootDir"].as_str() else { continue };
+         for (key, declarations_only) in [("outDir", false), ("declarationDir", true)] {

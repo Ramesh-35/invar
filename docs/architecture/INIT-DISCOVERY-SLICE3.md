@@ -235,3 +235,55 @@ Stop and report on: any Class 1 file needing a change; any frozen fixture
 other than u06 failing; any new dependency, code, exit or output-format
 change; any resolution that needs a guess the package did not declare;
 any byte change for a package without exports.
+
+## J. Rulings of 2026-10-19 (recorded)
+
+S3-D1 to S3-D8 RATIFIED as drafted (14:16). S3-D1 Option A: u06
+superseded, its original assertion preserved in K3, and the standing rule
+adopted: a frozen fixture pinning a declared scope limit by name may be
+updated or replaced only by the slice that explicitly lifts that limit.
+Class 3 granted for codepairs.rs. Implementation GO under baseline 0866583.
+
+## K. Implementation Evidence Ledger (appended at Gate 5; sections 0 to J are unchanged)
+
+Status: IMPLEMENTED. codepairs.rs is the only engine file changed; the
+explain registry, completions, SUMMARY grammar and every other Class 1
+file are byte-identical.
+
+### K1. Gate results
+
+| Gate | Result |
+|---|---|
+| 0 baseline | sandbox equal to the Mac at 0866583, 42-file ledger digest a7e9b200ef01517f on both sides |
+| 1 fixtures first | 19 fixtures written before the change; 18 of them and the superseded u06 failed with exactly `package a declares "exports"; not supported in slice 1`; S3-N2 (byte-exact golden of a workspace without exports, recorded from the unchanged engine) passed |
+| 2 implementation | codepairs.rs only: the section 1 algorithm, one back-map table per exports package read once |
+| 3 mutations | PASS: 12 of 12 CAUGHT by named assertion on the first run, control green, none SURVIVED, BUILD-FAILED or APPLY-FAILED (scripts/slice3/mutate.sh) |
+| 4 regression | 284 of 284 tests green, zero warnings; frozen suites unedited except u06 under S3-D1 |
+| 5 documentation | sections J and K, STATUS.md entry, STAGE3-EVAL-002 ledger |
+| landing | STAGE3-EVAL-002 found 4 silent drops (M-S-4 FAIL), so this slice did not land alone; it lands atomically with INIT-DISCOVERY-SLICE3B (ruling S3B-D6) after STAGE3-EVAL-003 passed. Its 12 mutants were re-run on the final combined tree: 12 of 12 CAUGHT, control green |
+
+### K2. What the gates taught (stated, not hidden)
+
+- Section D called S3-N1 and S3-M1 controls that pass on the unchanged
+  engine. They cannot: both assert SLICE3 behavior (the new reason text,
+  a back-mapped proposal), so at Gate 1 they failed with the slice 1
+  abstention like the F fixtures. Only S3-N2 is a pure invariance control.
+  The draft's wording was wrong, not the fixtures.
+- The pre-registered ceiling held to the unit: STAGE3-EVAL-002 measured
+  423 exports-related UNRESOLVED (from 6,394), exactly the predicted
+  bound, because the drafted rule and the pre-draft simulator agree.
+- Correct by its own gates, the slice made a pre-existing slice 1 silence
+  reachable at scale (S3-F-12): imports that now resolve could fall into a
+  silent NotShape. STAGE3-EVAL-002 caught it (M-S-4 FAIL, 4 drops); the
+  slice was held, and INIT-DISCOVERY-SLICE3B (earned silence) is the remedy.
+
+### K3. The superseded fixture (S3-D1), original assertion verbatim
+
+tests/init_slice1_test.rs u06_exports_map_unresolved, for the map
+`{"./order":"./order.ts"}`:
+
+    &["ABSTAIN UNRESOLVED b/src/x.ts:1 Order from \"a/order\": package a declares \"exports\"; not supported in slice 1"],
+    "SUMMARY packages=2 candidates=1 proposals=0 abstentions=1 inventory=0 status=COMPLETE",
+
+Now u06_exports_map_resolved_by_slice3: the same map resolves to
+a/order.ts and proposes the pair.

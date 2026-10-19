@@ -1,0 +1,20 @@
+{
+ "repo": "earendil-works__pi",
+ "census_loud": 77,
+ "engine_loud": 78,
+ "differences": [
+  {
+   "event": "packages/evals/evals/tui.docs.eval.ts:4 InteractiveMode",
+   "target_pkg": "packages/coding-agent",
+   "census": "silent",
+   "engine": "loud",
+   "cause": [
+    "mask"
+   ],
+   "census_kinds": [
+    "ce"
+   ],
+   "engine_like_kinds": []
+  }
+ ]
+}

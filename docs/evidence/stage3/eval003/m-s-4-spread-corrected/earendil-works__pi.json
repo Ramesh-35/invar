@@ -1,0 +1,43 @@
+{
+ "repo": "earendil-works__pi",
+ "packages_superset": 17,
+ "eligible_files": 438,
+ "sample": [
+  "packages/coding-agent/test/suite/regressions/7829-invalid-settings-warning.test.ts",
+  "packages/durable/test/examples/13-recovery.ts",
+  "packages/coding-agent/test/interactive-mode-tree-navigation.test.ts",
+  "packages/durable/test/harness-host-inputs.test.ts",
+  "packages/coding-agent/src/core/tools/index.ts",
+  "packages/coding-agent/src/modes/interactive/components/themed-text.ts",
+  "packages/coding-agent/test/suite/agent-session-retry-events.test.ts",
+  "packages/coding-agent/test/suite/regressions/tree-during-streaming.test.ts",
+  "packages/coding-agent/test/thinking-selector.test.ts",
+  "packages/coding-agent/examples/extensions/truncated-tool.ts"
+ ],
+ "sampled_constructs": 0,
+ "sampled_silent": 0,
+ "rows": [],
+ "exploratory_all_files_constructs": 355,
+ "exploratory_all_files_unaccounted": 4,
+ "repo_level_abstain": [],
+ "exploratory_unaccounted_after_stoplist": [
+  [
+   "packages/coding-agent/test/agent-session-dynamic-provider.test.ts",
+   4,
+   "Provider",
+   2
+  ],
+  [
+   "packages/coding-agent/test/runtime-credentials.test.ts",
+   1,
+   "CredentialStore",
+   4
+  ],
+  [
+   "packages/coding-agent/test/suite/regressions/7301-stalled-availability-refresh.test.ts",
+   1,
+   "Models",
+   3
+  ]
+ ]
+}

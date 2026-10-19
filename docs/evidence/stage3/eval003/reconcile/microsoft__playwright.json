@@ -1,0 +1,37 @@
+{
+ "repo": "microsoft__playwright",
+ "census_loud": 6,
+ "engine_loud": 8,
+ "differences": [
+  {
+   "event": "packages/playwright/src/index.ts:36 Playwright",
+   "target_pkg": "packages/playwright-core",
+   "census": "silent",
+   "engine": "loud",
+   "cause": [
+    "complete"
+   ],
+   "census_kinds": [
+    "ce"
+   ],
+   "engine_like_kinds": [
+    "ce"
+   ]
+  },
+  {
+   "event": "packages/playwright/src/index.ts:40 ChannelOwner",
+   "target_pkg": "packages/playwright-core",
+   "census": "silent",
+   "engine": "loud",
+   "cause": [
+    "complete"
+   ],
+   "census_kinds": [
+    "ce"
+   ],
+   "engine_like_kinds": [
+    "ce"
+   ]
+  }
+ ]
+}

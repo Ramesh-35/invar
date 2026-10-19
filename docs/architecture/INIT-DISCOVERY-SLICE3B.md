@@ -167,3 +167,46 @@ S3B-D7 Class 3 for codepairs.rs.
 Stop and report on: any frozen fixture whose bytes change; any proposal
 changing; any deviation from the 205 that cannot be explained line by
 line; any need for a parser, a new dependency or a Class 1 file.
+
+## J. Rulings of 2026-10-19 (recorded)
+
+S3B-D1 to S3B-D7 RATIFIED as drafted (15:02): earned silence, UNRESOLVED
+reused with exact reasons, classes and enums earn silence, the masked word
+scan as the evidence reader, `export type *` and regex masking deferred,
+SLICE3 and SLICE3B land together and never SLICE3 alone, Class 3 for
+codepairs.rs. Execution GO (15:22): STAGE3-EVAL-003 under release binary
+3e0bb89880be, landing only on 0 silent drops and 100 percent mutant kill.
+
+## K. Implementation Evidence Ledger (appended at Gate 5; sections 0 to J are unchanged)
+
+Status: IMPLEMENTED and landed together with INIT-DISCOVERY-SLICE3 in one
+commit. codepairs.rs is the only engine file changed.
+
+### K1. Gate results
+
+| Gate | Result |
+|---|---|
+| 0 baseline | the tree equal to 0866583 plus the SLICE3 patch, 43-file ledger identical to SLICE3's Gate 4 |
+| 1 fixtures first | B-F1, B-F2 (the excalidraw regex verbatim), B-F3, B-F6, B-F7, B-F9 and B-M1 were silent on the SLICE3 engine, as declared; B-F4, B-F5, B-F8 (earned silence) passed as controls; B-F10 (added at the rehearsal, K2) failed before its rule |
+| 2 implementation | codepairs.rs only: the type-only record on imports, the masked declaration index, the earned-silence arm, the evidence-completeness rule |
+| 3 mutations | PASS: 9 of 9 CAUGHT on a full re-run from scratch, control green (scripts/slice3b/mutate.sh); the first run of the original 8 was also 8 of 8 |
+| 4 regression | 295 of 295 tests green, zero warnings, every frozen suite unedited; 186 proposals and every pre-existing output line byte-identical on the evaluation set |
+| 5 documentation | sections J and K, STATUS.md entry, STAGE3-EVAL-003 ledger |
+
+### K2. What the gates taught (stated, not hidden)
+
+- The rehearsal before the official run found a flaw in the drafted rule:
+  playwright-core declares `class Browser` in readable code and `interface
+  Browser` only in types/types.d.ts (1,151,270 bytes), which init never
+  reads; silence was "earned" on evidence the engine knew was incomplete.
+  Applying S3B-D1 to that case, an unread file in the target package now
+  voids earned silence and the abstention names the file. Fixture B-F10
+  and mutant 09 were added; Gates 3 and 4 were re-run from scratch.
+- The pre-registered prediction (205) was NOT moved after the rehearsal.
+  STAGE3-EVAL-003 measured 194; every one of the 17 differences is
+  attributed line by line (STAGE3-EVAL-003 LEDGER, reconcile/): 13 + 1
+  where the census read declarations inside comments or strings that the
+  engine masks, 1 `const enum` the census regex misread, 2 from the
+  completeness rule. 0 unexplained.
+- Parsing `export type *` was measured at zero yield before drafting and
+  stays deferred with regex-literal masking (S3B-D5).

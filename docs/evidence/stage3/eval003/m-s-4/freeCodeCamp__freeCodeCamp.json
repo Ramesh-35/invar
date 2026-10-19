@@ -1,0 +1,24 @@
+{
+ "repo": "freeCodeCamp__freeCodeCamp",
+ "packages_superset": 15,
+ "eligible_files": 163,
+ "sample": [
+  "client/src/templates/Challenges/exam/show.test.tsx",
+  "client/src/utils/challenge-content-lang.ts",
+  "client/src/templates/Challenges/freecodecamp-os/show.tsx",
+  "client/src/utils/get-completion-percentage.test.ts",
+  "client/src/templates/Introduction/components/cert-challenge.test.tsx",
+  "client/src/components/settings/settings-sidebar-nav.tsx",
+  "client/config/cert-and-project-map.test.ts",
+  "tools/challenge-helper-scripts/helpers/create-project.test.ts",
+  "client/src/components/settings/certification.tsx",
+  "e2e/settings.spec.ts"
+ ],
+ "sampled_constructs": 0,
+ "sampled_silent": 0,
+ "rows": [],
+ "exploratory_all_files_constructs": 16,
+ "exploratory_all_files_unaccounted": 0,
+ "repo_level_abstain": [],
+ "exploratory_unaccounted_after_stoplist": []
+}

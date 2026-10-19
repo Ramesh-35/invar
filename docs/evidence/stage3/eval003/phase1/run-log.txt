@@ -1,0 +1,2 @@
+ledger: /tmp/claude-0/-home-claude/0ad2ce1c-afee-57af-87cf-f7a4a128779f/scratchpad/s1/eval003/ledger.tsv
+exit 0

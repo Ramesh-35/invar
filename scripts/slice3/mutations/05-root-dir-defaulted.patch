@@ -1,0 +1,13 @@
+# mutation: rootDir computed when absent (CM-S3-5)
+# catch: s3_f8_root_dir_is_never_computed
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -994,7 +994,7 @@
+         let Ok(text) = std::fs::read_to_string(root.join(pkg_dir).join(name)) else { continue };
+         let Ok(cfg) = serde_json::from_str::<Value>(&strip_jsonc(&text)) else { continue };
+         let co = &cfg["compilerOptions"];
+-        let Some(rd) = co["rootDir"].as_str() else { continue };
++        let rd = co["rootDir"].as_str().unwrap_or("./src");
+         for (key, declarations_only) in [("outDir", false), ("declarationDir", true)] {
+             let Some(od) = co[key].as_str() else { continue };
+             if let (Ok(o), Ok(r)) = (norm_path(&format!("{pkg_dir}/{od}")), norm_path(&format!("{pkg_dir}/{rd}"))) {

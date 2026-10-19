@@ -1,0 +1,13 @@
+# mutation: the reason does not name the declaration site (CM-S3B-9)
+# catch: b_f1_a_type_three_barrels_deep_abstains_with_its_site
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1649,7 +1649,7 @@
+                                 Some((sf, sl)) => abstain(
+                                     "UNRESOLVED",
+                                     format!(
+-                                        "{name} from {:?}: declared as a type at {sf}:{sl}, which init could not reach from {target}; not guessed",
++                                        "{name} from {:?}: declared as a type, which init could not reach from {target}; not guessed",
+                                         imp.spec
+                                     ),
+                                 ),

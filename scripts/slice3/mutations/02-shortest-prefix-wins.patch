@@ -1,0 +1,13 @@
+# mutation: the shorter of two matching pattern prefixes chosen (CM-S3-2)
+# catch: s3_f4_the_longest_pattern_prefix_wins
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1095,7 +1095,7 @@
+         if suf.contains('*') || sub.len() < pre.len() + suf.len() || !sub.starts_with(pre) || !sub.ends_with(suf) {
+             continue;
+         }
+-        if best.is_none_or(|(bk, bp, _)| pre.len() > bp || (pre.len() == bp && k.len() > bk.len())) {
++        if best.is_none_or(|(bk, bp, _)| pre.len() < bp || (pre.len() == bp && k.len() > bk.len())) {
+             best = Some((k, pre.len(), suf.len()));
+         }
+     }

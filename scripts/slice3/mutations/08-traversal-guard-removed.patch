@@ -1,0 +1,13 @@
+# mutation: a .. capture escaping the package (CM-S3-8)
+# catch: s3_f13_a_traversal_capture_never_escapes
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1154,7 +1154,7 @@
+         Some(cap) => t.replace('*', cap),
+         None => t.to_string(),
+     };
+-    if v.split('/').any(|seg| seg == ".." || seg == "node_modules") {
++    if v.split('/').any(|seg| seg == "node_modules") {
+         return Leaf::Fail(format!("exports target {v:?} escapes the package"));
+     }
+     Leaf::Target(v)

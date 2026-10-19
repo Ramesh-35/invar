@@ -1,0 +1,20 @@
+{
+ "repo": "puppeteer__puppeteer",
+ "census_loud": 49,
+ "engine_loud": 48,
+ "differences": [
+  {
+   "event": "test/src/cdp/bfcache.test.ts:8 PageEvent",
+   "target_pkg": "packages/puppeteer-core",
+   "census": "loud",
+   "engine": "silent",
+   "cause": [
+    "scope"
+   ],
+   "census_kinds": [],
+   "engine_like_kinds": [
+    "ce"
+   ]
+  }
+ ]
+}

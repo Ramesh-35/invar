@@ -1,0 +1,14 @@
+# mutation: a typeof type-only import abstains (CM-S3B-6)
+# catch: b_f8_a_type_only_import_of_a_value_stays_silent
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1635,6 +1635,9 @@
+                             ),
+                             Some(ev) => match &ev.type_site {
+                                 None => {
++                                    if imp.type_only.contains(name) {
++                                        abstain("UNRESOLVED", String::new());
++                                    }
+                                     if let Some(u) = unread {
+                                         abstain(
+                                             "UNRESOLVED",

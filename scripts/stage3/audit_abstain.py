@@ -34,6 +34,9 @@ REPO_LEVEL = ("H2 ", "SLICE-SCOPE")
 # S3-INT-9 (recorded at STAGE3-EVAL-002): init's declared candidate counts
 # only DISTINCTIVE reads, after the frozen slice 1 stoplist (name_key
 # normalized). Reported beside the raw count, never replacing it.
+# S3-INT-10 (recorded at STAGE3-EVAL-003, finding S3-F-14): a spread
+# `...name` is not a property read; the detector no longer counts it.
+# The pre-fix counts are kept in the ledger beside the corrected ones.
 STOP = {"id", "name", "type", "description", "data", "value", "payload", "key", "label", "title",
         "status", "error", "message", "result", "items", "url", "path", "version", "createdat", "updatedat"}
 def nk(s):
@@ -161,7 +164,7 @@ def main():
                 if sm is None:
                     continue
                 kind, mem = sm
-                reads = sorted(m for m in mem if re.search(r'\.' + re.escape(m) + r'\b', src))
+                reads = sorted(m for m in mem if re.search(r'(?<!\.\.)\.' + re.escape(m) + r'\b', src))
                 distinct = [r for r in reads if nk(r) not in STOP]
                 if kind == "alias" or len(reads) >= 2:
                     cs.append({"line": line, "spec": spec, "name": imported, "kind": kind, "reads": reads[:8], "distinctive": len(distinct)})

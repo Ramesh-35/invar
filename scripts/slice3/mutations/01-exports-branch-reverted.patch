@@ -1,0 +1,13 @@
+# mutation: the exports branch reverted to the slice 1 blanket abstention
+# catch: s3_f2_exact_subpath_key
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1280,7 +1280,7 @@
+         let p = &self.pkgs[pkg];
+         if let Some(exp) = p.manifest.get("exports") {
+             let sub = format!(".{}", &spec[name.len()..]);
+-            return (Some(pkg), self.resolve_exports(pkg, exp, &sub));
++            let _ = (exp, &sub); return (Some(pkg), Res::Unresolved(format!("package {name} declares \"exports\"; not supported in slice 1")));
+         }
+         let sub = spec[name.len()..].trim_start_matches('/');
+         if sub.is_empty() {

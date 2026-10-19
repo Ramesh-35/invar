@@ -1,0 +1,13 @@
+# mutation: a committed .d.ts taken as a source (CM-S3-11)
+# catch: s3_n1_a_committed_d_ts_is_never_a_source
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1208,7 +1208,7 @@
+             let full = segs.join("/");
+             let decl = full.ends_with(".d.ts");
+             let mut found = BTreeSet::new();
+-            if !decl {
++            if !decl || decl {
+                 found.extend(self.probe(&full));
+             }
+             if found.is_empty() {

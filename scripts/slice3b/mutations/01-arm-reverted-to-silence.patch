@@ -1,0 +1,13 @@
+# mutation: the NotShape arm silent again (CM-S3B-1)
+# catch: b_f1_a_type_three_barrels_deep_abstains_with_its_site
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1621,6 +1621,8 @@
+                     // class or enum and nowhere as a type; otherwise abstain
+                     // with a reason that says where to look (S3B-D2).
+                     Found::NotShape => {
++                        continue;
++                        #[allow(unreachable_code)]
+                         let Some(tp) = ctx.pkg_of(&target) else { continue };
+                         let (idx, unread) = decl_index.entry(tp).or_insert_with(|| {
+                             let (idx, bad) = declaration_index(root, file_set.iter().filter(|g| ctx.pkg_of(g) == Some(tp)));

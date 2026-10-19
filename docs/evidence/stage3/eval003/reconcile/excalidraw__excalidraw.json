@@ -1,0 +1,215 @@
+{
+ "repo": "excalidraw__excalidraw",
+ "census_loud": 72,
+ "engine_loud": 59,
+ "differences": [
+  {
+   "event": "excalidraw-app/tests/LanguageList.test.tsx:3 UI",
+   "target_pkg": "packages/excalidraw",
+   "census": "loud",
+   "engine": "silent",
+   "cause": [
+    "mask"
+   ],
+   "census_kinds": [
+    "ce",
+    "type"
+   ],
+   "engine_like_kinds": [
+    "ce"
+   ]
+  },
+  {
+   "event": "excalidraw-app/tests/MobileMenu.test.tsx:2 UI",
+   "target_pkg": "packages/excalidraw",
+   "census": "loud",
+   "engine": "silent",
+   "cause": [
+    "mask"
+   ],
+   "census_kinds": [
+    "ce",
+    "type"
+   ],
+   "engine_like_kinds": [
+    "ce"
+   ]
+  },
+  {
+   "event": "packages/element/tests/align.test.tsx:16 UI",
+   "target_pkg": "packages/excalidraw",
+   "census": "loud",
+   "engine": "silent",
+   "cause": [
+    "mask"
+   ],
+   "census_kinds": [
+    "ce",
+    "type"
+   ],
+   "engine_like_kinds": [
+    "ce"
+   ]
+  },
+  {
+   "event": "packages/element/tests/binding.test.tsx:10 UI",
+   "target_pkg": "packages/excalidraw",
+   "census": "loud",
+   "engine": "silent",
+   "cause": [
+    "mask"
+   ],
+   "census_kinds": [
+    "ce",
+    "type"
+   ],
+   "engine_like_kinds": [
+    "ce"
+   ]
+  },
+  {
+   "event": "packages/element/tests/collision.test.tsx:16 UI",
+   "target_pkg": "packages/excalidraw",
+   "census": "loud",
+   "engine": "silent",
+   "cause": [
+    "mask"
+   ],
+   "census_kinds": [
+    "ce",
+    "type"
+   ],
+   "engine_like_kinds": [
+    "ce"
+   ]
+  },
+  {
+   "event": "packages/element/tests/cropElement.test.tsx:17 UI",
+   "target_pkg": "packages/excalidraw",
+   "census": "loud",
+   "engine": "silent",
+   "cause": [
+    "mask"
+   ],
+   "census_kinds": [
+    "ce",
+    "type"
+   ],
+   "engine_like_kinds": [
+    "ce"
+   ]
+  },
+  {
+   "event": "packages/element/tests/distribute.test.tsx:9 UI",
+   "target_pkg": "packages/excalidraw",
+   "census": "loud",
+   "engine": "silent",
+   "cause": [
+    "mask"
+   ],
+   "census_kinds": [
+    "ce",
+    "type"
+   ],
+   "engine_like_kinds": [
+    "ce"
+   ]
+  },
+  {
+   "event": "packages/element/tests/duplicate.test.tsx:18 UI",
+   "target_pkg": "packages/excalidraw",
+   "census": "loud",
+   "engine": "silent",
+   "cause": [
+    "mask"
+   ],
+   "census_kinds": [
+    "ce",
+    "type"
+   ],
+   "engine_like_kinds": [
+    "ce"
+   ]
+  },
+  {
+   "event": "packages/element/tests/elbowArrow.test.tsx:7 UI",
+   "target_pkg": "packages/excalidraw",
+   "census": "loud",
+   "engine": "silent",
+   "cause": [
+    "mask"
+   ],
+   "census_kinds": [
+    "ce",
+    "type"
+   ],
+   "engine_like_kinds": [
+    "ce"
+   ]
+  },
+  {
+   "event": "packages/element/tests/flowchart.test.tsx:6 UI",
+   "target_pkg": "packages/excalidraw",
+   "census": "loud",
+   "engine": "silent",
+   "cause": [
+    "mask"
+   ],
+   "census_kinds": [
+    "ce",
+    "type"
+   ],
+   "engine_like_kinds": [
+    "ce"
+   ]
+  },
+  {
+   "event": "packages/element/tests/frame.test.tsx:8 UI",
+   "target_pkg": "packages/excalidraw",
+   "census": "loud",
+   "engine": "silent",
+   "cause": [
+    "mask"
+   ],
+   "census_kinds": [
+    "ce",
+    "type"
+   ],
+   "engine_like_kinds": [
+    "ce"
+   ]
+  },
+  {
+   "event": "packages/element/tests/linearElementEditor.test.tsx:19 UI",
+   "target_pkg": "packages/excalidraw",
+   "census": "loud",
+   "engine": "silent",
+   "cause": [
+    "mask"
+   ],
+   "census_kinds": [
+    "ce",
+    "type"
+   ],
+   "engine_like_kinds": [
+    "ce"
+   ]
+  },
+  {
+   "event": "packages/element/tests/resize.test.tsx:18 UI",
+   "target_pkg": "packages/excalidraw",
+   "census": "loud",
+   "engine": "silent",
+   "cause": [
+    "mask"
+   ],
+   "census_kinds": [
+    "ce",
+    "type"
+   ],
+   "engine_like_kinds": [
+    "ce"
+   ]
+  }
+ ]
+}

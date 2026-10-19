@@ -1,0 +1,14 @@
+# mutation: a declaration in a comment counted as evidence (CM-S3B-5)
+# catch: b_f9_a_declaration_in_a_comment_or_string_is_not_evidence
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -508,7 +508,8 @@
+             unread.push(f.clone());
+             continue;
+         };
+-        let t = Text::new(&text);
++        let mut t = Text::new(&text);
++        t.m = text.as_bytes().to_vec();
+         let mut i = 0;
+         while i < t.m.len() {
+             if !is_ident_start(t.m[i]) || (i > 0 && is_ident(t.m[i - 1])) {

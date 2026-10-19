@@ -1,0 +1,12 @@
+# mutation: a function import abstains (CM-S3B-3)
+# catch: b_f4_a_function_import_stays_silent
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1635,6 +1635,7 @@
+                             ),
+                             Some(ev) => match &ev.type_site {
+                                 None => {
++                                    abstain("UNRESOLVED", String::new());
+                                     if let Some(u) = unread {
+                                         abstain(
+                                             "UNRESOLVED",

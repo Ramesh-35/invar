@@ -1,0 +1,13 @@
+# mutation: a null-excluded subpath resolved through another key (CM-S3-7)
+# catch: s3_f10_a_null_subpath_is_excluded
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1081,7 +1081,7 @@
+         _ => return vec![Leaf::Fail("the exports value is not a string, array or object".into())],
+     };
+     let mut acc = Vec::new();
+-    if let Some(t) = map.get(sub) {
++    if let Some(t) = map.get(sub).filter(|t| !t.is_null()) {
+         if t.is_null() {
+             return vec![Leaf::Fail(format!("exports excludes {sub:?} (null)"))];
+         }

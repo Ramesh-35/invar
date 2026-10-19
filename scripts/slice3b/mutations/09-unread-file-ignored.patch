@@ -1,0 +1,13 @@
+# mutation: silence earned on incomplete evidence (the EVAL-003 rehearsal finding)
+# catch: b_f10_an_unread_package_file_voids_earned_silence
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1635,7 +1635,7 @@
+                             ),
+                             Some(ev) => match &ev.type_site {
+                                 None => {
+-                                    if let Some(u) = unread {
++                                    if let Some(u) = unread.as_ref().filter(|_| false) {
+                                         abstain(
+                                             "UNRESOLVED",
+                                             format!("{name} from {:?}: package {pkg} has a source file init could not read ({u}); silence is not earned; not guessed", imp.spec),

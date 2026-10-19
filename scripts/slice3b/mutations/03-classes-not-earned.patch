@@ -1,0 +1,13 @@
+# mutation: a class import abstains (CM-S3B-4)
+# catch: b_f5_a_class_import_stays_silent
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -522,7 +522,7 @@
+             let kind = match &t.m[i..e] {
+                 b"interface" | b"type" => Some(0),
+                 b"function" | b"const" | b"let" | b"var" => Some(1),
+-                b"class" | b"enum" => Some(2),
++                b"class" | b"enum" => None,
+                 _ => None,
+             };
+             if let Some(k) = kind {

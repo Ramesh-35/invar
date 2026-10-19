@@ -503,18 +503,25 @@ fn u05_marker_outside_slice_abstains() {
     );
 }
 
+// SUPERSEDED by INIT-DISCOVERY-SLICE3 under ruling S3-D1 (2026-10-19): a
+// frozen fixture that pins a declared scope limit by name may be replaced
+// only by the slice that lifts that limit. The original assertion, kept
+// verbatim (also in docs/architecture/INIT-DISCOVERY-SLICE3.md section K):
+//     &["ABSTAIN UNRESOLVED b/src/x.ts:1 Order from \"a/order\": package a declares \"exports\"; not supported in slice 1"],
+//     "SUMMARY packages=2 candidates=1 proposals=0 abstentions=1 inventory=0 status=COMPLETE",
+// The same map now resolves to the source it names.
 #[test]
-fn u06_exports_map_unresolved() {
+fn u06_exports_map_resolved_by_slice3() {
     let d = ws(
         "u06",
         &[ROOT_AB, ("a/package.json", r#"{"name":"a","exports":{"./order":"./order.ts"}}"#), PKG_B, ("a/order.ts", ORDER), ("b/src/x.ts", USE_ORDER)],
     );
     expect(
         &init(&d),
+        &[order_pair("b/src/x.ts", "production")],
         &[],
-        &["ABSTAIN UNRESOLVED b/src/x.ts:1 Order from \"a/order\": package a declares \"exports\"; not supported in slice 1"],
         &[],
-        "SUMMARY packages=2 candidates=1 proposals=0 abstentions=1 inventory=0 status=COMPLETE",
+        "SUMMARY packages=2 candidates=1 proposals=1 abstentions=0 inventory=0 status=COMPLETE",
     );
 }
 

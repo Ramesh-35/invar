@@ -34,3 +34,17 @@ egress/schema replay byte-identical. backtest.rs only; 10 fixtures first,
 11 of 11 mutations caught on a clean re-run, 265 of 265 tests, zero warnings. Re-measured on unseen code as
 STAGE3-EVAL-002-M6: the 61 false absences now read present. Record:
 docs/architecture/INVAR-BACKTEST-002.md.
+
+## 2026-10-19: INIT-DISCOVERY-SLICE3 and SLICE3B land together (STAGE3-EVAL-003 PASS)
+
+SLICE3 (package "exports" maps resolved to declared sources) passed its
+own gates but STAGE3-EVAL-002 found 4 silent drops it made reachable, so
+it was held. SLICE3B makes silence earned: an import that resolves but
+finds no shape is silent only when the target package's own sources
+prove the name is a value, class or enum and nothing is unread; otherwise
+init abstains and names where the type is declared or which file it could
+not read. STAGE3-EVAL-003 on the same pinned manifest: 186 proposals
+(from 9 in EVAL-001), 194 new abstentions against a pre-registered 205
+with every difference explained, 0 genuine silent drops, determinism and
+ISA 10 of 10. Records: docs/architecture/INIT-DISCOVERY-SLICE3.md,
+INIT-DISCOVERY-SLICE3B.md, docs/evidence/stage3/eval003/.

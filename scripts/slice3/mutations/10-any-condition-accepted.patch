@@ -1,0 +1,13 @@
+# mutation: a condition outside the active set picked (CM-S3-10)
+# catch: s3_f15_an_inactive_condition_is_never_picked
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1131,7 +1131,7 @@
+         Value::Object(m) => {
+             let mut hit = false;
+             for (k, v) in m {
+-                if EXPORTS_CONDITIONS.contains(&k.as_str()) {
++                if !k.is_empty() {
+                     hit = true;
+                     exports_leaves(v, star, acc);
+                 }
