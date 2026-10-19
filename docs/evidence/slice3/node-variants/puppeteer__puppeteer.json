@@ -1,0 +1,33 @@
+{
+ "repo": "puppeteer__puppeteer",
+ "blocked_imports": 128,
+ "packages": {
+  "puppeteer-core": 106,
+  "puppeteer": 22
+ },
+ "conditions_seen": {
+  "import": 6,
+  "require": 6,
+  "types": 2
+ },
+ "node": {
+  "non-source(js/dist)": 94,
+  "declaration-d.ts": 34
+ },
+ "src": {
+  "non-source(js/dist)": 94,
+  "declaration-d.ts": 34
+ },
+ "outdir-tsconfig": {
+  "TS-SOURCE(via outDir)": 94,
+  "declaration-d.ts": 34
+ },
+ "outdir-tsconfig+build": {
+  "TS-SOURCE(via outDir)": 94,
+  "declaration-d.ts": 34
+ },
+ "src+outdir": {
+  "TS-SOURCE(via outDir)": 94,
+  "declaration-d.ts": 34
+ }
+}

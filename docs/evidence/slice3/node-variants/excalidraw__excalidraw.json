@@ -1,0 +1,37 @@
+{
+ "repo": "excalidraw__excalidraw",
+ "blocked_imports": 3859,
+ "packages": {
+  "@excalidraw/element": 1518,
+  "@excalidraw/common": 1339,
+  "@excalidraw/math": 499,
+  "@excalidraw/excalidraw": 477,
+  "@excalidraw/utils": 17,
+  "@excalidraw/laser-pointer": 5,
+  "@excalidraw/fractional-indexing": 4
+ },
+ "conditions_seen": {
+  "types": 17,
+  "development": 12,
+  "production": 12,
+  "default": 11
+ },
+ "node": {
+  "declaration-d.ts": 3859
+ },
+ "src": {
+  "declaration-d.ts": 3859
+ },
+ "outdir-tsconfig": {
+  "TS-SOURCE(via outDir)": 3733,
+  "declaration-d.ts": 126
+ },
+ "outdir-tsconfig+build": {
+  "TS-SOURCE(via outDir)": 3733,
+  "declaration-d.ts": 126
+ },
+ "src+outdir": {
+  "TS-SOURCE(via outDir)": 3733,
+  "declaration-d.ts": 126
+ }
+}

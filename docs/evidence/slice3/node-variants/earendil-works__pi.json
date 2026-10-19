@@ -1,0 +1,37 @@
+{
+ "repo": "earendil-works__pi",
+ "blocked_imports": 1902,
+ "packages": {
+  "@earendil-works/pi-ai": 1282,
+  "@earendil-works/chord": 277,
+  "@earendil-works/pi-agent-core": 134,
+  "@earendil-works/pi-mcp": 65,
+  "@earendil-works/pi-durable": 53,
+  "@earendil-works/pi-coding-agent": 50,
+  "@earendil-works/pi-codemode": 38,
+  "@earendil-works/pi-telemetry": 3
+ },
+ "conditions_seen": {
+  "import": 47,
+  "types": 46,
+  "source": 33,
+  "default": 16
+ },
+ "node": {
+  "declaration-d.ts": 1902
+ },
+ "src": {
+  "declaration-d.ts": 1469,
+  "TS-SOURCE": 433
+ },
+ "outdir-tsconfig": {
+  "declaration-d.ts": 1902
+ },
+ "outdir-tsconfig+build": {
+  "TS-SOURCE(via outDir)": 1902
+ },
+ "src+outdir": {
+  "TS-SOURCE(via outDir)": 1469,
+  "TS-SOURCE": 433
+ }
+}

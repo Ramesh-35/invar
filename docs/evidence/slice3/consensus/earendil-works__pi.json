@@ -1,0 +1,22 @@
+{
+ "repo": "earendil-works__pi",
+ "blocked_imports": 1902,
+ "consensus": {
+  "TS-SOURCE": 1902
+ },
+ "resolved_by_package": {
+  "@earendil-works/pi-ai": 1282,
+  "@earendil-works/chord": 277,
+  "@earendil-works/pi-agent-core": 134,
+  "@earendil-works/pi-mcp": 65,
+  "@earendil-works/pi-durable": 53,
+  "@earendil-works/pi-coding-agent": 50,
+  "@earendil-works/pi-codemode": 38,
+  "@earendil-works/pi-telemetry": 3
+ },
+ "sanity_resolved_file_names_the_import": {
+  "star-reexport-barrel": 1067,
+  "names-it": 835
+ },
+ "suspects": []
+}

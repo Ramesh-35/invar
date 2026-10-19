@@ -1,0 +1,12 @@
+{
+ "repo": "microsoft__playwright",
+ "blocked_imports": 80,
+ "consensus": {
+  "declaration-d.ts": 60,
+  "non-source": 13,
+  "no-subpath-match": 7
+ },
+ "resolved_by_package": {},
+ "sanity_resolved_file_names_the_import": {},
+ "suspects": []
+}

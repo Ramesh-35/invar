@@ -1,0 +1,15 @@
+{
+ "repo": "Egonex-AI__Understand-Anything",
+ "blocked_imports": 70,
+ "consensus": {
+  "TS-SOURCE": 70
+ },
+ "resolved_by_package": {
+  "@understand-anything/core": 70
+ },
+ "sanity_resolved_file_names_the_import": {
+  "names-it": 49,
+  "star-reexport-barrel": 21
+ },
+ "suspects": []
+}

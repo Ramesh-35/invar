@@ -1,0 +1,16 @@
+{
+ "repo": "puppeteer__puppeteer",
+ "blocked_imports": 128,
+ "consensus": {
+  "TS-SOURCE": 128
+ },
+ "resolved_by_package": {
+  "puppeteer-core": 106,
+  "puppeteer": 22
+ },
+ "sanity_resolved_file_names_the_import": {
+  "star-reexport-barrel": 33,
+  "names-it": 95
+ },
+ "suspects": []
+}

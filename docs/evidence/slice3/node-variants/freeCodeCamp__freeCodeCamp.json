@@ -1,0 +1,32 @@
+{
+ "repo": "freeCodeCamp__freeCodeCamp",
+ "blocked_imports": 355,
+ "packages": {
+  "@freecodecamp/shared": 320,
+  "@freecodecamp/curriculum": 31,
+  "@freecodecamp/challenge-builder": 2,
+  "@freecodecamp/challenge-linter": 2
+ },
+ "conditions_seen": {
+  "import": 15,
+  "require": 15
+ },
+ "node": {
+  "non-source(js/dist)": 355
+ },
+ "src": {
+  "non-source(js/dist)": 355
+ },
+ "outdir-tsconfig": {
+  "non-source(js/dist)": 324,
+  "TS-SOURCE(via outDir)": 31
+ },
+ "outdir-tsconfig+build": {
+  "non-source(js/dist)": 324,
+  "TS-SOURCE(via outDir)": 31
+ },
+ "src+outdir": {
+  "non-source(js/dist)": 324,
+  "TS-SOURCE(via outDir)": 31
+ }
+}

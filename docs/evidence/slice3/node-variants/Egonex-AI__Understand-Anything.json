@@ -1,0 +1,26 @@
+{
+ "repo": "Egonex-AI__Understand-Anything",
+ "blocked_imports": 70,
+ "packages": {
+  "@understand-anything/core": 70
+ },
+ "conditions_seen": {
+  "types": 6,
+  "default": 6
+ },
+ "node": {
+  "declaration-d.ts": 70
+ },
+ "src": {
+  "declaration-d.ts": 70
+ },
+ "outdir-tsconfig": {
+  "TS-SOURCE(via outDir)": 70
+ },
+ "outdir-tsconfig+build": {
+  "TS-SOURCE(via outDir)": 70
+ },
+ "src+outdir": {
+  "TS-SOURCE(via outDir)": 70
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "repo": "freeCodeCamp__freeCodeCamp",
+ "blocked_imports": 355,
+ "consensus": {
+  "non-source": 324,
+  "TS-SOURCE": 31
+ },
+ "resolved_by_package": {
+  "@freecodecamp/curriculum": 31
+ },
+ "sanity_resolved_file_names_the_import": {
+  "names-it": 31
+ },
+ "suspects": []
+}

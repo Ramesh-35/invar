@@ -1,0 +1,40 @@
+{
+ "repo": "microsoft__playwright",
+ "blocked_imports": 80,
+ "packages": {
+  "playwright-core": 49,
+  "@playwright/test": 30,
+  "playwright": 1
+ },
+ "conditions_seen": {
+  "types": 6,
+  "import": 4,
+  "require": 4,
+  "default": 4
+ },
+ "node": {
+  "declaration-d.ts": 60,
+  "non-source(js/dist)": 13,
+  "no-subpath-match": 7
+ },
+ "src": {
+  "declaration-d.ts": 60,
+  "non-source(js/dist)": 13,
+  "no-subpath-match": 7
+ },
+ "outdir-tsconfig": {
+  "declaration-d.ts": 60,
+  "non-source(js/dist)": 13,
+  "no-subpath-match": 7
+ },
+ "outdir-tsconfig+build": {
+  "declaration-d.ts": 60,
+  "non-source(js/dist)": 13,
+  "no-subpath-match": 7
+ },
+ "src+outdir": {
+  "declaration-d.ts": 60,
+  "non-source(js/dist)": 13,
+  "no-subpath-match": 7
+ }
+}

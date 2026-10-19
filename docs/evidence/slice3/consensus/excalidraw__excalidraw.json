@@ -1,0 +1,22 @@
+{
+ "repo": "excalidraw__excalidraw",
+ "blocked_imports": 3859,
+ "consensus": {
+  "TS-SOURCE": 3840,
+  "declaration-d.ts": 19
+ },
+ "resolved_by_package": {
+  "@excalidraw/element": 1518,
+  "@excalidraw/common": 1339,
+  "@excalidraw/math": 499,
+  "@excalidraw/excalidraw": 458,
+  "@excalidraw/utils": 17,
+  "@excalidraw/laser-pointer": 5,
+  "@excalidraw/fractional-indexing": 4
+ },
+ "sanity_resolved_file_names_the_import": {
+  "names-it": 1149,
+  "star-reexport-barrel": 2691
+ },
+ "suspects": []
+}
