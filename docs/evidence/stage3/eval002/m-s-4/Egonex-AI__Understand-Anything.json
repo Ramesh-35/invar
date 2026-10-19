@@ -1,0 +1,109 @@
+{
+ "repo": "Egonex-AI__Understand-Anything",
+ "packages_superset": 7,
+ "eligible_files": 21,
+ "sample": [
+  "understand-anything-plugin/packages/dashboard/src/__tests__/allNodeTypes.test.ts",
+  "understand-anything-plugin/packages/dashboard/src/utils/__tests__/filters.test.ts",
+  "understand-anything-plugin/packages/dashboard/src/components/WarningBanner.tsx",
+  "understand-anything-plugin/src/__tests__/explain-builder.test.ts",
+  "understand-anything-plugin/packages/dashboard/src/__tests__/store-navigation.test.ts",
+  "understand-anything-plugin/packages/dashboard/src/__tests__/edgeCategories.test.ts",
+  "understand-anything-plugin/packages/dashboard/src/components/__tests__/structuralVisibleTypes.test.ts",
+  "understand-anything-plugin/packages/dashboard/src/components/FileExplorer.tsx",
+  "understand-anything-plugin/src/onboard-builder.ts",
+  "understand-anything-plugin/packages/dashboard/src/components/MobileLayout.tsx"
+ ],
+ "sampled_constructs": 7,
+ "sampled_silent": 4,
+ "rows": [
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/__tests__/allNodeTypes.test.ts",
+   "line": 3,
+   "spec": "@understand-anything/core/types",
+   "name": "NodeType",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN UNSUPPORTED-SHAPE understand-anything-plugin/packages/dashboard/src/__tests__/allNodeTypes.test.ts:3 NodeType at understand-anything-plugin/packages/c"
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/utils/__tests__/filters.test.ts",
+   "line": 3,
+   "spec": "@understand-anything/core/types",
+   "name": "GraphNode",
+   "kind": "object",
+   "reads": [
+    "id",
+    "type"
+   ],
+   "distinctive": 0,
+   "accounted_by": null
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/utils/__tests__/filters.test.ts",
+   "line": 3,
+   "spec": "@understand-anything/core/types",
+   "name": "Layer",
+   "kind": "object",
+   "reads": [
+    "id",
+    "nodeIds"
+   ],
+   "distinctive": 1,
+   "accounted_by": null
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/components/WarningBanner.tsx",
+   "line": 2,
+   "spec": "@understand-anything/core/schema",
+   "name": "GraphIssue",
+   "kind": "object",
+   "reads": [
+    "level",
+    "message"
+   ],
+   "distinctive": 1,
+   "accounted_by": null
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/__tests__/edgeCategories.test.ts",
+   "line": 3,
+   "spec": "@understand-anything/core/types",
+   "name": "EdgeType",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN UNSUPPORTED-SHAPE understand-anything-plugin/packages/dashboard/src/__tests__/edgeCategories.test.ts:3 EdgeType at understand-anything-plugin/packages"
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/components/__tests__/structuralVisibleTypes.test.ts",
+   "line": 3,
+   "spec": "@understand-anything/core/types",
+   "name": "NodeType",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN UNSUPPORTED-SHAPE understand-anything-plugin/packages/dashboard/src/components/__tests__/structuralVisibleTypes.test.ts:3 NodeType at understand-anyth"
+  },
+  {
+   "file": "understand-anything-plugin/packages/dashboard/src/components/FileExplorer.tsx",
+   "line": 2,
+   "spec": "@understand-anything/core/types",
+   "name": "GraphNode",
+   "kind": "object",
+   "reads": [
+    "filePath",
+    "id",
+    "name",
+    "type"
+   ],
+   "distinctive": 1,
+   "accounted_by": null
+  }
+ ],
+ "exploratory_all_files_constructs": 15,
+ "exploratory_all_files_unaccounted": 9,
+ "repo_level_abstain": [],
+ "exploratory_unaccounted_after_stoplist": []
+}

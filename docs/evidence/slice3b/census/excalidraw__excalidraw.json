@@ -1,0 +1,50 @@
+{
+ "repo": "excalidraw__excalidraw",
+ "notshape": 2848,
+ "categories": {
+  "value import: value declared only (EARNED silence)": 2617,
+  "value import: class or enum (EARNED silence under v1 shape scope)": 117,
+  "value import: no declaration in package": 52,
+  "type-only import: class/enum only": 29,
+  "value import: type declared only": 15,
+  "type-only import: value only": 13,
+  "type-only import: type declared in package": 5
+ },
+ "examples": {
+  "value import: value declared only (EARNED silence)": [
+   "examples/with-nextjs/src/excalidrawWrapper.tsx:3 Excalidraw -> packages/excalidraw/index.tsx",
+   "excalidraw-app/App.tsx:1 Excalidraw -> packages/excalidraw/index.tsx",
+   "excalidraw-app/App.tsx:1 LiveCollaborationTrigger -> packages/excalidraw/index.tsx"
+  ],
+  "value import: no declaration in package": [
+   "examples/with-script-in-browser/utils.ts:1 MIME_TYPES -> packages/excalidraw/index.tsx",
+   "excalidraw-app/App.tsx:1 CaptureUpdateAction -> packages/excalidraw/index.tsx",
+   "excalidraw-app/collab/Collab.tsx:1 CaptureUpdateAction -> packages/excalidraw/index.tsx"
+  ],
+  "value import: class or enum (EARNED silence under v1 shape scope)": [
+   "excalidraw-app/App.tsx:22 EVENT -> packages/common/src/index.ts",
+   "excalidraw-app/ExcalidrawPlusIframeExport.tsx:2 ExcalidrawError -> packages/excalidraw/errors.ts",
+   "excalidraw-app/collab/Collab.tsx:9 EVENT -> packages/common/src/index.ts"
+  ],
+  "type-only import: class/enum only": [
+   "excalidraw-app/collab/Portal.tsx:7 UserIdleState -> packages/common/src/index.ts",
+   "excalidraw-app/data/index.ts:16 UserIdleState -> packages/common/src/index.ts",
+   "excalidraw-app/tests/collab.test.tsx:13 DurableIncrement -> packages/element/src/index.ts"
+  ],
+  "value import: type declared only": [
+   "excalidraw-app/tests/LanguageList.test.tsx:3 UI -> packages/excalidraw/tests/helpers/ui.ts",
+   "excalidraw-app/tests/MobileMenu.test.tsx:2 UI -> packages/excalidraw/tests/helpers/ui.ts",
+   "packages/element/tests/align.test.tsx:16 UI -> packages/excalidraw/tests/helpers/ui.ts"
+  ],
+  "type-only import: type declared in package": [
+   "packages/element/src/arrows/helpers.ts:1 App -> packages/excalidraw/types.ts",
+   "packages/element/src/convertToShape.ts:29 App -> packages/excalidraw/types.ts",
+   "packages/excalidraw/components/App.duplicate.ts:29 ListMarkerAdvance -> packages/element/src/index.ts"
+  ],
+  "type-only import: value only": [
+   "packages/element/src/types.ts:3 FONT_FAMILY -> packages/common/src/index.ts",
+   "packages/element/src/types.ts:3 ROUNDNESS -> packages/common/src/index.ts",
+   "packages/element/src/types.ts:3 TEXT_ALIGN -> packages/common/src/index.ts"
+  ]
+ }
+}

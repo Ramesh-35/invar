@@ -1,0 +1,50 @@
+{
+ "repo": "puppeteer__puppeteer",
+ "notshape": 114,
+ "categories": {
+  "type-only import: class/enum only": 33,
+  "type-only import: type declared in package": 22,
+  "value import: no declaration in package": 19,
+  "value import: class or enum (EARNED silence under v1 shape scope)": 17,
+  "value import: value declared only (EARNED silence)": 15,
+  "type-only import: no declaration in package": 5,
+  "value import: type declared only": 3
+ },
+ "examples": {
+  "type-only import: type declared in package": [
+   "packages/puppeteer/src/getConfiguration.ts:11 ChromeHeadlessShellSettings -> packages/puppeteer-core/src/puppeteer-core.ts",
+   "packages/puppeteer/src/getConfiguration.ts:11 ChromeSettings -> packages/puppeteer-core/src/puppeteer-core.ts",
+   "packages/puppeteer/src/getConfiguration.ts:11 Configuration -> packages/puppeteer-core/src/puppeteer-core.ts"
+  ],
+  "type-only import: class/enum only": [
+   "packages/puppeteer/src/node/cli.ts:10 PuppeteerNode -> packages/puppeteer-core/src/node/PuppeteerNode.ts",
+   "test/src/acceptInsecureCerts.test.ts:10 HTTPResponse -> packages/puppeteer-core/src/api/HTTPResponse.ts",
+   "test/src/ariaqueryhandler.test.ts:11 ElementHandle -> packages/puppeteer-core/src/api/ElementHandle.ts"
+  ],
+  "value import: value declared only (EARNED silence)": [
+   "packages/puppeteer/src/node/cli.ts:11 PUPPETEER_REVISIONS -> packages/puppeteer-core/src/revisions.ts",
+   "packages/puppeteer/src/node/cli.ts:12 packageVersion -> packages/puppeteer-core/src/util/version.ts",
+   "packages/puppeteer/src/node/install.ts:19 PUPPETEER_REVISIONS -> packages/puppeteer-core/src/revisions.ts"
+  ],
+  "value import: class or enum (EARNED silence under v1 shape scope)": [
+   "packages/puppeteer/src/puppeteer.ts:9 PuppeteerNode -> packages/puppeteer-core/src/puppeteer-core.ts",
+   "test/src/cdp/CDPSession.test.ts:9 CdpCDPSession -> packages/puppeteer-core/src/cdp/CdpSession.ts",
+   "test/src/cdp/CDPSession.test.ts:10 TargetCloseError -> packages/puppeteer-core/src/common/Errors.ts"
+  ],
+  "type-only import: no declaration in package": [
+   "test/installation/assets/puppeteer/configuration/puppeteer.config.ts:1 Configuration -> packages/puppeteer/src/puppeteer.ts",
+   "test/src/cdp/webmcp.test.ts:10 Issue -> packages/puppeteer/src/puppeteer.ts",
+   "test/src/navigation.test.ts:10 Frame -> packages/puppeteer/src/puppeteer.ts"
+  ],
+  "value import: no declaration in package": [
+   "test/src/ariaqueryhandler.test.ts:10 TimeoutError -> packages/puppeteer/src/puppeteer.ts",
+   "test/src/browsercontext.test.ts:8 TimeoutError -> packages/puppeteer/src/puppeteer.ts",
+   "test/src/cdp/bfcache.test.ts:8 PageEvent -> packages/puppeteer-core/src/puppeteer-core.ts"
+  ],
+  "value import: type declared only": [
+   "test/src/frame.test.ts:8 CDPSession -> packages/puppeteer-core/src/api/CDPSession.ts",
+   "test/src/locator.test.ts:9 Locator -> packages/puppeteer-core/src/api/locators/locators.ts",
+   "test/src/page.test.ts:14 CDPSession -> packages/puppeteer-core/src/api/CDPSession.ts"
+  ]
+ }
+}

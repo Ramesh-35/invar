@@ -1,0 +1,172 @@
+{
+ "repo": "excalidraw__excalidraw",
+ "packages_superset": 11,
+ "eligible_files": 376,
+ "sample": [
+  "packages/excalidraw/components/UnlockPopup.tsx",
+  "packages/excalidraw/fonts/Fonts.ts",
+  "packages/excalidraw/actions/actionHistory.tsx",
+  "packages/excalidraw/history.ts",
+  "packages/excalidraw/components/DarkModeToggle.tsx",
+  "packages/excalidraw/components/Stats/MultiPosition.tsx",
+  "packages/excalidraw/fonts/Helvetica/index.ts",
+  "packages/element/tests/align.test.tsx",
+  "packages/excalidraw/components/App.duplicate.ts",
+  "packages/excalidraw/components/DefaultSidebar.test.tsx"
+ ],
+ "sampled_constructs": 13,
+ "sampled_silent": 0,
+ "rows": [
+  {
+   "file": "packages/excalidraw/components/UnlockPopup.tsx",
+   "line": 11,
+   "spec": "@excalidraw/element/types",
+   "name": "NonDeletedExcalidrawElement",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN UNSUPPORTED-SHAPE packages/excalidraw/components/UnlockPopup.tsx:11 NonDeletedExcalidrawElement at packages/element/src/types.ts:251 is not an object "
+  },
+  {
+   "file": "packages/excalidraw/fonts/Fonts.ts",
+   "line": 25,
+   "spec": "@excalidraw/element/types",
+   "name": "ExcalidrawElement",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN UNSUPPORTED-SHAPE packages/excalidraw/fonts/Fonts.ts:25 ExcalidrawElement at packages/element/src/types.ts:223 is not an object type (| ExcalidrawGene"
+  },
+  {
+   "file": "packages/excalidraw/fonts/Fonts.ts",
+   "line": 25,
+   "spec": "@excalidraw/element/types",
+   "name": "ExcalidrawTextElement",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN UNSUPPORTED-SHAPE packages/excalidraw/fonts/Fonts.ts:25 ExcalidrawElement at packages/element/src/types.ts:223 is not an object type (| ExcalidrawGene"
+  },
+  {
+   "file": "packages/excalidraw/fonts/Fonts.ts",
+   "line": 30,
+   "spec": "@excalidraw/common/utility-types",
+   "name": "ValueOf",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN UNSUPPORTED-SHAPE packages/excalidraw/fonts/Fonts.ts:25 ExcalidrawElement at packages/element/src/types.ts:223 is not an object type (| ExcalidrawGene"
+  },
+  {
+   "file": "packages/excalidraw/actions/actionHistory.tsx",
+   "line": 12,
+   "spec": "@excalidraw/element/types",
+   "name": "SceneElementsMap",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN UNSUPPORTED-SHAPE packages/excalidraw/actions/actionHistory.tsx:12 SceneElementsMap at packages/element/src/types.ts:464 is not an object type (Map<)"
+  },
+  {
+   "file": "packages/excalidraw/history.ts",
+   "line": 11,
+   "spec": "@excalidraw/element/types",
+   "name": "SceneElementsMap",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN UNSUPPORTED-SHAPE packages/excalidraw/history.ts:11 SceneElementsMap at packages/element/src/types.ts:464 is not an object type (Map<)"
+  },
+  {
+   "file": "packages/excalidraw/components/DarkModeToggle.tsx",
+   "line": 3,
+   "spec": "@excalidraw/element/types",
+   "name": "Theme",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN UNSUPPORTED-SHAPE packages/excalidraw/components/DarkModeToggle.tsx:3 Theme at packages/element/src/types.ts:22 is not an object type (typeof THEME[ke"
+  },
+  {
+   "file": "packages/excalidraw/components/Stats/MultiPosition.tsx",
+   "line": 8,
+   "spec": "@excalidraw/element/types",
+   "name": "ElementsMap",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN R6 packages/excalidraw/components/Stats/MultiPosition.tsx:4 reads angle, height, width, x, y of RectangleBox (packages/element/src/bounds.ts:68) witho"
+  },
+  {
+   "file": "packages/excalidraw/components/Stats/MultiPosition.tsx",
+   "line": 8,
+   "spec": "@excalidraw/element/types",
+   "name": "ExcalidrawElement",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN R6 packages/excalidraw/components/Stats/MultiPosition.tsx:4 reads angle, height, width, x, y of RectangleBox (packages/element/src/bounds.ts:68) witho"
+  },
+  {
+   "file": "packages/excalidraw/components/Stats/MultiPosition.tsx",
+   "line": 8,
+   "spec": "@excalidraw/element/types",
+   "name": "NonDeletedExcalidrawElement",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN R6 packages/excalidraw/components/Stats/MultiPosition.tsx:4 reads angle, height, width, x, y of RectangleBox (packages/element/src/bounds.ts:68) witho"
+  },
+  {
+   "file": "packages/excalidraw/components/App.duplicate.ts",
+   "line": 29,
+   "spec": "@excalidraw/element",
+   "name": "ListMarkerAdvance",
+   "kind": "object",
+   "reads": [
+    "contentStart",
+    "elementId",
+    "nextOriginalText"
+   ],
+   "distinctive": 3,
+   "accounted_by": "# ABSTAIN R6 packages/excalidraw/components/App.duplicate.ts:11 reads duplicateIdToOrigId, origIdToDuplicateId, originalElements of OnDuplicateData (packages/el"
+  },
+  {
+   "file": "packages/excalidraw/components/App.duplicate.ts",
+   "line": 30,
+   "spec": "@excalidraw/element/types",
+   "name": "ExcalidrawElement",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN R6 packages/excalidraw/components/App.duplicate.ts:11 reads duplicateIdToOrigId, origIdToDuplicateId, originalElements of OnDuplicateData (packages/el"
+  },
+  {
+   "file": "packages/excalidraw/components/App.duplicate.ts",
+   "line": 30,
+   "spec": "@excalidraw/element/types",
+   "name": "ExcalidrawTextElement",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN R6 packages/excalidraw/components/App.duplicate.ts:11 reads duplicateIdToOrigId, origIdToDuplicateId, originalElements of OnDuplicateData (packages/el"
+  }
+ ],
+ "exploratory_all_files_constructs": 600,
+ "exploratory_all_files_unaccounted": 2,
+ "repo_level_abstain": [],
+ "exploratory_unaccounted_after_stoplist": [
+  [
+   "packages/excalidraw/components/HintViewer.tsx",
+   20,
+   "EditorInterface",
+   0
+  ],
+  [
+   "packages/excalidraw/components/live-collaboration/LiveCollaborationTrigger.tsx",
+   3,
+   "EditorInterface",
+   0
+  ]
+ ]
+}

@@ -1,0 +1,54 @@
+{
+ "repo": "earendil-works__pi",
+ "notshape": 858,
+ "categories": {
+  "value import: value declared only (EARNED silence)": 713,
+  "value import: class or enum (EARNED silence under v1 shape scope)": 55,
+  "value import: no declaration in package": 40,
+  "value import: type declared only": 22,
+  "type-only import: class/enum only": 13,
+  "type-only import: type declared in package": 11,
+  "value import: both a type and a value declared": 2,
+  "type-only import: no declaration in package": 2
+ },
+ "examples": {
+  "value import: value declared only (EARNED silence)": [
+   "packages/agent/examples/mcp-codemode/main.ts:11 createModels -> packages/ai/src/index.ts",
+   "packages/agent/examples/mcp-codemode/main.ts:12 anthropicProvider -> packages/ai/src/providers/anthropic.ts",
+   "packages/agent/examples/mcp-codemode/tools.ts:14 renderDeclarations -> packages/codemode/src/index.ts"
+  ],
+  "value import: class or enum (EARNED silence under v1 shape scope)": [
+   "packages/agent/examples/mcp-codemode/main.ts:13 McpClient -> packages/mcp/src/index.ts",
+   "packages/agent/examples/mcp-codemode/main.ts:13 StdioTransport -> packages/mcp/src/index.ts",
+   "packages/agent/examples/mcp-codemode/tools.ts:14 CodemodeSandbox -> packages/codemode/src/index.ts"
+  ],
+  "type-only import: class/enum only": [
+   "packages/agent/examples/mcp-codemode/tools.ts:20 McpClient -> packages/mcp/src/index.ts",
+   "packages/agent/src/proxy.ts:7 AssistantMessageEventStream -> packages/ai/src/index.ts",
+   "packages/agent/src/types.ts:1 AssistantMessageEventStream -> packages/ai/src/index.ts"
+  ],
+  "type-only import: type declared in package": [
+   "packages/coding-agent/examples/extensions/custom-provider-gitlab-duo/index.ts:12 ThinkingLevelMap -> packages/ai/src/compat.ts",
+   "packages/coding-agent/src/core/agent-session.ts:18 Agent -> packages/agent/src/index.ts",
+   "packages/coding-agent/test/mcp-extension.test.ts:14 InMemoryTransport -> packages/mcp/src/testing/index.ts"
+  ],
+  "value import: both a type and a value declared": [
+   "packages/coding-agent/examples/extensions/gondolin/index.ts:25 createBashTool -> packages/coding-agent/src/index.ts",
+   "packages/coding-agent/examples/extensions/sandbox/index.ts:49 createBashTool -> packages/coding-agent/src/index.ts"
+  ],
+  "value import: no declaration in package": [
+   "packages/coding-agent/examples/extensions/hello.ts:5 Type -> packages/ai/src/index.ts",
+   "packages/coding-agent/test/sdk-codex-cache-probe-tool-loop.ts:16 Type -> packages/ai/src/compat.ts",
+   "packages/durable/src/tool-search/tool-search.ts:6 Type -> packages/ai/src/index.ts"
+  ],
+  "value import: type declared only": [
+   "packages/coding-agent/src/core/sdk.ts:2 Agent -> packages/agent/src/index.ts",
+   "packages/coding-agent/src/extensions/mcp/runtime.ts:11 McpAuthRequiredError -> packages/mcp/src/index.ts",
+   "packages/coding-agent/test/agent-session-auto-compaction-queue.test.ts:4 Agent -> packages/agent/src/index.ts"
+  ],
+  "type-only import: no declaration in package": [
+   "packages/durable/src/harness/define.ts:2 TSchema -> packages/ai/src/index.ts",
+   "packages/durable/src/harness/types.ts:2 TSchema -> packages/ai/src/index.ts"
+  ]
+ }
+}

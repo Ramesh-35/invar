@@ -1,0 +1,8 @@
+NOTSHAPE	packages/playwright-client/src/index.ts	17	Connection	../../playwright-core/src/client/connection	packages/playwright-core/src/client/connection.ts	packages/playwright-core
+NOTSHAPE	packages/playwright-client/src/index.ts	19	Browser	../../playwright-core/src/client/browser	packages/playwright-core/src/client/browser.ts	packages/playwright-core
+NOTSHAPE	packages/playwright/src/index.ts	36	Playwright	../../playwright-core/src/client/playwright	packages/playwright-core/src/client/playwright.ts	packages/playwright-core
+NOTSHAPE	packages/playwright/src/index.ts	37	Browser	../../playwright-core/src/client/browser	packages/playwright-core/src/client/browser.ts	packages/playwright-core
+NOTSHAPE	packages/playwright/src/index.ts	38	BrowserContext	../../playwright-core/src/client/browserContext	packages/playwright-core/src/client/browserContext.ts	packages/playwright-core
+NOTSHAPE	packages/playwright/src/index.ts	39	APIRequestContext	../../playwright-core/src/client/fetch	packages/playwright-core/src/client/fetch.ts	packages/playwright-core
+NOTSHAPE	packages/playwright/src/index.ts	40	ChannelOwner	../../playwright-core/src/client/channelOwner	packages/playwright-core/src/client/channelOwner.ts	packages/playwright-core
+NOTSHAPE	packages/playwright/src/index.ts	41	Page	../../playwright-core/src/client/page	packages/playwright-core/src/client/page.ts	packages/playwright-core

@@ -1,0 +1,18 @@
+{
+ "repo": "freeCodeCamp__freeCodeCamp",
+ "notshape": 35,
+ "categories": {
+  "value import: value declared only (EARNED silence)": 34,
+  "type-only import: no declaration in package": 1
+ },
+ "examples": {
+  "value import: value declared only (EARNED silence)": [
+   "client/config/cert-and-project-map.test.ts:5 getContentDir -> curriculum/src/file-handler.ts",
+   "client/config/cert-and-project-map.test.ts:6 buildCertification -> curriculum/src/build-certification.ts",
+   "client/src/templates/Challenges/utils/frame.ts:6 version -> tools/client-plugins/browser-scripts/test-runner.ts"
+  ],
+  "type-only import: no declaration in package": [
+   "client/src/templates/Challenges/utils/frame.ts:6 FCCTestRunner -> tools/client-plugins/browser-scripts/test-runner.ts"
+  ]
+ }
+}

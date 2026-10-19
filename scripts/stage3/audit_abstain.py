@@ -31,6 +31,13 @@ import json, os, random, re, sys
 SKIP = {"node_modules", ".git", "build", "dist", "out", "coverage", ".next"}
 IMPORT = re.compile(r'import\s+(type\s+)?\{([^}]*)\}\s*from\s*[\'"]([^\'"]+)[\'"]', re.S)
 REPO_LEVEL = ("H2 ", "SLICE-SCOPE")
+# S3-INT-9 (recorded at STAGE3-EVAL-002): init's declared candidate counts
+# only DISTINCTIVE reads, after the frozen slice 1 stoplist (name_key
+# normalized). Reported beside the raw count, never replacing it.
+STOP = {"id", "name", "type", "description", "data", "value", "payload", "key", "label", "title",
+        "status", "error", "message", "result", "items", "url", "path", "version", "createdat", "updatedat"}
+def nk(s):
+    return s.lower().replace("_", "").replace("-", "")
 
 def walk(root):
     for d, dirs, files in os.walk(root):
@@ -155,8 +162,9 @@ def main():
                     continue
                 kind, mem = sm
                 reads = sorted(m for m in mem if re.search(r'\.' + re.escape(m) + r'\b', src))
+                distinct = [r for r in reads if nk(r) not in STOP]
                 if kind == "alias" or len(reads) >= 2:
-                    cs.append({"line": line, "spec": spec, "name": imported, "kind": kind, "reads": reads[:8]})
+                    cs.append({"line": line, "spec": spec, "name": imported, "kind": kind, "reads": reads[:8], "distinctive": len(distinct)})
             if cs:
                 constructs[rel] = cs
     rnd = random.Random("STAGE3-EVAL-001:" + name)
@@ -174,12 +182,13 @@ def main():
                 silent += 1
             rows.append({"file": rel, **c, "accounted_by": a})
     full_unaccounted = sum(1 for rel, cs in constructs.items() for _ in cs if accounted(rel) is None)
+    full_unaccounted_distinct = [(rel, c["line"], c["name"], c["distinctive"]) for rel, cs in constructs.items() for c in cs if accounted(rel) is None and (c["kind"] == "alias" or c["distinctive"] >= 2)]
     full_total = sum(len(cs) for cs in constructs.values())
     out = {"repo": name, "packages_superset": len(pk), "eligible_files": len(eligible),
            "sample": sample, "sampled_constructs": len(rows), "sampled_silent": silent,
            "rows": rows, "exploratory_all_files_constructs": full_total,
            "exploratory_all_files_unaccounted": full_unaccounted,
-           "repo_level_abstain": repo_level[:1]}
+           "repo_level_abstain": repo_level[:1], "exploratory_unaccounted_after_stoplist": full_unaccounted_distinct}
     json.dump(out, open(outp, "w"), indent=1)
     print(f"{name}: pkgs={len(pk)} eligible={len(eligible)} sampled_constructs={len(rows)} SILENT={silent} | all-files constructs={full_total} unaccounted={full_unaccounted}")
 

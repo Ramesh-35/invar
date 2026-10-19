@@ -1,0 +1,4 @@
+NOTSHAPE	understand-anything-plugin/packages/dashboard/src/App.tsx	2	validateGraph	@understand-anything/core/schema	understand-anything-plugin/packages/core/src/schema.ts	understand-anything-plugin/packages/core
+NOTSHAPE	understand-anything-plugin/packages/dashboard/src/store.ts	2	SearchEngine	@understand-anything/core/search	understand-anything-plugin/packages/core/src/search.ts	understand-anything-plugin/packages/core
+NOTSHAPE	understand-anything-plugin/packages/dashboard/vite.config.ts	9	getGraphFreshnessBatch	../core/src/staleness	understand-anything-plugin/packages/core/src/staleness.ts	understand-anything-plugin/packages/core
+NOTSHAPE	understand-anything-plugin/src/context-builder.ts	1	SearchEngine	@understand-anything/core	understand-anything-plugin/packages/core/src/index.ts	understand-anything-plugin/packages/core

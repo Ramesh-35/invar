@@ -1,0 +1,23 @@
+{
+ "repo": "microsoft__playwright",
+ "notshape": 8,
+ "categories": {
+  "type-only import: type declared in package": 5,
+  "type-only import: class/enum only": 2,
+  "value import: type declared only": 1
+ },
+ "examples": {
+  "value import: type declared only": [
+   "packages/playwright-client/src/index.ts:17 Connection -> packages/playwright-core/src/client/connection.ts"
+  ],
+  "type-only import: type declared in package": [
+   "packages/playwright-client/src/index.ts:19 Browser -> packages/playwright-core/src/client/browser.ts",
+   "packages/playwright/src/index.ts:37 Browser -> packages/playwright-core/src/client/browser.ts",
+   "packages/playwright/src/index.ts:38 BrowserContext -> packages/playwright-core/src/client/browserContext.ts"
+  ],
+  "type-only import: class/enum only": [
+   "packages/playwright/src/index.ts:36 Playwright -> packages/playwright-core/src/client/playwright.ts",
+   "packages/playwright/src/index.ts:40 ChannelOwner -> packages/playwright-core/src/client/channelOwner.ts"
+  ]
+ }
+}

@@ -1,0 +1,67 @@
+{
+ "repo": "puppeteer__puppeteer",
+ "packages_superset": 13,
+ "eligible_files": 54,
+ "sample": [
+  "test/src/queryselector.test.ts",
+  "test/src/idle_override.test.ts",
+  "packages/puppeteer-core/src/node/FirefoxLauncher.ts",
+  "test/installation/src/puppeteer.test.ts",
+  "packages/puppeteer/src/node/install.ts",
+  "packages/puppeteer/src/node/cli.ts",
+  "packages/browsers/test/src/utils.ts",
+  "test/src/queryhandler.test.ts",
+  "test/src/cdp/network.test.ts",
+  "test/src/acceptInsecureCerts.test.ts"
+ ],
+ "sampled_constructs": 3,
+ "sampled_silent": 0,
+ "rows": [
+  {
+   "file": "packages/puppeteer/src/node/install.ts",
+   "line": 14,
+   "spec": "puppeteer-core",
+   "name": "ChromeHeadlessShellSettings",
+   "kind": "object",
+   "reads": [
+    "downloadBaseUrl",
+    "skipDownload",
+    "version"
+   ],
+   "distinctive": 2,
+   "accounted_by": "# ABSTAIN R6 packages/puppeteer/src/node/install.ts:14 reads cacheDirectory, chrome, firefox, skipDownload of Configuration (packages/puppeteer-core/src/common/"
+  },
+  {
+   "file": "packages/puppeteer/src/node/install.ts",
+   "line": 14,
+   "spec": "puppeteer-core",
+   "name": "ChromeSettings",
+   "kind": "object",
+   "reads": [
+    "downloadBaseUrl",
+    "skipDownload",
+    "version"
+   ],
+   "distinctive": 2,
+   "accounted_by": "# ABSTAIN R6 packages/puppeteer/src/node/install.ts:14 reads cacheDirectory, chrome, firefox, skipDownload of Configuration (packages/puppeteer-core/src/common/"
+  },
+  {
+   "file": "packages/puppeteer/src/node/install.ts",
+   "line": 14,
+   "spec": "puppeteer-core",
+   "name": "FirefoxSettings",
+   "kind": "object",
+   "reads": [
+    "downloadBaseUrl",
+    "skipDownload",
+    "version"
+   ],
+   "distinctive": 2,
+   "accounted_by": "# ABSTAIN R6 packages/puppeteer/src/node/install.ts:14 reads cacheDirectory, chrome, firefox, skipDownload of Configuration (packages/puppeteer-core/src/common/"
+  }
+ ],
+ "exploratory_all_files_constructs": 13,
+ "exploratory_all_files_unaccounted": 1,
+ "repo_level_abstain": [],
+ "exploratory_unaccounted_after_stoplist": []
+}
