@@ -1,0 +1,550 @@
+{
+  "backtest": [
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "ModelsStoreEntry.checkedAt",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ModelsStoreEntry.etag",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ModelsStoreEntry.lastModified",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ModelsStoreEntry.models",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 1,
+      "contract": "code:models-store.ts->remote-catalog-provider.ts",
+      "producer": "packages/ai/src/models-store.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "ModelsPublication.persist",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ModelsPublication.update",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 3,
+      "contract": "code:models.ts->llama-extension.test.ts",
+      "producer": "packages/ai/src/models.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "ModelsRefreshOptions.allowNetwork",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ModelsRefreshOptions.providers",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ModelsRefreshOptions.signal",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ModelsRefreshResult.aborted",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ModelsRefreshResult.errors",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "Provider.auth",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "Provider.baseUrl",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "Provider.headers",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 3,
+      "contract": "code:models.ts->model-runtime.ts",
+      "producer": "packages/ai/src/models.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "RefreshModelsContext.allowNetwork",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "RefreshModelsContext.credential",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "RefreshModelsContext.signal",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "RefreshModelsContext.stored",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 3,
+      "contract": "code:models.ts->provider.ts",
+      "producer": "packages/ai/src/models.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "ModelsPublication.persist",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ModelsPublication.update",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "RefreshModelsContext.allowNetwork",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "RefreshModelsContext.force",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "RefreshModelsContext.signal",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 3,
+      "contract": "code:models.ts->remote-catalog-provider.test.ts",
+      "producer": "packages/ai/src/models.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "RefreshModelsContext.allowNetwork",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "RefreshModelsContext.force",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "RefreshModelsContext.signal",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "RefreshModelsContext.stored",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 3,
+      "contract": "code:models.ts->remote-catalog-provider.ts",
+      "producer": "packages/ai/src/models.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "AgentTool.execute",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "AgentTool.outputSchema",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "AgentToolCallOutcome.durationMs",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "AgentToolCallOutcome.isError",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "AgentToolCallOutcome.toolCall",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "AgentToolResult.content",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "AgentToolResult.isError",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "AgentToolResult.structuredContent",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "AgentToolResult.usage",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 1,
+      "contract": "code:types.ts->execute.ts",
+      "producer": "packages/agent/src/types.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "OAuthCredentials.access",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "OAuthCredentials.refresh",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 1,
+      "contract": "code:types.ts->index.ts#2",
+      "producer": "packages/ai/src/auth/types.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "AuthResult.auth",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "AuthResult.env",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "4c28a6865c42",
+              "date": "2026-10-06",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 1,
+      "contract": "code:types.ts->model-registry.ts",
+      "producer": "packages/ai/src/auth/types.ts"
+    }
+  ],
+  "coda": "Timelines replay today's extraction over past file contents. They are\nnot replayed verdicts: waivers, selectors and samples are today's, and a\npast consumer may not have read the field yet. Unreadable commits are\nstated, never guessed.",
+  "depth": 100,
+  "skipped": []
+}

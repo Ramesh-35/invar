@@ -1,0 +1,40 @@
+INVAR check (9 contract(s))
+  [HOLDS]    code:types.ts->execute.ts (schema)
+      note: producer unchanged since lock (2026-10-19T09:02:19Z)
+      note: 11 read field(s) not in invar.lock (all, args, errorMessage, message, onUpdate); run `invar lock --update` to bind them
+  durability: held since 2026-10-19 (0 days)
+  [HOLDS]    code:types.ts->index.ts#2 (schema)
+      note: producer unchanged since lock (2026-10-19T09:02:19Z)
+      note: 11 read field(s) not in invar.lock (apiKey, baseUrl, expires, headers, id); run `invar lock --update` to bind them
+  durability: held since 2026-10-19 (0 days)
+  [HOLDS]    code:types.ts->model-registry.ts (schema)
+      note: producer unchanged since lock (2026-10-19T09:02:19Z)
+      note: 7 read field(s) not in invar.lock (apiKey, baseUrl, headers, name, options); run `invar lock --update` to bind them
+  durability: held since 2026-10-19 (0 days)
+  [HOLDS]    code:models-store.ts->remote-catalog-provider.ts (schema)
+      note: producer unchanged since lock (2026-10-19T09:02:19Z)
+      note: 1 read field(s) not in invar.lock (signal); run `invar lock --update` to bind them
+  durability: held since 2026-10-19 (0 days)
+  [HOLDS]    code:models.ts->model-runtime.ts (schema)
+      note: producer unchanged since lock (2026-10-19T09:02:19Z)
+      note: 29 read field(s) not in invar.lock (apiKey, base, cancelDeferred, classify, context); run `invar lock --update` to bind them
+  durability: held since 2026-10-19 (0 days)
+  [HOLDS]    code:models.ts->remote-catalog-provider.ts (schema)
+      note: producer unchanged since lock (2026-10-19T09:02:19Z)
+      note: 15 read field(s) not in invar.lock (aborted, checkedAt, context, getAllModels, getModels); run `invar lock --update` to bind them
+  durability: held since 2026-10-19 (0 days)
+  [HOLDS]    code:models.ts->provider.ts (schema)
+      note: producer unchanged since lock (2026-10-19T09:02:19Z)
+      note: 26 read field(s) not in invar.lock (aborted, api, apiKey, auth, baseUrl); run `invar lock --update` to bind them
+  durability: held since 2026-10-19 (0 days)
+  [HOLDS]    code:models.ts->llama-extension.test.ts (schema)
+      note: producer unchanged since lock (2026-10-19T09:02:19Z)
+      note: 24 read field(s) not in invar.lock (allowNetwork, api, apiKey, auth, baseUrl); run `invar lock --update` to bind them
+  durability: held since 2026-10-19 (0 days)
+  [HOLDS]    code:models.ts->remote-catalog-provider.test.ts (schema)
+      note: producer unchanged since lock (2026-10-19T09:02:19Z)
+      note: 22 read field(s) not in invar.lock (api, auth, baseUrl, chat, checkedAt); run `invar lock --update` to bind them
+  durability: held since 2026-10-19 (0 days)
+result: ALL 9 contract(s) hold
+summary: held 9 | violated 0 | skipped or not evaluated 0
+measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)

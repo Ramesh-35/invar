@@ -1,0 +1,29 @@
+invar backtest (invar.toml, 2 contract(s), depth 100)
+note: shallow history; the oldest replayed commit is the shallow boundary, and its date is the cutoff, not a change
+
+code:Accessibility.ts->accessibility.test.ts: packages/puppeteer-core/src/cdp/Accessibility.ts (5 commit(s) replayed)
+  SerializedAXNode.children
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  SerializedAXNode.focused
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+
+code:WebMCP.ts->webmcp.test.ts: packages/puppeteer-core/src/cdp/WebMCP.ts (6 commit(s) replayed)
+  WebMCPToolCallResult.call
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  WebMCPToolCallResult.errorText
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  WebMCPToolCallResult.exception
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  WebMCPToolCallResult.output
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+
+Timelines replay today's extraction over past file contents. They are
+not replayed verdicts: waivers, selectors and samples are today's, and a
+past consumer may not have read the field yet. Unreadable commits are
+stated, never guessed.

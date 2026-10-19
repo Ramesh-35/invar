@@ -1,0 +1,1166 @@
+{
+  "backtest": [
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "ArrowEndpoint.arrow",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "1acf66edabc2",
+              "date": "2026-07-28",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ArrowEndpoint.startOrEnd",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "1acf66edabc2",
+              "date": "2026-07-28",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 2,
+      "contract": "code:arrowEndpointText.ts->App.textTool.ts",
+      "producer": "packages/element/src/arrowEndpointText.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "EditorInterface.canFitSidebar",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "EditorInterface.desktopUIMode",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "EditorInterface.formFactor",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "EditorInterface.isTouchScreen",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "EditorInterface.userAgent",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 1,
+      "contract": "code:editorInterface.ts->App.tsx",
+      "producer": "packages/common/src/editorInterface.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "EditorInterface.formFactor",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "EditorInterface.userAgent",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 1,
+      "contract": "code:editorInterface.ts->transformHandles.ts",
+      "producer": "packages/common/src/editorInterface.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "ElementRenderState.offset",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "absent"
+            },
+            {
+              "commit": "a9186480121a",
+              "date": "2026-09-15",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ElementRenderState.opacity",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "absent"
+            },
+            {
+              "commit": "a9186480121a",
+              "date": "2026-09-15",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 11,
+      "contract": "code:renderElement.ts->staticScene.ts",
+      "producer": "packages/element/src/renderElement.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.getAppState",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.getFiles",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 55,
+      "contract": "code:types.ts->AI.tsx",
+      "producer": "packages/excalidraw/types.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "AppState.exportBackground",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "AppState.theme",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "AppState.viewBackgroundColor",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.addFiles",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.getAppState",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.getEditorInterface",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.getFiles",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.getName",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.getSceneElements",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.getSceneElementsIncludingDeleted",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.history",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.refresh",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.setViewport",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "absent"
+            },
+            {
+              "commit": "51ca8abde450",
+              "date": "2026-07-03",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.updateLibrary",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.updateScene",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawProps.isCollaborating",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawProps.onPointerUpdate",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawProps.theme",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 55,
+      "contract": "code:types.ts->App.tsx",
+      "producer": "packages/excalidraw/types.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "Collaborator.button",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "Collaborator.pointer",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "Collaborator.socketId",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "Collaborator.username",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.addFiles",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.getAppState",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.getFiles",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.getSceneElements",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.getSceneElementsIncludingDeleted",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.history",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.onScrollChange",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.onUserFollow",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.resetScene",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.updateScene",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "UserToFollow.socketId",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "UserToFollow.username",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 55,
+      "contract": "code:types.ts->Collab.tsx#2",
+      "producer": "packages/excalidraw/types.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.setActiveTool",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.setCursor",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 55,
+      "contract": "code:types.ts->CustomFooter.tsx",
+      "producer": "packages/excalidraw/types.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "FixedPointBinding.elementId",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "FixedPointBinding.fixedPoint",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "FixedPointBinding.mode",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 8,
+      "contract": "code:types.ts->DebugCanvas.tsx",
+      "producer": "packages/element/src/types.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "AppState.scrollX",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "AppState.scrollY",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "AppState.zoom",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 55,
+      "contract": "code:types.ts->DebugCanvas.tsx#2",
+      "producer": "packages/excalidraw/types.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "AppState.activeTool",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "AppState.height",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "AppState.offsetLeft",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "AppState.offsetTop",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "AppState.width",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.addFiles",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.getAppState",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.getFiles",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.getSceneElements",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.resetScene",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.setActiveTool",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.setViewport",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "absent"
+            },
+            {
+              "commit": "51ca8abde450",
+              "date": "2026-07-03",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.updateLibrary",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.updateScene",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 55,
+      "contract": "code:types.ts->ExampleApp.tsx",
+      "producer": "packages/excalidraw/types.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "BinaryFileData.dataURL",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.getFiles",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ExcalidrawImperativeAPI.updateScene",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 55,
+      "contract": "code:types.ts->FileManager.ts",
+      "producer": "packages/excalidraw/types.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "FixedPointBinding.elementId",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "FixedPointBinding.fixedPoint",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "FixedPointBinding.mode",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 8,
+      "contract": "code:types.ts->history.test.tsx",
+      "producer": "packages/element/src/types.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "ImportedDataState.appState",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "ImportedDataState.elements",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 1,
+      "contract": "code:types.ts->index.ts",
+      "producer": "packages/excalidraw/data/types.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "StaticCanvasRenderConfig.imageCache",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "StaticCanvasRenderConfig.isExporting",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "StaticCanvasRenderConfig.theme",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 6,
+      "contract": "code:types.ts->renderElement.ts",
+      "producer": "packages/excalidraw/scene/types.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "FixedPointBinding.elementId",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "FixedPointBinding.fixedPoint",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "FixedPointBinding.mode",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 8,
+      "contract": "code:types.ts->restore.ts",
+      "producer": "packages/element/src/types.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "DebugElement.color",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "DebugElement.permanent",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "f39ac4a65333",
+              "date": "2026-02-02",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 2,
+      "contract": "code:visualdebug.ts->DebugCanvas.tsx",
+      "producer": "packages/element/src/visualdebug.ts"
+    }
+  ],
+  "coda": "Timelines replay today's extraction over past file contents. They are\nnot replayed verdicts: waivers, selectors and samples are today's, and a\npast consumer may not have read the field yet. Unreadable commits are\nstated, never guessed.",
+  "depth": 100,
+  "skipped": []
+}

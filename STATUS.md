@@ -48,3 +48,13 @@ not read. STAGE3-EVAL-003 on the same pinned manifest: 186 proposals
 with every difference explained, 0 genuine silent drops, determinism and
 ISA 10 of 10. Records: docs/architecture/INIT-DISCOVERY-SLICE3.md,
 INIT-DISCOVERY-SLICE3B.md, docs/evidence/stage3/eval003/.
+
+## 2026-10-19: STAGE3-EVAL-003 closed, all seven metrics
+
+ISA and determinism 10 of 10; precision 41 of 58 new code-pair proposals
+TRUE (71 percent; pooled 73 percent) under two independent blind AI
+adjudications delegated by the founder (deviation from S-D3 recorded);
+abstention honesty 0 genuine silent drops; round trip 41 of 41 HOLDS with
+durability; backtest 4 of 4, 0 absence windows. The precision limiter is
+the declared unverified receiver (S3-F-15). Record:
+docs/evidence/stage3/eval003/LEDGER.md.

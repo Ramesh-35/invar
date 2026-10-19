@@ -1,0 +1,12 @@
+INVAR check (2 contract(s))
+  [HOLDS]    code:Accessibility.ts->accessibility.test.ts (schema)
+      note: producer unchanged since lock (2026-10-19T09:02:19Z)
+      note: 26 read field(s) not in invar.lock (atomic, busy, checked, description, details); run `invar lock --update` to bind them
+  durability: held since 2026-10-19 (0 days)
+  [HOLDS]    code:WebMCP.ts->webmcp.test.ts (schema)
+      note: producer unchanged since lock (2026-10-19T09:02:19Z)
+      note: 13 read field(s) not in invar.lock (annotations, description, frame, id, input); run `invar lock --update` to bind them
+  durability: held since 2026-10-19 (0 days)
+result: ALL 2 contract(s) hold
+summary: held 2 | violated 0 | skipped or not evaluated 0
+measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)

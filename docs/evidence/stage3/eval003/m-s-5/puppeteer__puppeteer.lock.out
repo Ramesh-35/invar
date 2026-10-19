@@ -1,0 +1,3 @@
+  + contract code:Accessibility.ts->accessibility.test.ts (2 bindings)
+  + contract code:WebMCP.ts->webmcp.test.ts (4 bindings)
+wrote ./invar.lock (2 contract(s), 6 binding(s))

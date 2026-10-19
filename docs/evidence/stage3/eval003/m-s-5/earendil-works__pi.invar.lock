@@ -1,0 +1,114 @@
+# invar.lock: the producer fields this repository depends on.
+# Written by `invar lock`. Accept a reviewed producer change with
+# `invar lock --update`. Waivers are written by hand and kept.
+
+[lock]
+format = "1"
+
+[[contract]]
+id = "code:models-store.ts->remote-catalog-provider.ts"
+producer = "packages/ai/src/models-store.ts"
+blake3 = "8430994dfd40d4be28cbe85d13077615d8f15fce32fea803c6328f6e6edbcd02"
+recorded_at = "2026-10-19T09:02:19Z"
+bind = "code 2026-10-19 ModelsStoreEntry.checkedAt number"
+bind = "code 2026-10-19 ModelsStoreEntry.etag string"
+bind = "code 2026-10-19 ModelsStoreEntry.lastModified number"
+bind = "code 2026-10-19 ModelsStoreEntry.models readonly AnyModel[]"
+members = "code ModelsStoreEntry checkedAt etag lastModified models"
+
+[[contract]]
+id = "code:models.ts->llama-extension.test.ts"
+producer = "packages/ai/src/models.ts"
+blake3 = "850aa356a2f5e02d84cd9653e4a5f875e38f0a41fe015ef80c161fcf826746d6"
+recorded_at = "2026-10-19T09:02:19Z"
+bind = "code 2026-10-19 ModelsPublication.persist ModelsStoreEntry | null"
+bind = "code 2026-10-19 ModelsPublication.update ()"
+members = "code ModelsPublication persist update"
+
+[[contract]]
+id = "code:models.ts->model-runtime.ts"
+producer = "packages/ai/src/models.ts"
+blake3 = "850aa356a2f5e02d84cd9653e4a5f875e38f0a41fe015ef80c161fcf826746d6"
+recorded_at = "2026-10-19T09:02:19Z"
+bind = "code 2026-10-19 ModelsRefreshOptions.allowNetwork boolean"
+bind = "code 2026-10-19 ModelsRefreshOptions.providers readonly string[]"
+bind = "code 2026-10-19 ModelsRefreshOptions.signal AbortSignal"
+bind = "code 2026-10-19 ModelsRefreshResult.aborted boolean"
+bind = "code 2026-10-19 ModelsRefreshResult.errors ReadonlyMap<string"
+bind = "code 2026-10-19 Provider.auth ProviderAuth"
+bind = "code 2026-10-19 Provider.baseUrl string"
+bind = "code 2026-10-19 Provider.headers ProviderHeaders"
+members = "code ModelsRefreshOptions allowNetwork force providers signal"
+members = "code ModelsRefreshResult aborted errors"
+members = "code Provider auth baseUrl context credential handle headers id model models name options"
+
+[[contract]]
+id = "code:models.ts->provider.ts"
+producer = "packages/ai/src/models.ts"
+blake3 = "850aa356a2f5e02d84cd9653e4a5f875e38f0a41fe015ef80c161fcf826746d6"
+recorded_at = "2026-10-19T09:02:19Z"
+bind = "code 2026-10-19 RefreshModelsContext.allowNetwork boolean"
+bind = "code 2026-10-19 RefreshModelsContext.credential Credential"
+bind = "code 2026-10-19 RefreshModelsContext.signal AbortSignal"
+bind = "code 2026-10-19 RefreshModelsContext.stored Readonly<ModelsStoreEntry>"
+members = "code RefreshModelsContext allowNetwork baseUrl credential force signal stored"
+
+[[contract]]
+id = "code:models.ts->remote-catalog-provider.test.ts"
+producer = "packages/ai/src/models.ts"
+blake3 = "850aa356a2f5e02d84cd9653e4a5f875e38f0a41fe015ef80c161fcf826746d6"
+recorded_at = "2026-10-19T09:02:19Z"
+bind = "code 2026-10-19 ModelsPublication.persist ModelsStoreEntry | null"
+bind = "code 2026-10-19 ModelsPublication.update ()"
+bind = "code 2026-10-19 RefreshModelsContext.allowNetwork boolean"
+bind = "code 2026-10-19 RefreshModelsContext.force boolean"
+bind = "code 2026-10-19 RefreshModelsContext.signal AbortSignal"
+members = "code ModelsPublication persist update"
+members = "code RefreshModelsContext allowNetwork baseUrl credential force signal stored"
+
+[[contract]]
+id = "code:models.ts->remote-catalog-provider.ts"
+producer = "packages/ai/src/models.ts"
+blake3 = "850aa356a2f5e02d84cd9653e4a5f875e38f0a41fe015ef80c161fcf826746d6"
+recorded_at = "2026-10-19T09:02:19Z"
+bind = "code 2026-10-19 RefreshModelsContext.allowNetwork boolean"
+bind = "code 2026-10-19 RefreshModelsContext.force boolean"
+bind = "code 2026-10-19 RefreshModelsContext.signal AbortSignal"
+bind = "code 2026-10-19 RefreshModelsContext.stored Readonly<ModelsStoreEntry>"
+members = "code RefreshModelsContext allowNetwork baseUrl credential force signal stored"
+
+[[contract]]
+id = "code:types.ts->execute.ts"
+producer = "packages/agent/src/types.ts"
+blake3 = "47c5f10d44d90bfc7a8ce7cfcbe7c37d577249c841801094e12a46785d2e400b"
+recorded_at = "2026-10-19T09:02:19Z"
+bind = "code 2026-10-19 AgentTool.execute ("
+bind = "code 2026-10-19 AgentTool.outputSchema TSchema"
+bind = "code 2026-10-19 AgentToolCallOutcome.durationMs number"
+bind = "code 2026-10-19 AgentToolCallOutcome.isError boolean"
+bind = "code 2026-10-19 AgentToolCallOutcome.toolCall AgentToolCall"
+bind = "code 2026-10-19 AgentToolResult.content (TextContent | ImageContent)[]"
+bind = "code 2026-10-19 AgentToolResult.isError boolean"
+bind = "code 2026-10-19 AgentToolResult.structuredContent JsonValue"
+bind = "code 2026-10-19 AgentToolResult.usage Usage"
+members = "code AgentTool execute executionMode label onUpdate outputSchema params prepareArguments replay signal toolCallId"
+members = "code AgentToolCallOutcome durationMs isError result toolCall"
+members = "code AgentToolResult content details isError structuredContent terminate usage"
+
+[[contract]]
+id = "code:types.ts->index.ts#2"
+producer = "packages/ai/src/auth/types.ts"
+blake3 = "6d1714b28ea29cb7be2a14f2c0b275b0d7a036fc187dc189d6dc18381dd5c898"
+recorded_at = "2026-10-19T09:02:19Z"
+bind = "code 2026-10-19 OAuthCredentials.access string"
+bind = "code 2026-10-19 OAuthCredentials.refresh string"
+members = "code OAuthCredentials access expires refresh"
+
+[[contract]]
+id = "code:types.ts->model-registry.ts"
+producer = "packages/ai/src/auth/types.ts"
+blake3 = "6d1714b28ea29cb7be2a14f2c0b275b0d7a036fc187dc189d6dc18381dd5c898"
+recorded_at = "2026-10-19T09:02:19Z"
+bind = "code 2026-10-19 AuthResult.auth ModelAuth"
+bind = "code 2026-10-19 AuthResult.env ProviderEnv"
+members = "code AuthResult auth env source"

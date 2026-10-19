@@ -1,0 +1,300 @@
+invar backtest (invar.toml, 17 contract(s), depth 100)
+note: shallow history; the oldest replayed commit is the shallow boundary, and its date is the cutoff, not a change
+
+code:arrowEndpointText.ts->App.textTool.ts: packages/element/src/arrowEndpointText.ts (2 commit(s) replayed)
+  ArrowEndpoint.arrow
+    2026-07-28 1acf66edabc2 present
+    never absent after introduction
+  ArrowEndpoint.startOrEnd
+    2026-07-28 1acf66edabc2 present
+    never absent after introduction
+
+code:editorInterface.ts->App.tsx: packages/common/src/editorInterface.ts (1 commit(s) replayed)
+  EditorInterface.canFitSidebar
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  EditorInterface.desktopUIMode
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  EditorInterface.formFactor
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  EditorInterface.isTouchScreen
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  EditorInterface.userAgent
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+
+code:editorInterface.ts->transformHandles.ts: packages/common/src/editorInterface.ts (1 commit(s) replayed)
+  EditorInterface.formFactor
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  EditorInterface.userAgent
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+
+code:renderElement.ts->staticScene.ts: packages/element/src/renderElement.ts (11 commit(s) replayed)
+  ElementRenderState.offset
+    2026-02-02 f39ac4a65333 absent
+    2026-09-15 a9186480121a present
+    never absent after introduction
+  ElementRenderState.opacity
+    2026-02-02 f39ac4a65333 absent
+    2026-09-15 a9186480121a present
+    never absent after introduction
+
+code:types.ts->AI.tsx: packages/excalidraw/types.ts (55 commit(s) replayed)
+  ExcalidrawImperativeAPI.getAppState
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.getFiles
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+
+code:types.ts->App.tsx: packages/excalidraw/types.ts (55 commit(s) replayed)
+  AppState.exportBackground
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  AppState.theme
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  AppState.viewBackgroundColor
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.addFiles
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.getAppState
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.getEditorInterface
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.getFiles
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.getName
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.getSceneElements
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.getSceneElementsIncludingDeleted
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.history
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.refresh
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.setViewport
+    2026-02-02 f39ac4a65333 absent
+    2026-07-03 51ca8abde450 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.updateLibrary
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.updateScene
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawProps.isCollaborating
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawProps.onPointerUpdate
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawProps.theme
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+
+code:types.ts->Collab.tsx#2: packages/excalidraw/types.ts (55 commit(s) replayed)
+  Collaborator.button
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  Collaborator.pointer
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  Collaborator.socketId
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  Collaborator.username
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.addFiles
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.getAppState
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.getFiles
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.getSceneElements
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.getSceneElementsIncludingDeleted
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.history
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.onScrollChange
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.onUserFollow
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.resetScene
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.updateScene
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  UserToFollow.socketId
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  UserToFollow.username
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+
+code:types.ts->CustomFooter.tsx: packages/excalidraw/types.ts (55 commit(s) replayed)
+  ExcalidrawImperativeAPI.setActiveTool
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.setCursor
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+
+code:types.ts->DebugCanvas.tsx: packages/element/src/types.ts (8 commit(s) replayed)
+  FixedPointBinding.elementId
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  FixedPointBinding.fixedPoint
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  FixedPointBinding.mode
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+
+code:types.ts->DebugCanvas.tsx#2: packages/excalidraw/types.ts (55 commit(s) replayed)
+  AppState.scrollX
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  AppState.scrollY
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  AppState.zoom
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+
+code:types.ts->ExampleApp.tsx: packages/excalidraw/types.ts (55 commit(s) replayed)
+  AppState.activeTool
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  AppState.height
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  AppState.offsetLeft
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  AppState.offsetTop
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  AppState.width
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.addFiles
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.getAppState
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.getFiles
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.getSceneElements
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.resetScene
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.setActiveTool
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.setViewport
+    2026-02-02 f39ac4a65333 absent
+    2026-07-03 51ca8abde450 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.updateLibrary
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.updateScene
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+
+code:types.ts->FileManager.ts: packages/excalidraw/types.ts (55 commit(s) replayed)
+  BinaryFileData.dataURL
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.getFiles
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ExcalidrawImperativeAPI.updateScene
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+
+code:types.ts->history.test.tsx: packages/element/src/types.ts (8 commit(s) replayed)
+  FixedPointBinding.elementId
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  FixedPointBinding.fixedPoint
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  FixedPointBinding.mode
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+
+code:types.ts->index.ts: packages/excalidraw/data/types.ts (1 commit(s) replayed)
+  ImportedDataState.appState
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  ImportedDataState.elements
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+
+code:types.ts->renderElement.ts: packages/excalidraw/scene/types.ts (6 commit(s) replayed)
+  StaticCanvasRenderConfig.imageCache
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  StaticCanvasRenderConfig.isExporting
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  StaticCanvasRenderConfig.theme
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+
+code:types.ts->restore.ts: packages/element/src/types.ts (8 commit(s) replayed)
+  FixedPointBinding.elementId
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  FixedPointBinding.fixedPoint
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  FixedPointBinding.mode
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+
+code:visualdebug.ts->DebugCanvas.tsx: packages/element/src/visualdebug.ts (2 commit(s) replayed)
+  DebugElement.color
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+  DebugElement.permanent
+    2026-02-02 f39ac4a65333 present
+    never absent after introduction
+
+Timelines replay today's extraction over past file contents. They are
+not replayed verdicts: waivers, selectors and samples are today's, and a
+past consumer may not have read the field yet. Unreadable commits are
+stated, never guessed.

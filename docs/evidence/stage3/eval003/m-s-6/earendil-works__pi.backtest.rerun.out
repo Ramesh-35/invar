@@ -1,0 +1,145 @@
+invar backtest (invar.toml, 9 contract(s), depth 100)
+note: shallow history; the oldest replayed commit is the shallow boundary, and its date is the cutoff, not a change
+
+code:models-store.ts->remote-catalog-provider.ts: packages/ai/src/models-store.ts (1 commit(s) replayed)
+  ModelsStoreEntry.checkedAt
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ModelsStoreEntry.etag
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ModelsStoreEntry.lastModified
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ModelsStoreEntry.models
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:models.ts->llama-extension.test.ts: packages/ai/src/models.ts (3 commit(s) replayed)
+  ModelsPublication.persist
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ModelsPublication.update
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:models.ts->model-runtime.ts: packages/ai/src/models.ts (3 commit(s) replayed)
+  ModelsRefreshOptions.allowNetwork
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ModelsRefreshOptions.providers
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ModelsRefreshOptions.signal
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ModelsRefreshResult.aborted
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ModelsRefreshResult.errors
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Provider.auth
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Provider.baseUrl
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Provider.headers
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:models.ts->provider.ts: packages/ai/src/models.ts (3 commit(s) replayed)
+  RefreshModelsContext.allowNetwork
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  RefreshModelsContext.credential
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  RefreshModelsContext.signal
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  RefreshModelsContext.stored
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:models.ts->remote-catalog-provider.test.ts: packages/ai/src/models.ts (3 commit(s) replayed)
+  ModelsPublication.persist
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ModelsPublication.update
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  RefreshModelsContext.allowNetwork
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  RefreshModelsContext.force
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  RefreshModelsContext.signal
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:models.ts->remote-catalog-provider.ts: packages/ai/src/models.ts (3 commit(s) replayed)
+  RefreshModelsContext.allowNetwork
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  RefreshModelsContext.force
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  RefreshModelsContext.signal
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  RefreshModelsContext.stored
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:types.ts->execute.ts: packages/agent/src/types.ts (1 commit(s) replayed)
+  AgentTool.execute
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AgentTool.outputSchema
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AgentToolCallOutcome.durationMs
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AgentToolCallOutcome.isError
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AgentToolCallOutcome.toolCall
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AgentToolResult.content
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AgentToolResult.isError
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AgentToolResult.structuredContent
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AgentToolResult.usage
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:types.ts->index.ts#2: packages/ai/src/auth/types.ts (1 commit(s) replayed)
+  OAuthCredentials.access
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  OAuthCredentials.refresh
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:types.ts->model-registry.ts: packages/ai/src/auth/types.ts (1 commit(s) replayed)
+  AuthResult.auth
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AuthResult.env
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+Timelines replay today's extraction over past file contents. They are
+not replayed verdicts: waivers, selectors and samples are today's, and a
+past consumer may not have read the field yet. Unreadable commits are
+stated, never guessed.

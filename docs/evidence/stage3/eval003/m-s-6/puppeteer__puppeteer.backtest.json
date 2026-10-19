@@ -1,0 +1,93 @@
+{
+  "backtest": [
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "SerializedAXNode.children",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "c8faa53225f9",
+              "date": "2026-08-03",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "SerializedAXNode.focused",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "c8faa53225f9",
+              "date": "2026-08-03",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 5,
+      "contract": "code:Accessibility.ts->accessibility.test.ts",
+      "producer": "packages/puppeteer-core/src/cdp/Accessibility.ts"
+    },
+    {
+      "bindings": [
+        {
+          "absence_windows": 0,
+          "binding": "WebMCPToolCallResult.call",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "c8faa53225f9",
+              "date": "2026-08-03",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "WebMCPToolCallResult.errorText",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "c8faa53225f9",
+              "date": "2026-08-03",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "WebMCPToolCallResult.exception",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "c8faa53225f9",
+              "date": "2026-08-03",
+              "state": "present"
+            }
+          ]
+        },
+        {
+          "absence_windows": 0,
+          "binding": "WebMCPToolCallResult.output",
+          "blind_spot_commits": 0,
+          "events": [
+            {
+              "commit": "c8faa53225f9",
+              "date": "2026-08-03",
+              "state": "present"
+            }
+          ]
+        }
+      ],
+      "commits_replayed": 6,
+      "contract": "code:WebMCP.ts->webmcp.test.ts",
+      "producer": "packages/puppeteer-core/src/cdp/WebMCP.ts"
+    }
+  ],
+  "coda": "Timelines replay today's extraction over past file contents. They are\nnot replayed verdicts: waivers, selectors and samples are today's, and a\npast consumer may not have read the field yet. Unreadable commits are\nstated, never guessed.",
+  "depth": 100,
+  "skipped": []
+}

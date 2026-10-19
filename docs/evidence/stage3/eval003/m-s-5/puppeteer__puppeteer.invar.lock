@@ -1,0 +1,26 @@
+# invar.lock: the producer fields this repository depends on.
+# Written by `invar lock`. Accept a reviewed producer change with
+# `invar lock --update`. Waivers are written by hand and kept.
+
+[lock]
+format = "1"
+
+[[contract]]
+id = "code:Accessibility.ts->accessibility.test.ts"
+producer = "packages/puppeteer-core/src/cdp/Accessibility.ts"
+blake3 = "688da396a6644f12a5e5b60b5756c39613f3a0e72f0b768e1a324dbabb02aba5"
+recorded_at = "2026-10-19T09:02:19Z"
+bind = "code 2026-10-19 SerializedAXNode.children SerializedAXNode[]"
+bind = "code 2026-10-19 SerializedAXNode.focused boolean"
+members = "code SerializedAXNode atomic autocomplete backendNodeId busy checked children description details disabled errormessage expanded focused haspopup invalid keyshortcuts level live loaderId modal multiline multiselectable name orientation pressed readonly relevant required role roledescription selected url value valuemax valuemin valuetext"
+
+[[contract]]
+id = "code:WebMCP.ts->webmcp.test.ts"
+producer = "packages/puppeteer-core/src/cdp/WebMCP.ts"
+blake3 = "77536dbdb728de9656a120395a4cce115bcacfec33818861cd46dd281d7ebc18"
+recorded_at = "2026-10-19T09:02:19Z"
+bind = "code 2026-10-19 WebMCPToolCallResult.call WebMCPToolCall"
+bind = "code 2026-10-19 WebMCPToolCallResult.errorText string"
+bind = "code 2026-10-19 WebMCPToolCallResult.exception Protocol.Runtime.RemoteObject"
+bind = "code 2026-10-19 WebMCPToolCallResult.output any"
+members = "code WebMCPToolCallResult call errorText exception id output status"
