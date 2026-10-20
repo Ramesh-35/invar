@@ -1,0 +1,105 @@
+INVAR check (25 contract(s))
+  [HOLDS]    code:editorInterface.ts->transformHandles.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 3 read field(s) not in invar.lock (editorInterface, height, isMobileDevice); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:editorInterface.ts->App.tsx (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 4 read field(s) not in invar.lock (editorInterface, height, isLandscape, userAgent); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:renderElement.ts->staticScene.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 19 read field(s) not in invar.lock (angle, appState, context, element, elementsMap); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->DebugCanvas.tsx (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 14 read field(s) not in invar.lock (boundElements, endBinding, error, fillStyle, height); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->restore.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 61 read field(s) not in invar.lock (angle, autoResize, backgroundColor, baseFontSize, baseHeight); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:visualdebug.ts->DebugCanvas.tsx (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 7 read field(s) not in invar.lock (currentFrame, data, elementsMap, fill, segment); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->index.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 2 read field(s) not in invar.lock (files, type); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->renderElement.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 17 read field(s) not in invar.lock (allElementsMap, appState, canvas, elementsMap, frameRendering); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->CustomFooter.tsx (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 3 read field(s) not in invar.lock (customType, excalidrawAPI, type); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->ExampleApp.tsx (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 63 read field(s) not in invar.lock (UIOptions, activeTool, appState, avatarUrl, bottom); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->App.tsx (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 44 read field(s) not in invar.lock (action, appState, border, button, canvasActions); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->Collab.tsx (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 30 read field(s) not in invar.lock (action, appState, button, captureUpdate, collaborators); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->AI.tsx (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 13 read field(s) not in invar.lock (appState, elements, error, excalidrawAPI, exportBackground); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->DebugCanvas.tsx#2 (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 17 read field(s) not in invar.lock (appState, canvas, color, data, elementId); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->focus.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 16 read field(s) not in invar.lock (appState, element, elementId, get, gridSize); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->binding.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 20 read field(s) not in invar.lock (altKey, appState, element, elementId, elements); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->collision.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 11 read field(s) not in invar.lock (center, element, elements, get, id); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->convertToShape.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 16 read field(s) not in invar.lock (activeTool, appState, created, drawShape, height); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->delta.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 17 read field(s) not in invar.lock (appState, container, element, elementId, elements); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->flowchart.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 13 read field(s) not in invar.lock (appState, clear, element, elementId, get); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->frame.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 13 read field(s) not in invar.lock (appState, clip, element, elements, frame); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->linearElementEditor.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 33 read field(s) not in invar.lock (_brand, altKey, appState, bindMode, container); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->resizeTest.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 12 read field(s) not in invar.lock (appState, center, editorInterface, element, elements); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->selection.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 8 read field(s) not in invar.lock (appState, boxSelectionMode, elements, error, id); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->store.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:26Z)
+      note: 17 read field(s) not in invar.lock (action, appState, elementId, elements, error); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+result: ALL 25 contract(s) hold
+summary: held 25 | violated 0 | skipped or not evaluated 0
+measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)
+check exit 0

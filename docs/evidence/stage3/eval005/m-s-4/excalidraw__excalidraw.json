@@ -1,0 +1,118 @@
+{
+ "repo": "excalidraw__excalidraw",
+ "packages_superset": 11,
+ "eligible_files": 392,
+ "sample": [
+  "packages/utils/tests/utils.unmocked.test.ts",
+  "packages/excalidraw/components/TTDDialog/TTDContext.tsx",
+  "packages/excalidraw/data/EditorLocalStorage.ts",
+  "packages/excalidraw/actions/actionDeselect.ts",
+  "packages/excalidraw/data/image.ts",
+  "packages/excalidraw/components/ColorPicker/ColorInput.tsx",
+  "packages/excalidraw/components/ProjectName.tsx",
+  "packages/excalidraw/data/blob.ts",
+  "packages/element/src/showSelectedShapeActions.ts",
+  "packages/excalidraw/charts/charts.helpers.ts"
+ ],
+ "sampled_constructs": 8,
+ "sampled_silent": 0,
+ "rows": [
+  {
+   "file": "packages/excalidraw/actions/actionDeselect.ts",
+   "line": 9,
+   "spec": "@excalidraw/element/types",
+   "name": "GroupId",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN UNSUPPORTED-SHAPE packages/excalidraw/actions/actionDeselect.ts:9 GroupId at packages/element/src/types.ts:24 is not an object type (string)"
+  },
+  {
+   "file": "packages/excalidraw/data/blob.ts",
+   "line": 10,
+   "spec": "@excalidraw/common/utility-types",
+   "name": "ValueOf",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN R6 packages/excalidraw/data/blob.ts:11 reads height, naturalHeight, naturalWidth, width of ImageCrop (packages/element/src/types.ts:152) without impor"
+  },
+  {
+   "file": "packages/excalidraw/data/blob.ts",
+   "line": 11,
+   "spec": "@excalidraw/element/types",
+   "name": "ExcalidrawElement",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN R6 packages/excalidraw/data/blob.ts:11 reads height, naturalHeight, naturalWidth, width of ImageCrop (packages/element/src/types.ts:152) without impor"
+  },
+  {
+   "file": "packages/excalidraw/data/blob.ts",
+   "line": 11,
+   "spec": "@excalidraw/element/types",
+   "name": "FileId",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN R6 packages/excalidraw/data/blob.ts:11 reads height, naturalHeight, naturalWidth, width of ImageCrop (packages/element/src/types.ts:152) without impor"
+  },
+  {
+   "file": "packages/element/src/showSelectedShapeActions.ts",
+   "line": 1,
+   "spec": "@excalidraw/excalidraw/types",
+   "name": "UIAppState",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN R6 packages/element/src/showSelectedShapeActions.ts:1 reads activeTool, editingTextElement, openDialog, viewModeEnabled of AppState (packages/excalidr"
+  },
+  {
+   "file": "packages/excalidraw/charts/charts.helpers.ts",
+   "line": 25,
+   "spec": "@excalidraw/element/types",
+   "name": "ChartType",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN R6 packages/excalidraw/charts/charts.helpers.ts:16 reads angle, height, width, y of RectangleBox (packages/element/src/bounds.ts:68) without importing"
+  },
+  {
+   "file": "packages/excalidraw/charts/charts.helpers.ts",
+   "line": 25,
+   "spec": "@excalidraw/element/types",
+   "name": "ExcalidrawTextElement",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN R6 packages/excalidraw/charts/charts.helpers.ts:16 reads angle, height, width, y of RectangleBox (packages/element/src/bounds.ts:68) without importing"
+  },
+  {
+   "file": "packages/excalidraw/charts/charts.helpers.ts",
+   "line": 29,
+   "spec": "@excalidraw/element/types",
+   "name": "NonDeletedExcalidrawElement",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN R6 packages/excalidraw/charts/charts.helpers.ts:16 reads angle, height, width, y of RectangleBox (packages/element/src/bounds.ts:68) without importing"
+  }
+ ],
+ "exploratory_all_files_constructs": 678,
+ "exploratory_all_files_unaccounted": 2,
+ "repo_level_abstain": [],
+ "exploratory_unaccounted_after_stoplist": [
+  [
+   "packages/excalidraw/components/HintViewer.tsx",
+   20,
+   "EditorInterface",
+   0
+  ],
+  [
+   "packages/excalidraw/components/live-collaboration/LiveCollaborationTrigger.tsx",
+   3,
+   "EditorInterface",
+   0
+  ]
+ ]
+}

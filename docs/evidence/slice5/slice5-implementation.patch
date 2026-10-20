@@ -1,0 +1,953 @@
+diff --git a/crates/invar-falsify/src/codepairs.rs b/crates/invar-falsify/src/codepairs.rs
+index a05916c..0781e5c 100644
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -5,10 +5,13 @@
+ //! HONEST SCOPE: line and bracket-depth patterns over comment- and
+ //! string-masked text, not a parser. A proposal establishes a named import of
+ //! an exported shape across two declared packages plus at least two of the
+-//! shape's direct members read by property access in the importing file. It
+-//! does NOT establish that those reads are performed on values of the shape
+-//! (the receiver is not verified). Everything init cannot resolve is an
+-//! explicit abstention, never a guess.
++//! shape's direct members read by property access in the importing file.
++//! Since INIT-DISCOVERY-SLICE5 a read counts only through a receiver declared
++//! as the shape in that file (annotation, cast, explicit type argument, a
++//! local function's declared return type, or an element of a declared
++//! array); writes never count; types are not inferred, and receivers are
++//! matched by name across the file, not by scope. Everything init cannot
++//! resolve is an explicit abstention, never a guess.
+ 
+ use std::collections::{BTreeMap, BTreeSet};
+ use std::path::Path;
+@@ -294,6 +297,8 @@ struct FileInfo {
+     reexports: Vec<ReExport>,
+     /// name_key -> (spelling, first line), property access only.
+     reads: BTreeMap<String, (String, usize)>,
++    /// The masked text, for the per-shape receiver check (SLICE5).
++    masked: Vec<u8>,
+ }
+ 
+ impl FileInfo {
+@@ -594,6 +599,7 @@ fn scan_file(text: &str) -> FileInfo {
+         i += 1;
+     }
+     fi.reads = property_reads(&t);
++    fi.masked = t.m.clone();
+     fi
+ }
+ 
+@@ -752,6 +758,337 @@ fn property_reads(t: &Text) -> BTreeMap<String, (String, usize)> {
+     out
+ }
+ 
++// ------------------------------------------------------------ receivers
++//
++// INIT-DISCOVERY-SLICE5. A field read counts for shape S only through a
++// receiver declared as S in the consuming file (bounds B2 to B4): an
++// annotation, a cast, an explicit type argument, a call to a function of
++// this file whose declared return type is S or Promise<S>, or an element of
++// a receiver declared as an array of S. Writes never count. Receivers are
++// names, not scopes (no parser): a name declared as S anywhere in the file
++// verifies every bare read through that name.
++
++#[derive(Debug, Clone, PartialEq)]
++enum Tok {
++    Id(String),
++    P(u8),
++}
++
++/// Identifiers and single punctuation bytes of masked text, with offsets.
++/// Numbers are skipped; string contents and comments are already blank.
++fn tokens(m: &[u8]) -> Vec<(Tok, usize)> {
++    let mut out = Vec::new();
++    let mut i = 0;
++    while i < m.len() {
++        let c = m[i];
++        if is_ident_start(c) || c.is_ascii_digit() {
++            let s = i;
++            while i < m.len() && is_ident(m[i]) {
++                i += 1;
++            }
++            if is_ident_start(c) {
++                out.push((Tok::Id(String::from_utf8_lossy(&m[s..i]).into_owned()), s));
++            }
++            continue;
++        }
++        if !c.is_ascii_whitespace() {
++            out.push((Tok::P(c), i));
++        }
++        i += 1;
++    }
++    out
++}
++
++struct Toks<'a>(&'a [(Tok, usize)]);
++
++impl Toks<'_> {
++    fn id(&self, k: usize) -> Option<&str> {
++        match self.0.get(k) {
++            Some((Tok::Id(s), _)) => Some(s),
++            _ => None,
++        }
++    }
++    fn is(&self, k: usize, w: &str) -> bool {
++        self.id(k) == Some(w)
++    }
++    fn p(&self, k: usize, c: u8) -> bool {
++        matches!(self.0.get(k), Some((Tok::P(x), _)) if *x == c)
++    }
++    /// The index after the bracket group opened at k (`open` .. `close`).
++    fn skip_group(&self, mut k: usize, open: u8, close: u8) -> usize {
++        let mut d = 0i32;
++        while k < self.0.len() {
++            if self.p(k, open) {
++                d += 1;
++            } else if self.p(k, close) {
++                d -= 1;
++                if d == 0 {
++                    return k + 1;
++                }
++            }
++            k += 1;
++        }
++        k
++    }
++}
++
++/// A type at token k whose head is `shape`: `[readonly] [Wrapper<] S`, with
++/// optional generic arguments and an optional `[]`; never `S.x` or `S[k]`.
++/// Some(true) is an array of S, Some(false) is S itself.
++fn type_head(t: &Toks, mut k: usize, shape: &str) -> Option<bool> {
++    if t.is(k, "readonly") {
++        k += 1;
++    }
++    let mut arr = false;
++    if let Some(w) = t.id(k) {
++        if matches!(w, "Readonly" | "Partial" | "Required" | "Array" | "ReadonlyArray") && t.p(k + 1, b'<') {
++            arr = matches!(w, "Array" | "ReadonlyArray");
++            k += 2;
++            if t.is(k, "readonly") {
++                k += 1;
++            }
++        }
++    }
++    if !t.is(k, shape) || t.p(k + 1, b'.') {
++        return None;
++    }
++    k += 1;
++    if t.p(k, b'<') {
++        k = t.skip_group(k, b'<', b'>');
++    }
++    if t.p(k, b'[') {
++        return if t.p(k + 1, b']') { Some(true) } else { None };
++    }
++    Some(arr)
++}
++
++/// Functions of this file whose declared return type is S or Promise<S>.
++fn returning(t: &Toks, shape: &str) -> BTreeSet<String> {
++    let mut fns = BTreeSet::new();
++    for k in 0..t.0.len() {
++        if !(t.p(k, b')') && t.p(k + 1, b':')) {
++            continue;
++        }
++        let mut j = k + 2;
++        if t.is(j, "Promise") && t.p(j + 1, b'<') {
++            j += 2;
++        }
++        if type_head(t, j, shape) != Some(false) {
++            continue;
++        }
++        // back to the matching '(' and the name before it
++        let mut d = 0i32;
++        let mut o = k;
++        loop {
++            if t.p(o, b')') {
++                d += 1;
++            } else if t.p(o, b'(') {
++                d -= 1;
++                if d == 0 {
++                    break;
++                }
++            }
++            if o == 0 {
++                break;
++            }
++            o -= 1;
++        }
++        if o == 0 {
++            continue;
++        }
++        if t.p(o - 1, b'>') {
++            // `name<T>(`: step over the type parameters
++            let mut d = 0i32;
++            while o > 0 {
++                o -= 1;
++                if t.p(o, b'>') {
++                    d += 1;
++                } else if t.p(o, b'<') {
++                    d -= 1;
++                    if d == 0 {
++                        break;
++                    }
++                }
++            }
++            if o == 0 {
++                continue;
++            }
++        }
++        let name = match t.id(o - 1) {
++            Some("async") if o >= 3 && t.p(o - 2, b'=') => t.id(o - 3),
++            Some(n) if n != "function" => Some(n),
++            None if o >= 2 && t.p(o - 1, b'=') => t.id(o - 2),
++            _ => None,
++        };
++        if let Some(n) = name {
++            fns.insert(n.to_string());
++        }
++    }
++    fns
++}
++
++/// Receivers declared as `shape`: (single values, arrays of S).
++fn receivers(t: &Toks, shape: &str) -> (BTreeSet<String>, BTreeSet<String>) {
++    let fns = returning(t, shape);
++    let mut one: BTreeSet<String> = BTreeSet::new();
++    let mut arr: BTreeSet<String> = BTreeSet::new();
++    fn put(one: &mut BTreeSet<String>, arr: &mut BTreeSet<String>, name: &str, is_arr: bool) {
++        if is_arr {
++            arr.insert(name.to_string());
++        } else {
++            one.insert(name.to_string());
++        }
++    }
++    for k in 0..t.0.len() {
++        let Some(name) = t.id(k) else { continue };
++        if k > 0 && t.p(k - 1, b'.') {
++            continue;
++        }
++        // an annotation `r: S`, `r?: S`
++        let colon = if t.p(k + 1, b'?') { k + 2 } else { k + 1 };
++        if t.p(colon, b':') {
++            if let Some(a) = type_head(t, colon + 1, shape) {
++                put(&mut one, &mut arr, name, a);
++            }
++            continue;
++        }
++        // `r = <expression>`, not `==` or `=>`
++        if !t.p(k + 1, b'=') || t.p(k + 2, b'=') || t.p(k + 2, b'>') {
++            continue;
++        }
++        let start = k + 2;
++        let mut end = start;
++        let mut d = 0i32;
++        while end < t.0.len() {
++            if t.p(end, b'(') || t.p(end, b'[') || t.p(end, b'{') {
++                d += 1;
++            } else if t.p(end, b')') || t.p(end, b']') || t.p(end, b'}') {
++                if d == 0 {
++                    break;
++                }
++                d -= 1;
++            } else if d == 0 && t.p(end, b';') {
++                break;
++            }
++            end += 1;
++        }
++        // a cast `r = ... as S`
++        for q in start..end {
++            if t.is(q, "as") {
++                if let Some(a) = type_head(t, q + 1, shape) {
++                    put(&mut one, &mut arr, name, a);
++                }
++            }
++        }
++        let mut q = if t.is(start, "await") { start + 1 } else { start };
++        // a local function returning S: `r = [await] [this.]f(`
++        let local = if t.is(q, "this") && t.p(q + 1, b'.') { q + 2 } else { q };
++        if t.id(local).is_some_and(|f| fns.contains(f)) && t.p(local + 1, b'(') {
++            put(&mut one, &mut arr, name, false);
++        }
++        // an explicit type argument: `r = [await] a.b.f<S ...>(`
++        while t.id(q).is_some() && t.p(q + 1, b'.') {
++            q += 2;
++        }
++        if t.id(q).is_some() && t.p(q + 1, b'<') && type_head(t, q + 2, shape) == Some(false) && t.p(t.skip_group(q + 1, b'<', b'>'), b'(') {
++            put(&mut one, &mut arr, name, false);
++        }
++    }
++    // an explicit type argument, destructured: `[r, ...] = f<S>(`
++    for k in 0..t.0.len() {
++        let (true, Some(r), true) = (t.p(k, b'['), t.id(k + 1), t.p(k + 2, b',')) else { continue };
++        let close = t.skip_group(k, b'[', b']');
++        if !t.p(close, b'=') || t.p(close + 1, b'=') {
++            continue;
++        }
++        let mut q = close + 1;
++        while t.id(q).is_some() && t.p(q + 1, b'.') {
++            q += 2;
++        }
++        if t.id(q).is_some() && t.p(q + 1, b'<') && type_head(t, q + 2, shape) == Some(false) {
++            put(&mut one, &mut arr, r, false);
++        }
++    }
++    // elements of a receiver declared as an array of S
++    let arrays = arr.clone();
++    for k in 0..t.0.len() {
++        if t.is(k, "for") && t.p(k + 1, b'(') && matches!(t.id(k + 2), Some("const" | "let" | "var")) && t.is(k + 4, "of") {
++            if let (Some(r), Some(a)) = (t.id(k + 3), t.id(k + 5)) {
++                if arrays.contains(a) && t.p(k + 6, b')') {
++                    put(&mut one, &mut arr, r, false);
++                }
++            }
++        }
++        let Some(a) = t.id(k) else { continue };
++        if !arrays.contains(a) || (k > 0 && t.p(k - 1, b'.')) {
++            continue;
++        }
++        let dot = if t.p(k + 1, b'?') { k + 2 } else { k + 1 };
++        if t.p(dot, b'.')
++            && matches!(
++                t.id(dot + 1),
++                Some("map" | "filter" | "forEach" | "find" | "findLast" | "findIndex" | "some" | "every" | "flatMap" | "sort")
++            )
++            && t.p(dot + 2, b'(')
++        {
++            let q = if t.p(dot + 3, b'(') { dot + 4 } else { dot + 3 };
++            if let Some(r) = t.id(q) {
++                put(&mut one, &mut arr, r, false);
++            }
++        }
++    }
++    (one, arr)
++}
++
++/// Is the property access whose name starts at byte `off` a write?
++fn written(m: &[u8], mut i: usize) -> bool {
++    while i < m.len() && is_ident(m[i]) {
++        i += 1;
++    }
++    while i < m.len() && m[i].is_ascii_whitespace() {
++        i += 1;
++    }
++    let r = &m[i..m.len().min(i + 3)];
++    (r.first() == Some(&b'=') && !matches!(r.get(1), Some(b'=' | b'>')))
++        || [&b"+="[..], b"-=", b"*=", b"/=", b"%=", b"++", b"--", b"??=", b"||=", b"&&="].iter().any(|w| r.starts_with(w))
++}
++
++/// Reads (name_key -> (spelling, first line)) of fields through receivers
++/// declared as `shape` in this file: `r.f`, `r?.f`, `this.r.f`, `a[i].f`.
++fn receiver_reads(fi: &FileInfo, shape: &str) -> BTreeMap<String, (String, usize)> {
++    let m = &fi.masked;
++    let all = tokens(m);
++    let t = Toks(&all);
++    let (one, arr) = receivers(&t, shape);
++    let mut out: BTreeMap<String, (String, usize)> = BTreeMap::new();
++    for k in 0..all.len() {
++        let Some(r) = t.id(k) else { continue };
++        let via_this = k >= 2 && t.p(k - 1, b'.') && t.is(k - 2, "this");
++        if k > 0 && t.p(k - 1, b'.') && !via_this {
++            continue;
++        }
++        let mut j = k + 1;
++        if arr.contains(r) && t.p(j, b'[') {
++            j = t.skip_group(j, b'[', b']');
++        } else if !one.contains(r) {
++            continue;
++        }
++        if t.p(j, b'?') {
++            j += 1;
++        }
++        if !t.p(j, b'.') {
++            continue;
++        }
++        let Some(f) = t.id(j + 1) else { continue };
++        let off = all[j + 1].1;
++        if !written(m, off) {
++            let line = m[..off].iter().filter(|&&b| b == b'\n').count() + 1;
++            out.entry(name_key(f)).or_insert((f.to_string(), line));
++        }
++    }
++    out
++}
++
+ // ------------------------------------------------------------ membership
+ 
+ fn norm_entry(raw: &str) -> Result<Vec<String>, String> {
+@@ -1706,9 +2043,18 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
+                             Kind::Object(members) => {
+                                 let mut fields = Vec::new();
+                                 let mut stoplisted = Vec::new();
++                                // SLICE5: only reads through a receiver declared as the shape.
++                                let declared = receiver_reads(fi, name);
++                                let accessed = members
++                                    .iter()
++                                    .filter(|(m, _)| {
++                                        let k = name_key(m);
++                                        fi.reads.contains_key(&k) && !stop.contains(&k)
++                                    })
++                                    .count();
+                                 for (m, _) in members {
+                                     let k = name_key(m);
+-                                    if let Some((_, line)) = fi.reads.get(&k) {
++                                    if let Some((_, line)) = declared.get(&k) {
+                                         if stop.contains(&k) {
+                                             stoplisted.push(m.clone());
+                                         } else {
+@@ -1720,6 +2066,13 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
+                                 fields.dedup_by(|a, b| a.0 == b.0);
+                                 stoplisted.sort();
+                                 stoplisted.dedup();
++                                if fields.len() < MIN_FIELDS && accessed >= MIN_FIELDS {
++                                    let why = format!(
++                                        "{name}: {accessed} of its fields are accessed in this file, {} read on a receiver declared as {name}; the others are writes or are read off values init cannot tie to {name}; not guessed",
++                                        fields.len()
++                                    );
++                                    abstain("RECV", why);
++                                }
+                                 if fields.len() >= MIN_FIELDS {
+                                     let ev = ShapeEvidence {
+                                         shape: name.clone(),
+diff --git a/crates/invar-falsify/src/explain.rs b/crates/invar-falsify/src/explain.rs
+index 3af8d60..4c81d10 100644
+--- a/crates/invar-falsify/src/explain.rs
++++ b/crates/invar-falsify/src/explain.rs
+@@ -103,6 +103,10 @@ const REGISTRY: &[(&str, &str, &str, &str, &str, &str)] = &[
+      "a file reads two or more fields of an exported shape without importing it by name; out of v1, stated, never proposed",
+      "import the shape by name if the pair should become a contract",
+      "INIT-DISCOVERY-SLICE2.md"),
++    ("RECV", "abstention", "invar init, code-pair discovery (slice 5)",
++     "a shape's fields are accessed in the file, but fewer than two are read on a receiver declared as the shape there (annotation, cast, explicit type argument, a local function's return type, or an element of a declared array); writes never count and types are not inferred",
++     "declare the receiver as the shape (for example `(o: Order)` or `as Order`) if the contract is wanted",
++     "INIT-DISCOVERY-SLICE5.md"),
+     ("SLICE-SCOPE", "abstention", "invar init, slice 1 (repository level)",
+      "the workspace is declared by a marker outside the frozen slice (only package.json workspaces and pnpm-workspace.yaml are read)",
+      "none; other workspace markers are out of the frozen scope by design",
+diff --git a/crates/invar-falsify/src/init.rs b/crates/invar-falsify/src/init.rs
+index d808935..5ee4d98 100644
+--- a/crates/invar-falsify/src/init.rs
++++ b/crates/invar-falsify/src/init.rs
+@@ -4,7 +4,8 @@
+ //! HEURISTIC. Since INIT-DISCOVERY slice 1 it proposes contracts only between
+ //! TypeScript code producers and consumers in different qualifying workspace
+ //! packages (see `codepairs`), each with its evidence and the status line
+-//! "PROPOSED (heuristic; receiver of field reads not verified)". Schema files
++//! "PROPOSED (heuristic; each counted read is on a receiver declared as the
++//! shape in this file; field writes excluded; types are not inferred)". Schema files
+ //! (JSON Schema, OpenAPI-JSON components) are INVENTORY ONLY (ruling H1): they
+ //! are listed, never proposed. Everything else it finds (YAML specs,
+ //! AsyncAPI, protobuf, framework routes, Pydantic models) is inventory too.
+@@ -112,7 +113,8 @@ pub fn summary(d: &Discovery) -> String {
+     )
+ }
+ 
+-pub const PROPOSAL_STATUS: &str = "status: PROPOSED (heuristic; receiver of field reads not verified)";
++pub const PROPOSAL_STATUS: &str =
++    "status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)";
+ pub const LOCK_NOTE: &str = "lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.";
+ 
+ fn rel(root: &Path, p: &Path) -> String {
+@@ -751,7 +753,8 @@ pub fn render_manifest_opts(d: &Discovery, full_inventory: bool) -> String {
+     s.push_str("# HONEST SCOPE: discovery is HEURISTIC (text patterns, not a parser). Each\n");
+     s.push_str("# [[invariant]] block below is a PROPOSAL: a TypeScript shape exported by one\n");
+     s.push_str("# workspace package, imported by name in another, with at least 2 of its\n");
+-    s.push_str("# direct fields read there. The receiver of those reads is NOT verified.\n");
++    s.push_str("# direct fields read there, each on a receiver declared as that shape in\n");
++    s.push_str("# the consumer file (field writes excluded; types are not inferred).\n");
+     s.push_str("# Review every block before trusting a verdict. Schema files are inventory\n");
+     s.push_str("# only. ABSTAIN lines are refusals to propose, not negative findings. Paths\n");
+     s.push_str("# are relative to this file.\n\n");
+diff --git a/crates/invar-falsify/tests/explain_test.rs b/crates/invar-falsify/tests/explain_test.rs
+index f8ce620..1e72ee5 100644
+--- a/crates/invar-falsify/tests/explain_test.rs
++++ b/crates/invar-falsify/tests/explain_test.rs
+@@ -129,7 +129,10 @@ fn x_f1_entry_is_five_lines_and_tsc_governed_names_both_emitters() {
+ #[test]
+ fn x_f2_index_is_sorted_complete_and_exactly_once() {
+     let idx = index();
+-    assert_eq!(idx.len(), 33, "19 engine + 8 proof + UNKNOWN-EXPLAIN-CODE + 5 exit numerals: {idx:?}");
++    // INIT-DISCOVERY-SLICE5 (ruling S5-D1) adds the engine code RECV. Line
++    // before SLICE5, kept verbatim:
++    //     assert_eq!(idx.len(), 33, "19 engine + 8 proof + UNKNOWN-EXPLAIN-CODE + 5 exit numerals: {idx:?}");
++    assert_eq!(idx.len(), 34, "20 engine + 8 proof + UNKNOWN-EXPLAIN-CODE + 5 exit numerals: {idx:?}");
+     let codes: Vec<&String> = idx.iter().map(|(c, _)| c).collect();
+     let mut sorted = codes.clone();
+     sorted.sort();
+diff --git a/crates/invar-falsify/tests/init_slice1_test.rs b/crates/invar-falsify/tests/init_slice1_test.rs
+index 65532da..698dc12 100644
+--- a/crates/invar-falsify/tests/init_slice1_test.rs
++++ b/crates/invar-falsify/tests/init_slice1_test.rs
+@@ -11,7 +11,10 @@ use std::collections::BTreeMap;
+ use std::path::{Path, PathBuf};
+ use std::process::Command;
+ 
+-const STATUS: &str = "# status: PROPOSED (heuristic; receiver of field reads not verified)";
++// S5-D4 (INIT-DISCOVERY-SLICE5): the status line states what is verified.
++// Original, kept verbatim:
++//     const STATUS: &str = "# status: PROPOSED (heuristic; receiver of field reads not verified)";
++const STATUS: &str = "# status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)";
+ 
+ fn ws(tag: &str, files: &[(&str, &str)]) -> PathBuf {
+     let nanos = std::time::SystemTime::now()
+@@ -353,15 +356,29 @@ fn n09_undeclared_directory_is_not_a_package() {
+     expect(&init(&d), &[], &[], &[], "SUMMARY packages=2 candidates=0 proposals=0 abstentions=0 inventory=0 status=COMPLETE");
+ }
+ 
++// SUPERSEDED by INIT-DISCOVERY-SLICE5 under ruling S5-D3 (2026-10-20), the
++// standing rule of S3-D1: this fixture pinned the bound "receiver of field
++// reads not verified" by name, and SLICE5 lifts it. The original name and
++// body, kept verbatim (also in docs/architecture/INIT-DISCOVERY-SLICE5.md
++// section K):
++//     fn n10_receiver_not_verified_is_pinned()
++//     expect(&o, &[order_pair("b/src/x.ts", "production")], &[], &[], "SUMMARY packages=2 candidates=1 proposals=1 abstentions=0 inventory=0 status=COMPLETE");
++//     assert!(o.proposals[0].evidence.contains(&STATUS.to_string()));
++// The reads are on `other`, not on the value declared as Order: RECV.
+ #[test]
+-fn n10_receiver_not_verified_is_pinned() {
++fn n10_untyped_receiver_abstains_recv_by_slice5() {
+     let d = ws(
+         "n10",
+         &[ROOT_AB, PKG_A, PKG_B, ("a/order.ts", ORDER), ("b/src/x.ts", "import { Order } from 'a/order';\nexport const f = (o: Order, other: any) => [other.total_minor, other.currency_code];\n")],
+     );
+     let o = init(&d);
+-    expect(&o, &[order_pair("b/src/x.ts", "production")], &[], &[], "SUMMARY packages=2 candidates=1 proposals=1 abstentions=0 inventory=0 status=COMPLETE");
+-    assert!(o.proposals[0].evidence.contains(&STATUS.to_string()));
++    expect(
++        &o,
++        &[],
++        &["ABSTAIN RECV b/src/x.ts:1 Order: 2 of its fields are accessed in this file, 0 read on a receiver declared as Order; the others are writes or are read off values init cannot tie to Order; not guessed"],
++        &[],
++        "SUMMARY packages=2 candidates=1 proposals=0 abstentions=1 inventory=0 status=COMPLETE",
++    );
+ }
+ 
+ #[test]
+diff --git a/crates/invar-falsify/tests/init_slice3_test.rs b/crates/invar-falsify/tests/init_slice3_test.rs
+index f530beb..9c3bfb9 100644
+--- a/crates/invar-falsify/tests/init_slice3_test.rs
++++ b/crates/invar-falsify/tests/init_slice3_test.rs
+@@ -198,12 +198,17 @@ fn s3_n1_a_committed_d_ts_is_never_a_source() {
+ 
+ // Recorded at Gate 1 from the unchanged engine (0866583): a workspace with
+ // no "exports" anywhere must not change by one byte (CM-S3-13).
++// S5-D4 (INIT-DISCOVERY-SLICE5) changed two lines of this golden, the header
++// sentence and the status line, and nothing else. Originals, kept verbatim:
++//     # direct fields read there. The receiver of those reads is NOT verified.
++//     # status: PROPOSED (heuristic; receiver of field reads not verified)
+ const N2_GOLDEN: &str = r#"# invar.toml generated by `invar init`.
+ #
+ # HONEST SCOPE: discovery is HEURISTIC (text patterns, not a parser). Each
+ # [[invariant]] block below is a PROPOSAL: a TypeScript shape exported by one
+ # workspace package, imported by name in another, with at least 2 of its
+-# direct fields read there. The receiver of those reads is NOT verified.
++# direct fields read there, each on a receiver declared as that shape in
++# the consumer file (field writes excluded; types are not inferred).
+ # Review every block before trusting a verdict. Schema files are inventory
+ # only. ABSTAIN lines are refusals to propose, not negative findings. Paths
+ # are relative to this file.
+@@ -218,7 +223,7 @@ abstentions = "0"
+ inventory = "0"
+ 
+ # PROPOSED code:order.ts->use.ts
+-# status: PROPOSED (heuristic; receiver of field reads not verified)
++# status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)
+ # E1 producer package a at a/package.json (package.json "workspaces" entry "a")
+ # E2 Order declared at a/order.ts:1
+ # E3 consumer package b at b/package.json (package.json "workspaces" entry "b")
+diff --git a/crates/invar-falsify/tests/init_slice3b_test.rs b/crates/invar-falsify/tests/init_slice3b_test.rs
+index dedfb0d..4222ba7 100644
+--- a/crates/invar-falsify/tests/init_slice3b_test.rs
++++ b/crates/invar-falsify/tests/init_slice3b_test.rs
+@@ -60,6 +60,16 @@ fn case(tag: &str, files: &[(&str, &str)], clause: &str) -> Out {
+     init(&ws(tag, &all))
+ }
+ 
++/// INIT-DISCOVERY-SLICE5 (ruling S5-D3): `case` with the receiver declared
++/// as Order, for the four fixtures S4-D7 turned into proposals. SLICE5 counts
++/// no read through `o: any`; the abstaining and silent fixtures keep `case`.
++fn case_typed(tag: &str, files: &[(&str, &str)], clause: &str) -> Out {
++    let use_ts = format!("import {clause} from 'a';\nexport function f(o: Order) {{\n  return [o.total_minor, o.currency_code];\n}}\n");
++    let mut all: Vec<(&str, &str)> = vec![ROOT_AB, PKG_A, PKG_B, ("b/src/use.ts", &use_ts)];
++    all.extend_from_slice(files);
++    init(&ws(tag, &all))
++}
++
+ fn silent(o: &Out) {
+     assert_eq!(o.proposals, 0, "{}", o.raw);
+     assert!(o.abstain.is_empty(), "earned silence must stay silent\n{}", o.raw);
+@@ -97,7 +107,9 @@ fn b_f1_a_type_three_barrels_deep_resolved_by_slice4() {
+     // unreached-site reason stays pinned on a route init still does not
+     // follow: a namespace re-export at the third level.
+     let files = [("a/index.ts", "export * from \"./l1\";\n"), ("a/l1.ts", "export * from \"./l2\";\n"), ("a/l2.ts", "export * from \"./l3\";\n"), ("a/l3.ts", ORDER)];
+-    proposed(&case("f1", &files, "{ Order }"));
++    // S5-D3: typed receiver. Line before SLICE5, kept verbatim:
++    //     proposed(&case("f1", &files, "{ Order }"));
++    proposed(&case_typed("f1", &files, "{ Order }"));
+     let ns = [("a/index.ts", "export * from \"./l1\";\n"), ("a/l1.ts", "export * from \"./l2\";\n"), ("a/l2.ts", "export * as ns from \"./l3\";\n"), ("a/l3.ts", ORDER)];
+     loud(&case("f1ns", &ns, "{ Order }"), "Order", &unreached("a/l3.ts:1"));
+ }
+@@ -121,7 +133,9 @@ fn b_f3_an_export_type_star_chain_resolved_by_slice4() {
+     //   // S3-F-10 is deferred (S3B-D5): the chain stays unparsed, and stated.
+     //   loud(&case("f3", &files, "{ Order }"), "Order", &unreached("a/o.ts:1"));
+     let files = [("a/index.ts", "export type * from \"./o\";\n"), ("a/o.ts", ORDER)];
+-    proposed(&case("f3", &files, "{ Order }"));
++    // S5-D3: typed receiver. Line before SLICE5, kept verbatim:
++    //     proposed(&case("f3", &files, "{ Order }"));
++    proposed(&case_typed("f3", &files, "{ Order }"));
+ }
+ 
+ #[test]
+@@ -141,7 +155,9 @@ fn b_f7_a_name_declared_both_ways_resolved_by_slice4() {
+     // init still does not follow: a namespace re-export at the third level.
+     let l3 = "export const Order = { kind: 1 };\nexport type Order = {\n  total_minor: number;\n  currency_code: string;\n};\n";
+     let files = [("a/index.ts", "export * from \"./l1\";\n"), ("a/l1.ts", "export * from \"./l2\";\n"), ("a/l2.ts", "export * from \"./l3\";\n"), ("a/l3.ts", l3)];
+-    proposed(&case("f7", &files, "{ Order }"));
++    // S5-D3: typed receiver. Line before SLICE5, kept verbatim:
++    //     proposed(&case("f7", &files, "{ Order }"));
++    proposed(&case_typed("f7", &files, "{ Order }"));
+     let ns = [("a/index.ts", "export * from \"./l1\";\n"), ("a/l1.ts", "export * from \"./l2\";\n"), ("a/l2.ts", "export * as ns from \"./l3\";\n"), ("a/l3.ts", l3)];
+     loud(&case("f7ns", &ns, "{ Order }"), "Order", "declared both as a type and as a value in package a; not guessed");
+ }
+@@ -202,7 +218,9 @@ fn b_f10_an_unread_package_file_voids_earned_silence() {
+ fn b_m1_two_runs_are_byte_identical() {
+     // init() runs twice and asserts byte identity; pinned on the deepest path.
+     let files = [("a/index.ts", "export * from \"./l1\";\n"), ("a/l1.ts", "export * from \"./l2\";\n"), ("a/l2.ts", "export * from \"./l3\";\n"), ("a/l3.ts", ORDER)];
+-    let o = case("m1", &files, "{ Order }");
++    // S5-D3: typed receiver. Line before SLICE5, kept verbatim:
++    //     let o = case("m1", &files, "{ Order }");
++    let o = case_typed("m1", &files, "{ Order }");
+     // Changed by INIT-DISCOVERY-SLICE4 (ruling S4-D7): this chain now
+     // proposes. Original assertion, kept verbatim:
+     //   assert_eq!(o.summary, LOUD, "{}", o.raw);
+diff --git a/crates/invar-falsify/tests/init_slice4_test.rs b/crates/invar-falsify/tests/init_slice4_test.rs
+index 400ad52..ef8acb8 100644
+--- a/crates/invar-falsify/tests/init_slice4_test.rs
++++ b/crates/invar-falsify/tests/init_slice4_test.rs
+@@ -77,9 +77,15 @@ fn init(dir: &Path) -> Out {
+ }
+ 
+ /// Package `a` with `files`, and `b/src/use.ts` importing `clause` from 'a'
+-/// and reading two fields.
++/// and reading two fields on a receiver declared as the imported name.
++///
++/// Changed by INIT-DISCOVERY-SLICE5 (ruling S5-D3): the receiver was `o: any`,
++/// which SLICE5 no longer counts and which says nothing about chains. Original
++/// line, kept verbatim:
++///     let use_ts = format!("import {clause} from 'a';\nexport function f(o: any) {{\n  return [o.total_minor, o.currency_code];\n}}\n");
+ fn case(tag: &str, files: &[(&str, &str)], clause: &str) -> Out {
+-    let use_ts = format!("import {clause} from 'a';\nexport function f(o: any) {{\n  return [o.total_minor, o.currency_code];\n}}\n");
++    let ty = clause.trim_matches(|c| c == '{' || c == '}' || c == ' ');
++    let use_ts = format!("import {clause} from 'a';\nexport function f(o: {ty}) {{\n  return [o.total_minor, o.currency_code];\n}}\n");
+     let mut all: Vec<(&str, &str)> = vec![ROOT_AB, PKG_A, PKG_B, ("b/src/use.ts", &use_ts)];
+     all.extend_from_slice(files);
+     init(&ws(tag, &all))
+@@ -277,12 +283,17 @@ fn s4_m1_reordered_reexports_give_the_same_answer() {
+     assert_eq!(ambig("p", "q").raw, ambig("q", "p").raw);
+ }
+ 
++// S5-D4 (INIT-DISCOVERY-SLICE5) changed two lines of this golden, the header
++// sentence and the status line, and nothing else. Originals, kept verbatim:
++//     # direct fields read there. The receiver of those reads is NOT verified.
++//     # status: PROPOSED (heuristic; receiver of field reads not verified)
+ const N1_GOLDEN: &str = r#"# invar.toml generated by `invar init`.
+ #
+ # HONEST SCOPE: discovery is HEURISTIC (text patterns, not a parser). Each
+ # [[invariant]] block below is a PROPOSAL: a TypeScript shape exported by one
+ # workspace package, imported by name in another, with at least 2 of its
+-# direct fields read there. The receiver of those reads is NOT verified.
++# direct fields read there, each on a receiver declared as that shape in
++# the consumer file (field writes excluded; types are not inferred).
+ # Review every block before trusting a verdict. Schema files are inventory
+ # only. ABSTAIN lines are refusals to propose, not negative findings. Paths
+ # are relative to this file.
+@@ -297,7 +308,7 @@ abstentions = "0"
+ inventory = "0"
+ 
+ # PROPOSED code:o.ts->use.ts
+-# status: PROPOSED (heuristic; receiver of field reads not verified)
++# status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)
+ # E1 producer package a at a/package.json (package.json "workspaces" entry "a")
+ # E2 Order declared at a/o.ts:1
+ # E3 consumer package b at b/package.json (package.json "workspaces" entry "b")
+diff --git a/crates/invar-falsify/tests/init_slice5_test.rs b/crates/invar-falsify/tests/init_slice5_test.rs
+new file mode 100644
+index 0000000..29600bb
+--- /dev/null
++++ b/crates/invar-falsify/tests/init_slice5_test.rs
+@@ -0,0 +1,275 @@
++//! INIT-DISCOVERY-SLICE5 fixtures (rulings S5-D1 to S5-D6): receiver
++//! verification. A field read counts for a shape only through a receiver
++//! declared as that shape in the consumer file (annotation, cast, explicit
++//! type argument, a local function's declared return type, or an element of
++//! a declared array); writes never count. A shape that passes file-wide but
++//! not on declared receivers abstains RECV, never silently. Each fixture is
++//! a two-package workspace (package `a` produces Order, `b` consumes), run
++//! through `invar init --stdout` twice, byte-identical.
++
++use std::path::{Path, PathBuf};
++use std::process::Command;
++
++const ROOT_AB: (&str, &str) = ("package.json", r#"{"private":true,"workspaces":["a","b"]}"#);
++const PKG_A: (&str, &str) = ("a/package.json", r#"{"name":"a"}"#);
++const PKG_B: (&str, &str) = ("b/package.json", r#"{"name":"b"}"#);
++const ORDER: &str = "export interface Order {\n  total_minor: number;\n  currency_code: string;\n}\n";
++const ONE: &str = "SUMMARY packages=2 candidates=1 proposals=1 abstentions=0 inventory=0 status=COMPLETE";
++const LOUD: &str = "SUMMARY packages=2 candidates=1 proposals=0 abstentions=1 inventory=0 status=COMPLETE";
++const STATUS: &str = "status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)";
++
++fn ws(tag: &str, files: &[(&str, &str)]) -> PathBuf {
++    let nanos = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
++    let dir = std::env::temp_dir().join(format!("invar_s5_{tag}_{}_{nanos}", std::process::id()));
++    for (rel, body) in files {
++        let p = dir.join(rel);
++        std::fs::create_dir_all(p.parent().unwrap()).unwrap();
++        std::fs::write(p, body).unwrap();
++    }
++    dir
++}
++
++fn run(dir: &Path) -> String {
++    let o = Command::new(env!("CARGO_BIN_EXE_invar")).args(["init", "--stdout", "--root"]).arg(dir).output().unwrap();
++    assert_eq!(o.status.code(), Some(0), "{}", String::from_utf8_lossy(&o.stderr));
++    String::from_utf8(o.stdout).unwrap()
++}
++
++struct Out {
++    proposals: usize,
++    e5: Vec<String>,
++    abstain: Vec<String>,
++    summary: String,
++    raw: String,
++}
++
++fn init(dir: &Path) -> Out {
++    let (a, b) = (run(dir), run(dir));
++    assert_eq!(a, b, "D01: init output is not deterministic");
++    Out {
++        proposals: a.lines().filter(|l| *l == "[[invariant]]").count(),
++        e5: a.lines().filter_map(|l| l.strip_prefix("# E5 ")).filter(|l| l.contains(" fields read: ")).map(String::from).collect(),
++        abstain: a.lines().filter_map(|l| l.strip_prefix("# ABSTAIN ")).map(|l| format!("ABSTAIN {l}")).collect(),
++        summary: a.lines().last().unwrap_or("").trim_start_matches("# ").to_string(),
++        raw: a,
++    }
++}
++
++/// `a/order.ts` declares Order; `b/src/x.ts` is `consumer`.
++fn case(tag: &str, consumer: &str) -> Out {
++    init(&ws(tag, &[ROOT_AB, PKG_A, PKG_B, ("a/order.ts", ORDER), ("b/src/x.ts", consumer)]))
++}
++
++fn proposed(o: &Out, e5: &str) {
++    assert_eq!(o.proposals, 1, "{}", o.raw);
++    assert!(o.abstain.is_empty(), "{}", o.raw);
++    assert_eq!(o.e5, vec![e5.to_string()], "{}", o.raw);
++    assert!(o.raw.contains(&format!("# {STATUS}\n")), "{}", o.raw);
++    assert_eq!(o.summary, ONE, "{}", o.raw);
++}
++
++fn recv(o: &Out, line: &str) {
++    assert_eq!(o.proposals, 0, "{}", o.raw);
++    assert_eq!(o.abstain, vec![line.to_string()], "{}", o.raw);
++    assert_eq!(o.summary, LOUD, "{}", o.raw);
++}
++
++fn e5(lines: (usize, usize)) -> String {
++    format!("Order fields read: currency_code (b/src/x.ts:{}), total_minor (b/src/x.ts:{})", lines.0, lines.1)
++}
++
++fn recv_line(accessed: usize, verified: usize) -> String {
++    format!(
++        "ABSTAIN RECV b/src/x.ts:1 Order: {accessed} of its fields are accessed in this file, {verified} read on a receiver declared as Order; the others are writes or are read off values init cannot tie to Order; not guessed"
++    )
++}
++
++// ------------------------------------------------------- declared (R-S5-1)
++
++#[test]
++fn s5_f1_an_annotated_parameter_proposes() {
++    let o = case("f1", "import { Order } from 'a/order';\nexport const f = (o: Order) => [o.total_minor, o.currency_code];\n");
++    proposed(&o, &e5((2, 2)));
++}
++
++#[test]
++fn s5_f2_an_untyped_receiver_abstains_recv() {
++    // The slice 1 n10 workspace (S5-D3): the reads are on `other`, not on
++    // the value declared as Order.
++    let o = case("f2", "import { Order } from 'a/order';\nexport const f = (o: Order, other: any) => [other.total_minor, other.currency_code];\n");
++    recv(&o, &recv_line(2, 0));
++}
++
++#[test]
++fn s5_f4_a_cast_proposes() {
++    let o = case("f4", "import { Order } from 'a/order';\nexport function f(x: unknown) {\n  const o = x as Order;\n  return [o.total_minor, o.currency_code];\n}\n");
++    proposed(&o, &e5((4, 4)));
++}
++
++#[test]
++fn s5_f5_an_explicit_type_argument_proposes() {
++    let o = case(
++        "f5",
++        "import { Order } from 'a/order';\ndeclare function useState<T>(v: T): [T, (v: T) => void];\nexport function f() {\n  const [o, setO] = useState<Order | null>(null);\n  return [o?.total_minor, o?.currency_code, setO];\n}\n",
++    );
++    proposed(&o, &e5((5, 5)));
++}
++
++#[test]
++fn s5_f6_a_local_return_type_proposes() {
++    let o = case(
++        "f6",
++        "import { Order } from 'a/order';\nasync function load(): Promise<Order> {\n  return fetchIt();\n}\nexport async function f() {\n  const o = await load();\n  return [o.total_minor, o.currency_code];\n}\n",
++    );
++    proposed(&o, &e5((7, 7)));
++}
++
++#[test]
++fn s5_f7_a_for_of_element_proposes() {
++    let o = case(
++        "f7",
++        "import { Order } from 'a/order';\nexport function f(list: Order[]) {\n  for (const o of list) {\n    use(o.total_minor, o.currency_code);\n  }\n}\n",
++    );
++    proposed(&o, &e5((4, 4)));
++}
++
++#[test]
++fn s5_f8_array_callbacks_and_indexing_propose() {
++    let o = case(
++        "f8",
++        "import { Order } from 'a/order';\nexport function f(list: Array<Order>) {\n  const totals = list.map((o) => o.total_minor);\n  return [totals, list[0].currency_code];\n}\n",
++    );
++    proposed(&o, &e5((4, 3)));
++}
++
++#[test]
++fn s5_f10_a_this_field_proposes() {
++    let o = case(
++        "f10",
++        "import { Order } from 'a/order';\nexport class C {\n  private order: Order;\n  f() {\n    return [this.order.total_minor, this.order.currency_code];\n  }\n}\n",
++    );
++    proposed(&o, &e5((5, 5)));
++}
++
++// --------------------------------------------------------- refused (R-S5-2)
++
++#[test]
++fn s5_f3_writes_never_count() {
++    let o = case(
++        "f3",
++        "import { Order } from 'a/order';\nexport function f(o: Order) {\n  o.total_minor = 1;\n  o.currency_code += \"x\";\n}\n",
++    );
++    recv(&o, &recv_line(2, 0));
++}
++
++#[test]
++fn s5_f9_a_type_argument_of_another_type_is_not_the_shape() {
++    let o = case(
++        "f9",
++        "import { Order } from 'a/order';\ninterface Box<T> {\n  total_minor: number;\n  currency_code: string;\n  inner: T;\n}\nexport const f = (x: Box<Order>) => [x.total_minor, x.currency_code];\n",
++    );
++    recv(&o, &recv_line(2, 0));
++}
++
++// ---------------------------------------------------- restriction (R-S5-4)
++
++#[test]
++fn s5_r1_a_pair_keeps_only_its_verified_shape() {
++    // Two shapes imported; reads on Order are declared, reads on Invoice
++    // are not. The pair keeps Order; Invoice abstains RECV.
++    let shapes = "export interface Order {\n  total_minor: number;\n  currency_code: string;\n}\nexport interface Invoice {\n  due_date: string;\n  amount_due: number;\n}\n";
++    let x = "import { Order, Invoice } from 'a/order';\nexport const f = (o: Order, i: any) => [o.total_minor, o.currency_code, i.due_date, i.amount_due];\n";
++    let o = init(&ws("r1", &[ROOT_AB, PKG_A, PKG_B, ("a/order.ts", shapes), ("b/src/x.ts", x)]));
++    assert_eq!(o.proposals, 1, "{}", o.raw);
++    assert_eq!(o.e5, vec![e5((2, 2))], "{}", o.raw);
++    assert_eq!(
++        o.abstain,
++        vec!["ABSTAIN RECV b/src/x.ts:1 Invoice: 2 of its fields are accessed in this file, 0 read on a receiver declared as Invoice; the others are writes or are read off values init cannot tie to Invoice; not guessed".to_string()],
++        "{}",
++        o.raw
++    );
++    assert_eq!(o.summary, "SUMMARY packages=2 candidates=2 proposals=1 abstentions=1 inventory=0 status=COMPLETE", "{}", o.raw);
++}
++
++#[test]
++fn s5_r2_an_untyped_read_never_joins_the_evidence() {
++    // Three fields read, two on the declared receiver: E5 lists those two.
++    let shape = "export interface Order {\n  total_minor: number;\n  currency_code: string;\n  placed_at: string;\n}\n";
++    let x = "import { Order } from 'a/order';\nexport const f = (o: Order, other: any) => [o.total_minor, o.currency_code, other.placed_at];\n";
++    let o = init(&ws("r2", &[ROOT_AB, PKG_A, PKG_B, ("a/order.ts", shape), ("b/src/x.ts", x)]));
++    proposed(&o, &e5((2, 2)));
++}
++
++// ------------------------------------------------------ no regression (N1)
++
++#[test]
++fn s5_n1_a_typed_proposal_changes_only_the_s5_d4_text() {
++    // Golden recorded at Gate 1 on the SLICE4 binary (aa03983 plus the SLICE4
++    // patch); SLICE5 may change only the header sentence and the status line.
++    let x = "import { Order } from 'a/order';\nexport const f = (o: Order) => [o.total_minor, o.currency_code];\n";
++    let o = case("n1", x);
++    let want = N1_SLICE4
++        .replace(
++            "# direct fields read there. The receiver of those reads is NOT verified.\n",
++            "# direct fields read there, each on a receiver declared as that shape in\n# the consumer file (field writes excluded; types are not inferred).\n",
++        )
++        .replace("# status: PROPOSED (heuristic; receiver of field reads not verified)\n", &format!("# {STATUS}\n"));
++    assert_ne!(want, N1_SLICE4);
++    assert_eq!(o.raw, want);
++}
++
++// ------------------------------------------------------- determinism (M1)
++
++#[test]
++fn s5_m1_declaration_order_does_not_matter() {
++    // init() asserts two runs byte-identical; declaring the untyped value
++    // before or after the typed one gives the same evidence.
++    let a = case("m1a", "import { Order } from 'a/order';\nexport const f = (o: Order, other: any) => [o.total_minor, other.x, o.currency_code];\n");
++    let b = case("m1b", "import { Order } from 'a/order';\nexport const f = (other: any, o: Order) => [o.total_minor, other.x, o.currency_code];\n");
++    assert_eq!(a.e5, b.e5);
++    proposed(&a, &e5((2, 2)));
++}
++
++const N1_SLICE4: &str = r#"# invar.toml generated by `invar init`.
++#
++# HONEST SCOPE: discovery is HEURISTIC (text patterns, not a parser). Each
++# [[invariant]] block below is a PROPOSAL: a TypeScript shape exported by one
++# workspace package, imported by name in another, with at least 2 of its
++# direct fields read there. The receiver of those reads is NOT verified.
++# Review every block before trusting a verdict. Schema files are inventory
++# only. ABSTAIN lines are refusals to propose, not negative findings. Paths
++# are relative to this file.
++
++[discovery]
++files_scanned = "5"
++truncated = "false"
++packages = "2"
++candidates = "1"
++contracts_proposed = "1"
++abstentions = "0"
++inventory = "0"
++
++# PROPOSED code:order.ts->x.ts
++# status: PROPOSED (heuristic; receiver of field reads not verified)
++# E1 producer package a at a/package.json (package.json "workspaces" entry "a")
++# E2 Order declared at a/order.ts:1
++# E3 consumer package b at b/package.json (package.json "workspaces" entry "b")
++# E4 Order imported at b/src/x.ts:1 from "a/order", resolved to a/order.ts
++# E5 Order fields read: currency_code (b/src/x.ts:2), total_minor (b/src/x.ts:2)
++# E5 Order stoplisted reads: (none)
++# E6 pair a/order.ts -> b/src/x.ts
++# category: production
++# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
++[[invariant]]
++kind = "schema"
++id = "code:order.ts->x.ts"
++producer = "a/order.ts"
++consumer = "b/src/x.ts"
++evidence = "Order currency_code total_minor"
++
++# ---- Abstentions (init declined to propose; not negative findings) ----
++# (none)
++# ---- Found but NOT proposed (inventory only) ----
++# (none)
++# SUMMARY packages=2 candidates=1 proposals=1 abstentions=0 inventory=0 status=COMPLETE
++"#;

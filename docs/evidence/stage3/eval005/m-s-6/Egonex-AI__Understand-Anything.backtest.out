@@ -1,0 +1,160 @@
+invar backtest (invar.toml, 10 contract(s), depth 50)
+
+code:types.ts->DomainGraphView.tsx: understand-anything-plugin/packages/core/src/types.ts (15 commit(s) replayed)
+  GraphNode.domainMeta
+    2026-03-15 b75235919e97 absent
+    2026-04-02 37e56d62b313 present
+    never absent after introduction
+  GraphNode.filePath
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  GraphNode.summary
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  KnowledgeGraph.edges
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  KnowledgeGraph.nodes
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+
+code:types.ts->GraphView.tsx: understand-anything-plugin/packages/core/src/types.ts (15 commit(s) replayed)
+  GraphNode.complexity
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  GraphNode.filePath
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  GraphNode.summary
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  GraphNode.tags
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+
+code:types.ts->KnowledgeGraphView.tsx: understand-anything-plugin/packages/core/src/types.ts (15 commit(s) replayed)
+  KnowledgeGraph.edges
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  KnowledgeGraph.layers
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  KnowledgeGraph.nodes
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+
+code:types.ts->NodeInfo.tsx: understand-anything-plugin/packages/core/src/types.ts (15 commit(s) replayed)
+  GraphNode.complexity
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  GraphNode.domainMeta
+    2026-03-15 b75235919e97 absent
+    2026-04-02 37e56d62b313 present
+    never absent after introduction
+  GraphNode.figmaMeta
+    2026-03-15 b75235919e97 absent
+    2026-06-24 4be7a7283e2a present
+    never absent after introduction
+  GraphNode.filePath
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  GraphNode.knowledgeMeta
+    2026-03-15 b75235919e97 absent
+    2026-04-12 2fc85e68c397 present
+    never absent after introduction
+  GraphNode.languageNotes
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  GraphNode.lineRange
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  GraphNode.summary
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  GraphNode.tags
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  KnowledgeGraph.edges
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  KnowledgeGraph.nodes
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+
+code:types.ts->context-builder.ts: understand-anything-plugin/packages/core/src/types.ts (15 commit(s) replayed)
+  KnowledgeGraph.edges
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  KnowledgeGraph.layers
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  KnowledgeGraph.nodes
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  KnowledgeGraph.project
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+
+code:types.ts->edgeAggregation.ts: understand-anything-plugin/packages/core/src/types.ts (15 commit(s) replayed)
+  GraphEdge.source
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  GraphEdge.target
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  KnowledgeGraph.edges
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  KnowledgeGraph.layers
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+
+code:types.ts->explain-builder.ts: understand-anything-plugin/packages/core/src/types.ts (15 commit(s) replayed)
+  GraphEdge.source
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  GraphEdge.target
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  GraphNode.filePath
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  GraphNode.languageNotes
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  GraphNode.lineRange
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+
+code:types.ts->filters.ts: understand-anything-plugin/packages/core/src/types.ts (15 commit(s) replayed)
+  GraphEdge.source
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  GraphEdge.target
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+
+code:types.ts->louvain.ts: understand-anything-plugin/packages/core/src/types.ts (15 commit(s) replayed)
+  GraphEdge.source
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  GraphEdge.target
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+
+code:types.ts->store.ts: understand-anything-plugin/packages/core/src/types.ts (15 commit(s) replayed)
+  KnowledgeGraph.layers
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  KnowledgeGraph.nodes
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+  KnowledgeGraph.tour
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+
+Timelines replay today's extraction over past file contents. They are
+not replayed verdicts: waivers, selectors and samples are today's, and a
+past consumer may not have read the field yet. Unreadable commits are
+stated, never guessed.
+backtest exit 0

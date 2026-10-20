@@ -1,0 +1,64 @@
+{
+ "repo": "earendil-works__pi",
+ "packages_superset": 17,
+ "eligible_files": 482,
+ "sample": [
+  "packages/durable/test/tools-read-differential.test.ts",
+  "packages/coding-agent/test/suite/regressions/6363-agent-settled-event.test.ts",
+  "packages/durable/src/truncate.ts",
+  "packages/coding-agent/test/export-jsonl-share.test.ts",
+  "packages/durable/test/examples/04-chord-state.ts",
+  "packages/coding-agent/src/core/tools/bash.ts",
+  "packages/coding-agent/src/modes/interactive/components/show-images-selector.ts",
+  "packages/coding-agent/test/sdk-session-manager.test.ts",
+  "packages/coding-agent/test/suite/regressions/7153-scoped-models-refresh.test.ts",
+  "packages/coding-agent/test/suite/regressions/7911-json-stream-usage.test.ts"
+ ],
+ "sampled_constructs": 2,
+ "sampled_silent": 0,
+ "rows": [
+  {
+   "file": "packages/coding-agent/test/export-jsonl-share.test.ts",
+   "line": 4,
+   "spec": "@earendil-works/pi-ai/compat",
+   "name": "ToolResultMessage",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN R6 packages/coding-agent/test/export-jsonl-share.test.ts:4 reads messages, systemPrompt, tools of Context (packages/ai/src/types.ts:771) without impor"
+  },
+  {
+   "file": "packages/coding-agent/test/suite/regressions/7153-scoped-models-refresh.test.ts",
+   "line": 1,
+   "spec": "@earendil-works/pi-ai",
+   "name": "Api",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN R6 packages/coding-agent/test/suite/regressions/7153-scoped-models-refresh.test.ts:1 reads cleanup, signal of CombinedAbortSignal (packages/ai/src/uti"
+  }
+ ],
+ "exploratory_all_files_constructs": 436,
+ "exploratory_all_files_unaccounted": 4,
+ "repo_level_abstain": [],
+ "exploratory_unaccounted_after_stoplist": [
+  [
+   "packages/coding-agent/test/agent-session-dynamic-provider.test.ts",
+   4,
+   "Provider",
+   2
+  ],
+  [
+   "packages/coding-agent/test/runtime-credentials.test.ts",
+   1,
+   "CredentialStore",
+   4
+  ],
+  [
+   "packages/coding-agent/test/suite/regressions/7301-stalled-availability-refresh.test.ts",
+   1,
+   "Models",
+   3
+  ]
+ ]
+}

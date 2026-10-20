@@ -1,0 +1,24 @@
+{
+ "repo": "puppeteer__puppeteer",
+ "packages_superset": 13,
+ "eligible_files": 55,
+ "sample": [
+  "test/src/queryhandler.test.ts",
+  "test/src/idle_override.test.ts",
+  "packages/puppeteer-core/src/node/ChromeLauncher.ts",
+  "test/src/acceptInsecureCerts.test.ts",
+  "packages/puppeteer/src/puppeteer.ts",
+  "packages/puppeteer/src/node/cli.ts",
+  "packages/browsers/test/src/utils.ts",
+  "test/src/proxy.test.ts",
+  "test/src/cdp/network_restrictions.test.ts",
+  "test/src/queryselector.test.ts"
+ ],
+ "sampled_constructs": 0,
+ "sampled_silent": 0,
+ "rows": [],
+ "exploratory_all_files_constructs": 6,
+ "exploratory_all_files_unaccounted": 1,
+ "repo_level_abstain": [],
+ "exploratory_unaccounted_after_stoplist": []
+}

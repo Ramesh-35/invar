@@ -1,0 +1,45 @@
+INVAR check (10 contract(s))
+  [HOLDS]    code:types.ts->DomainGraphView.tsx (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:23Z)
+      note: 13 read field(s) not in invar.lock (businessRules, description, direction, entities, entryPoint); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->GraphView.tsx (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:23Z)
+      note: 12 read field(s) not in invar.lock (description, edges, id, layers, name); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->KnowledgeGraphView.tsx (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:23Z)
+      note: 11 read field(s) not in invar.lock (complexity, id, name, nodeId, nodeIds); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->NodeInfo.tsx (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:23Z)
+      note: 16 read field(s) not in invar.lock (backlinks, businessRules, category, content, crossDomainInteractions); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->store.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:23Z)
+      note: 4 read field(s) not in invar.lock (id, level, nodeIds, order); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->edgeAggregation.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:23Z)
+      note: 4 read field(s) not in invar.lock (id, name, nodeIds, type); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->filters.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:23Z)
+      note: 6 read field(s) not in invar.lock (complexity, edges, id, nodeIds, nodes); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->louvain.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:23Z)
+      note: 2 read field(s) not in invar.lock (edges, nodeIds); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->context-builder.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:23Z)
+      note: 15 read field(s) not in invar.lock (complexity, description, filePath, frameworks, id); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->explain-builder.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:23Z)
+      note: 9 read field(s) not in invar.lock (complexity, description, id, name, nodeIds); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+result: ALL 10 contract(s) hold
+summary: held 10 | violated 0 | skipped or not evaluated 0
+measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)
+check exit 0

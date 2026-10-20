@@ -1,6 +1,10 @@
 # INIT-DISCOVERY-SLICE5: receiver verification
 
-Status: DRAFT r1 for ruling. Implementation NOT authorized. Parent:
+Status: RATIFIED (S5-D1 to S5-D6, section J) and implemented; NOT LANDED.
+STAGE3-EVAL-005 passed M-S-3 (43 of 50 out of sample) and failed M-S-5 on
+a pre-existing lock defect (S5-F-01); by ruling of 2026-10-20 SLICE4, SLICE5
+and LOCK-SLICE1 land together once all seven metrics pass (sections J, K).
+Sections 0 to I are the draft r1 text, unchanged. Parent:
 STAGE3-EVAL-004 (M-S-3 FAIL, finding S4-F-03) and ruling S4-D8 (hold
 SLICE4; fix the receiver bound; land both; re-measure). Baseline: d299d74
 with docs/evidence/slice4/slice4-implementation.patch applied.
@@ -199,3 +203,56 @@ on the out-of-sample set.
 Stop and report on: any proposal, shape or read outside the SLICE4 result;
 any dropped shape without a RECV line; any fixture collision beyond the
 12 of S5-D3; any need for a parser or a new dependency.
+
+## J. Rulings of 2026-10-20 (recorded)
+
+S5-D1 RATIFIED: the code is RECV (confirmed against the example name
+UNRESOLVED-RECV-UNTYPED, which was not adopted).
+S5-D2 RATIFIED: SLICE4 and SLICE5 land together and are measured together
+as STAGE3-EVAL-005; SLICE4 stays unlanded until it passes all seven.
+S5-D3 RATIFIED as drafted: n10 superseded under the standing rule of S3-D1;
+the seven SLICE4 fixtures and the four S4-D7 re-pins read through a
+receiver declared as the shape; originals kept verbatim. (The ruling text
+placed all 12 in tests/init_slice1_test.rs; they are in the slice 1,
+SLICE3B and SLICE4 suites, as section 0 measured.)
+S5-D4 RATIFIED after one clarification: the ruling first proposed
+"receiver type annotation verified in local scope; field writes excluded",
+which the engine cannot back (receivers are names, not scopes, B4; casts,
+type arguments and return types count, not only annotations). The pinned
+line is the accurate form: `PROPOSED (heuristic; each counted read is on a
+receiver declared as the shape in this file; field writes excluded; types
+are not inferred)`.
+S5-D5 RATIFIED: M-S-3 is tested on the 50 never-adjudicated survivors.
+S5-D6 RATIFIED: the 16 inferred-receiver contracts become RECV, visible.
+Pre-registered by the founder: code-pair proposals about 104, RECV +168,
+M-S-3 at least 60 percent out of sample, M-S-4 0, M-S-5 100 percent, 10 of
+10 exit 0.
+After STAGE3-EVAL-005 (M-S-5 FAIL, S5-F-01): hold all three slices; fix
+lock and check in LOCK-SLICE1 (check never reports HOLDS on a zero-binding
+contract; lock reads one-line type members); land SLICE4, SLICE5 and
+LOCK-SLICE1 together once all seven metrics pass.
+
+## K. Results
+
+Gate 0 PASS: 56 of 56 crate hashes identical at c406834 (ledger
+153ada8d09c8, Mac and sandbox). The SLICE4 patch applied cleanly; its
+rebuilt binary is 2823f90b0161, the EVAL-004 binary, byte for byte.
+Gate 1 PASS: fixtures frozen before engine code: init_slice5_test.rs
+(46911ff46b0f; S5-F1 to F10, R1, R2, N1 with the golden recorded on the
+SLICE4 binary, M1) and the S5-D3 and S5-D4 changes in the slice 1, 3,
+3B and 4 suites and the explain registry count (34 entries); 27 tests
+failed on the SLICE4 baseline as declared.
+Gate 2 PASS: the receiver module and the object-shape branch in
+codepairs.rs, RECV in explain.rs, the S5-D4 text in init.rs; 3 source
+files; the frozen fixture files byte-unchanged.
+Gate 3 PASS: 10 of 10 section E mutants caught from scratch; the SLICE4
+harness 11 of 11 and the SLICE3B harness 9 of 9 on the combined engine.
+Gate 4 PASS: 321 of 321 tests, 0 compiler warnings.
+Gate 5: STAGE3-EVAL-005 M-S-3 PASS (86.0 percent out of sample), M-S-5
+FAIL 87 of 88 (docs/evidence/stage3/eval005/LEDGER.md).
+
+Original kept verbatim (S5-D3):
+
+    fn n10_receiver_not_verified_is_pinned()
+    expect(&o, &[order_pair("b/src/x.ts", "production")], &[], &[], "SUMMARY packages=2 candidates=1 proposals=1 abstentions=0 inventory=0 status=COMPLETE");
+    assert!(o.proposals[0].evidence.contains(&STATUS.to_string()));

@@ -1,0 +1,204 @@
+INVAR check (50 contract(s))
+  [HOLDS]    code:types.ts->index.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 17 read field(s) not in invar.lock (all, args, errorMessage, isError, label); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->nested-tool-calls.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 12 read field(s) not in invar.lock (args, content, executionMode, onUpdate, options); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->tool-definition-wrapper.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 1 read field(s) not in invar.lock (label); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->agent-session.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 10 read field(s) not in invar.lock (apiKey, baseUrl, headers, id, label); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->model-runtime.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 14 read field(s) not in invar.lock (apiKey, baseUrl, credential, headers, id); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->provider-composer.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 15 read field(s) not in invar.lock (baseUrl, credential, ctx, id, isSubscription); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:models-store.ts->remote-catalog-provider.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 3 read field(s) not in invar.lock (checkedAt, etag, signal); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:models.ts->bug-report.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 11 read field(s) not in invar.lock (api, apiKey, env, id, input); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:models.ts->provider-composer.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 37 read field(s) not in invar.lock (aborted, api, apiKey, base, cacheRead); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:models.ts->remote-catalog-provider.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 15 read field(s) not in invar.lock (aborted, checkedAt, context, getAllModels, getModels); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:models.ts->provider.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 26 read field(s) not in invar.lock (aborted, api, apiKey, auth, baseUrl); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:models.ts->llama-extension.test.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 24 read field(s) not in invar.lock (allowNetwork, api, apiKey, auth, baseUrl); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:models.ts->remote-catalog-provider.test.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 25 read field(s) not in invar.lock (allowNetwork, api, auth, baseUrl, chat); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:faux.ts->harness.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 20 read field(s) not in invar.lock (apiKey, baseUrl, content, contextWindow, cost); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->agent-loop.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 22 read field(s) not in invar.lock (apiKey, arguments, context, details, durationMs); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->index.ts#2 (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 39 read field(s) not in invar.lock (api, apiKey, arguments, baseUrl, cacheRead); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->list-models.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 9 read field(s) not in invar.lock (context, error, id, images, input); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->bug-report.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 26 read field(s) not in invar.lock (api, apiKey, baseUrl, content, data); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->cache-stats.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 7 read field(s) not in invar.lock (cacheRead, cacheWrite, cost, input, message); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->cache-warmer.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 26 read field(s) not in invar.lock (api, cacheRetention, compat, context, cost); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->compaction.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 24 read field(s) not in invar.lock (apiKey, arguments, cacheRetention, context, details); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->model-runtime.ts#2 (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 18 read field(s) not in invar.lock (apiKey, baseUrl, context, env, handle); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->provider-composer.ts#2 (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 21 read field(s) not in invar.lock (api, apiKey, baseUrl, cacheRead, cacheWrite); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->usage-totals.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 8 read field(s) not in invar.lock (message, model, provider, responseModel, role); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->virtual-models.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 20 read field(s) not in invar.lock (api, baseUrl, contextWindow, cost, data); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->assistant-message.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 4 read field(s) not in invar.lock (message, text, thinking, type); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->print-mode.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 7 read field(s) not in invar.lock (error, message, messages, role, state); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->test-harness.test.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 12 read field(s) not in invar.lock (description, errorMessage, input, messages, name); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->test-harness.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 20 read field(s) not in invar.lock (api, arguments, baseUrl, context, error); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->compaction.ts#2 (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 24 read field(s) not in invar.lock (arguments, cacheRetention, context, data, id); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->events.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 18 read field(s) not in invar.lock (arguments, context, deferred, details, diagnostics); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->generation.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 26 read field(s) not in invar.lock (calls, context, contextWindow, env, error); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->prompt.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 10 read field(s) not in invar.lock (content, context, id, input, messages); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->usage.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 3 read field(s) not in invar.lock (tools, total, usage); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->harness-compaction.test.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 31 read field(s) not in invar.lock (cacheRetention, content, context, contextWindow, deferred); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->harness-inbox.test.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 20 read field(s) not in invar.lock (cacheRead, cacheWrite, content, context, cost); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->harness-prompt.test.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 13 read field(s) not in invar.lock (content, context, env, id, message); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->harness-tools.test.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 27 read field(s) not in invar.lock (arguments, content, data, details, diagnostics); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->system-order-cache-e2e.test.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 15 read field(s) not in invar.lock (apiKey, cacheRead, cacheWrite, description, input); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->configured-runtime.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 16 read field(s) not in invar.lock (cacheRead, cacheWrite, content, cost, id); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:output.ts->tool.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 7 read field(s) not in invar.lock (droppedBytes, droppedLines, limits, minIntervalMs, now); run `invar lock --update` to bind them
+  [HOLDS]    code:types.ts->codemode.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 33 read field(s) not in invar.lock (calls, context, delete, description, durationMs); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:read.ts->index.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 10 read field(s) not in invar.lock (content, cwd, data, description, detectImageMimeType); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:index.ts->list-files.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 7 read field(s) not in invar.lock (context, info, length, ok, options); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:index.ts->remote-env.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 29 read field(s) not in invar.lock (bytes, code, command, context, end); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:index.ts->watch.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 11 read field(s) not in invar.lock (code, hidden, kind, message, mode); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:provider.ts->oauth.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 11 read field(s) not in invar.lock (clientId, clientMetadata, clientSecret, client_id, client_secret); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->oauth.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 9 read field(s) not in invar.lock (access_token, client_id, client_name, client_secret, error); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:content.ts->tools.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 12 read field(s) not in invar.lock (annotations, data, description, mimeType, name); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:jsonrpc.ts->agent-session-mcp.test.ts (schema)
+      note: producer unchanged since lock (2026-10-20T09:27:24Z)
+      note: 5 read field(s) not in invar.lock (code, error, id, message, name); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+result: ALL 50 contract(s) hold
+summary: held 50 | violated 0 | skipped or not evaluated 0
+measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)
+check exit 0

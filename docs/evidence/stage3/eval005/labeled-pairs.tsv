@@ -1,0 +1,88 @@
+repo	producer	consumer	adjudicated_in	id_then	verdict_then
+Egonex-AI__Understand-Anything	understand-anything-plugin/packages/core/src/types.ts	understand-anything-plugin/packages/dashboard/src/components/DomainGraphView.tsx	eval003	code:types.ts->DomainGraphView.tsx	TRUE
+Egonex-AI__Understand-Anything	understand-anything-plugin/packages/core/src/types.ts	understand-anything-plugin/packages/dashboard/src/components/ExportMenu.tsx	eval003	code:types.ts->ExportMenu.tsx	TRUE
+Egonex-AI__Understand-Anything	understand-anything-plugin/packages/core/src/types.ts	understand-anything-plugin/packages/dashboard/src/components/GraphView.tsx	eval003	code:types.ts->GraphView.tsx	TRUE
+Egonex-AI__Understand-Anything	understand-anything-plugin/packages/core/src/types.ts	understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx	eval003	code:types.ts->KnowledgeGraphView.tsx	TRUE
+Egonex-AI__Understand-Anything	understand-anything-plugin/packages/core/src/types.ts	understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx	eval003	code:types.ts->NodeInfo.tsx	TRUE
+Egonex-AI__Understand-Anything	understand-anything-plugin/packages/core/src/types.ts	understand-anything-plugin/packages/dashboard/src/store.ts	eval003	code:types.ts->store.ts	TRUE
+Egonex-AI__Understand-Anything	understand-anything-plugin/packages/core/src/types.ts	understand-anything-plugin/packages/dashboard/src/utils/edgeAggregation.ts	eval003	code:types.ts->edgeAggregation.ts	TRUE
+Egonex-AI__Understand-Anything	understand-anything-plugin/packages/core/src/types.ts	understand-anything-plugin/packages/dashboard/src/utils/filters.ts	eval003	code:types.ts->filters.ts	TRUE
+Egonex-AI__Understand-Anything	understand-anything-plugin/packages/core/src/types.ts	understand-anything-plugin/packages/dashboard/src/utils/louvain.ts	eval003	code:types.ts->louvain.ts	TRUE
+Egonex-AI__Understand-Anything	understand-anything-plugin/packages/core/src/types.ts	understand-anything-plugin/src/__tests__/context-builder.test.ts	eval003	code:types.ts->context-builder.test.ts	TRUE
+Egonex-AI__Understand-Anything	understand-anything-plugin/packages/core/src/types.ts	understand-anything-plugin/src/context-builder.ts	eval003	code:types.ts->context-builder.ts	TRUE
+Egonex-AI__Understand-Anything	understand-anything-plugin/packages/core/src/types.ts	understand-anything-plugin/src/diff-analyzer.ts	eval003	code:types.ts->diff-analyzer.ts	TRUE
+Egonex-AI__Understand-Anything	understand-anything-plugin/packages/core/src/types.ts	understand-anything-plugin/src/explain-builder.ts	eval003	code:types.ts->explain-builder.ts	TRUE
+earendil-works__pi	packages/agent/src/types.ts	packages/coding-agent/examples/extensions/subagent/index.ts	eval003	code:types.ts->index.ts	NOT TRUE
+earendil-works__pi	packages/agent/src/types.ts	packages/coding-agent/src/core/agent-session.ts	eval003	code:types.ts->agent-session.ts	NOT TRUE
+earendil-works__pi	packages/agent/src/types.ts	packages/coding-agent/src/core/nested-tool-calls.ts	eval003	code:types.ts->nested-tool-calls.ts	NOT TRUE
+earendil-works__pi	packages/agent/src/types.ts	packages/coding-agent/src/core/tools/tool-definition-wrapper.ts	eval003	code:types.ts->tool-definition-wrapper.ts	NOT TRUE
+earendil-works__pi	packages/agent/src/types.ts	packages/coding-agent/src/extensions/codemode/execute.ts	eval003	code:types.ts->execute.ts	TRUE
+earendil-works__pi	packages/agent/src/types.ts	packages/coding-agent/src/extensions/mcp/tools.ts	eval003	code:types.ts->tools.ts	NOT TRUE
+earendil-works__pi	packages/ai/src/auth/types.ts	packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts	eval003	code:types.ts->index.ts#2	TRUE
+earendil-works__pi	packages/ai/src/auth/types.ts	packages/coding-agent/src/core/model-registry.ts	eval003	code:types.ts->model-registry.ts	TRUE
+earendil-works__pi	packages/ai/src/auth/types.ts	packages/coding-agent/src/core/model-runtime.ts	eval003	code:types.ts->model-runtime.ts	NOT TRUE
+earendil-works__pi	packages/ai/src/auth/types.ts	packages/coding-agent/src/core/provider-composer.ts	eval003	code:types.ts->provider-composer.ts	NOT TRUE
+earendil-works__pi	packages/ai/src/auth/types.ts	packages/coding-agent/src/extensions/llama/provider.ts	eval003	code:types.ts->provider.ts	NOT TRUE
+earendil-works__pi	packages/ai/src/auth/types.ts	packages/coding-agent/test/utilities.ts	eval003	code:types.ts->utilities.ts	NOT TRUE
+earendil-works__pi	packages/ai/src/models-store.ts	packages/coding-agent/src/core/remote-catalog-provider.ts	eval003	code:models-store.ts->remote-catalog-provider.ts	TRUE
+earendil-works__pi	packages/ai/src/models.ts	packages/coding-agent/src/core/model-registry.ts	eval003	code:models.ts->model-registry.ts	NOT TRUE
+earendil-works__pi	packages/ai/src/models.ts	packages/coding-agent/src/core/model-runtime.ts	eval003	code:models.ts->model-runtime.ts	TRUE
+earendil-works__pi	packages/ai/src/models.ts	packages/coding-agent/src/core/provider-composer.ts	eval003	code:models.ts->provider-composer.ts	NOT TRUE
+earendil-works__pi	packages/ai/src/models.ts	packages/coding-agent/src/core/remote-catalog-provider.ts	eval003	code:models.ts->remote-catalog-provider.ts	TRUE
+earendil-works__pi	packages/ai/src/models.ts	packages/coding-agent/src/extensions/llama/provider.ts	eval003	code:models.ts->provider.ts	TRUE
+earendil-works__pi	packages/ai/src/models.ts	packages/coding-agent/test/llama-extension.test.ts	eval003	code:models.ts->llama-extension.test.ts	TRUE
+earendil-works__pi	packages/ai/src/models.ts	packages/coding-agent/test/remote-catalog-provider.test.ts	eval003	code:models.ts->remote-catalog-provider.test.ts	TRUE
+excalidraw__excalidraw	packages/common/src/editorInterface.ts	packages/element/src/transformHandles.ts	eval003	code:editorInterface.ts->transformHandles.ts	TRUE
+excalidraw__excalidraw	packages/common/src/editorInterface.ts	packages/excalidraw/components/App.tsx	eval003	code:editorInterface.ts->App.tsx	TRUE
+excalidraw__excalidraw	packages/element/src/arrowEndpointText.ts	packages/excalidraw/components/App.textTool.ts	eval003	code:arrowEndpointText.ts->App.textTool.ts	TRUE
+excalidraw__excalidraw	packages/element/src/renderElement.ts	packages/excalidraw/renderer/staticScene.ts	eval003	code:renderElement.ts->staticScene.ts	TRUE
+excalidraw__excalidraw	packages/element/src/types.ts	excalidraw-app/components/DebugCanvas.tsx	eval003	code:types.ts->DebugCanvas.tsx	TRUE
+excalidraw__excalidraw	packages/element/src/types.ts	packages/excalidraw/data/restore.ts	eval003	code:types.ts->restore.ts	TRUE
+excalidraw__excalidraw	packages/element/src/types.ts	packages/excalidraw/tests/history.test.tsx	eval003	code:types.ts->history.test.tsx	TRUE
+excalidraw__excalidraw	packages/element/src/visualdebug.ts	excalidraw-app/components/DebugCanvas.tsx	eval003	code:visualdebug.ts->DebugCanvas.tsx	TRUE
+excalidraw__excalidraw	packages/excalidraw/data/restore.ts	excalidraw-app/App.tsx	eval003	code:restore.ts->App.tsx	NOT TRUE
+excalidraw__excalidraw	packages/excalidraw/data/types.ts	excalidraw-app/collab/Collab.tsx	eval003	code:types.ts->Collab.tsx	NOT TRUE
+excalidraw__excalidraw	packages/excalidraw/data/types.ts	excalidraw-app/data/index.ts	eval003	code:types.ts->index.ts	TRUE
+excalidraw__excalidraw	packages/excalidraw/scene/types.ts	packages/element/src/renderElement.ts	eval003	code:types.ts->renderElement.ts	TRUE
+excalidraw__excalidraw	packages/excalidraw/scene/types.ts	packages/element/src/shape.ts	eval003	code:types.ts->shape.ts	NOT TRUE
+excalidraw__excalidraw	packages/excalidraw/types.ts	examples/with-script-in-browser/components/CustomFooter.tsx	eval003	code:types.ts->CustomFooter.tsx	TRUE
+excalidraw__excalidraw	packages/excalidraw/types.ts	examples/with-script-in-browser/components/ExampleApp.tsx	eval003	code:types.ts->ExampleApp.tsx	TRUE
+excalidraw__excalidraw	packages/excalidraw/types.ts	excalidraw-app/App.tsx	eval003	code:types.ts->App.tsx	TRUE
+excalidraw__excalidraw	packages/excalidraw/types.ts	excalidraw-app/collab/Collab.tsx	eval003	code:types.ts->Collab.tsx#2	TRUE
+excalidraw__excalidraw	packages/excalidraw/types.ts	excalidraw-app/components/AI.tsx	eval003	code:types.ts->AI.tsx	TRUE
+excalidraw__excalidraw	packages/excalidraw/types.ts	excalidraw-app/components/DebugCanvas.tsx	eval003	code:types.ts->DebugCanvas.tsx#2	TRUE
+excalidraw__excalidraw	packages/excalidraw/types.ts	excalidraw-app/data/FileManager.ts	eval003	code:types.ts->FileManager.ts	TRUE
+puppeteer__puppeteer	packages/puppeteer-core/src/api/ElementHandle.ts	test/src/elementhandle.test.ts	eval003	code:ElementHandle.ts->elementhandle.test.ts	NOT TRUE
+puppeteer__puppeteer	packages/puppeteer-core/src/api/Page.ts	test/src/page.test.ts	eval003	code:Page.ts->page.test.ts	NOT TRUE
+puppeteer__puppeteer	packages/puppeteer-core/src/cdp/Accessibility.ts	test/src/accessibility.test.ts	eval003	code:Accessibility.ts->accessibility.test.ts	TRUE
+puppeteer__puppeteer	packages/puppeteer-core/src/cdp/WebMCP.ts	test/src/cdp/webmcp.test.ts	eval003	code:WebMCP.ts->webmcp.test.ts	TRUE
+puppeteer__puppeteer	packages/puppeteer-core/src/node/LaunchOptions.ts	test/src/mocha-utils.ts	eval003	code:LaunchOptions.ts->mocha-utils.ts	NOT TRUE
+earendil-works__pi	packages/ai/src/auth/types.ts	packages/coding-agent/examples/extensions/custom-provider-gitlab-duo/index.ts	eval004	code:types.ts->index.ts#3	TRUE
+earendil-works__pi	packages/ai/src/auth/types.ts	packages/coding-agent/src/core/agent-session.ts	eval004	code:types.ts->agent-session.ts#2	TRUE
+earendil-works__pi	packages/ai/src/models.ts	packages/coding-agent/src/core/bug-report.ts	eval004	code:models.ts->bug-report.ts	TRUE
+earendil-works__pi	packages/ai/src/providers/faux.ts	packages/agent/test/e2e.test.ts	eval004	code:faux.ts->e2e.test.ts	TRUE
+earendil-works__pi	packages/ai/src/providers/faux.ts	packages/coding-agent/test/suite/harness.ts	eval004	code:faux.ts->harness.ts	NOT TRUE
+earendil-works__pi	packages/ai/src/types.ts	packages/agent/test/agent.test.ts	eval004	code:types.ts->agent.test.ts	NOT TRUE
+earendil-works__pi	packages/ai/src/types.ts	packages/agent/test/e2e.test.ts	eval004	code:types.ts->e2e.test.ts	NOT TRUE
+earendil-works__pi	packages/ai/src/types.ts	packages/coding-agent/examples/extensions/custom-provider-gitlab-duo/test.ts	eval004	code:types.ts->test.ts	NOT TRUE
+earendil-works__pi	packages/ai/src/types.ts	packages/coding-agent/src/core/agent-session.ts	eval004	code:types.ts->agent-session.ts#3	NOT TRUE
+earendil-works__pi	packages/ai/src/types.ts	packages/coding-agent/src/core/bug-report.ts	eval004	code:types.ts->bug-report.ts	TRUE
+earendil-works__pi	packages/ai/src/types.ts	packages/coding-agent/src/core/compaction/compaction.ts	eval004	code:types.ts->compaction.ts	TRUE
+earendil-works__pi	packages/ai/src/types.ts	packages/coding-agent/src/core/usage-totals.ts	eval004	code:types.ts->usage-totals.ts	TRUE
+earendil-works__pi	packages/ai/src/types.ts	packages/coding-agent/src/modes/interactive/interactive-mode.ts	eval004	code:types.ts->interactive-mode.ts	TRUE
+earendil-works__pi	packages/ai/src/types.ts	packages/coding-agent/test/agent-session-concurrent.test.ts	eval004	code:types.ts->agent-session-concurrent.test.ts	NOT TRUE
+earendil-works__pi	packages/ai/src/types.ts	packages/coding-agent/test/agent-session-stats.test.ts	eval004	code:types.ts->agent-session-stats.test.ts	NOT TRUE
+earendil-works__pi	packages/ai/src/types.ts	packages/coding-agent/test/compaction.test.ts	eval004	code:types.ts->compaction.test.ts	NOT TRUE
+earendil-works__pi	packages/ai/src/types.ts	packages/coding-agent/test/model-registry.test.ts	eval004	code:types.ts->model-registry.test.ts	TRUE
+earendil-works__pi	packages/ai/src/types.ts	packages/coding-agent/test/sdk-codex-cache-probe-tool-loop.ts	eval004	code:types.ts->sdk-codex-cache-probe-tool-loop.ts	TRUE
+earendil-works__pi	packages/ai/src/types.ts	packages/coding-agent/test/suite/agent-session-mcp.test.ts	eval004	code:types.ts->agent-session-mcp.test.ts	TRUE
+earendil-works__pi	packages/ai/src/types.ts	packages/coding-agent/test/suite/harness.ts	eval004	code:types.ts->harness.ts	TRUE
+earendil-works__pi	packages/coding-agent/src/core/agent-session-services.ts	packages/evals/evals/tui.docs.eval.ts	eval004	code:agent-session-services.ts->tui.docs.eval.ts	NOT TRUE
+earendil-works__pi	packages/coding-agent/src/core/extensions/types.ts	packages/coding-agent/examples/extensions/gondolin/index.ts	eval004	code:types.ts->index.ts#6	NOT TRUE
+earendil-works__pi	packages/coding-agent/src/core/tools/edit.ts	packages/coding-agent/examples/extensions/gondolin/index.ts	eval004	code:edit.ts->index.ts	NOT TRUE
+earendil-works__pi	packages/coding-agent/src/core/tools/grep.ts	packages/coding-agent/examples/extensions/gondolin/index.ts	eval004	code:grep.ts->index.ts	NOT TRUE
+earendil-works__pi	packages/coding-agent/src/core/tools/read.ts	packages/coding-agent/examples/extensions/gondolin/index.ts	eval004	code:read.ts->index.ts	TRUE
+earendil-works__pi	packages/coding-agent/src/core/tools/write.ts	packages/coding-agent/examples/extensions/gondolin/index.ts	eval004	code:write.ts->index.ts	NOT TRUE
+puppeteer__puppeteer	packages/puppeteer-core/src/api/Issue.ts	test/src/cdp/webmcp.test.ts	eval004	code:Issue.ts->webmcp.test.ts	TRUE
+puppeteer__puppeteer	packages/puppeteer-core/src/common/Configuration.ts	packages/puppeteer/src/getConfiguration.ts	eval004	code:Configuration.ts->getConfiguration.ts	TRUE
+puppeteer__puppeteer	packages/puppeteer-core/src/common/Configuration.ts	packages/puppeteer/src/node/install.ts	eval004	code:Configuration.ts->install.ts	TRUE
