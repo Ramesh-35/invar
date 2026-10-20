@@ -1,0 +1,86 @@
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -744,6 +744,7 @@
+ }
+ 
+ struct World {
++    aliases: Vec<(String, Vec<String>)>,
+     files: BTreeSet<String>,
+     /// package name -> dirs
+     pkgs: BTreeMap<String, Vec<String>>,
+@@ -816,6 +817,26 @@
+                 None => Res::Unresolved("no such source file".into()),
+             };
+         }
++        {
++            let mut best: Option<(&String, usize, Option<String>)> = None;
++            for (k, _) in &self.aliases {
++                if k == spec { best = Some((k, usize::MAX, None)); break; }
++                if let Some((pre, suf)) = k.split_once('*') {
++                    if !suf.contains('*') && spec.len() >= pre.len() + suf.len() && spec.starts_with(pre) && spec.ends_with(suf) && best.as_ref().is_none_or(|b| pre.len() > b.1) {
++                        best = Some((k, pre.len(), Some(spec[pre.len()..spec.len() - suf.len()].to_string())));
++                    }
++                }
++            }
++            if let Some((k, _, cap)) = best {
++                let targets = &self.aliases.iter().find(|(kk, _)| kk == k).unwrap().1;
++                for tg in targets {
++                    let v = match &cap { Some(c) => tg.replace('*', c), None => tg.clone() };
++                    if let Some(n) = norm(&v) { if let Some(f) = self.probe(&n) { if std::env::var("INVAR_CENSUS").is_ok() { eprintln!("ALIAS\t{from}\t{spec}\t{f}"); } return Res::File(f); } }
++                }
++                if std::env::var("INVAR_CENSUS").is_ok() { eprintln!("ALIASMISS\t{from}\t{spec}\t{k}"); }
++                return Res::Unresolved(format!("path alias {spec:?} matches tsconfig paths {k:?} but no target file exists; not guessed"));
++            }
++        }
+         if spec.starts_with("@/") || spec.starts_with("~/") || spec.starts_with('#') {
+             return Res::Unresolved("path alias (tsconfig paths are not read)".into());
+         }
+@@ -1054,7 +1075,27 @@
+ pub fn discover_values(root: &Path, files: &[String], oversized: &[String], marks: &[String]) -> ValueDiscovery {
+     let mut out = ValueDiscovery::default();
+     let src: Vec<&String> = files.iter().filter(|f| SRC_EXTS.contains(&ext_of(f))).collect();
+-    let mut w = World { files: src.iter().map(|f| (*f).clone()).collect(), pkgs: BTreeMap::new(), mods: BTreeMap::new() };
++    let aliases = {
++        let mut v = Vec::new();
++        if let Ok(txt) = std::fs::read_to_string(root.join("tsconfig.json")) {
++            let mut o = String::new(); let c: Vec<char> = txt.chars().collect(); let (mut i, mut s) = (0, false);
++            while i < c.len() { let ch = c[i];
++                if s { o.push(ch); if ch == '\\' && i + 1 < c.len() { o.push(c[i+1]); i += 2; continue; } s = ch != '"'; i += 1; continue; }
++                if ch == '"' { s = true; o.push(ch); i += 1; continue; }
++                if ch == '/' && c.get(i+1) == Some(&'/') { while i < c.len() && c[i] != '\n' { i += 1; } continue; }
++                if ch == '/' && c.get(i+1) == Some(&'*') { i += 2; while i + 1 < c.len() && !(c[i] == '*' && c[i+1] == '/') { i += 1; } i += 2; continue; }
++                if ch == '}' || ch == ']' { let k = o.trim_end().len(); if o[..k].ends_with(',') { o.truncate(k - 1); } }
++                o.push(ch); i += 1; }
++            if let Ok(cfg) = serde_json::from_str::<serde_json::Value>(&o) {
++                let base = cfg["compilerOptions"]["baseUrl"].as_str().unwrap_or(".").to_string();
++                if let Some(m) = cfg["compilerOptions"]["paths"].as_object() {
++                    for (k, vs) in m { let ts: Vec<String> = vs.as_array().map(|a| a.iter().filter_map(|x| x.as_str()).map(|x| format!("{base}/{x}")).collect()).unwrap_or_default(); v.push((k.clone(), ts)); }
++                }
++            }
++        }
++        v
++    };
++    let mut w = World { aliases, files: src.iter().map(|f| (*f).clone()).collect(), pkgs: BTreeMap::new(), mods: BTreeMap::new() };
+     for f in files.iter().filter(|f| f.rsplit('/').next() == Some("package.json")) {
+         if let Ok(text) = std::fs::read_to_string(root.join(f)) {
+             if let Some(name) = serde_json::from_str::<serde_json::Value>(&text)
+@@ -1124,7 +1165,7 @@
+             };
+             for (imported, local) in &imp.names {
+                 match w.find(&target, imported) {
+-                    Found::NotShape => {}
++                    Found::NotShape => { if std::env::var("INVAR_CENSUS").is_ok() { eprintln!("K1NOTSHAPE\t{f}\t{}\t{imported}\t{}\t{target}", imp.line, imp.spec); } }
+                     Found::Barrel2 => out.abstentions.push(Abstention {
+                         code: "BARREL2",
+                         location: loc.clone(),
+--- a/crates/invar-falsify/src/valuepairs/strings.rs
++++ b/crates/invar-falsify/src/valuepairs/strings.rs
+@@ -584,7 +584,7 @@
+         .iter()
+         .filter(|f| SRC_EXTS.contains(&ext_of(f)) && !oversized.contains(f))
+         .collect();
+-    let mut w = World { files: src.iter().map(|f| (*f).clone()).collect(), pkgs: BTreeMap::new(), mods: BTreeMap::new() };
++    let mut w = World { aliases: Vec::new(), files: src.iter().map(|f| (*f).clone()).collect(), pkgs: BTreeMap::new(), mods: BTreeMap::new() };
+     let mut pkg_dirs: BTreeSet<String> = BTreeSet::new();
+     for f in files.iter().filter(|f| f.rsplit('/').next() == Some("package.json")) {
+         pkg_dirs.insert(dir_of(f).to_string());

@@ -1,0 +1,31 @@
+repo	n	verdict	how	sentence
+earendil-works__pi	1	NOT TRUE	none	The reads are on provider.auth (ProviderAuth) and on model (Model), not on any ModelAuth value.
+excalidraw__excalidraw	2	NOT TRUE	none	The min and max are Math.min and Math.max calls, not reads of RangeProps.
+puppeteer__puppeteer	3	NOT TRUE	none	Only options.args is read from the launch options copy, and timeout is an object literal key next to mocha this.timeout().
+earendil-works__pi	4	NOT TRUE	none	The tools and resources occurrences are object literal keys in a fake server reply and a parsed JSON config, not reads of ServerCapabilities.
+earendil-works__pi	5	NOT TRUE	none	The reads are params.context on tool parameters and Object.entries on an env record, not on BoundaryState.
+microsoft__playwright	6	NOT TRUE	none	The reads are video.size and video.fps on the test video option and request.dispose on an APIRequestContext, not on ScreencastClient.
+microsoft__playwright	7	NOT TRUE	none	The reads are on contextOptions and options typed as the public BrowserContextOptions, not the protocol BrowserNewContextParams.
+excalidraw__excalidraw	8	NOT TRUE	none	The data.elements and data.appState reads are on a variable explicitly typed ImportedDataState, not ExportedDataState.
+microsoft__playwright	9	NOT TRUE	none	The reads are on this._liveTraceFile (a local file and fs pair) and this._options (local TraceOptions), not on StackSession.
+earendil-works__pi	10	TRUE	property	The route request field failed.message is typed AssistantMessage and the test reads its errorMessage and stopReason, and narrowed session messages read model and thinkingLevel.
+earendil-works__pi	11	NOT TRUE	none	The reads are on a local options parameter of the assistant helper, not on FauxModelDefinition.
+earendil-works__pi	12	NOT TRUE	none	Only options.apiKey is read from the stream options, and headers is read from a locally cast JSON response.
+earendil-works__pi	13	NOT TRUE	none	The reads are cleanup on a test harness and signal on getAuth options, not on CombinedAbortSignal.
+microsoft__playwright	14	NOT TRUE	none	The matches are in documentation comments of the test type declarations, not reads of BrowserTypeLaunchParams.
+earendil-works__pi	15	NOT TRUE	none	The reads are auth on getAuth results, baseUrl on a Model, and headers on image options, while the Provider values only have generateImages and classify read.
+microsoft__playwright	16	NOT TRUE	none	The reads are on contextOptions and options typed as the public BrowserContextOptions, not the client BrowserNewContextForReuseOptions.
+excalidraw__excalidraw	17	NOT TRUE	none	The reads are on pointerDownState.origin, a local x and y record type, not on RectangleBox.
+earendil-works__pi	18	NOT TRUE	none	Only setResponses is read from setup.faux, while state is read from durable task objects.
+excalidraw__excalidraw	19	NOT TRUE	none	The reads are on the component props typed by a local Props type, not ImportedDataState.
+earendil-works__pi	20	NOT TRUE	none	The reads are model on a durable session entry and provider on the faux provider handle, not on ClassifierResult.
+microsoft__playwright	21	NOT TRUE	none	The reads are on an IPC message typed any, not on CDPSessionSendParams.
+earendil-works__pi	22	NOT TRUE	none	The reads are closed on an AgentEventStream and input on a usage object, not on GrammarToolInputJsonBuffer.
+earendil-works__pi	23	NOT TRUE	none	The reads are on a message parameter typed AssistantMessage, not AssistantImages.
+microsoft__playwright	24	NOT TRUE	none	The reads are on a dashboard local AnnotateFrame value, not on PageScreencastFrameEvent.
+puppeteer__puppeteer	25	NOT TRUE	none	The reads are the process() method and connection property of the BidiBrowser instance, not of BidiBrowserOptions.
+earendil-works__pi	26	NOT TRUE	none	The reads are on session stats objects and a Model from getModel, not on FauxModelDefinition.
+excalidraw__excalidraw	27	TRUE	property	The crop variable is element.crop on a narrowed ExcalidrawImageElement, typed ImageCrop, and its x, y, width, height, naturalWidth and naturalHeight are read.
+excalidraw__excalidraw	28	NOT TRUE	none	The reads are on match.element, a text element, not on RenderPositionOffset.
+earendil-works__pi	29	NOT TRUE	none	The reads are on a usage ledger snapshot entry, not on AiGatewayPricing.
+earendil-works__pi	30	NOT TRUE	none	The reads are on messages narrowed to role system (SystemMessage, which declares its own toolsAdded and toolsRemoved), not on ToolStateChanges.
