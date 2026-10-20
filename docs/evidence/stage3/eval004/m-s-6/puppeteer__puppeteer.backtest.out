@@ -1,0 +1,83 @@
+invar backtest (invar.toml, 3 contract(s), depth 50)
+note: shallow history; the oldest replayed commit is the shallow boundary, and its date is the cutoff, not a change
+
+code:Configuration.ts->getConfiguration.ts: packages/puppeteer-core/src/common/Configuration.ts (1 commit(s) replayed)
+  ChromeHeadlessShellSettings.downloadBaseUrl
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  ChromeHeadlessShellSettings.skipDownload
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  ChromeSettings.downloadBaseUrl
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  ChromeSettings.skipDownload
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  Configuration.cacheDirectory
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  Configuration.chrome
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  Configuration.defaultBrowser
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  Configuration.executablePath
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  Configuration.experiments
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  Configuration.firefox
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  Configuration.logLevel
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  Configuration.skipDownload
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  Configuration.temporaryDirectory
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  FirefoxSettings.downloadBaseUrl
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  FirefoxSettings.skipDownload
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+
+code:Configuration.ts->install.ts: packages/puppeteer-core/src/common/Configuration.ts (1 commit(s) replayed)
+  ChromeHeadlessShellSettings.downloadBaseUrl
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  ChromeHeadlessShellSettings.skipDownload
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  ChromeSettings.downloadBaseUrl
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  ChromeSettings.skipDownload
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  FirefoxSettings.downloadBaseUrl
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  FirefoxSettings.skipDownload
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+
+code:Issue.ts->webmcp.test.ts: packages/puppeteer-core/src/api/Issue.ts (1 commit(s) replayed)
+  Issue.code
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+  Issue.details
+    2026-08-03 c8faa53225f9 present
+    never absent after introduction
+
+Timelines replay today's extraction over past file contents. They are
+not replayed verdicts: waivers, selectors and samples are today's, and a
+past consumer may not have read the field yet. Unreadable commits are
+stated, never guessed.
+backtest exit 0

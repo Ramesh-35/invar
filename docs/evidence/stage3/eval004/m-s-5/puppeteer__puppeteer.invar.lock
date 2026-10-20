@@ -1,0 +1,55 @@
+# invar.lock: the producer fields this repository depends on.
+# Written by `invar lock`. Accept a reviewed producer change with
+# `invar lock --update`. Waivers are written by hand and kept.
+
+[lock]
+format = "1"
+
+[[contract]]
+id = "code:Configuration.ts->getConfiguration.ts"
+producer = "packages/puppeteer-core/src/common/Configuration.ts"
+blake3 = "475a1e4a90af34706a08e31c4c4127b56cad3919b06d7182057b98bed66aa0fb"
+recorded_at = "2026-10-20T07:58:21Z"
+bind = "code 2026-10-20 ChromeHeadlessShellSettings.downloadBaseUrl string"
+bind = "code 2026-10-20 ChromeHeadlessShellSettings.skipDownload boolean"
+bind = "code 2026-10-20 ChromeSettings.downloadBaseUrl string"
+bind = "code 2026-10-20 ChromeSettings.skipDownload boolean"
+bind = "code 2026-10-20 Configuration.cacheDirectory string"
+bind = "code 2026-10-20 Configuration.chrome ChromeSettings"
+bind = "code 2026-10-20 Configuration.defaultBrowser SupportedBrowser"
+bind = "code 2026-10-20 Configuration.executablePath string"
+bind = "code 2026-10-20 Configuration.experiments ExperimentsConfiguration"
+bind = "code 2026-10-20 Configuration.firefox FirefoxSettings"
+bind = "code 2026-10-20 Configuration.logLevel 'silent' | 'error' | 'warn'"
+bind = "code 2026-10-20 Configuration.skipDownload boolean"
+bind = "code 2026-10-20 Configuration.temporaryDirectory string"
+bind = "code 2026-10-20 FirefoxSettings.downloadBaseUrl string"
+bind = "code 2026-10-20 FirefoxSettings.skipDownload boolean"
+members = "code ChromeHeadlessShellSettings downloadBaseUrl skipDownload version"
+members = "code ChromeSettings downloadBaseUrl skipDownload version"
+members = "code Configuration cacheDirectory chrome defaultBrowser executablePath experiments firefox logLevel skipDownload temporaryDirectory"
+members = "code FirefoxSettings downloadBaseUrl skipDownload version"
+
+[[contract]]
+id = "code:Configuration.ts->install.ts"
+producer = "packages/puppeteer-core/src/common/Configuration.ts"
+blake3 = "475a1e4a90af34706a08e31c4c4127b56cad3919b06d7182057b98bed66aa0fb"
+recorded_at = "2026-10-20T07:58:21Z"
+bind = "code 2026-10-20 ChromeHeadlessShellSettings.downloadBaseUrl string"
+bind = "code 2026-10-20 ChromeHeadlessShellSettings.skipDownload boolean"
+bind = "code 2026-10-20 ChromeSettings.downloadBaseUrl string"
+bind = "code 2026-10-20 ChromeSettings.skipDownload boolean"
+bind = "code 2026-10-20 FirefoxSettings.downloadBaseUrl string"
+bind = "code 2026-10-20 FirefoxSettings.skipDownload boolean"
+members = "code ChromeHeadlessShellSettings downloadBaseUrl skipDownload version"
+members = "code ChromeSettings downloadBaseUrl skipDownload version"
+members = "code FirefoxSettings downloadBaseUrl skipDownload version"
+
+[[contract]]
+id = "code:Issue.ts->webmcp.test.ts"
+producer = "packages/puppeteer-core/src/api/Issue.ts"
+blake3 = "29907f09ad9f91caab459c479eda7a00e915957dc84f9aebb79f989a4622ef8e"
+recorded_at = "2026-10-20T07:58:21Z"
+bind = "code 2026-10-20 Issue.code string"
+bind = "code 2026-10-20 Issue.details Protocol.Audits.InspectorIssueDetails"
+members = "code Issue code details"

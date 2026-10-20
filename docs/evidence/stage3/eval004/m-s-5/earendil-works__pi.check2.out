@@ -1,0 +1,57 @@
+INVAR check (13 contract(s))
+  [HOLDS]    code:types.ts->index.ts#3 (schema)
+      note: producer unchanged since lock (2026-10-20T07:58:20Z)
+      note: 9 read field(s) not in invar.lock (apiKey, baseUrl, expires, headers, id); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->agent-session.ts#2 (schema)
+      note: producer unchanged since lock (2026-10-20T07:58:20Z)
+      note: 9 read field(s) not in invar.lock (apiKey, baseUrl, headers, id, label); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:models.ts->bug-report.ts (schema)
+      note: producer unchanged since lock (2026-10-20T07:58:20Z)
+      note: 11 read field(s) not in invar.lock (api, apiKey, env, id, input); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:faux.ts->e2e.test.ts (schema)
+      note: producer unchanged since lock (2026-10-20T07:58:20Z)
+      note: 20 read field(s) not in invar.lock (cacheRead, cacheWrite, content, cost, errorMessage); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->bug-report.ts (schema)
+      note: producer unchanged since lock (2026-10-20T07:58:20Z)
+      note: 26 read field(s) not in invar.lock (api, apiKey, baseUrl, content, data); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->compaction.ts (schema)
+      note: producer unchanged since lock (2026-10-20T07:58:20Z)
+      note: 22 read field(s) not in invar.lock (apiKey, arguments, cacheRetention, context, details); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->usage-totals.ts (schema)
+      note: producer unchanged since lock (2026-10-20T07:58:20Z)
+      note: 8 read field(s) not in invar.lock (message, model, provider, responseModel, role); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->interactive-mode.ts (schema)
+      note: producer unchanged since lock (2026-10-20T07:58:20Z)
+      note: 29 read field(s) not in invar.lock (apiKey, arguments, description, details, env); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->model-registry.test.ts (schema)
+      note: producer unchanged since lock (2026-10-20T07:58:20Z)
+      note: 27 read field(s) not in invar.lock (api, apiKey, baseUrl, contextWindow, cost); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->sdk-codex-cache-probe-tool-loop.ts (schema)
+      note: producer unchanged since lock (2026-10-20T07:58:20Z)
+      note: 24 read field(s) not in invar.lock (api, apiKey, baseUrl, cacheRead, cacheWrite); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->agent-session-mcp.test.ts (schema)
+      note: producer unchanged since lock (2026-10-20T07:58:20Z)
+      note: 18 read field(s) not in invar.lock (arguments, calls, description, error, id); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:types.ts->harness.ts (schema)
+      note: producer unchanged since lock (2026-10-20T07:58:20Z)
+      note: 21 read field(s) not in invar.lock (api, apiKey, baseUrl, content, cost); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:read.ts->index.ts (schema)
+      note: producer unchanged since lock (2026-10-20T07:58:20Z)
+      note: 10 read field(s) not in invar.lock (content, cwd, data, description, detectImageMimeType); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+result: ALL 13 contract(s) hold
+summary: held 13 | violated 0 | skipped or not evaluated 0
+measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)
+check exit 0

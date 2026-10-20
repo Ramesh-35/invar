@@ -1,0 +1,5 @@
+  + contract code:Configuration.ts->getConfiguration.ts (15 bindings)
+  + contract code:Configuration.ts->install.ts (6 bindings)
+  + contract code:Issue.ts->webmcp.test.ts (2 bindings)
+wrote ./invar.lock (3 contract(s), 23 binding(s))
+lock exit 0

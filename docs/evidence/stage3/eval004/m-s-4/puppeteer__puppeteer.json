@@ -1,0 +1,48 @@
+{
+ "repo": "puppeteer__puppeteer",
+ "packages_superset": 13,
+ "eligible_files": 52,
+ "sample": [
+  "test/src/requestinterception.test.ts",
+  "test/src/input.test.ts",
+  "packages/puppeteer-core/src/node/FirefoxLauncher.ts",
+  "test/src/ariaqueryhandler.test.ts",
+  "test/installation/assets/puppeteer/configuration/puppeteer.config.ts",
+  "packages/puppeteer/src/puppeteer.ts",
+  "packages/browsers/test/src/utils.ts",
+  "test/src/requestinterception-experimental.test.ts",
+  "test/src/cdp/pipe.test.ts",
+  "test/src/browsercontext-cookies.test.ts"
+ ],
+ "sampled_constructs": 2,
+ "sampled_silent": 1,
+ "rows": [
+  {
+   "file": "test/src/requestinterception-experimental.test.ts",
+   "line": 11,
+   "spec": "puppeteer-core/internal/api/HTTPRequest.js",
+   "name": "ActionResult",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN R6 test/src/requestinterception-experimental.test.ts:11 reads body, headers of ResponseForRequest (packages/puppeteer-core/src/api/HTTPRequest.ts:110)"
+  },
+  {
+   "file": "test/src/browsercontext-cookies.test.ts",
+   "line": 7,
+   "spec": "puppeteer-core",
+   "name": "DeleteCookiesRequest",
+   "kind": "object",
+   "reads": [
+    "name",
+    "partitionKey"
+   ],
+   "distinctive": 1,
+   "accounted_by": null
+  }
+ ],
+ "exploratory_all_files_constructs": 5,
+ "exploratory_all_files_unaccounted": 1,
+ "repo_level_abstain": [],
+ "exploratory_unaccounted_after_stoplist": []
+}

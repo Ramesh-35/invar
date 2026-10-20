@@ -1,0 +1,11 @@
+earendil-works__pi removed 122 Counter({'BARREL2': 118, 'UNRESOLVED': 4}) added 44 Counter({'UNSUPPORTED-SHAPE': 31, 'R5': 13}) to-silence 7
+   SILENT<- # ABSTAIN BARREL2 packages/coding-agent/examples/extensions/with-deps/index.ts:8 ExtensionAPI from "@earendil-works/pi-coding-agent" is re-exported through more than one barrel level (from packages/coding-agent/src/index.ts)
+   SILENT<- # ABSTAIN BARREL2 packages/coding-agent/src/core/compaction/branch-summarization.ts:11 Model from "@earendil-works/pi-ai/compat" is re-exported through more than one barrel level (from packages/ai/src/compat.ts)
+   SILENT<- # ABSTAIN BARREL2 packages/coding-agent/src/core/compaction/branch-summarization.ts:11 SimpleStreamOptions from "@earendil-works/pi-ai/compat" is re-exported through more than one barrel level (from packages/ai/src/compat.ts)
+   SILENT<- # ABSTAIN BARREL2 packages/coding-agent/src/core/compaction/branch-summarization.ts:11 Usage from "@earendil-works/pi-ai/compat" is re-exported through more than one barrel level (from packages/ai/src/compat.ts)
+   SILENT<- # ABSTAIN BARREL2 packages/coding-agent/test/branch-summary-extensions.test.ts:1 Usage from "@earendil-works/pi-ai/compat" is re-exported through more than one barrel level (from packages/ai/src/compat.ts)
+   SILENT<- # ABSTAIN BARREL2 packages/coding-agent/test/rpc-prompt-response-semantics.test.ts:5 AssistantMessage from "@earendil-works/pi-ai/compat" is re-exported through more than one barrel level (from packages/ai/src/compat.ts)
+   SILENT<- # ABSTAIN BARREL2 packages/coding-agent/test/rpc-prompt-response-semantics.test.ts:5 Model from "@earendil-works/pi-ai/compat" is re-exported through more than one barrel level (from packages/ai/src/compat.ts)
+puppeteer__puppeteer removed 13 Counter({'UNRESOLVED': 12, 'R6': 1}) added 1 Counter({'UNSUPPORTED-SHAPE': 1}) to-silence 2
+   SILENT<- # ABSTAIN UNRESOLVED test/installation/assets/puppeteer/configuration/puppeteer.config.ts:1 Configuration from "puppeteer": not declared in the sources of package puppeteer; not guessed
+   SILENT<- # ABSTAIN UNRESOLVED test/src/browsercontext-cookies.test.ts:7 DeleteCookiesRequest from "puppeteer-core": declared as a type at packages/puppeteer-core/src/common/Cookie.ts:207, which init could not reach from packages/puppeteer-

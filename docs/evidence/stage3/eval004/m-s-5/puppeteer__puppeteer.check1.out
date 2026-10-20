@@ -1,0 +1,16 @@
+INVAR check (3 contract(s))
+  [HOLDS]    code:Issue.ts->webmcp.test.ts (schema)
+      note: producer unchanged since lock (2026-10-20T07:58:21Z)
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:Configuration.ts->getConfiguration.ts (schema)
+      note: producer unchanged since lock (2026-10-20T07:58:21Z)
+      note: 1 read field(s) not in invar.lock (version); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:Configuration.ts->install.ts (schema)
+      note: producer unchanged since lock (2026-10-20T07:58:21Z)
+      note: 4 read field(s) not in invar.lock (cacheDirectory, chrome, firefox, version); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+result: ALL 3 contract(s) hold
+summary: held 3 | violated 0 | skipped or not evaluated 0
+measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)
+check exit 0

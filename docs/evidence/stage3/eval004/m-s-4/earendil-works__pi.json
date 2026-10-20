@@ -1,0 +1,101 @@
+{
+ "repo": "earendil-works__pi",
+ "packages_superset": 17,
+ "eligible_files": 417,
+ "sample": [
+  "packages/coding-agent/test/tool-search.test.ts",
+  "packages/durable/test/harness-ownership.test.ts",
+  "packages/coding-agent/test/plan-mode-extension.test.ts",
+  "packages/durable/test/session-document-cache-bench.ts",
+  "packages/coding-agent/src/extensions/codemode/tool.ts",
+  "packages/coding-agent/src/modes/interactive/tui-renderer.ts",
+  "packages/coding-agent/test/suite/regressions/5998-blocked-tool-terminate.test.ts",
+  "packages/durable/src/env/node-watch.ts",
+  "packages/durable/src/harness/scheduler.ts",
+  "packages/coding-agent/scripts/generate-schemas.ts"
+ ],
+ "sampled_constructs": 5,
+ "sampled_silent": 0,
+ "rows": [
+  {
+   "file": "packages/coding-agent/test/plan-mode-extension.test.ts",
+   "line": 1,
+   "spec": "@earendil-works/pi-agent-core",
+   "name": "AgentMessage",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN UNSUPPORTED-SHAPE packages/coding-agent/test/plan-mode-extension.test.ts:1 AgentMessage at packages/agent/src/types.ts:374 is not an object type (Mess"
+  },
+  {
+   "file": "packages/coding-agent/src/extensions/codemode/tool.ts",
+   "line": 26,
+   "spec": "@earendil-works/pi-codemode",
+   "name": "CodemodeTool",
+   "kind": "object",
+   "reads": [
+    "description",
+    "name",
+    "outputSchema"
+   ],
+   "distinctive": 1,
+   "accounted_by": "# ABSTAIN UNSUPPORTED-SHAPE packages/coding-agent/src/extensions/codemode/tool.ts:26 CodemodeJsonSchema at packages/codemode/src/types.ts:12 is not an object ty"
+  },
+  {
+   "file": "packages/coding-agent/src/modes/interactive/tui-renderer.ts",
+   "line": 1,
+   "spec": "@earendil-works/pi-tui",
+   "name": "WheelScrollLines",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN R6 packages/coding-agent/src/modes/interactive/tui-renderer.ts:1 reads bg, fg of TextStyle (packages/tui/src/colors.ts:53) without importing it by nam"
+  },
+  {
+   "file": "packages/durable/src/harness/scheduler.ts",
+   "line": 1,
+   "spec": "@earendil-works/chord",
+   "name": "JsonValue",
+   "kind": "alias",
+   "reads": [],
+   "distinctive": 0,
+   "accounted_by": "# ABSTAIN R6 packages/durable/src/harness/scheduler.ts:1 reads entry, env of ForkDriverOptions (packages/chord/src/manager.ts:56) without importing it by name ("
+  },
+  {
+   "file": "packages/durable/src/harness/scheduler.ts",
+   "line": 3,
+   "spec": "@earendil-works/pi-ai",
+   "name": "Models",
+   "kind": "object",
+   "reads": [
+    "context",
+    "type"
+   ],
+   "distinctive": 1,
+   "accounted_by": "# ABSTAIN R6 packages/durable/src/harness/scheduler.ts:1 reads entry, env of ForkDriverOptions (packages/chord/src/manager.ts:56) without importing it by name ("
+  }
+ ],
+ "exploratory_all_files_constructs": 258,
+ "exploratory_all_files_unaccounted": 4,
+ "repo_level_abstain": [],
+ "exploratory_unaccounted_after_stoplist": [
+  [
+   "packages/coding-agent/test/agent-session-dynamic-provider.test.ts",
+   4,
+   "Provider",
+   2
+  ],
+  [
+   "packages/coding-agent/test/runtime-credentials.test.ts",
+   1,
+   "CredentialStore",
+   4
+  ],
+  [
+   "packages/coding-agent/test/suite/regressions/7301-stalled-availability-refresh.test.ts",
+   1,
+   "Models",
+   3
+  ]
+ ]
+}

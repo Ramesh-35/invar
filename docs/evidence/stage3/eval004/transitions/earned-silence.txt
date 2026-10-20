@@ -1,0 +1,9 @@
+pi index.ts ExtensionAPI: decl 'packages/coding-agent/src/core/extensions/types.ts:1592:export interface ExtensionAPI {' members=36 reads=[] distinctive=0 EARNED
+pi branch-summarization.ts Model: decl 'packages/ai/src/types.ts:839:export interface Model<TApi extends Api> extends BaseModel<TA' members=9 reads=['contextWindow', 'type'] distinctive=1 EARNED
+pi branch-summarization.ts SimpleStreamOptions: decl 'packages/ai/src/types.ts:369:export interface SimpleStreamOptions extends StreamOptions {' members=4 reads=[] distinctive=0 EARNED
+pi branch-summarization.ts Usage: decl 'packages/ai/src/types.ts:451:export interface Usage {' members=9 reads=[] distinctive=0 EARNED
+pi branch-summary-extensions.test.ts Usage: decl 'packages/ai/src/types.ts:451:export interface Usage {' members=9 reads=['cost'] distinctive=1 EARNED
+pi rpc-prompt-response-semantics.test.ts AssistantMessage: decl 'packages/ai/src/types.ts:570:export interface AssistantMessage {' members=18 reads=['model'] distinctive=1 EARNED
+pi rpc-prompt-response-semantics.test.ts Model: decl 'packages/ai/src/types.ts:839:export interface Model<TApi extends Api> extends BaseModel<TA' members=9 reads=['type'] distinctive=0 EARNED
+puppeteer puppeteer.config.ts Configuration: decl 'packages/puppeteer-core/src/common/Configuration.ts:26:export interface Configuration {' members=9 reads=[] distinctive=0 EARNED
+puppeteer browsercontext-cookies.test.ts DeleteCookiesRequest: decl 'packages/puppeteer-core/src/common/Cookie.ts:207:export interface DeleteCookiesRequest {' members=5 reads=['name', 'partitionKey'] distinctive=1 EARNED
