@@ -321,6 +321,52 @@ fn go_fields(text: &str) -> Fields {
     out
 }
 
+/// The member texts after a declaration line's opening brace (the first `{`
+/// outside `<...>`, `(...)` and `[...]`, so a type parameter's constraint or
+/// default is never read as a member), up to its matching `}` or the end of
+/// the line, split at `;` and `,` outside `{}`, `()` and `[]`. A comma inside
+/// `<...>` may split a segment; the piece after it has no `name:` and is
+/// dropped, and the type text is cut at that comma as for every member line,
+/// so angle brackets are not tracked there. Empty when nothing follows the
+/// brace on that line.
+fn same_line_members(t: &str) -> Vec<&str> {
+    let b = t.as_bytes();
+    let mut d = 0i32;
+    let mut open = None;
+    for (i, &c) in b.iter().enumerate() {
+        match c {
+            b'<' | b'(' | b'[' => d += 1,
+            b'>' if i > 0 && b[i - 1] == b'=' => {}
+            b'>' | b')' | b']' => d -= 1,
+            b'{' if d <= 0 => {
+                open = Some(i + 1);
+                break;
+            }
+            _ => {}
+        }
+    }
+    let Some(start) = open else { return Vec::new() };
+    let mut out = Vec::new();
+    let (mut d, mut seg) = (0i32, start);
+    for i in start..b.len() {
+        match b[i] {
+            b'{' | b'(' | b'[' => d += 1,
+            b'}' if d == 0 => {
+                out.push(&t[seg..i]);
+                return out;
+            }
+            b'}' | b')' | b']' => d -= 1,
+            b';' | b',' if d == 0 => {
+                out.push(&t[seg..i]);
+                seg = i + 1;
+            }
+            _ => {}
+        }
+    }
+    out.push(&t[seg..]);
+    out
+}
+
 fn decl_name_type(t: &str) -> Option<(String, String)> {
     let t = t.strip_prefix("readonly ").unwrap_or(t);
     let name = ident_at(t, 0)?;
@@ -395,11 +441,22 @@ fn ts_fields(text: &str) -> Fields {
             .trim()
             .trim_start_matches("export ")
             .trim_start_matches("declare ");
+        let mut opened = false;
         for kw in ["interface ", "type ", "class "] {
             if let Some(rest) = t.strip_prefix(kw) {
                 if let Some(id) = ident_at(rest, 0) {
                     scope = id.to_string();
                     open_at = depth;
+                    opened = true;
+                }
+            }
+        }
+        // LOCK-SLICE1: members written on the declaration's own line,
+        // `type X = { a: A; readonly b: B }`.
+        if opened {
+            for seg in same_line_members(t) {
+                if let Some((name, ty)) = decl_name_type(seg.trim()) {
+                    out.insert((scope.clone(), name), Some(ty.trim_end_matches(['{', ' ']).to_string()));
                 }
             }
         }

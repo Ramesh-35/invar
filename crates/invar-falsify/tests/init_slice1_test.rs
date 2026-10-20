@@ -11,7 +11,10 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-const STATUS: &str = "# status: PROPOSED (heuristic; receiver of field reads not verified)";
+// S5-D4 (INIT-DISCOVERY-SLICE5): the status line states what is verified.
+// Original, kept verbatim:
+//     const STATUS: &str = "# status: PROPOSED (heuristic; receiver of field reads not verified)";
+const STATUS: &str = "# status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)";
 
 fn ws(tag: &str, files: &[(&str, &str)]) -> PathBuf {
     let nanos = std::time::SystemTime::now()
@@ -353,15 +356,29 @@ fn n09_undeclared_directory_is_not_a_package() {
     expect(&init(&d), &[], &[], &[], "SUMMARY packages=2 candidates=0 proposals=0 abstentions=0 inventory=0 status=COMPLETE");
 }
 
+// SUPERSEDED by INIT-DISCOVERY-SLICE5 under ruling S5-D3 (2026-10-20), the
+// standing rule of S3-D1: this fixture pinned the bound "receiver of field
+// reads not verified" by name, and SLICE5 lifts it. The original name and
+// body, kept verbatim (also in docs/architecture/INIT-DISCOVERY-SLICE5.md
+// section K):
+//     fn n10_receiver_not_verified_is_pinned()
+//     expect(&o, &[order_pair("b/src/x.ts", "production")], &[], &[], "SUMMARY packages=2 candidates=1 proposals=1 abstentions=0 inventory=0 status=COMPLETE");
+//     assert!(o.proposals[0].evidence.contains(&STATUS.to_string()));
+// The reads are on `other`, not on the value declared as Order: RECV.
 #[test]
-fn n10_receiver_not_verified_is_pinned() {
+fn n10_untyped_receiver_abstains_recv_by_slice5() {
     let d = ws(
         "n10",
         &[ROOT_AB, PKG_A, PKG_B, ("a/order.ts", ORDER), ("b/src/x.ts", "import { Order } from 'a/order';\nexport const f = (o: Order, other: any) => [other.total_minor, other.currency_code];\n")],
     );
     let o = init(&d);
-    expect(&o, &[order_pair("b/src/x.ts", "production")], &[], &[], "SUMMARY packages=2 candidates=1 proposals=1 abstentions=0 inventory=0 status=COMPLETE");
-    assert!(o.proposals[0].evidence.contains(&STATUS.to_string()));
+    expect(
+        &o,
+        &[],
+        &["ABSTAIN RECV b/src/x.ts:1 Order: 2 of its fields are accessed in this file, 0 read on a receiver declared as Order; the others are writes or are read off values init cannot tie to Order; not guessed"],
+        &[],
+        "SUMMARY packages=2 candidates=1 proposals=0 abstentions=1 inventory=0 status=COMPLETE",
+    );
 }
 
 #[test]
@@ -435,8 +452,17 @@ fn u01_inferred_type_abstains_r6() {
     );
 }
 
+// SUPERSEDED by INIT-DISCOVERY-SLICE4 under ruling S4-D1 (2026-10-19), the
+// standing rule of S3-D1: a frozen fixture that pins a declared scope limit
+// by name may be replaced only by the slice that lifts that limit. The
+// original name and assertion, kept verbatim (also in
+// docs/architecture/INIT-DISCOVERY-SLICE4.md section K):
+//     fn u02_barrel_depth_two_abstains()
+//     &["ABSTAIN BARREL2 b/src/x.ts:1 Order from \"a\" is re-exported through more than one barrel level (from a/index.ts)"],
+//     "SUMMARY packages=2 candidates=1 proposals=0 abstentions=1 inventory=0 status=COMPLETE",
+// Code-pair discovery now follows five barrel levels, so the chain resolves.
 #[test]
-fn u02_barrel_depth_two_abstains() {
+fn u02_barrel_depth_two_resolved_by_slice4() {
     let d = ws(
         "u02",
         &[
@@ -451,10 +477,10 @@ fn u02_barrel_depth_two_abstains() {
     );
     expect(
         &init(&d),
+        &[prop("code:order.ts->x.ts", "a/models/order.ts", "b/src/x.ts", "production", &[("Order", &["currency_code", "total_minor"], &[])])],
         &[],
-        &["ABSTAIN BARREL2 b/src/x.ts:1 Order from \"a\" is re-exported through more than one barrel level (from a/index.ts)"],
         &[],
-        "SUMMARY packages=2 candidates=1 proposals=0 abstentions=1 inventory=0 status=COMPLETE",
+        "SUMMARY packages=2 candidates=1 proposals=1 abstentions=0 inventory=0 status=COMPLETE",
     );
 }
 

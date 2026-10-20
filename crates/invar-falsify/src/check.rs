@@ -917,6 +917,15 @@ pub fn evaluate_with(
             ..Default::default()
         };
         if let Some(l) = lock {
+            // LOCK-SLICE1 (L1): a contract whose lock binds no field has
+            // nothing to compare; a HOLDS would be vacuous, so it is not
+            // evaluated (exit 4), never passed.
+            let unbound = l.contracts.iter().any(|c| c.id == o.id && c.bindings.is_empty());
+            if unbound && o.residue.is_empty() && o.skipped.is_none() && o.unevaluated.is_empty() {
+                o.unevaluated.push(
+                    "the lock binds no field of this contract (0 bindings), so there is nothing to compare and a HOLDS would be vacuous; make the producer's fields readable and run `invar lock --update`".into(),
+                );
+            }
             apply_waivers(&mut o, &l.waivers, today);
         }
         out.push(o);

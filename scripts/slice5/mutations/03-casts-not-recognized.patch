@@ -1,0 +1,13 @@
+# mutation: a cast `as S` not recognized
+# catch: s5_f4_a_cast_proposes
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -974,7 +974,7 @@
+         }
+         // a cast `r = ... as S`
+         for q in start..end {
+-            if t.is(q, "as") {
++            if t.is(q, "as_") {
+                 if let Some(a) = type_head(t, q + 1, shape) {
+                     put(&mut one, &mut arr, name, a);
+                 }

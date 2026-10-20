@@ -1,0 +1,14 @@
+# mutation: E4 names only the first barrel hop (CM-S4-10, R-S4-4)
+# catch: s4_f10_e4_names_the_whole_chain
+--- a/crates/invar-falsify/src/init.rs
++++ b/crates/invar-falsify/src/init.rs
+@@ -711,8 +711,7 @@
+             [] => String::new(),
+             [(b, l)] => format!(", re-exported by barrel {b}:{l} from {}", p.producer),
+             chain => {
+-                let hops: Vec<String> = chain.iter().map(|(b, l)| format!("{b}:{l}")).collect();
+-                format!(", re-exported through {} from {}", hops.join(" -> "), p.producer)
++                format!(", re-exported by barrel {}:{} from {}", chain[0].0, chain[0].1, p.producer)
+             }
+         };
+         v.push(format!(

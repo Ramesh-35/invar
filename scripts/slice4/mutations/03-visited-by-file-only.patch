@@ -1,0 +1,13 @@
+# mutation: the visited set keyed on the file only, dropping a renamed route (CM-S4-6)
+# catch: s4_f7_a_renamed_reexport_follows_the_original_name
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1490,7 +1490,7 @@
+                 };
+                 let (_, Res::File(t)) = ctx.resolve(&re.spec, &f, false) else { continue };
+                 let key = (t, orig);
+-                if seen.contains(&key) {
++                if seen.iter().any(|(sf, _)| *sf == key.0) {
+                     continue;
+                 }
+                 let mut c = chain.clone();

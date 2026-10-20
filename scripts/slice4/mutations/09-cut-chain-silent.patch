@@ -1,0 +1,13 @@
+# mutation: a chain cut at the limit returned as no shape instead of BARREL2 (CM-S4-9)
+# catch: s4_f3_depth_six_abstains_barrel2
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1506,7 +1506,7 @@
+         depth += 1;
+     }
+     match within.len() {
+-        0 if beyond => Found::Barrel2,
++        0 if beyond => Found::NotShape,
+         0 => Found::NotShape,
+         1 => {
+             let (f, (d, chain)) = within.into_iter().next().expect("one entry");

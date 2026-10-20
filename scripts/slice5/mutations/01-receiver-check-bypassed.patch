@@ -1,0 +1,13 @@
+# mutation: the receiver check bypassed: every file-wide read counts (CM-S5-1)
+# catch: s5_f2_an_untyped_receiver_abstains_recv
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -2044,7 +2044,7 @@
+                                 let mut fields = Vec::new();
+                                 let mut stoplisted = Vec::new();
+                                 // SLICE5: only reads through a receiver declared as the shape.
+-                                let declared = receiver_reads(fi, name);
++                                let declared = fi.reads.clone();
+                                 let accessed = members
+                                     .iter()
+                                     .filter(|(m, _)| {

@@ -1,0 +1,5 @@
+  + contract code:Accessibility.ts->accessibility.test.ts (2 bindings)
+  + contract code:ElementHandle.ts->elementhandle.test.ts (2 bindings)
+  + contract code:LaunchOptions.ts->mocha-utils.ts (3 bindings)
+wrote ./invar.lock (3 contract(s), 7 binding(s))
+lock exit 0

@@ -15,6 +15,7 @@ const PKG_B: (&str, &str) = ("b/package.json", r#"{"name":"b"}"#);
 const ORDER: &str = "export interface Order {\n  total_minor: number;\n  currency_code: string;\n}\n";
 const SILENT: &str = "SUMMARY packages=2 candidates=1 proposals=0 abstentions=0 inventory=0 status=COMPLETE";
 const LOUD: &str = "SUMMARY packages=2 candidates=1 proposals=0 abstentions=1 inventory=0 status=COMPLETE";
+const ONE: &str = "SUMMARY packages=2 candidates=1 proposals=1 abstentions=0 inventory=0 status=COMPLETE";
 
 fn ws(tag: &str, files: &[(&str, &str)]) -> PathBuf {
     let nanos = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
@@ -59,6 +60,16 @@ fn case(tag: &str, files: &[(&str, &str)], clause: &str) -> Out {
     init(&ws(tag, &all))
 }
 
+/// INIT-DISCOVERY-SLICE5 (ruling S5-D3): `case` with the receiver declared
+/// as Order, for the four fixtures S4-D7 turned into proposals. SLICE5 counts
+/// no read through `o: any`; the abstaining and silent fixtures keep `case`.
+fn case_typed(tag: &str, files: &[(&str, &str)], clause: &str) -> Out {
+    let use_ts = format!("import {clause} from 'a';\nexport function f(o: Order) {{\n  return [o.total_minor, o.currency_code];\n}}\n");
+    let mut all: Vec<(&str, &str)> = vec![ROOT_AB, PKG_A, PKG_B, ("b/src/use.ts", &use_ts)];
+    all.extend_from_slice(files);
+    init(&ws(tag, &all))
+}
+
 fn silent(o: &Out) {
     assert_eq!(o.proposals, 0, "{}", o.raw);
     assert!(o.abstain.is_empty(), "earned silence must stay silent\n{}", o.raw);
@@ -71,6 +82,13 @@ fn loud(o: &Out, name: &str, reason: &str) {
     assert_eq!(o.summary, LOUD, "{}", o.raw);
 }
 
+/// SLICE4 now follows this workspace's chain to the declaration.
+fn proposed(o: &Out) {
+    assert_eq!(o.proposals, 1, "{}", o.raw);
+    assert!(o.abstain.is_empty(), "{}", o.raw);
+    assert_eq!(o.summary, ONE, "{}", o.raw);
+}
+
 fn unreached(site: &str) -> String {
     format!("declared as a type at {site}, which init could not reach from a/index.ts; not guessed")
 }
@@ -80,9 +98,20 @@ const NOT_DECLARED: &str = "not declared in the sources of package a; not guesse
 // --------------------------------------------------------- unearned: loud
 
 #[test]
-fn b_f1_a_type_three_barrels_deep_abstains_with_its_site() {
+fn b_f1_a_type_three_barrels_deep_resolved_by_slice4() {
+    // Superseded by INIT-DISCOVERY-SLICE4 (ruling S4-D7 under the standing
+    // rule of S3-D1). Original name and assertion, kept verbatim:
+    //   fn b_f1_a_type_three_barrels_deep_abstains_with_its_site()
+    //   loud(&case("f1", &files, "{ Order }"), "Order", &unreached("a/l3.ts:1"));
+    // Chains are now followed five levels, so this workspace proposes. The
+    // unreached-site reason stays pinned on a route init still does not
+    // follow: a namespace re-export at the third level.
     let files = [("a/index.ts", "export * from \"./l1\";\n"), ("a/l1.ts", "export * from \"./l2\";\n"), ("a/l2.ts", "export * from \"./l3\";\n"), ("a/l3.ts", ORDER)];
-    loud(&case("f1", &files, "{ Order }"), "Order", &unreached("a/l3.ts:1"));
+    // S5-D3: typed receiver. Line before SLICE5, kept verbatim:
+    //     proposed(&case("f1", &files, "{ Order }"));
+    proposed(&case_typed("f1", &files, "{ Order }"));
+    let ns = [("a/index.ts", "export * from \"./l1\";\n"), ("a/l1.ts", "export * from \"./l2\";\n"), ("a/l2.ts", "export * as ns from \"./l3\";\n"), ("a/l3.ts", ORDER)];
+    loud(&case("f1ns", &ns, "{ Order }"), "Order", &unreached("a/l3.ts:1"));
 }
 
 #[test]
@@ -96,10 +125,17 @@ fn b_f2_a_regex_literal_cannot_hide_a_type() {
 }
 
 #[test]
-fn b_f3_an_export_type_star_chain_abstains() {
-    // S3-F-10 is deferred (S3B-D5): the chain stays unparsed, and stated.
+fn b_f3_an_export_type_star_chain_resolved_by_slice4() {
+    // Superseded by INIT-DISCOVERY-SLICE4, which parses `export type *`
+    // (S3-F-10; ruling S4-D7 under the standing rule of S3-D1). Original
+    // name, comment and assertion, kept verbatim:
+    //   fn b_f3_an_export_type_star_chain_abstains()
+    //   // S3-F-10 is deferred (S3B-D5): the chain stays unparsed, and stated.
+    //   loud(&case("f3", &files, "{ Order }"), "Order", &unreached("a/o.ts:1"));
     let files = [("a/index.ts", "export type * from \"./o\";\n"), ("a/o.ts", ORDER)];
-    loud(&case("f3", &files, "{ Order }"), "Order", &unreached("a/o.ts:1"));
+    // S5-D3: typed receiver. Line before SLICE5, kept verbatim:
+    //     proposed(&case("f3", &files, "{ Order }"));
+    proposed(&case_typed("f3", &files, "{ Order }"));
 }
 
 #[test]
@@ -109,10 +145,21 @@ fn b_f6_a_name_declared_outside_the_package_abstains() {
 }
 
 #[test]
-fn b_f7_a_name_declared_both_ways_abstains() {
+fn b_f7_a_name_declared_both_ways_resolved_by_slice4() {
+    // Superseded by INIT-DISCOVERY-SLICE4 (ruling S4-D7 under the standing
+    // rule of S3-D1). Original name and assertion, kept verbatim:
+    //   fn b_f7_a_name_declared_both_ways_abstains()
+    //   loud(&case("f7", &files, "{ Order }"), "Order", "declared both as a type and as a value in package a; not guessed");
+    // The chain now reaches the type alias, which proposes exactly as it
+    // does one level down. The both-ways reason stays pinned on a route
+    // init still does not follow: a namespace re-export at the third level.
     let l3 = "export const Order = { kind: 1 };\nexport type Order = {\n  total_minor: number;\n  currency_code: string;\n};\n";
     let files = [("a/index.ts", "export * from \"./l1\";\n"), ("a/l1.ts", "export * from \"./l2\";\n"), ("a/l2.ts", "export * from \"./l3\";\n"), ("a/l3.ts", l3)];
-    loud(&case("f7", &files, "{ Order }"), "Order", "declared both as a type and as a value in package a; not guessed");
+    // S5-D3: typed receiver. Line before SLICE5, kept verbatim:
+    //     proposed(&case("f7", &files, "{ Order }"));
+    proposed(&case_typed("f7", &files, "{ Order }"));
+    let ns = [("a/index.ts", "export * from \"./l1\";\n"), ("a/l1.ts", "export * from \"./l2\";\n"), ("a/l2.ts", "export * as ns from \"./l3\";\n"), ("a/l3.ts", l3)];
+    loud(&case("f7ns", &ns, "{ Order }"), "Order", "declared both as a type and as a value in package a; not guessed");
 }
 
 #[test]
@@ -171,6 +218,11 @@ fn b_f10_an_unread_package_file_voids_earned_silence() {
 fn b_m1_two_runs_are_byte_identical() {
     // init() runs twice and asserts byte identity; pinned on the deepest path.
     let files = [("a/index.ts", "export * from \"./l1\";\n"), ("a/l1.ts", "export * from \"./l2\";\n"), ("a/l2.ts", "export * from \"./l3\";\n"), ("a/l3.ts", ORDER)];
-    let o = case("m1", &files, "{ Order }");
-    assert_eq!(o.summary, LOUD, "{}", o.raw);
+    // S5-D3: typed receiver. Line before SLICE5, kept verbatim:
+    //     let o = case("m1", &files, "{ Order }");
+    let o = case_typed("m1", &files, "{ Order }");
+    // Changed by INIT-DISCOVERY-SLICE4 (ruling S4-D7): this chain now
+    // proposes. Original assertion, kept verbatim:
+    //   assert_eq!(o.summary, LOUD, "{}", o.raw);
+    assert_eq!(o.summary, ONE, "{}", o.raw);
 }

@@ -1,0 +1,42 @@
+# mutation: states not merged, so a diamond counts each route as a declaration (CM-S4-4)
+# catch: s4_f5_a_diamond_to_one_declaration_proposes
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1464,17 +1464,17 @@
+ fn find_shape(ctx: &Ctx, infos: &BTreeMap<String, FileInfo>, name: &str, file: &str) -> Found {
+     let start = (file.to_string(), name.to_string());
+     let mut seen = BTreeSet::from([start.clone()]);
+-    let mut level: BTreeMap<(String, String), Chain> = BTreeMap::from([(start, Vec::new())]);
++    let mut level: Vec<((String, String), Chain)> = vec![(start, Vec::new())];
+     let mut within: BTreeMap<String, (Decl, Chain)> = BTreeMap::new();
+     let mut beyond = false;
+     let mut depth = 0;
+     while !level.is_empty() {
+-        let mut next: BTreeMap<(String, String), Chain> = BTreeMap::new();
++        let mut next: Vec<((String, String), Chain)> = Vec::new();
+         for ((f, n), chain) in level {
+             let Some(fi) = infos.get(&f) else { continue };
+             if let Some(d) = fi.exported_shape(&n) {
+                 if depth <= MAX_BARREL_DEPTH {
+-                    within.entry(f).or_insert((d.clone(), chain));
++                    within.entry(format!("{f} {chain:?}")).or_insert((d.clone(), chain));
+                 } else {
+                     beyond = true;
+                 }
+@@ -1495,13 +1495,11 @@
+                 }
+                 let mut c = chain.clone();
+                 c.push((f.clone(), re.line));
+-                let slot = next.entry(key).or_insert_with(|| c.clone());
+-                if by_path(&c) < by_path(slot) {
+-                    *slot = c;
+-                }
++                let _ = by_path;
++                next.push((key, c));
+             }
+         }
+-        seen.extend(next.keys().cloned());
++        seen.extend(next.iter().map(|(k, _)| k.clone()));
+         level = next;
+         depth += 1;
+     }

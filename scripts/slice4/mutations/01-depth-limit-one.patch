@@ -1,0 +1,13 @@
+# mutation: the depth limit set to one level (CM-S4-1)
+# catch: s4_f1_depth_two_proposes
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1435,7 +1435,7 @@
+ 
+ /// Barrel levels code-pair discovery follows from an import's resolved entry
+ /// (SLICE4, S4-D2: the smallest limit covering every chain measured).
+-const MAX_BARREL_DEPTH: usize = 5;
++const MAX_BARREL_DEPTH: usize = 1;
+ 
+ /// A barrel hop: the re-exporting file and the line of its re-export.
+ type Chain = Vec<(String, usize)>;

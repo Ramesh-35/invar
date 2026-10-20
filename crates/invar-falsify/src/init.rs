@@ -4,7 +4,8 @@
 //! HEURISTIC. Since INIT-DISCOVERY slice 1 it proposes contracts only between
 //! TypeScript code producers and consumers in different qualifying workspace
 //! packages (see `codepairs`), each with its evidence and the status line
-//! "PROPOSED (heuristic; receiver of field reads not verified)". Schema files
+//! "PROPOSED (heuristic; each counted read is on a receiver declared as the
+//! shape in this file; field writes excluded; types are not inferred)". Schema files
 //! (JSON Schema, OpenAPI-JSON components) are INVENTORY ONLY (ruling H1): they
 //! are listed, never proposed. Everything else it finds (YAML specs,
 //! AsyncAPI, protobuf, framework routes, Pydantic models) is inventory too.
@@ -112,7 +113,8 @@ pub fn summary(d: &Discovery) -> String {
     )
 }
 
-pub const PROPOSAL_STATUS: &str = "status: PROPOSED (heuristic; receiver of field reads not verified)";
+pub const PROPOSAL_STATUS: &str =
+    "status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)";
 pub const LOCK_NOTE: &str = "lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.";
 
 fn rel(root: &Path, p: &Path) -> String {
@@ -707,9 +709,13 @@ fn evidence_lines(p: &crate::codepairs::CodePair) -> Vec<String> {
     }
     v.push(format!("E3 consumer package {}", pkg(&p.consumer_pkg)));
     for s in &p.shapes {
-        let via = match &s.barrel {
-            Some((b, l)) => format!(", re-exported by barrel {b}:{l} from {}", p.producer),
-            None => String::new(),
+        let via = match s.barrel.as_slice() {
+            [] => String::new(),
+            [(b, l)] => format!(", re-exported by barrel {b}:{l} from {}", p.producer),
+            chain => {
+                let hops: Vec<String> = chain.iter().map(|(b, l)| format!("{b}:{l}")).collect();
+                format!(", re-exported through {} from {}", hops.join(" -> "), p.producer)
+            }
         };
         v.push(format!(
             "E4 {} imported at {}:{} from {:?}, resolved to {}{via}",
@@ -747,7 +753,8 @@ pub fn render_manifest_opts(d: &Discovery, full_inventory: bool) -> String {
     s.push_str("# HONEST SCOPE: discovery is HEURISTIC (text patterns, not a parser). Each\n");
     s.push_str("# [[invariant]] block below is a PROPOSAL: a TypeScript shape exported by one\n");
     s.push_str("# workspace package, imported by name in another, with at least 2 of its\n");
-    s.push_str("# direct fields read there. The receiver of those reads is NOT verified.\n");
+    s.push_str("# direct fields read there, each on a receiver declared as that shape in\n");
+    s.push_str("# the consumer file (field writes excluded; types are not inferred).\n");
     s.push_str("# Review every block before trusting a verdict. Schema files are inventory\n");
     s.push_str("# only. ABSTAIN lines are refusals to propose, not negative findings. Paths\n");
     s.push_str("# are relative to this file.\n\n");

@@ -1,0 +1,13 @@
+# mutation: the RECV reason missing the accessed count
+# catch: s5_f2_an_untyped_receiver_abstains_recv
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -2068,7 +2068,7 @@
+                                 stoplisted.dedup();
+                                 if fields.len() < MIN_FIELDS && accessed >= MIN_FIELDS {
+                                     let why = format!(
+-                                        "{name}: {accessed} of its fields are accessed in this file, {} read on a receiver declared as {name}; the others are writes or are read off values init cannot tie to {name}; not guessed",
++                                        "{name}: of its fields are accessed in this file, {} read on a receiver declared as {name}; the others are writes or are read off values init cannot tie to {name}; not guessed",
+                                         fields.len()
+                                     );
+                                     abstain("RECV", why);

@@ -75,3 +75,23 @@ whose (producer, consumer) pair was never adjudicated (50); in-sample, the
 no knowledge of the engine or of earlier verdicts, rubric D, the packet and
 the pinned source only, blind to each other; TRUE only when both say TRUE.
 This is AI adjudication, reported under that label.
+
+## Closing re-measurement after LOCK-SLICE1 (2026-10-20)
+
+The record above stands as written (M-S-5 FAIL on 237fbfef5b0b). By the
+ruling that followed it, LOCK-SLICE1 fixed lock and check
+(docs/architecture/LOCK-SLICE1.md), and the evaluation was re-measured on
+release binary 26824a08805e (SLICE4 plus SLICE5 plus LOCK-SLICE1), same
+manifest, same pinned clones (after-lock-slice1/).
+
+| Metric | Verdict on 26824a08805e |
+|---|---|
+| M-S-1, M-S-2 | PASS, 10 of 10, exit 0, deterministic |
+| init output | byte-identical to 237fbfef5b0b on all 10 repositories, so M-S-3 (43 of 50, 86.0 percent) and M-S-4 (0 silent) stand unchanged |
+| M-S-5 round trip | **PASS: 88 of 88** TRUE contracts lock with bindings (0 zero-binding contracts; every contract binds every one of its evidence fields), check exits 0 with the durability line on all 88, second check byte-identical. pi `code:output.ts->tool.ts` now binds OutputLimits maxBytes, maxLines, retain |
+| M-S-6 backtest | PASS: 4 of 4, exit 0, byte-identical reruns; 370 bindings, all present, every absent event before the field's introduction; 0 never-present, 0 blind spots. The only change from 237fbfef5b0b is the 3 new OutputLimits bindings, each present since its introduction |
+| M-S-7 | init 0 to 8 seconds per repository |
+
+STAGE3-EVAL-005: CLOSED, all seven metrics PASS. The first OmniRoute
+fetch of the re-run failed on disk space (PIN-FAILED, as S3-F-02); space
+was freed and the repository re-run alone; its output is byte-identical.

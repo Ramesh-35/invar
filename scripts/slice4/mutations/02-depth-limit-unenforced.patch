@@ -1,0 +1,13 @@
+# mutation: the depth limit not enforced (CM-S4-2)
+# catch: s4_f3_depth_six_abstains_barrel2
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1473,7 +1473,7 @@
+         for ((f, n), chain) in level {
+             let Some(fi) = infos.get(&f) else { continue };
+             if let Some(d) = fi.exported_shape(&n) {
+-                if depth <= MAX_BARREL_DEPTH {
++                if depth <= usize::MAX {
+                     within.entry(f).or_insert((d.clone(), chain));
+                 } else {
+                     beyond = true;

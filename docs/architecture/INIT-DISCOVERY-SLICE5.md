@@ -1,9 +1,10 @@
 # INIT-DISCOVERY-SLICE5: receiver verification
 
-Status: RATIFIED (S5-D1 to S5-D6, section J) and implemented; NOT LANDED.
-STAGE3-EVAL-005 passed M-S-3 (43 of 50 out of sample) and failed M-S-5 on
-a pre-existing lock defect (S5-F-01); by ruling of 2026-10-20 SLICE4, SLICE5
-and LOCK-SLICE1 land together once all seven metrics pass (sections J, K).
+Status: LANDED (2026-10-20) together with INIT-DISCOVERY-SLICE4 and
+LOCK-SLICE1. STAGE3-EVAL-005 first passed M-S-3 (43 of 50 out of sample)
+and failed M-S-5 on a pre-existing lock defect (S5-F-01); LOCK-SLICE1
+fixed it and the re-measurement closed all seven metrics (sections J, K;
+docs/evidence/stage3/eval005/LEDGER.md).
 Sections 0 to I are the draft r1 text, unchanged. Parent:
 STAGE3-EVAL-004 (M-S-3 FAIL, finding S4-F-03) and ruling S4-D8 (hold
 SLICE4; fix the receiver bound; land both; re-measure). Baseline: d299d74

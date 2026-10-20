@@ -1,0 +1,13 @@
+# mutation: `this.r.f` through a field declared as S not recognized
+# catch: s5_f10_a_this_field_proposes
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1063,7 +1063,7 @@
+     let mut out: BTreeMap<String, (String, usize)> = BTreeMap::new();
+     for k in 0..all.len() {
+         let Some(r) = t.id(k) else { continue };
+-        let via_this = k >= 2 && t.p(k - 1, b'.') && t.is(k - 2, "this");
++        let via_this = false;
+         if k > 0 && t.p(k - 1, b'.') && !via_this {
+             continue;
+         }

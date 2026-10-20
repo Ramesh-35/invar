@@ -1,0 +1,13 @@
+# mutation: same-line members not read (CM-L-3)
+# catch: l_f1_a_one_line_type_binds_its_members_and_holds
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -450,7 +450,7 @@
+         }
+         // LOCK-SLICE1: members written on the declaration's own line,
+         // `type X = { a: A; readonly b: B }`.
+-        if opened {
++        if opened && false {
+             for seg in same_line_members(t) {
+                 if let Some((name, ty)) = decl_name_type(seg.trim()) {
+                     out.insert((scope.clone(), name), Some(ty.trim_end_matches(['{', ' ']).to_string()));

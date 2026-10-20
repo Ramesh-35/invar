@@ -1,9 +1,10 @@
 # INIT-DISCOVERY-SLICE4: bounded barrel chains
 
-Status: RATIFIED (S4-D1 to S4-D7) and implemented; NOT LANDED. STAGE3-EVAL-004
-failed M-S-3 (16 of 29, below the 60 percent floor), and by ruling S4-D8
-the engine is held as docs/evidence/slice4/slice4-implementation.patch
-until a receiver-verification slice lands with it (sections J and K).
+Status: LANDED (2026-10-20) together with INIT-DISCOVERY-SLICE5 and
+LOCK-SLICE1, after STAGE3-EVAL-005 closed on all seven metrics. Before
+that: STAGE3-EVAL-004 failed M-S-3 (16 of 29), and by ruling S4-D8 the
+engine was held as docs/evidence/slice4/slice4-implementation.patch until
+the receiver-verification slice could land with it (sections J and K).
 Sections 0 to I are the draft r1 text, unchanged. Parent:
 STAGE3-EVAL-003 (BARREL2 and unreached-type abstentions) and the founder's
 choice of 2026-10-19 (barrel depth before tsconfig paths, on measured

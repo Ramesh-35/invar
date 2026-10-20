@@ -1,0 +1,15 @@
+# mutation: the cycle guard removed (CM-S4-3); fails by the fixture's wall-clock limit, not by hanging
+# catch: s4_f4_a_cycle_ends_and_earned_silence_decides
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1490,9 +1490,7 @@
+                 };
+                 let (_, Res::File(t)) = ctx.resolve(&re.spec, &f, false) else { continue };
+                 let key = (t, orig);
+-                if seen.contains(&key) {
+-                    continue;
+-                }
++                let _ = &seen;
+                 let mut c = chain.clone();
+                 c.push((f.clone(), re.line));
+                 let slot = next.entry(key).or_insert_with(|| c.clone());

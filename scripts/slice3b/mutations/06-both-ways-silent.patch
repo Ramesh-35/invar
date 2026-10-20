@@ -1,5 +1,5 @@
 # mutation: a name declared both ways left silent (CM-S3B-7)
-# catch: b_f7_a_name_declared_both_ways_abstains
+# catch: b_f7_a_name_declared_both_ways_resolved_by_slice4
 --- a/crates/invar-falsify/src/codepairs.rs
 +++ b/crates/invar-falsify/src/codepairs.rs
 @@ -1642,7 +1642,8 @@

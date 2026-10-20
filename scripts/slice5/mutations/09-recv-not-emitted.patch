@@ -1,0 +1,13 @@
+# mutation: a dropped shape left silent instead of RECV (CM-S5-6)
+# catch: s5_f2_an_untyped_receiver_abstains_recv
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -2071,7 +2071,7 @@
+                                         "{name}: {accessed} of its fields are accessed in this file, {} read on a receiver declared as {name}; the others are writes or are read off values init cannot tie to {name}; not guessed",
+                                         fields.len()
+                                     );
+-                                    abstain("RECV", why);
++                                    let _ = why;
+                                 }
+                                 if fields.len() >= MIN_FIELDS {
+                                     let ev = ShapeEvidence {

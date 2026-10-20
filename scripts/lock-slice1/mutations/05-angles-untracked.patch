@@ -1,0 +1,16 @@
+# mutation: angle brackets not tracked when finding the opening brace, so a type parameter's constraint is read as members (CM-L-4); retargeted at Gate 3, finding L-F-01
+# catch: l_f6_a_type_parameter_constraint_is_not_a_member
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -335,9 +335,8 @@
+     let mut open = None;
+     for (i, &c) in b.iter().enumerate() {
+         match c {
+-            b'<' | b'(' | b'[' => d += 1,
+-            b'>' if i > 0 && b[i - 1] == b'=' => {}
+-            b'>' | b')' | b']' => d -= 1,
++            b'(' | b'[' => d += 1,
++            b')' | b']' => d -= 1,
+             b'{' if d <= 0 => {
+                 open = Some(i + 1);
+                 break;

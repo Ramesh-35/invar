@@ -1,0 +1,13 @@
+# mutation: writes counted as reads (CM-S5-2)
+# catch: s5_f3_writes_never_count
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1081,7 +1081,7 @@
+         }
+         let Some(f) = t.id(j + 1) else { continue };
+         let off = all[j + 1].1;
+-        if !written(m, off) {
++        if !written(m, off) || true {
+             let line = m[..off].iter().filter(|&&b| b == b'\n').count() + 1;
+             out.entry(name_key(f)).or_insert((f.to_string(), line));
+         }

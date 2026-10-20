@@ -129,7 +129,10 @@ fn x_f1_entry_is_five_lines_and_tsc_governed_names_both_emitters() {
 #[test]
 fn x_f2_index_is_sorted_complete_and_exactly_once() {
     let idx = index();
-    assert_eq!(idx.len(), 33, "19 engine + 8 proof + UNKNOWN-EXPLAIN-CODE + 5 exit numerals: {idx:?}");
+    // INIT-DISCOVERY-SLICE5 (ruling S5-D1) adds the engine code RECV. Line
+    // before SLICE5, kept verbatim:
+    //     assert_eq!(idx.len(), 33, "19 engine + 8 proof + UNKNOWN-EXPLAIN-CODE + 5 exit numerals: {idx:?}");
+    assert_eq!(idx.len(), 34, "20 engine + 8 proof + UNKNOWN-EXPLAIN-CODE + 5 exit numerals: {idx:?}");
     let codes: Vec<&String> = idx.iter().map(|(c, _)| c).collect();
     let mut sorted = codes.clone();
     sorted.sort();

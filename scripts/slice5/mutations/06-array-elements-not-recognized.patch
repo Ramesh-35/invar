@@ -1,0 +1,22 @@
+# mutation: elements of a declared array of S not recognized (for-of and callbacks)
+# catch: s5_f7_a_for_of_element_proposes s5_f8_array_callbacks_and_indexing_propose
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1015,7 +1015,7 @@
+         if t.is(k, "for") && t.p(k + 1, b'(') && matches!(t.id(k + 2), Some("const" | "let" | "var")) && t.is(k + 4, "of") {
+             if let (Some(r), Some(a)) = (t.id(k + 3), t.id(k + 5)) {
+                 if arrays.contains(a) && t.p(k + 6, b')') {
+-                    put(&mut one, &mut arr, r, false);
++                    let _ = r;
+                 }
+             }
+         }
+@@ -1033,7 +1033,7 @@
+         {
+             let q = if t.p(dot + 3, b'(') { dot + 4 } else { dot + 3 };
+             if let Some(r) = t.id(q) {
+-                put(&mut one, &mut arr, r, false);
++                let _ = r;
+             }
+         }
+     }

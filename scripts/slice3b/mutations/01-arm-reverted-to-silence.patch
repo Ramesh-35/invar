@@ -1,5 +1,5 @@
 # mutation: the NotShape arm silent again (CM-S3B-1)
-# catch: b_f1_a_type_three_barrels_deep_abstains_with_its_site
+# catch: b_f1_a_type_three_barrels_deep_resolved_by_slice4
 --- a/crates/invar-falsify/src/codepairs.rs
 +++ b/crates/invar-falsify/src/codepairs.rs
 @@ -1621,6 +1621,8 @@

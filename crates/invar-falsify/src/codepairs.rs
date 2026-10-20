@@ -5,10 +5,13 @@
 //! HONEST SCOPE: line and bracket-depth patterns over comment- and
 //! string-masked text, not a parser. A proposal establishes a named import of
 //! an exported shape across two declared packages plus at least two of the
-//! shape's direct members read by property access in the importing file. It
-//! does NOT establish that those reads are performed on values of the shape
-//! (the receiver is not verified). Everything init cannot resolve is an
-//! explicit abstention, never a guess.
+//! shape's direct members read by property access in the importing file.
+//! Since INIT-DISCOVERY-SLICE5 a read counts only through a receiver declared
+//! as the shape in that file (annotation, cast, explicit type argument, a
+//! local function's declared return type, or an element of a declared
+//! array); writes never count; types are not inferred, and receivers are
+//! matched by name across the file, not by scope. Everything init cannot
+//! resolve is an explicit abstention, never a guess.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
@@ -60,7 +63,9 @@ pub struct ShapeEvidence {
     pub import_line: usize,
     pub specifier: String,
     pub resolved: String,
-    pub barrel: Option<(String, usize)>,
+    /// Barrel hops from `resolved` to the declaring file, in order; empty
+    /// when `resolved` declares the shape.
+    pub barrel: Vec<(String, usize)>,
     pub fields: Vec<(String, usize)>,
     pub stoplisted: Vec<String>,
 }
@@ -292,6 +297,8 @@ struct FileInfo {
     reexports: Vec<ReExport>,
     /// name_key -> (spelling, first line), property access only.
     reads: BTreeMap<String, (String, usize)>,
+    /// The masked text, for the per-shape receiver check (SLICE5).
+    masked: Vec<u8>,
 }
 
 impl FileInfo {
@@ -592,6 +599,7 @@ fn scan_file(text: &str) -> FileInfo {
         i += 1;
     }
     fi.reads = property_reads(&t);
+    fi.masked = t.m.clone();
     fi
 }
 
@@ -643,6 +651,10 @@ fn top_statement(t: &Text, i: usize, fi: &mut FileInfo) -> Option<usize> {
     }
     if t.kw(i, "export") {
         let mut j = t.ws(i + 6);
+        // `export type { .. } from` and (SLICE4, R-S4-3) `export type * from`.
+        if t.kw(j, "type") && matches!(t.m.get(t.ws(j + 4)), Some(b'{') | Some(b'*')) {
+            j = t.ws(j + 4);
+        }
         if t.m.get(j) == Some(&b'*') {
             let k = t.ws(j + 1);
             if t.kw(k, "as") {
@@ -651,9 +663,6 @@ fn top_statement(t: &Text, i: usize, fi: &mut FileInfo) -> Option<usize> {
             let (spec, end) = from_spec(t, k)?;
             fi.reexports.push(ReExport { line, spec, names: None });
             return Some(end);
-        }
-        if t.kw(j, "type") && t.m.get(t.ws(j + 4)) == Some(&b'{') {
-            j = t.ws(j + 4);
         }
         if t.m.get(j) == Some(&b'{') {
             let close = t.close(j)?;
@@ -744,6 +753,337 @@ fn property_reads(t: &Text) -> BTreeMap<String, (String, usize)> {
                 }
             }
             _ => {}
+        }
+    }
+    out
+}
+
+// ------------------------------------------------------------ receivers
+//
+// INIT-DISCOVERY-SLICE5. A field read counts for shape S only through a
+// receiver declared as S in the consuming file (bounds B2 to B4): an
+// annotation, a cast, an explicit type argument, a call to a function of
+// this file whose declared return type is S or Promise<S>, or an element of
+// a receiver declared as an array of S. Writes never count. Receivers are
+// names, not scopes (no parser): a name declared as S anywhere in the file
+// verifies every bare read through that name.
+
+#[derive(Debug, Clone, PartialEq)]
+enum Tok {
+    Id(String),
+    P(u8),
+}
+
+/// Identifiers and single punctuation bytes of masked text, with offsets.
+/// Numbers are skipped; string contents and comments are already blank.
+fn tokens(m: &[u8]) -> Vec<(Tok, usize)> {
+    let mut out = Vec::new();
+    let mut i = 0;
+    while i < m.len() {
+        let c = m[i];
+        if is_ident_start(c) || c.is_ascii_digit() {
+            let s = i;
+            while i < m.len() && is_ident(m[i]) {
+                i += 1;
+            }
+            if is_ident_start(c) {
+                out.push((Tok::Id(String::from_utf8_lossy(&m[s..i]).into_owned()), s));
+            }
+            continue;
+        }
+        if !c.is_ascii_whitespace() {
+            out.push((Tok::P(c), i));
+        }
+        i += 1;
+    }
+    out
+}
+
+struct Toks<'a>(&'a [(Tok, usize)]);
+
+impl Toks<'_> {
+    fn id(&self, k: usize) -> Option<&str> {
+        match self.0.get(k) {
+            Some((Tok::Id(s), _)) => Some(s),
+            _ => None,
+        }
+    }
+    fn is(&self, k: usize, w: &str) -> bool {
+        self.id(k) == Some(w)
+    }
+    fn p(&self, k: usize, c: u8) -> bool {
+        matches!(self.0.get(k), Some((Tok::P(x), _)) if *x == c)
+    }
+    /// The index after the bracket group opened at k (`open` .. `close`).
+    fn skip_group(&self, mut k: usize, open: u8, close: u8) -> usize {
+        let mut d = 0i32;
+        while k < self.0.len() {
+            if self.p(k, open) {
+                d += 1;
+            } else if self.p(k, close) {
+                d -= 1;
+                if d == 0 {
+                    return k + 1;
+                }
+            }
+            k += 1;
+        }
+        k
+    }
+}
+
+/// A type at token k whose head is `shape`: `[readonly] [Wrapper<] S`, with
+/// optional generic arguments and an optional `[]`; never `S.x` or `S[k]`.
+/// Some(true) is an array of S, Some(false) is S itself.
+fn type_head(t: &Toks, mut k: usize, shape: &str) -> Option<bool> {
+    if t.is(k, "readonly") {
+        k += 1;
+    }
+    let mut arr = false;
+    if let Some(w) = t.id(k) {
+        if matches!(w, "Readonly" | "Partial" | "Required" | "Array" | "ReadonlyArray") && t.p(k + 1, b'<') {
+            arr = matches!(w, "Array" | "ReadonlyArray");
+            k += 2;
+            if t.is(k, "readonly") {
+                k += 1;
+            }
+        }
+    }
+    if !t.is(k, shape) || t.p(k + 1, b'.') {
+        return None;
+    }
+    k += 1;
+    if t.p(k, b'<') {
+        k = t.skip_group(k, b'<', b'>');
+    }
+    if t.p(k, b'[') {
+        return if t.p(k + 1, b']') { Some(true) } else { None };
+    }
+    Some(arr)
+}
+
+/// Functions of this file whose declared return type is S or Promise<S>.
+fn returning(t: &Toks, shape: &str) -> BTreeSet<String> {
+    let mut fns = BTreeSet::new();
+    for k in 0..t.0.len() {
+        if !(t.p(k, b')') && t.p(k + 1, b':')) {
+            continue;
+        }
+        let mut j = k + 2;
+        if t.is(j, "Promise") && t.p(j + 1, b'<') {
+            j += 2;
+        }
+        if type_head(t, j, shape) != Some(false) {
+            continue;
+        }
+        // back to the matching '(' and the name before it
+        let mut d = 0i32;
+        let mut o = k;
+        loop {
+            if t.p(o, b')') {
+                d += 1;
+            } else if t.p(o, b'(') {
+                d -= 1;
+                if d == 0 {
+                    break;
+                }
+            }
+            if o == 0 {
+                break;
+            }
+            o -= 1;
+        }
+        if o == 0 {
+            continue;
+        }
+        if t.p(o - 1, b'>') {
+            // `name<T>(`: step over the type parameters
+            let mut d = 0i32;
+            while o > 0 {
+                o -= 1;
+                if t.p(o, b'>') {
+                    d += 1;
+                } else if t.p(o, b'<') {
+                    d -= 1;
+                    if d == 0 {
+                        break;
+                    }
+                }
+            }
+            if o == 0 {
+                continue;
+            }
+        }
+        let name = match t.id(o - 1) {
+            Some("async") if o >= 3 && t.p(o - 2, b'=') => t.id(o - 3),
+            Some(n) if n != "function" => Some(n),
+            None if o >= 2 && t.p(o - 1, b'=') => t.id(o - 2),
+            _ => None,
+        };
+        if let Some(n) = name {
+            fns.insert(n.to_string());
+        }
+    }
+    fns
+}
+
+/// Receivers declared as `shape`: (single values, arrays of S).
+fn receivers(t: &Toks, shape: &str) -> (BTreeSet<String>, BTreeSet<String>) {
+    let fns = returning(t, shape);
+    let mut one: BTreeSet<String> = BTreeSet::new();
+    let mut arr: BTreeSet<String> = BTreeSet::new();
+    fn put(one: &mut BTreeSet<String>, arr: &mut BTreeSet<String>, name: &str, is_arr: bool) {
+        if is_arr {
+            arr.insert(name.to_string());
+        } else {
+            one.insert(name.to_string());
+        }
+    }
+    for k in 0..t.0.len() {
+        let Some(name) = t.id(k) else { continue };
+        if k > 0 && t.p(k - 1, b'.') {
+            continue;
+        }
+        // an annotation `r: S`, `r?: S`
+        let colon = if t.p(k + 1, b'?') { k + 2 } else { k + 1 };
+        if t.p(colon, b':') {
+            if let Some(a) = type_head(t, colon + 1, shape) {
+                put(&mut one, &mut arr, name, a);
+            }
+            continue;
+        }
+        // `r = <expression>`, not `==` or `=>`
+        if !t.p(k + 1, b'=') || t.p(k + 2, b'=') || t.p(k + 2, b'>') {
+            continue;
+        }
+        let start = k + 2;
+        let mut end = start;
+        let mut d = 0i32;
+        while end < t.0.len() {
+            if t.p(end, b'(') || t.p(end, b'[') || t.p(end, b'{') {
+                d += 1;
+            } else if t.p(end, b')') || t.p(end, b']') || t.p(end, b'}') {
+                if d == 0 {
+                    break;
+                }
+                d -= 1;
+            } else if d == 0 && t.p(end, b';') {
+                break;
+            }
+            end += 1;
+        }
+        // a cast `r = ... as S`
+        for q in start..end {
+            if t.is(q, "as") {
+                if let Some(a) = type_head(t, q + 1, shape) {
+                    put(&mut one, &mut arr, name, a);
+                }
+            }
+        }
+        let mut q = if t.is(start, "await") { start + 1 } else { start };
+        // a local function returning S: `r = [await] [this.]f(`
+        let local = if t.is(q, "this") && t.p(q + 1, b'.') { q + 2 } else { q };
+        if t.id(local).is_some_and(|f| fns.contains(f)) && t.p(local + 1, b'(') {
+            put(&mut one, &mut arr, name, false);
+        }
+        // an explicit type argument: `r = [await] a.b.f<S ...>(`
+        while t.id(q).is_some() && t.p(q + 1, b'.') {
+            q += 2;
+        }
+        if t.id(q).is_some() && t.p(q + 1, b'<') && type_head(t, q + 2, shape) == Some(false) && t.p(t.skip_group(q + 1, b'<', b'>'), b'(') {
+            put(&mut one, &mut arr, name, false);
+        }
+    }
+    // an explicit type argument, destructured: `[r, ...] = f<S>(`
+    for k in 0..t.0.len() {
+        let (true, Some(r), true) = (t.p(k, b'['), t.id(k + 1), t.p(k + 2, b',')) else { continue };
+        let close = t.skip_group(k, b'[', b']');
+        if !t.p(close, b'=') || t.p(close + 1, b'=') {
+            continue;
+        }
+        let mut q = close + 1;
+        while t.id(q).is_some() && t.p(q + 1, b'.') {
+            q += 2;
+        }
+        if t.id(q).is_some() && t.p(q + 1, b'<') && type_head(t, q + 2, shape) == Some(false) {
+            put(&mut one, &mut arr, r, false);
+        }
+    }
+    // elements of a receiver declared as an array of S
+    let arrays = arr.clone();
+    for k in 0..t.0.len() {
+        if t.is(k, "for") && t.p(k + 1, b'(') && matches!(t.id(k + 2), Some("const" | "let" | "var")) && t.is(k + 4, "of") {
+            if let (Some(r), Some(a)) = (t.id(k + 3), t.id(k + 5)) {
+                if arrays.contains(a) && t.p(k + 6, b')') {
+                    put(&mut one, &mut arr, r, false);
+                }
+            }
+        }
+        let Some(a) = t.id(k) else { continue };
+        if !arrays.contains(a) || (k > 0 && t.p(k - 1, b'.')) {
+            continue;
+        }
+        let dot = if t.p(k + 1, b'?') { k + 2 } else { k + 1 };
+        if t.p(dot, b'.')
+            && matches!(
+                t.id(dot + 1),
+                Some("map" | "filter" | "forEach" | "find" | "findLast" | "findIndex" | "some" | "every" | "flatMap" | "sort")
+            )
+            && t.p(dot + 2, b'(')
+        {
+            let q = if t.p(dot + 3, b'(') { dot + 4 } else { dot + 3 };
+            if let Some(r) = t.id(q) {
+                put(&mut one, &mut arr, r, false);
+            }
+        }
+    }
+    (one, arr)
+}
+
+/// Is the property access whose name starts at byte `off` a write?
+fn written(m: &[u8], mut i: usize) -> bool {
+    while i < m.len() && is_ident(m[i]) {
+        i += 1;
+    }
+    while i < m.len() && m[i].is_ascii_whitespace() {
+        i += 1;
+    }
+    let r = &m[i..m.len().min(i + 3)];
+    (r.first() == Some(&b'=') && !matches!(r.get(1), Some(b'=' | b'>')))
+        || [&b"+="[..], b"-=", b"*=", b"/=", b"%=", b"++", b"--", b"??=", b"||=", b"&&="].iter().any(|w| r.starts_with(w))
+}
+
+/// Reads (name_key -> (spelling, first line)) of fields through receivers
+/// declared as `shape` in this file: `r.f`, `r?.f`, `this.r.f`, `a[i].f`.
+fn receiver_reads(fi: &FileInfo, shape: &str) -> BTreeMap<String, (String, usize)> {
+    let m = &fi.masked;
+    let all = tokens(m);
+    let t = Toks(&all);
+    let (one, arr) = receivers(&t, shape);
+    let mut out: BTreeMap<String, (String, usize)> = BTreeMap::new();
+    for k in 0..all.len() {
+        let Some(r) = t.id(k) else { continue };
+        let via_this = k >= 2 && t.p(k - 1, b'.') && t.is(k - 2, "this");
+        if k > 0 && t.p(k - 1, b'.') && !via_this {
+            continue;
+        }
+        let mut j = k + 1;
+        if arr.contains(r) && t.p(j, b'[') {
+            j = t.skip_group(j, b'[', b']');
+        } else if !one.contains(r) {
+            continue;
+        }
+        if t.p(j, b'?') {
+            j += 1;
+        }
+        if !t.p(j, b'.') {
+            continue;
+        }
+        let Some(f) = t.id(j + 1) else { continue };
+        let off = all[j + 1].1;
+        if !written(m, off) {
+            let line = m[..off].iter().filter(|&&b| b == b'\n').count() + 1;
+            out.entry(name_key(f)).or_insert((f.to_string(), line));
         }
     }
     out
@@ -1430,66 +1770,87 @@ fn norm_path(p: &str) -> Result<Vec<String>, ()> {
     Ok(segs)
 }
 
+/// Barrel levels code-pair discovery follows from an import's resolved entry
+/// (SLICE4, S4-D2: the smallest limit covering every chain measured).
+const MAX_BARREL_DEPTH: usize = 5;
+
+/// A barrel hop: the re-exporting file and the line of its re-export.
+type Chain = Vec<(String, usize)>;
+
+/// Chains compare by their files first, so moving a re-export line never
+/// changes which route is named.
+fn by_path(c: &Chain) -> (Vec<&str>, Vec<usize>) {
+    c.iter().map(|(f, l)| (f.as_str(), *l)).unzip()
+}
+
 enum Found {
-    Decl { file: String, decl: Decl, barrel: Option<(String, usize)> },
+    /// `chain` lists the barrel hops from the entry; empty when the entry
+    /// declares the shape itself.
+    Decl { file: String, decl: Decl, chain: Chain },
     Ambig(Vec<String>),
     Barrel2,
     NotShape,
 }
 
+/// Follows the re-exports the files declare, breadth first from `file`, each
+/// (file, name) once so a cycle ends (SLICE4). A file that declares the shape
+/// is not followed further. Exactly one distinct declaring file within
+/// MAX_BARREL_DEPTH levels resolves; several are ambiguous; one reached only
+/// deeper is BARREL2. Each level is keyed by path and keeps the smallest
+/// chain, so neither the answer nor the chain depends on re-export order.
 fn find_shape(ctx: &Ctx, infos: &BTreeMap<String, FileInfo>, name: &str, file: &str) -> Found {
-    let Some(fi) = infos.get(file) else { return Found::NotShape };
-    if let Some(d) = fi.exported_shape(name) {
-        return Found::Decl { file: file.to_string(), decl: d.clone(), barrel: None };
-    }
-    let mut found: Vec<(String, Decl, usize)> = Vec::new();
-    let mut deeper = false;
-    for re in &fi.reexports {
-        let orig = match &re.names {
-            None => name.to_string(),
-            Some(ns) => match ns.iter().find(|(e, _)| e == name) {
-                Some((_, o)) => o.clone(),
-                None => continue,
-            },
-        };
-        let (_, Res::File(t2)) = ctx.resolve(&re.spec, file, false) else { continue };
-        let Some(fi2) = infos.get(&t2) else { continue };
-        if let Some(d) = fi2.exported_shape(&orig) {
-            if !found.iter().any(|(f, _, _)| f == &t2) {
-                found.push((t2, d.clone(), re.line));
+    let start = (file.to_string(), name.to_string());
+    let mut seen = BTreeSet::from([start.clone()]);
+    let mut level: BTreeMap<(String, String), Chain> = BTreeMap::from([(start, Vec::new())]);
+    let mut within: BTreeMap<String, (Decl, Chain)> = BTreeMap::new();
+    let mut beyond = false;
+    let mut depth = 0;
+    while !level.is_empty() {
+        let mut next: BTreeMap<(String, String), Chain> = BTreeMap::new();
+        for ((f, n), chain) in level {
+            let Some(fi) = infos.get(&f) else { continue };
+            if let Some(d) = fi.exported_shape(&n) {
+                if depth <= MAX_BARREL_DEPTH {
+                    within.entry(f).or_insert((d.clone(), chain));
+                } else {
+                    beyond = true;
+                }
+                continue;
             }
-        } else if shape_one_level_down(ctx, infos, &orig, &t2) {
-            deeper = true;
+            for re in &fi.reexports {
+                let orig = match &re.names {
+                    None => n.clone(),
+                    Some(ns) => match ns.iter().find(|(e, _)| *e == n) {
+                        Some((_, o)) => o.clone(),
+                        None => continue,
+                    },
+                };
+                let (_, Res::File(t)) = ctx.resolve(&re.spec, &f, false) else { continue };
+                let key = (t, orig);
+                if seen.contains(&key) {
+                    continue;
+                }
+                let mut c = chain.clone();
+                c.push((f.clone(), re.line));
+                let slot = next.entry(key).or_insert_with(|| c.clone());
+                if by_path(&c) < by_path(slot) {
+                    *slot = c;
+                }
+            }
         }
+        seen.extend(next.keys().cloned());
+        level = next;
+        depth += 1;
     }
-    match found.len() {
-        1 => {
-            let (f, d, line) = found.remove(0);
-            Found::Decl { file: f, decl: d, barrel: Some((file.to_string(), line)) }
-        }
-        0 if deeper => Found::Barrel2,
+    match within.len() {
+        0 if beyond => Found::Barrel2,
         0 => Found::NotShape,
-        _ => Found::Ambig(found.into_iter().map(|(f, _, _)| f).collect()),
-    }
-}
-
-/// Whether `file` re-exports an exported shape `name` declared one level
-/// further down (used only to classify BARREL2; never followed).
-fn shape_one_level_down(ctx: &Ctx, infos: &BTreeMap<String, FileInfo>, name: &str, file: &str) -> bool {
-    let Some(fi) = infos.get(file) else { return false };
-    fi.reexports.iter().any(|re| {
-        let orig = match &re.names {
-            None => name.to_string(),
-            Some(ns) => match ns.iter().find(|(e, _)| e == name) {
-                Some((_, o)) => o.clone(),
-                None => return false,
-            },
-        };
-        match ctx.resolve(&re.spec, file, false) {
-            (_, Res::File(t3)) => infos.get(&t3).map_or(false, |f3| f3.exported_shape(&orig).is_some()),
-            _ => false,
+        1 => {
+            let (f, (d, chain)) = within.into_iter().next().expect("one entry");
+            Found::Decl { file: f, decl: d, chain }
         }
-    })
+        _ => Found::Ambig(within.into_keys().collect()),
+    }
 }
 
 fn category(rel: &str) -> &'static str {
@@ -1658,13 +2019,13 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
                     }
                     Found::Barrel2 => abstain(
                         "BARREL2",
-                        format!("{name} from {:?} is re-exported through more than one barrel level (from {target})", imp.spec),
+                        format!("{name} from {:?} is re-exported through more than {MAX_BARREL_DEPTH} barrel levels (from {target})", imp.spec),
                     ),
                     Found::Ambig(files) => abstain(
                         "AMBIG-SHAPE",
                         format!("{name} from {:?} resolves to more than one declaration: {}", imp.spec, files.join(", ")),
                     ),
-                    Found::Decl { file: d, decl, barrel } => {
+                    Found::Decl { file: d, decl, chain: barrel } => {
                         imported_shapes.insert((d.clone(), decl.name.clone()));
                         let Some(p) = ctx.pkg_of(&d) else { continue };
                         if p == c {
@@ -1682,9 +2043,18 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
                             Kind::Object(members) => {
                                 let mut fields = Vec::new();
                                 let mut stoplisted = Vec::new();
+                                // SLICE5: only reads through a receiver declared as the shape.
+                                let declared = receiver_reads(fi, name);
+                                let accessed = members
+                                    .iter()
+                                    .filter(|(m, _)| {
+                                        let k = name_key(m);
+                                        fi.reads.contains_key(&k) && !stop.contains(&k)
+                                    })
+                                    .count();
                                 for (m, _) in members {
                                     let k = name_key(m);
-                                    if let Some((_, line)) = fi.reads.get(&k) {
+                                    if let Some((_, line)) = declared.get(&k) {
                                         if stop.contains(&k) {
                                             stoplisted.push(m.clone());
                                         } else {
@@ -1696,6 +2066,13 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
                                 fields.dedup_by(|a, b| a.0 == b.0);
                                 stoplisted.sort();
                                 stoplisted.dedup();
+                                if fields.len() < MIN_FIELDS && accessed >= MIN_FIELDS {
+                                    let why = format!(
+                                        "{name}: {accessed} of its fields are accessed in this file, {} read on a receiver declared as {name}; the others are writes or are read off values init cannot tie to {name}; not guessed",
+                                        fields.len()
+                                    );
+                                    abstain("RECV", why);
+                                }
                                 if fields.len() >= MIN_FIELDS {
                                     let ev = ShapeEvidence {
                                         shape: name.clone(),

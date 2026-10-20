@@ -1,0 +1,13 @@
+# mutation: a local function's declared return type not recognized (CM-S5-10 inverted)
+# catch: s5_f6_a_local_return_type_proposes
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -921,7 +921,7 @@
+             _ => None,
+         };
+         if let Some(n) = name {
+-            fns.insert(n.to_string());
++            let _ = n;
+         }
+     }
+     fns

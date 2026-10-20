@@ -1,0 +1,12 @@
+  + contract code:types.ts->DomainGraphView.tsx (5 bindings)
+  + contract code:types.ts->GraphView.tsx (4 bindings)
+  + contract code:types.ts->KnowledgeGraphView.tsx (3 bindings)
+  + contract code:types.ts->NodeInfo.tsx (11 bindings)
+  + contract code:types.ts->context-builder.ts (4 bindings)
+  + contract code:types.ts->edgeAggregation.ts (4 bindings)
+  + contract code:types.ts->explain-builder.ts (5 bindings)
+  + contract code:types.ts->filters.ts (2 bindings)
+  + contract code:types.ts->louvain.ts (2 bindings)
+  + contract code:types.ts->store.ts (3 bindings)
+wrote ./invar.lock (10 contract(s), 43 binding(s))
+lock exit 0

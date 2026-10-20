@@ -1,0 +1,13 @@
+# mutation: `x: Box<S>` counted as declaring x as S (CM-S5-3)
+# catch: s5_f9_a_type_argument_of_another_type_is_not_the_shape
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -947,7 +947,7 @@
+         // an annotation `r: S`, `r?: S`
+         let colon = if t.p(k + 1, b'?') { k + 2 } else { k + 1 };
+         if t.p(colon, b':') {
+-            if let Some(a) = type_head(t, colon + 1, shape) {
++            if let Some(a) = (colon + 1..colon + 5).find_map(|j| type_head(t, j, shape)) {
+                 put(&mut one, &mut arr, name, a);
+             }
+             continue;

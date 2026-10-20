@@ -1,0 +1,15 @@
+# mutation: a namespace re-export followed (CM-S4-8)
+# catch: s4_f9_a_namespace_reexport_is_not_followed
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -651,9 +651,7 @@
+         }
+         if t.m.get(j) == Some(&b'*') {
+             let k = t.ws(j + 1);
+-            if t.kw(k, "as") {
+-                return None;
+-            }
++            let k = if t.kw(k, "as") { t.ident(t.ws(k + 2)).map_or(k, |(_, e)| e) } else { k };
+             let (spec, end) = from_spec(t, k)?;
+             fi.reexports.push(ReExport { line, spec, names: None });
+             return Some(end);

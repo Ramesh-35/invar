@@ -1,0 +1,22 @@
+# mutation: an explicit type argument not recognized
+# catch: s5_f5_an_explicit_type_argument_proposes
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -990,7 +990,7 @@
+         while t.id(q).is_some() && t.p(q + 1, b'.') {
+             q += 2;
+         }
+-        if t.id(q).is_some() && t.p(q + 1, b'<') && type_head(t, q + 2, shape) == Some(false) && t.p(t.skip_group(q + 1, b'<', b'>'), b'(') {
++        if false && t.id(q).is_some() && t.p(q + 1, b'<') && type_head(t, q + 2, shape) == Some(false) && t.p(t.skip_group(q + 1, b'<', b'>'), b'(') {
+             put(&mut one, &mut arr, name, false);
+         }
+     }
+@@ -1005,7 +1005,7 @@
+         while t.id(q).is_some() && t.p(q + 1, b'.') {
+             q += 2;
+         }
+-        if t.id(q).is_some() && t.p(q + 1, b'<') && type_head(t, q + 2, shape) == Some(false) {
++        if false && t.id(q).is_some() && t.p(q + 1, b'<') && type_head(t, q + 2, shape) == Some(false) {
+             put(&mut one, &mut arr, r, false);
+         }
+     }

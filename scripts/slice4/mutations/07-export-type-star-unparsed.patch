@@ -1,0 +1,13 @@
+# mutation: `export type * from` left unparsed (CM-S4-7)
+# catch: s4_f8_an_export_type_star_chain_proposes
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -646,7 +646,7 @@
+     if t.kw(i, "export") {
+         let mut j = t.ws(i + 6);
+         // `export type { .. } from` and (SLICE4, R-S4-3) `export type * from`.
+-        if t.kw(j, "type") && matches!(t.m.get(t.ws(j + 4)), Some(b'{') | Some(b'*')) {
++        if t.kw(j, "type") && t.m.get(t.ws(j + 4)) == Some(&b'{') {
+             j = t.ws(j + 4);
+         }
+         if t.m.get(j) == Some(&b'*') {

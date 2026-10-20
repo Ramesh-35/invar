@@ -1592,3 +1592,31 @@ zero frozen-suite edits. Gate 2 surfaced and the ruling resolved a real
 interface fact: 17 frozen slice 1 fixtures machine-read init's last line as
 the summary, so SUMMARY-last is now an explicit immutable contract. Record:
 docs/architecture/INVAR-GATE-001.md sections K and M.
+
+## 2026-10-20: INIT-DISCOVERY-SLICE4, SLICE5 and LOCK-SLICE1 land together (STAGE3-EVAL-005 closed)
+
+Three slices, landed atomically after one evaluation closed on all seven
+metrics. SLICE4: code-pair discovery follows re-export chains up to five
+levels (cycle-guarded, one declaring file or AMBIG-SHAPE) and parses
+`export type * from`. SLICE5: a field read counts for a shape only through
+a receiver declared as that shape in the consumer file (annotation, cast,
+explicit type argument, a local function's return type, an element of a
+declared array); writes never count; a shape that loses its reads abstains
+with the new code RECV, never silently; the proposal status line now reads
+"PROPOSED (heuristic; each counted read is on a receiver declared as the
+shape in this file; field writes excluded; types are not inferred)" (an
+init output change). Receivers are matched by name, not by scope. LOCK-SLICE1:
+check never reports HOLDS for a contract whose lock binds no field (it is
+NOT EVALUATED, exit 4), and lock reads TypeScript members written on the
+declaration's own line (additive: 2,344 fields gained across 17,795 corpus
+files, 0 removed, 0 retyped). STAGE3-EVAL-004 (SLICE4 alone) failed
+precision, 16 of 29, and was held; STAGE3-EVAL-005 measured the pair:
+code-pair proposals 206 to 104, 168 RECV abstentions, 0 silent drops,
+precision 43 of 50 (86 percent) on proposals never adjudicated before,
+88 of 88 TRUE contracts round-trip after LOCK-SLICE1. Precision is AI
+adjudication (two blind agents, conservative merge), labeled as such. 328
+of 328 tests, zero warnings; 10, 11, 9 and 6 of the declared mutations
+caught for SLICE5, SLICE4, SLICE3B and LOCK-SLICE1. Not claimed: scope
+analysis, inferred types, or general detection capability. Record:
+docs/architecture/INIT-DISCOVERY-SLICE4.md, INIT-DISCOVERY-SLICE5.md,
+LOCK-SLICE1.md; docs/evidence/stage3/eval004 and eval005.

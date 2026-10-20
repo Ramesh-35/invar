@@ -1,0 +1,19 @@
+# mutation: nested braces not tracked in the member split, so a nested member leaks (CM-L-4)
+# catch: l_f3_nested_and_generic_members_stay_whole
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -350,12 +350,12 @@
+     let (mut d, mut seg) = (0i32, start);
+     for i in start..b.len() {
+         match b[i] {
+-            b'{' | b'(' | b'[' => d += 1,
++            b'(' | b'[' => d += 1,
+             b'}' if d == 0 => {
+                 out.push(&t[seg..i]);
+                 return out;
+             }
+-            b'}' | b')' | b']' => d -= 1,
++            b')' | b']' => d -= 1,
+             b';' | b',' if d == 0 => {
+                 out.push(&t[seg..i]);
+                 seg = i + 1;

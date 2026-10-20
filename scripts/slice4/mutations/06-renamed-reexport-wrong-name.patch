@@ -1,0 +1,13 @@
+# mutation: a named re-export followed by its exported name, not its original (CM-S4-6)
+# catch: s4_f7_a_renamed_reexport_follows_the_original_name
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1484,7 +1484,7 @@
+                 let orig = match &re.names {
+                     None => n.clone(),
+                     Some(ns) => match ns.iter().find(|(e, _)| *e == n) {
+-                        Some((_, o)) => o.clone(),
++                        Some((e, _)) => e.clone(),
+                         None => continue,
+                     },
+                 };

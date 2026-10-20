@@ -1,0 +1,16 @@
+# mutation: two declarations resolved to the first found (CM-S4-5)
+# catch: s4_f6_two_declarations_abstain_ambig_shape
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1512,7 +1512,10 @@
+             let (f, (d, chain)) = within.into_iter().next().expect("one entry");
+             Found::Decl { file: f, decl: d, chain }
+         }
+-        _ => Found::Ambig(within.into_keys().collect()),
++        _ => {
++            let (f, (d, chain)) = within.into_iter().next().expect("one entry");
++            Found::Decl { file: f, decl: d, chain }
++        }
+     }
+ }
+ 
