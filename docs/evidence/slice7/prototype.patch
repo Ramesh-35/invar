@@ -1,0 +1,212 @@
+diff --git a/crates/invar-falsify/src/codepairs.rs b/crates/invar-falsify/src/codepairs.rs
+index 0781e5c..54ef842 100644
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -927,8 +927,77 @@ fn returning(t: &Toks, shape: &str) -> BTreeSet<String> {
+     fns
+ }
+ 
++/// PROTOTYPE SLICE7: every function in this file with a declared return
++/// type: (name, head identifier of the type, is array, line).
++fn return_index(fi: &FileInfo) -> Vec<(String, String, bool, usize)> {
++    let m = &fi.masked;
++    let all = tokens(m);
++    let t = Toks(&all);
++    let mut out = Vec::new();
++    for k in 0..all.len() {
++        if !(t.p(k, b')') && t.p(k + 1, b':')) {
++            continue;
++        }
++        let mut j = k + 2;
++        if t.is(j, "Promise") && t.p(j + 1, b'<') {
++            j += 2;
++        }
++        if t.is(j, "readonly") {
++            j += 1;
++        }
++        let mut arr = false;
++        if let Some(w) = t.id(j) {
++            if matches!(w, "Readonly" | "Partial" | "Required" | "Array" | "ReadonlyArray") && t.p(j + 1, b'<') {
++                arr = matches!(w, "Array" | "ReadonlyArray");
++                j += 2;
++            }
++        }
++        let Some(head) = t.id(j) else { continue };
++        if t.p(j + 1, b'.') {
++            continue;
++        }
++        let mut e = j + 1;
++        if t.p(e, b'<') {
++            e = t.skip_group(e, b'<', b'>');
++        }
++        if t.p(e, b'[') && t.p(e + 1, b']') {
++            arr = true;
++        }
++        let mut d = 0i32;
++        let mut o = k;
++        loop {
++            if t.p(o, b')') {
++                d += 1;
++            } else if t.p(o, b'(') {
++                d -= 1;
++                if d == 0 {
++                    break;
++                }
++            }
++            if o == 0 {
++                break;
++            }
++            o -= 1;
++        }
++        if o == 0 {
++            continue;
++        }
++        let name = match t.id(o - 1) {
++            Some("async") if o >= 3 && t.p(o - 2, b'=') => t.id(o - 3),
++            Some(n) if n != "function" => Some(n),
++            None if o >= 2 && t.p(o - 1, b'=') => t.id(o - 2),
++            _ => None,
++        };
++        if let Some(n) = name {
++            let line = m[..all[k].1].iter().filter(|&&b| b == b'\n').count() + 1;
++            out.push((n.to_string(), head.to_string(), arr, line));
++        }
++    }
++    out
++}
++
+ /// Receivers declared as `shape`: (single values, arrays of S).
+-fn receivers(t: &Toks, shape: &str) -> (BTreeSet<String>, BTreeSet<String>) {
++fn receivers(t: &Toks, shape: &str, imported: &BTreeMap<String, bool>) -> (BTreeSet<String>, BTreeSet<String>) {
+     let fns = returning(t, shape);
+     let mut one: BTreeSet<String> = BTreeSet::new();
+     let mut arr: BTreeSet<String> = BTreeSet::new();
+@@ -986,6 +1055,13 @@ fn receivers(t: &Toks, shape: &str) -> (BTreeSet<String>, BTreeSet<String>) {
+         if t.id(local).is_some_and(|f| fns.contains(f)) && t.p(local + 1, b'(') {
+             put(&mut one, &mut arr, name, false);
+         }
++        // PROTOTYPE SLICE7: a function imported from the shape's package whose
++        // single declaration there returns S (or Promise<S>, or an array).
++        if let Some(a) = t.id(q).and_then(|f| imported.get(f)) {
++            if t.p(q + 1, b'(') && (q == start || (q == start + 1 && t.is(start, "await"))) {
++                put(&mut one, &mut arr, name, *a);
++            }
++        }
+         // an explicit type argument: `r = [await] a.b.f<S ...>(`
+         while t.id(q).is_some() && t.p(q + 1, b'.') {
+             q += 2;
+@@ -1055,11 +1131,11 @@ fn written(m: &[u8], mut i: usize) -> bool {
+ 
+ /// Reads (name_key -> (spelling, first line)) of fields through receivers
+ /// declared as `shape` in this file: `r.f`, `r?.f`, `this.r.f`, `a[i].f`.
+-fn receiver_reads(fi: &FileInfo, shape: &str) -> BTreeMap<String, (String, usize)> {
++fn receiver_reads(fi: &FileInfo, shape: &str, imported: &BTreeMap<String, bool>) -> BTreeMap<String, (String, usize)> {
+     let m = &fi.masked;
+     let all = tokens(m);
+     let t = Toks(&all);
+-    let (one, arr) = receivers(&t, shape);
++    let (one, arr) = receivers(&t, shape, imported);
+     let mut out: BTreeMap<String, (String, usize)> = BTreeMap::new();
+     for k in 0..all.len() {
+         let Some(r) = t.id(k) else { continue };
+@@ -1941,6 +2017,33 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
+             }
+         }
+     }
++    // PROTOTYPE SLICE7: per package, function name -> declarations with a
++    // declared return type (head, is array, file, line).
++    let mut pkg_returns: BTreeMap<usize, BTreeMap<String, Vec<(String, bool, String, usize)>>> = BTreeMap::new();
++    for (g, gi) in &infos {
++        if let Some(p) = ctx.pkg_of(g) {
++            for (n, head, arr, line) in return_index(gi) {
++                pkg_returns.entry(p).or_default().entry(n).or_default().push((head, arr, g.clone(), line));
++            }
++        }
++    }
++    fn ret_fns(
++        pr: &BTreeMap<usize, BTreeMap<String, Vec<(String, bool, String, usize)>>>,
++        names: &BTreeMap<usize, BTreeSet<String>>,
++        p: usize,
++        shape: &str,
++    ) -> BTreeMap<String, bool> {
++        let mut out = BTreeMap::new();
++        let (Some(idx), Some(ns)) = (pr.get(&p), names.get(&p)) else { return out };
++        for n in ns {
++            if let Some(ds) = idx.get(n) {
++                if ds.len() == 1 && ds[0].0 == shape {
++                    out.insert(n.clone(), ds[0].1);
++                }
++            }
++        }
++        out
++    }
+     for (f, fi) in &infos {
+         let Some(c) = ctx.pkg_of(f) else { continue };
+         let mut imported_from: BTreeMap<usize, usize> = BTreeMap::new(); // pkg -> first import line
+@@ -2044,7 +2147,8 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
+                                 let mut fields = Vec::new();
+                                 let mut stoplisted = Vec::new();
+                                 // SLICE5: only reads through a receiver declared as the shape.
+-                                let declared = receiver_reads(fi, name);
++                                let uni = if std::env::var("INVAR_S7_UNIFORM").is_ok() { ret_fns(&pkg_returns, &imported_names, p, name) } else { BTreeMap::new() };
++                                let declared = receiver_reads(fi, name, &uni);
+                                 let accessed = members
+                                     .iter()
+                                     .filter(|(m, _)| {
+@@ -2129,6 +2233,56 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
+                         .collect();
+                     read.sort();
+                     read.dedup();
++                    // PROTOTYPE SLICE7: receivers typed by an imported function's return type
++                    let fns = ret_fns(&pkg_returns, &imported_names, *p, ename);
++                    if !fns.is_empty() && read.len() >= MIN_FIELDS {
++                        let rr = receiver_reads(fi, ename, &fns);
++                        let mut fields = Vec::new();
++                        let mut stoplisted = Vec::new();
++                        for (m, _) in members {
++                            let k = name_key(m);
++                            if let Some((_, line)) = rr.get(&k) {
++                                if stop.contains(&k) {
++                                    stoplisted.push(m.clone());
++                                } else {
++                                    fields.push((m.clone(), *line));
++                                }
++                            }
++                        }
++                        fields.sort();
++                        fields.dedup_by(|a, b| a.0 == b.0);
++                        stoplisted.sort();
++                        stoplisted.dedup();
++                        if fields.len() >= MIN_FIELDS {
++                            let via: Vec<String> = fns.keys().cloned().collect();
++                            if std::env::var("INVAR_S7_CENSUS").is_ok() {
++                                eprintln!("S7\t{f}\t{g}\t{ename}\t{}", via.join(","));
++                            }
++                            let ev = ShapeEvidence {
++                                shape: ename.clone(),
++                                decl_line: d.line,
++                                import_line: *first_line,
++                                specifier: format!("return type of {}", via.join(", ")),
++                                resolved: g.clone(),
++                                barrel: Vec::new(),
++                                fields,
++                                stoplisted,
++                            };
++                            let rel = f[pkgs[c].dir.len() + 1..].to_string();
++                            let pair = pairs.entry((g.clone(), f.clone())).or_insert_with(|| CodePair {
++                                producer: g.clone(),
++                                consumer: f.clone(),
++                                producer_pkg: pkgs[*p].clone(),
++                                consumer_pkg: pkgs[c].clone(),
++                                category: category(&rel),
++                                shapes: Vec::new(),
++                            });
++                            if !pair.shapes.iter().any(|s| s.shape == ev.shape) {
++                                pair.shapes.push(ev);
++                            }
++                            continue;
++                        }
++                    }
+                     if read.len() >= MIN_FIELDS {
+                         out.abstentions.push(Abstention {
+                             code: "R6",
