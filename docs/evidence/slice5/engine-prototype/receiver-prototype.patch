@@ -1,0 +1,401 @@
+--- a/crates/invar-falsify/src/codepairs.rs	2026-10-19 10:14:59.265670581 +0000
++++ b/crates/invar-falsify/src/codepairs.rs	2026-10-20 08:20:46.870959794 +0000
+@@ -294,6 +294,8 @@
+     reexports: Vec<ReExport>,
+     /// name_key -> (spelling, first line), property access only.
+     reads: BTreeMap<String, (String, usize)>,
++    /// PROTOTYPE (SLICE5): the masked text, for per-shape receiver checks.
++    masked: Vec<u8>,
+ }
+ 
+ impl FileInfo {
+@@ -594,6 +596,7 @@
+         i += 1;
+     }
+     fi.reads = property_reads(&t);
++    fi.masked = t.m.clone();
+     fi
+ }
+ 
+@@ -752,6 +755,349 @@
+     out
+ }
+ 
++// ------------------------------------------------------------ receivers
++// PROTOTYPE (SLICE5 draft evidence, throwaway). A field read counts for a
++// shape only when its receiver is declared as that shape in this file.
++
++#[derive(Debug, Clone, PartialEq)]
++enum Tok {
++    Id(String),
++    P(u8),
++}
++
++fn tokens(m: &[u8]) -> Vec<(Tok, usize)> {
++    let mut out = Vec::new();
++    let mut i = 0;
++    while i < m.len() {
++        let c = m[i];
++        if is_ident_start(c) {
++            let s = i;
++            while i < m.len() && is_ident(m[i]) {
++                i += 1;
++            }
++            out.push((Tok::Id(String::from_utf8_lossy(&m[s..i]).into_owned()), s));
++            continue;
++        }
++        if c.is_ascii_digit() {
++            while i < m.len() && is_ident(m[i]) {
++                i += 1;
++            }
++            continue;
++        }
++        if !c.is_ascii_whitespace() {
++            out.push((Tok::P(c), i));
++        }
++        i += 1;
++    }
++    out
++}
++
++fn is_id(t: &[(Tok, usize)], k: usize, w: &str) -> bool {
++    matches!(t.get(k), Some((Tok::Id(s), _)) if s == w)
++}
++fn is_p(t: &[(Tok, usize)], k: usize, c: u8) -> bool {
++    matches!(t.get(k), Some((Tok::P(x), _)) if *x == c)
++}
++fn id_at(t: &[(Tok, usize)], k: usize) -> Option<&str> {
++    match t.get(k) {
++        Some((Tok::Id(s), _)) => Some(s),
++        _ => None,
++    }
++}
++
++/// At token k, a type naming `shape` at its head: `[readonly] [Wrapper<] S`,
++/// not `S.x` or `S[...]` indexing. Returns (is_array, index after S).
++fn type_head(t: &[(Tok, usize)], mut k: usize, shape: &str) -> Option<(bool, usize)> {
++    if is_id(t, k, "readonly") {
++        k += 1;
++    }
++    let mut arr = false;
++    if let Some(w) = id_at(t, k) {
++        if matches!(w, "Readonly" | "Partial" | "Required" | "Array" | "ReadonlyArray") && is_p(t, k + 1, b'<') {
++            arr = matches!(w, "Array" | "ReadonlyArray");
++            k += 2;
++            if is_id(t, k, "readonly") {
++                k += 1;
++            }
++        }
++    }
++    if !is_id(t, k, shape) {
++        return None;
++    }
++    k += 1;
++    if is_p(t, k, b'.') {
++        return None;
++    }
++    if is_p(t, k, b'<') {
++        // generic arguments of S itself
++        let mut d = 0i32;
++        while k < t.len() {
++            if is_p(t, k, b'<') {
++                d += 1;
++            } else if is_p(t, k, b'>') {
++                d -= 1;
++                if d == 0 {
++                    k += 1;
++                    break;
++                }
++            }
++            k += 1;
++        }
++    }
++    if is_p(t, k, b'[') {
++        if is_p(t, k + 1, b']') {
++            return Some((true, k + 2));
++        }
++        return None;
++    }
++    Some((arr, k))
++}
++
++/// Receivers declared as `shape` in this file: (single values, arrays).
++fn receivers(t: &[(Tok, usize)], shape: &str) -> (BTreeSet<String>, BTreeSet<String>) {
++    let mut one = BTreeSet::new();
++    let mut arr = BTreeSet::new();
++    // functions in this file whose declared return type is S or Promise<S>
++    let mut fns: BTreeSet<String> = BTreeSet::new();
++    for k in 0..t.len() {
++        if is_p(t, k, b')') && is_p(t, k + 1, b':') {
++            let mut j = k + 2;
++            if is_id(t, j, "Promise") && is_p(t, j + 1, b'<') {
++                j += 2;
++            }
++            if let Some((false, _)) = type_head(t, j, shape) {
++                // find the matching '(' and the name before it
++                let mut d = 0i32;
++                let mut o = k;
++                loop {
++                    if is_p(t, o, b')') {
++                        d += 1;
++                    } else if is_p(t, o, b'(') {
++                        d -= 1;
++                        if d == 0 {
++                            break;
++                        }
++                    }
++                    if o == 0 {
++                        break;
++                    }
++                    o -= 1;
++                }
++                if o >= 1 {
++                    if let Some(n) = id_at(t, o - 1) {
++                        if n != "function" {
++                            fns.insert(n.to_string());
++                        }
++                    } else if is_p(t, o - 1, b'=') && o >= 2 {
++                        if let Some(n) = id_at(t, o - 2) {
++                            fns.insert(n.to_string());
++                        }
++                    }
++                    if is_id(t, o - 1, "async") && o >= 3 && is_p(t, o - 2, b'=') {
++                        if let Some(n) = id_at(t, o - 3) {
++                            fns.insert(n.to_string());
++                        }
++                    }
++                }
++            }
++        }
++    }
++    for k in 0..t.len() {
++        let Some(name) = id_at(t, k) else { continue };
++        if k > 0 && is_p(t, k - 1, b'.') {
++            continue;
++        }
++        // B1 `r: S`, `r?: S`
++        let mut j = k + 1;
++        if is_p(t, j, b'?') {
++            j += 1;
++        }
++        if is_p(t, j, b':') {
++            if let Some((a, _)) = type_head(t, j + 1, shape) {
++                if a {
++                    arr.insert(name.to_string());
++                } else {
++                    one.insert(name.to_string());
++                }
++            }
++            continue;
++        }
++        if !is_p(t, k + 1, b'=') || is_p(t, k + 2, b'=') || is_p(t, k + 2, b'>') {
++            continue;
++        }
++        // statement after `r =`, to the next ';' at this depth
++        let mut j = k + 2;
++        let mut d = 0i32;
++        let start = j;
++        let mut end = j;
++        while j < t.len() {
++            match &t[j].0 {
++                Tok::P(b'(') | Tok::P(b'[') | Tok::P(b'{') => d += 1,
++                Tok::P(b')') | Tok::P(b']') | Tok::P(b'}') => {
++                    if d == 0 {
++                        break;
++                    }
++                    d -= 1
++                }
++                Tok::P(b';') if d == 0 => break,
++                _ => {}
++            }
++            j += 1;
++            end = j;
++        }
++        // B2 `r = ... as S`
++        for q in start..end {
++            if is_id(t, q, "as") {
++                if let Some((a, _)) = type_head(t, q + 1, shape) {
++                    if a {
++                        arr.insert(name.to_string());
++                    } else {
++                        one.insert(name.to_string());
++                    }
++                }
++            }
++        }
++        // E1 `r = [await] f<S ...>(` and E2 `r = [await] [this.]f(` for local f returning S
++        let mut q = start;
++        if is_id(t, q, "await") {
++            q += 1;
++        }
++        while id_at(t, q).is_some() && is_p(t, q + 1, b'.') {
++            q += 2;
++        }
++        if let Some(callee) = id_at(t, q) {
++            if is_p(t, q + 1, b'<') {
++                if let Some((false, _)) = type_head(t, q + 2, shape) {
++                    one.insert(name.to_string());
++                }
++            } else if is_p(t, q + 1, b'(') && fns.contains(callee) {
++                let plain = q == start || (q >= start + 1 && is_id(t, start, "await") && q == start + 1)
++                    || (q >= 2 && is_id(t, q - 2, "this"));
++                if plain {
++                    one.insert(name.to_string());
++                }
++            }
++        }
++    }
++    // E1 for array destructuring: `[r, setR] = f<S>(`
++    for k in 0..t.len() {
++        if is_p(t, k, b'[') {
++            if let (Some(r), true) = (id_at(t, k + 1), is_p(t, k + 2, b',')) {
++                let mut j = k + 2;
++                while j < t.len() && !is_p(t, j, b']') {
++                    j += 1;
++                }
++                if is_p(t, j + 1, b'=') && !is_p(t, j + 2, b'=') {
++                    let mut q = j + 2;
++                    while id_at(t, q).is_some() && is_p(t, q + 1, b'.') {
++                        q += 2;
++                    }
++                    if id_at(t, q).is_some() && is_p(t, q + 1, b'<') {
++                        if let Some((false, _)) = type_head(t, q + 2, shape) {
++                            one.insert(r.to_string());
++                        }
++                    }
++                }
++            }
++        }
++    }
++    // B3 elements of a verified array: for-of, and callbacks of array methods
++    for k in 0..t.len() {
++        if is_id(t, k, "for") && is_p(t, k + 1, b'(') && matches!(id_at(t, k + 2), Some("const" | "let" | "var")) {
++            if let (Some(r), true) = (id_at(t, k + 3), is_id(t, k + 4, "of")) {
++                if let Some(a) = id_at(t, k + 5) {
++                    if arr.contains(a) && !is_p(t, k + 6, b'.') {
++                        one.insert(r.to_string());
++                    }
++                }
++            }
++        }
++        if let Some(a) = id_at(t, k) {
++            if arr.contains(a) && !(k > 0 && is_p(t, k - 1, b'.')) {
++                let mut j = k + 1;
++                if is_p(t, j, b'?') {
++                    j += 1;
++                }
++                if is_p(t, j, b'.')
++                    && matches!(id_at(t, j + 1), Some("map" | "filter" | "forEach" | "find" | "some" | "every" | "flatMap" | "findLast" | "sort" | "findIndex"))
++                    && is_p(t, j + 2, b'(')
++                {
++                    let mut q = j + 3;
++                    if is_p(t, q, b'(') {
++                        q += 1;
++                    }
++                    if let Some(r) = id_at(t, q) {
++                        one.insert(r.to_string());
++                    }
++                }
++            }
++        }
++    }
++    (one, arr)
++}
++
++/// Field reads (name_key -> (spelling, first line)) whose receiver is
++/// declared as `shape` in this file; writes never count.
++fn receiver_reads(fi: &FileInfo, shape: &str) -> BTreeMap<String, (String, usize)> {
++    let m = &fi.masked;
++    let t = tokens(m);
++    let (one, arr) = receivers(&t, shape);
++    let mut out: BTreeMap<String, (String, usize)> = BTreeMap::new();
++    let line = |off: usize| m[..off].iter().filter(|&&b| b == b'\n').count() + 1;
++    let write_after = |k: usize| -> bool {
++        // token k is the field; a write follows?
++        let Some((_, off)) = t.get(k) else { return false };
++        let mut i = *off;
++        while i < m.len() && is_ident(m[i]) {
++            i += 1;
++        }
++        while i < m.len() && m[i].is_ascii_whitespace() {
++            i += 1;
++        }
++        let r = &m[i..m.len().min(i + 3)];
++        (r.first() == Some(&b'=') && !matches!(r.get(1), Some(b'=') | Some(b'>')))
++            || r.starts_with(b"+=") || r.starts_with(b"-=") || r.starts_with(b"*=") || r.starts_with(b"/=")
++            || r.starts_with(b"++") || r.starts_with(b"--") || r.starts_with(b"??=") || r.starts_with(b"||=") || r.starts_with(b"&&=")
++    };
++    for k in 0..t.len() {
++        let Some(r) = id_at(&t, k) else { continue };
++        let this_field = k >= 2 && is_p(&t, k - 1, b'.') && is_id(&t, k - 2, "this");
++        if k > 0 && is_p(&t, k - 1, b'.') && !this_field {
++            continue;
++        }
++        let mut j = k + 1;
++        if arr.contains(r) && is_p(&t, j, b'[') {
++            let mut d = 0i32;
++            while j < t.len() {
++                if is_p(&t, j, b'[') {
++                    d += 1;
++                } else if is_p(&t, j, b']') {
++                    d -= 1;
++                    if d == 0 {
++                        j += 1;
++                        break;
++                    }
++                }
++                j += 1;
++            }
++        } else if !one.contains(r) {
++            continue;
++        }
++        if is_p(&t, j, b'?') {
++            j += 1;
++        }
++        if !is_p(&t, j, b'.') {
++            continue;
++        }
++        if let Some(f) = id_at(&t, j + 1) {
++            if !write_after(j + 1) {
++                out.entry(name_key(f)).or_insert((f.to_string(), line(t[j + 1].1)));
++            }
++        }
++    }
++    out
++}
++
+ // ------------------------------------------------------------ membership
+ 
+ fn norm_entry(raw: &str) -> Result<Vec<String>, String> {
+@@ -1706,9 +2052,14 @@
+                             Kind::Object(members) => {
+                                 let mut fields = Vec::new();
+                                 let mut stoplisted = Vec::new();
++                                let rreads = receiver_reads(fi, name);
++                                let wide = members
++                                    .iter()
++                                    .filter(|(m, _)| fi.reads.contains_key(&name_key(m)) && !stop.contains(&name_key(m)))
++                                    .count();
+                                 for (m, _) in members {
+                                     let k = name_key(m);
+-                                    if let Some((_, line)) = fi.reads.get(&k) {
++                                    if let Some((_, line)) = rreads.get(&k) {
+                                         if stop.contains(&k) {
+                                             stoplisted.push(m.clone());
+                                         } else {
+@@ -1720,6 +2071,15 @@
+                                 fields.dedup_by(|a, b| a.0 == b.0);
+                                 stoplisted.sort();
+                                 stoplisted.dedup();
++                                if fields.len() < MIN_FIELDS && wide >= MIN_FIELDS {
++                                    abstain(
++                                        "RECV",
++                                        format!(
++                                            "{name}: {wide} of its fields are read in this file, {} on a receiver declared as {name}; the rest are read off values init cannot tie to {name}; not guessed",
++                                            fields.len()
++                                        ),
++                                    );
++                                }
+                                 if fields.len() >= MIN_FIELDS {
+                                     let ev = ShapeEvidence {
+                                         shape: name.clone(),

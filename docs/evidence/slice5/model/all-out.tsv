@@ -1,0 +1,207 @@
+repo	eval	id	final	shapes_before	shapes_after	kept	detail
+Egonex-AI__Understand-Anything	eval004	code:types.ts->DomainGraphView.tsx	TRUE	GraphNode,KnowledgeGraph	GraphNode,KnowledgeGraph	yes	GraphNode:3/3 KnowledgeGraph:2/2
+Egonex-AI__Understand-Anything	eval004	code:types.ts->ExportMenu.tsx	TRUE	KnowledgeGraph		no	KnowledgeGraph:0/2
+Egonex-AI__Understand-Anything	eval004	code:types.ts->GraphView.tsx	TRUE	GraphEdge,GraphNode,KnowledgeGraph	GraphNode	yes	GraphEdge:0/2 GraphNode:4/4 KnowledgeGraph:0/3
+Egonex-AI__Understand-Anything	eval004	code:types.ts->KnowledgeGraphView.tsx	TRUE	KnowledgeGraph	KnowledgeGraph	yes	KnowledgeGraph:3/3
+Egonex-AI__Understand-Anything	eval004	code:types.ts->NodeInfo.tsx	TRUE	GraphNode,KnowledgeGraph	GraphNode,KnowledgeGraph	yes	GraphNode:9/9 KnowledgeGraph:2/2
+Egonex-AI__Understand-Anything	eval004	code:types.ts->store.ts	TRUE	KnowledgeGraph,TourStep	KnowledgeGraph	yes	KnowledgeGraph:3/3 TourStep:0/2
+Egonex-AI__Understand-Anything	eval004	code:types.ts->edgeAggregation.ts	TRUE	GraphEdge,KnowledgeGraph	GraphEdge,KnowledgeGraph	yes	GraphEdge:2/2 KnowledgeGraph:2/2
+Egonex-AI__Understand-Anything	eval004	code:types.ts->filters.ts	TRUE	GraphEdge	GraphEdge	yes	GraphEdge:2/2
+Egonex-AI__Understand-Anything	eval004	code:types.ts->louvain.ts	TRUE	GraphEdge	GraphEdge	yes	GraphEdge:2/2
+Egonex-AI__Understand-Anything	eval004	code:types.ts->context-builder.test.ts	TRUE	GraphEdge		no	GraphEdge:0/2
+Egonex-AI__Understand-Anything	eval004	code:types.ts->context-builder.ts	TRUE	GraphEdge,GraphNode,KnowledgeGraph	KnowledgeGraph	yes	GraphEdge:0/2 GraphNode:0/3 KnowledgeGraph:4/4
+Egonex-AI__Understand-Anything	eval004	code:types.ts->diff-analyzer.ts	TRUE	GraphEdge,GraphNode		no	GraphEdge:0/2 GraphNode:0/2
+Egonex-AI__Understand-Anything	eval004	code:types.ts->explain-builder.ts	TRUE	GraphEdge,GraphNode	GraphEdge,GraphNode	yes	GraphEdge:2/2 GraphNode:3/3
+earendil-works__pi	eval004	code:types.ts->index.ts	NOT TRUE	AgentToolResult	AgentToolResult	yes	AgentToolResult:2/3
+earendil-works__pi	eval004	code:types.ts->agent-session.ts	NOT TRUE	AfterToolCallContext,AfterToolCallResult,AgentContext,AgentState,AgentToolCallOutcome,BeforeToolCallContext		no	AfterToolCallContext:0/3 AfterToolCallResult:0/5 AgentContext:1/2 AgentState:0/5 AgentToolCallOutcome:0/2 BeforeToolCallContext:0/2
+earendil-works__pi	eval004	code:types.ts->nested-tool-calls.ts	NOT TRUE	AgentToolCallOutcome,AgentToolResult	AgentToolCallOutcome	yes	AgentToolCallOutcome:2/2 AgentToolResult:1/3
+earendil-works__pi	eval004	code:types.ts->tool-definition-wrapper.ts	NOT TRUE	AgentTool	AgentTool	yes	AgentTool:4/4
+earendil-works__pi	eval004	code:types.ts->execute.ts	TRUE	AgentTool,AgentToolCallOutcome,AgentToolResult	AgentToolCallOutcome,AgentToolResult	yes	AgentTool:1/2 AgentToolCallOutcome:2/3 AgentToolResult:3/4
+earendil-works__pi	eval004	code:types.ts->tools.ts	NOT TRUE	AgentToolResult		no	AgentToolResult:0/3
+earendil-works__pi	eval004	code:types.ts->index.ts#2	TRUE	OAuthCredentials		no	OAuthCredentials:1/2
+earendil-works__pi	eval004	code:types.ts->index.ts#3	TRUE	OAuthCredentials		no	OAuthCredentials:1/2
+earendil-works__pi	eval004	code:types.ts->agent-session.ts#2	TRUE	AuthResult	AuthResult	yes	AuthResult:2/3
+earendil-works__pi	eval004	code:types.ts->model-registry.ts	TRUE	AuthResult		no	AuthResult:0/2
+earendil-works__pi	eval004	code:types.ts->model-runtime.ts	NOT TRUE	AuthResult	AuthResult	yes	AuthResult:2/3
+earendil-works__pi	eval004	code:types.ts->provider-composer.ts	NOT TRUE	AuthResult,ModelAuth	AuthResult,ModelAuth	yes	AuthResult:2/3 ModelAuth:2/3
+earendil-works__pi	eval004	code:types.ts->provider.ts	NOT TRUE	AuthResult		no	AuthResult:0/2
+earendil-works__pi	eval004	code:types.ts->utilities.ts	NOT TRUE	OAuthCredentials		no	OAuthCredentials:0/2
+earendil-works__pi	eval004	code:models-store.ts->remote-catalog-provider.ts	TRUE	ModelsStoreEntry	ModelsStoreEntry	yes	ModelsStoreEntry:2/4
+earendil-works__pi	eval004	code:models.ts->bug-report.ts	TRUE	Provider	Provider	yes	Provider:3/3
+earendil-works__pi	eval004	code:models.ts->model-registry.ts	NOT TRUE	Provider		no	Provider:0/3
+earendil-works__pi	eval004	code:models.ts->model-runtime.ts	TRUE	ModelsRefreshOptions,ModelsRefreshResult,Provider	ModelsRefreshOptions,ModelsRefreshResult	yes	ModelsRefreshOptions:3/3 ModelsRefreshResult:2/2 Provider:1/3
+earendil-works__pi	eval004	code:models.ts->provider-composer.ts	NOT TRUE	Provider,RefreshModelsContext	Provider,RefreshModelsContext	yes	Provider:3/3 RefreshModelsContext:2/3
+earendil-works__pi	eval004	code:models.ts->remote-catalog-provider.ts	TRUE	RefreshModelsContext	RefreshModelsContext	yes	RefreshModelsContext:4/4
+earendil-works__pi	eval004	code:models.ts->provider.ts	TRUE	RefreshModelsContext	RefreshModelsContext	yes	RefreshModelsContext:4/4
+earendil-works__pi	eval004	code:models.ts->llama-extension.test.ts	TRUE	ModelsPublication	ModelsPublication	yes	ModelsPublication:2/2
+earendil-works__pi	eval004	code:models.ts->remote-catalog-provider.test.ts	TRUE	ModelsPublication,RefreshModelsContext	ModelsPublication	yes	ModelsPublication:2/2 RefreshModelsContext:0/3
+earendil-works__pi	eval004	code:faux.ts->e2e.test.ts	TRUE	FauxProviderRegistration		no	FauxProviderRegistration:1/4
+earendil-works__pi	eval004	code:faux.ts->harness.ts	NOT TRUE	FauxModelDefinition,FauxProviderRegistration	FauxProviderRegistration	yes	FauxModelDefinition:0/6 FauxProviderRegistration:6/6
+earendil-works__pi	eval004	code:faux.ts->chat-support.ts	UNLABELED	FauxProviderHandle,RegisterFauxProviderOptions		no	FauxProviderHandle:1/2 RegisterFauxProviderOptions:0/2
+earendil-works__pi	eval004	code:types.ts->agent-loop.ts	UNLABELED	AssistantMessage,SystemMessage	AssistantMessage,SystemMessage	yes	AssistantMessage:3/8 SystemMessage:4/4
+earendil-works__pi	eval004	code:types.ts->proxy.ts	UNLABELED	AssistantMessage,Model,SimpleStreamOptions		no	AssistantMessage:1/7 Model:0/3 SimpleStreamOptions:0/2
+earendil-works__pi	eval004	code:types.ts->agent-loop.test.ts	UNLABELED	AssistantMessage,UserMessage	AssistantMessage	yes	AssistantMessage:3/6 UserMessage:0/3
+earendil-works__pi	eval004	code:types.ts->agent.test.ts	NOT TRUE	AssistantMessage,UserMessage	AssistantMessage	yes	AssistantMessage:2/6 UserMessage:0/2
+earendil-works__pi	eval004	code:types.ts->e2e.test.ts	NOT TRUE	AssistantMessage,UserMessage	AssistantMessage	yes	AssistantMessage:2/6 UserMessage:0/2
+earendil-works__pi	eval004	code:types.ts->proxy.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/5
+earendil-works__pi	eval004	code:types.ts->custom-footer.ts	UNLABELED	AssistantMessage		no	AssistantMessage:1/2
+earendil-works__pi	eval004	code:types.ts->index.ts#4	UNLABELED	AssistantMessage,Model,SimpleStreamOptions,ThinkingContent	AssistantMessage,Model,SimpleStreamOptions	yes	AssistantMessage:4/7 Model:2/2 SimpleStreamOptions:2/2 ThinkingContent:0/2
+earendil-works__pi	eval004	code:types.ts->test.ts	NOT TRUE	Model		no	Model:0/3
+earendil-works__pi	eval004	code:types.ts->index.ts#5	UNLABELED	AssistantMessage		no	AssistantMessage:1/2
+earendil-works__pi	eval004	code:types.ts->qna.ts	UNLABELED	UserMessage		no	UserMessage:0/2
+earendil-works__pi	eval004	code:types.ts->list-models.ts	UNLABELED	Model		no	Model:0/3
+earendil-works__pi	eval004	code:types.ts->agent-session.ts#3	NOT TRUE	AssistantMessage,Model,SystemMessage,Usage	AssistantMessage,Model	yes	AssistantMessage:8/10 Model:3/3 SystemMessage:0/6 Usage:0/6
+earendil-works__pi	eval004	code:types.ts->bug-report.ts	TRUE	Model	Model	yes	Model:6/6
+earendil-works__pi	eval004	code:types.ts->cache-stats.ts	UNLABELED	AssistantMessage	AssistantMessage	yes	AssistantMessage:4/5
+earendil-works__pi	eval004	code:types.ts->cache-warmer.ts	UNLABELED	Model,Usage	Usage	yes	Model:1/3 Usage:3/5
+earendil-works__pi	eval004	code:types.ts->compaction.ts	TRUE	AssistantMessage,SystemMessage,Usage	AssistantMessage,SystemMessage,Usage	yes	AssistantMessage:3/4 SystemMessage:3/4 Usage:5/6
+earendil-works__pi	eval004	code:types.ts->model-runtime.ts#2	UNLABELED	AssistantImages,AssistantMessage,ClassifierResult,Model,ProviderRequestOptions	AssistantMessage	yes	AssistantImages:0/2 AssistantMessage:3/3 ClassifierResult:0/2 Model:0/2 ProviderRequestOptions:0/4
+earendil-works__pi	eval004	code:types.ts->nested-tool-calls.ts#2	UNLABELED	NestedToolCallRecord,NestedToolCalls		no	NestedToolCallRecord:0/3 NestedToolCalls:0/2
+earendil-works__pi	eval004	code:types.ts->provider-composer.ts#2	UNLABELED	Model,StreamOptions	Model	yes	Model:8/8 StreamOptions:0/2
+earendil-works__pi	eval004	code:types.ts->session-manager.ts	UNLABELED	AssistantMessage,SystemMessage,UserMessage		no	AssistantMessage:0/6 SystemMessage:0/3 UserMessage:0/3
+earendil-works__pi	eval004	code:types.ts->usage-totals.ts	TRUE	Usage	Usage	yes	Usage:8/8
+earendil-works__pi	eval004	code:types.ts->virtual-models.ts	UNLABELED	AssistantMessage,Model	AssistantMessage	yes	AssistantMessage:2/5 Model:0/2
+earendil-works__pi	eval004	code:types.ts->execute.ts#2	UNLABELED	Usage		no	Usage:0/2
+earendil-works__pi	eval004	code:types.ts->assistant-message.ts	UNLABELED	AssistantMessage	AssistantMessage	yes	AssistantMessage:3/3
+earendil-works__pi	eval004	code:types.ts->interactive-mode.ts	TRUE	AssistantMessage,Usage	AssistantMessage,Usage	yes	AssistantMessage:5/12 Usage:5/6
+earendil-works__pi	eval004	code:types.ts->print-mode.ts	UNLABELED	AssistantMessage	AssistantMessage	yes	AssistantMessage:3/4
+earendil-works__pi	eval004	code:types.ts->agent-session-auto-compaction-queue.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:1/5
+earendil-works__pi	eval004	code:types.ts->agent-session-concurrent.test.ts	NOT TRUE	AssistantMessage	AssistantMessage	yes	AssistantMessage:2/2
+earendil-works__pi	eval004	code:types.ts->agent-session-stats.test.ts	NOT TRUE	AssistantMessage,Usage		no	AssistantMessage:0/2 Usage:0/2
+earendil-works__pi	eval004	code:types.ts->assistant-message.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:1/2
+earendil-works__pi	eval004	code:types.ts->branch-summarization.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/3
+earendil-works__pi	eval004	code:types.ts->cache-stats.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/2
+earendil-works__pi	eval004	code:types.ts->cache-warmer.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/3
+earendil-works__pi	eval004	code:types.ts->compaction.test.ts	NOT TRUE	AssistantMessage		no	AssistantMessage:0/4
+earendil-works__pi	eval004	code:types.ts->jev-router-example.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/4
+earendil-works__pi	eval004	code:types.ts->model-registry.test.ts	TRUE	Model		no	Model:0/5
+earendil-works__pi	eval004	code:types.ts->model-runtime-images.test.ts	UNLABELED	AssistantImages		no	AssistantImages:0/4
+earendil-works__pi	eval004	code:types.ts->nested-tool-calls.test.ts	UNLABELED	Usage		no	Usage:0/2
+earendil-works__pi	eval004	code:types.ts->print-mode.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/2
+earendil-works__pi	eval004	code:types.ts->program-status-reporter.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/2
+earendil-works__pi	eval004	code:types.ts->sdk-codex-cache-probe-tool-loop.ts	TRUE	AssistantMessage		no	AssistantMessage:1/4
+earendil-works__pi	eval004	code:types.ts->sdk-openrouter-attribution.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/2
+earendil-works__pi	eval004	code:types.ts->sdk-stream-options.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/4
+earendil-works__pi	eval004	code:types.ts->session-context-edit.test.ts	UNLABELED	AssistantMessage	AssistantMessage	yes	AssistantMessage:2/3
+earendil-works__pi	eval004	code:types.ts->agent-session-codemode.test.ts	UNLABELED	AssistantImages,ClassifierResult,Usage		no	AssistantImages:0/3 ClassifierResult:0/3 Usage:0/2
+earendil-works__pi	eval004	code:types.ts->agent-session-compaction.test.ts	UNLABELED	AssistantMessage	AssistantMessage	yes	AssistantMessage:2/9
+earendil-works__pi	eval004	code:types.ts->agent-session-mcp.test.ts	TRUE	SystemMessage		no	SystemMessage:0/5
+earendil-works__pi	eval004	code:types.ts->harness.ts	TRUE	Model		no	Model:0/3
+earendil-works__pi	eval004	code:types.ts->6647-compaction-retries-transient-stream-drop.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/4
+earendil-works__pi	eval004	code:types.ts->6768-copilot-compaction-base-url.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/3
+earendil-works__pi	eval004	code:types.ts->7048-compaction-truncated-summary.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/2
+earendil-works__pi	eval004	code:types.ts->8328-zero-usage-auto-compaction.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/2
+earendil-works__pi	eval004	code:types.ts->8964-extension-provider-streaming.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/2
+earendil-works__pi	eval004	code:types.ts->9340-9777-auto-compaction-cancellation.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/4
+earendil-works__pi	eval004	code:types.ts->pre-prompt-compaction-no-continue.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/2
+earendil-works__pi	eval004	code:types.ts->test-harness.test.ts	UNLABELED	AssistantMessage	AssistantMessage	yes	AssistantMessage:3/5
+earendil-works__pi	eval004	code:types.ts->test-harness.ts	UNLABELED	AssistantMessage,Model,Usage	AssistantMessage,Model,Usage	yes	AssistantMessage:2/6 Model:3/3 Usage:6/7
+earendil-works__pi	eval004	code:types.ts->virtual-models.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/7
+earendil-works__pi	eval004	code:types.ts->compaction.ts#2	UNLABELED	AssistantMessage	AssistantMessage	yes	AssistantMessage:5/8
+earendil-works__pi	eval004	code:types.ts->context.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/5
+earendil-works__pi	eval004	code:types.ts->events.ts	UNLABELED	AssistantMessage	AssistantMessage	yes	AssistantMessage:3/6
+earendil-works__pi	eval004	code:types.ts->generation.ts	UNLABELED	AssistantMessage,DeferredHandle	AssistantMessage	yes	AssistantMessage:6/8 DeferredHandle:1/3
+earendil-works__pi	eval004	code:types.ts->prompt.ts	UNLABELED	SystemMessage	SystemMessage	yes	SystemMessage:2/4
+earendil-works__pi	eval004	code:types.ts->usage.ts	UNLABELED	Usage	Usage	yes	Usage:8/8
+earendil-works__pi	eval004	code:types.ts->codemode-models.test.ts	UNLABELED	AssistantImages,ClassifierResult		no	AssistantImages:0/3 ClassifierResult:0/4
+earendil-works__pi	eval004	code:types.ts->codemode.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/4
+earendil-works__pi	eval004	code:types.ts->18-print.ts	UNLABELED	AssistantMessage		no	AssistantMessage:1/3
+earendil-works__pi	eval004	code:types.ts->22-subagent-foreground.ts	UNLABELED	AssistantMessage		no	AssistantMessage:1/3
+earendil-works__pi	eval004	code:types.ts->23-subagent-background.ts	UNLABELED	AssistantMessage	AssistantMessage	yes	AssistantMessage:2/4
+earendil-works__pi	eval004	code:types.ts->25-compaction.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/3
+earendil-works__pi	eval004	code:types.ts->28-reviewer.ts	UNLABELED	AssistantMessage	AssistantMessage	yes	AssistantMessage:2/4
+earendil-works__pi	eval004	code:types.ts->harness-callers.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/2
+earendil-works__pi	eval004	code:types.ts->harness-compaction.test.ts	UNLABELED	AssistantMessage,UserMessage	AssistantMessage	yes	AssistantMessage:3/6 UserMessage:0/2
+earendil-works__pi	eval004	code:types.ts->harness-events.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:1/3
+earendil-works__pi	eval004	code:types.ts->harness-generation-recovery.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:1/4
+earendil-works__pi	eval004	code:types.ts->harness-generation.test.ts	UNLABELED	AssistantMessage,SystemMessage		no	AssistantMessage:1/5 SystemMessage:0/2
+earendil-works__pi	eval004	code:types.ts->harness-inbox.test.ts	UNLABELED	AssistantMessage,Usage	AssistantMessage	yes	AssistantMessage:3/5 Usage:0/3
+earendil-works__pi	eval004	code:types.ts->harness-input-entries.test.ts	UNLABELED	AssistantMessage,Context		no	AssistantMessage:1/2 Context:0/2
+earendil-works__pi	eval004	code:types.ts->harness-nested-tools-restart.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/2
+earendil-works__pi	eval004	code:types.ts->harness-nested-tools.test.ts	UNLABELED	AssistantMessage,Usage		no	AssistantMessage:0/3 Usage:0/2
+earendil-works__pi	eval004	code:types.ts->harness-prompt.test.ts	UNLABELED	SystemMessage	SystemMessage	yes	SystemMessage:3/3
+earendil-works__pi	eval004	code:types.ts->harness-structured-output.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/4
+earendil-works__pi	eval004	code:types.ts->harness-support.ts	UNLABELED	AssistantMessage,SystemMessage,UserMessage		no	AssistantMessage:0/3 SystemMessage:0/2 UserMessage:0/2
+earendil-works__pi	eval004	code:types.ts->harness-tools-recovery.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/4
+earendil-works__pi	eval004	code:types.ts->harness-tools.test.ts	UNLABELED	AssistantMessage,SystemMessage	SystemMessage	yes	AssistantMessage:0/5 SystemMessage:2/5
+earendil-works__pi	eval004	code:types.ts->provider-session-cache-e2e.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/4
+earendil-works__pi	eval004	code:types.ts->system-order-cache-e2e.test.ts	UNLABELED	AssistantMessage	AssistantMessage	yes	AssistantMessage:4/5
+earendil-works__pi	eval004	code:types.ts->tool-search.test.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/3
+earendil-works__pi	eval004	code:types.ts->configured-runtime.ts	UNLABELED	Model	Model	yes	Model:3/3
+earendil-works__pi	eval004	code:types.ts->tui.docs.eval.ts	UNLABELED	AssistantMessage		no	AssistantMessage:0/3
+earendil-works__pi	eval004	code:transcript.ts->agent-loop.ts	UNLABELED	ToolStateChanges		no	ToolStateChanges:0/2
+earendil-works__pi	eval004	code:output.ts->tool.ts	UNLABELED	OutputLimits,ProgressClock	OutputLimits	yes	OutputLimits:3/3 ProgressClock:0/2
+earendil-works__pi	eval004	code:state.ts->observation.ts	UNLABELED	ReplicatedStateSourceFrame	ReplicatedStateSourceFrame	yes	ReplicatedStateSourceFrame:2/2
+earendil-works__pi	eval004	code:types.ts->tools.ts#2	UNLABELED	CodemodeTool		no	CodemodeTool:0/2
+earendil-works__pi	eval004	code:types.ts->codemode.ts	UNLABELED	CodemodeHostCall	CodemodeHostCall	yes	CodemodeHostCall:2/2
+earendil-works__pi	eval004	code:agent-session-services.ts->tui.docs.eval.ts	NOT TRUE	AgentSessionServices		no	AgentSessionServices:1/4
+earendil-works__pi	eval004	code:types.ts->index.ts#6	NOT TRUE	ExtensionContext		no	ExtensionContext:1/3
+earendil-works__pi	eval004	code:sdk.ts->harness.ts	UNLABELED	CreateAgentSessionOptions		no	CreateAgentSessionOptions:0/4
+earendil-works__pi	eval004	code:edit.ts->index.ts	NOT TRUE	EditOperations		no	EditOperations:0/3
+earendil-works__pi	eval004	code:grep.ts->index.ts	NOT TRUE	GrepToolDetails		no	GrepToolDetails:0/3
+earendil-works__pi	eval004	code:read.ts->index.ts	TRUE	ReadOperations	ReadOperations	yes	ReadOperations:2/2
+earendil-works__pi	eval004	code:write.ts->index.ts	NOT TRUE	WriteOperations		no	WriteOperations:1/2
+earendil-works__pi	eval004	code:index.ts->list-files.ts	UNLABELED	ListFilesOptions	ListFilesOptions	yes	ListFilesOptions:6/6
+earendil-works__pi	eval004	code:index.ts->remote-env.ts	UNLABELED	FileInfo,ShellExecOptions,ShellExecResult,ShellOutputInfo	ShellExecOptions	yes	FileInfo:0/2 ShellExecOptions:6/7 ShellExecResult:0/2 ShellOutputInfo:0/2
+earendil-works__pi	eval004	code:index.ts->watch.ts	UNLABELED	WatchTarget	WatchTarget	yes	WatchTarget:2/2
+earendil-works__pi	eval004	code:client.ts->runtime.ts	UNLABELED	McpRequestOptions		no	McpRequestOptions:0/2
+earendil-works__pi	eval004	code:provider.ts->oauth.ts	UNLABELED	McpOAuthState	McpOAuthState	yes	McpOAuthState:4/4
+earendil-works__pi	eval004	code:types.ts->oauth.ts	UNLABELED	AuthorizationServerMetadata,OAuthChallenge	AuthorizationServerMetadata,OAuthChallenge	yes	AuthorizationServerMetadata:3/3 OAuthChallenge:2/2
+earendil-works__pi	eval004	code:content.ts->tools.ts	UNLABELED	CallToolResult	CallToolResult	yes	CallToolResult:2/2
+earendil-works__pi	eval004	code:jsonrpc.ts->agent-session-mcp.test.ts	UNLABELED	JsonRpcRequest	JsonRpcRequest	yes	JsonRpcRequest:2/2
+earendil-works__pi	eval004	code:types.ts->resources.ts	UNLABELED	ListResourceTemplatesResult,ListResourcesResult,Resource,ResourceTemplate		no	ListResourceTemplatesResult:0/2 ListResourcesResult:0/2 Resource:0/2 ResourceTemplate:0/2
+earendil-works__pi	eval004	code:types.ts->tools.ts#3	UNLABELED	Tool		no	Tool:0/3
+excalidraw__excalidraw	eval004	code:editorInterface.ts->transformHandles.ts	TRUE	EditorInterface	EditorInterface	yes	EditorInterface:2/2
+excalidraw__excalidraw	eval004	code:editorInterface.ts->App.tsx	TRUE	EditorInterface	EditorInterface	yes	EditorInterface:4/5
+excalidraw__excalidraw	eval004	code:arrowEndpointText.ts->App.textTool.ts	TRUE	ArrowEndpoint		no	ArrowEndpoint:0/2
+excalidraw__excalidraw	eval004	code:renderElement.ts->staticScene.ts	TRUE	ElementRenderState	ElementRenderState	yes	ElementRenderState:2/2
+excalidraw__excalidraw	eval004	code:types.ts->DebugCanvas.tsx	TRUE	FixedPointBinding	FixedPointBinding	yes	FixedPointBinding:2/3
+excalidraw__excalidraw	eval004	code:types.ts->restore.ts	TRUE	FixedPointBinding	FixedPointBinding	yes	FixedPointBinding:3/3
+excalidraw__excalidraw	eval004	code:types.ts->history.test.tsx	TRUE	FixedPointBinding		no	FixedPointBinding:0/3
+excalidraw__excalidraw	eval004	code:visualdebug.ts->DebugCanvas.tsx	TRUE	DebugElement	DebugElement	yes	DebugElement:2/2
+excalidraw__excalidraw	eval004	code:restore.ts->App.tsx	NOT TRUE	RestoredDataState		no	RestoredDataState:0/2
+excalidraw__excalidraw	eval004	code:types.ts->Collab.tsx	NOT TRUE	ImportedDataState		no	ImportedDataState:0/2
+excalidraw__excalidraw	eval004	code:types.ts->index.ts	TRUE	ImportedDataState	ImportedDataState	yes	ImportedDataState:2/2
+excalidraw__excalidraw	eval004	code:types.ts->renderElement.ts	TRUE	StaticCanvasRenderConfig	StaticCanvasRenderConfig	yes	StaticCanvasRenderConfig:3/3
+excalidraw__excalidraw	eval004	code:types.ts->shape.ts	NOT TRUE	ElementShapes		no	ElementShapes:0/3
+excalidraw__excalidraw	eval004	code:types.ts->CustomFooter.tsx	TRUE	ExcalidrawImperativeAPI	ExcalidrawImperativeAPI	yes	ExcalidrawImperativeAPI:2/2
+excalidraw__excalidraw	eval004	code:types.ts->ExampleApp.tsx	TRUE	AppState,ExcalidrawImperativeAPI	ExcalidrawImperativeAPI	yes	AppState:0/5 ExcalidrawImperativeAPI:9/9
+excalidraw__excalidraw	eval004	code:types.ts->App.tsx	TRUE	AppState,ExcalidrawImperativeAPI,ExcalidrawProps	AppState,ExcalidrawImperativeAPI	yes	AppState:2/3 ExcalidrawImperativeAPI:7/12 ExcalidrawProps:0/3
+excalidraw__excalidraw	eval004	code:types.ts->Collab.tsx#2	TRUE	Collaborator,ExcalidrawImperativeAPI,UserToFollow	ExcalidrawImperativeAPI	yes	Collaborator:0/4 ExcalidrawImperativeAPI:8/10 UserToFollow:1/2
+excalidraw__excalidraw	eval004	code:types.ts->AI.tsx	TRUE	ExcalidrawImperativeAPI	ExcalidrawImperativeAPI	yes	ExcalidrawImperativeAPI:2/2
+excalidraw__excalidraw	eval004	code:types.ts->DebugCanvas.tsx#2	TRUE	AppState	AppState	yes	AppState:3/3
+excalidraw__excalidraw	eval004	code:types.ts->FileManager.ts	TRUE	BinaryFileData,ExcalidrawImperativeAPI		no	BinaryFileData:0/2 ExcalidrawImperativeAPI:0/2
+excalidraw__excalidraw	eval004	code:types.ts->firebase.ts	UNLABELED	BinaryFileData		no	BinaryFileData:0/2
+excalidraw__excalidraw	eval004	code:types.ts->constants.ts	UNLABELED	AppState		no	AppState:0/3
+excalidraw__excalidraw	eval004	code:types.ts->flowchart.test.ts	UNLABELED	AppState		no	AppState:0/2
+excalidraw__excalidraw	eval004	code:types.ts->arrowEndpointText.ts	UNLABELED	AppState		no	AppState:0/2
+excalidraw__excalidraw	eval004	code:types.ts->focus.ts	UNLABELED	AppState	AppState	yes	AppState:2/3
+excalidraw__excalidraw	eval004	code:types.ts->binding.ts	UNLABELED	AppState	AppState	yes	AppState:7/9
+excalidraw__excalidraw	eval004	code:types.ts->bounds.ts	UNLABELED	AppState		no	AppState:0/2
+excalidraw__excalidraw	eval004	code:types.ts->collision.ts	UNLABELED	AppState,FrameNameBounds	FrameNameBounds	yes	AppState:0/3 FrameNameBounds:4/4
+excalidraw__excalidraw	eval004	code:types.ts->convertToShape.ts	UNLABELED	AppState	AppState	yes	AppState:11/15
+excalidraw__excalidraw	eval004	code:types.ts->delta.ts	UNLABELED	AppState,ObservedElementsAppState	AppState	yes	AppState:4/4 ObservedElementsAppState:0/4
+excalidraw__excalidraw	eval004	code:types.ts->duplicate.ts	UNLABELED	AppState		no	AppState:0/2
+excalidraw__excalidraw	eval004	code:types.ts->elbowArrow.ts	UNLABELED	AppState		no	AppState:0/3
+excalidraw__excalidraw	eval004	code:types.ts->flowchart.ts	UNLABELED	AppState	AppState	yes	AppState:2/4
+excalidraw__excalidraw	eval004	code:types.ts->frame.ts	UNLABELED	AppState	AppState	yes	AppState:5/5
+excalidraw__excalidraw	eval004	code:types.ts->groups.ts	UNLABELED	AppState	AppState	yes	AppState:3/3
+excalidraw__excalidraw	eval004	code:types.ts->linearElementEditor.ts	UNLABELED	AppClassProperties,AppState,PointerCoords	AppClassProperties,AppState,PointerCoords	yes	AppClassProperties:4/4 AppState:3/11 PointerCoords:2/2
+excalidraw__excalidraw	eval004	code:types.ts->renderElement.ts#2	UNLABELED	AppState		no	AppState:0/12
+excalidraw__excalidraw	eval004	code:types.ts->resizeTest.ts	UNLABELED	AppState	AppState	yes	AppState:2/4
+excalidraw__excalidraw	eval004	code:types.ts->selection.ts	UNLABELED	AppState	AppState	yes	AppState:6/6
+excalidraw__excalidraw	eval004	code:types.ts->shape.ts#2	UNLABELED	AppState		no	AppState:0/4
+excalidraw__excalidraw	eval004	code:types.ts->sizeHelpers.ts	UNLABELED	AppState		no	AppState:0/5
+excalidraw__excalidraw	eval004	code:types.ts->store.ts	UNLABELED	AppState	AppState	yes	AppState:8/8
+excalidraw__excalidraw	eval004	code:types.ts->utils.ts	UNLABELED	AppState		no	AppState:0/3
+excalidraw__excalidraw	eval004	code:types.ts->zindex.test.tsx	UNLABELED	AppState		no	AppState:0/2
+excalidraw__excalidraw	eval004	code:types.ts->export.ts	UNLABELED	AppState		no	AppState:0/5
+excalidraw__excalidraw	eval004	code:state.ts->animatedTrail.ts	UNLABELED	LaserPointerOptions		no	LaserPointerOptions:0/2
+puppeteer__puppeteer	eval004	code:ElementHandle.ts->elementhandle.test.ts	NOT TRUE	Point	Point	yes	Point:2/2
+puppeteer__puppeteer	eval004	code:Issue.ts->webmcp.test.ts	TRUE	Issue		no	Issue:0/2
+puppeteer__puppeteer	eval004	code:Page.ts->page.test.ts	NOT TRUE	Metrics		no	Metrics:0/2
+puppeteer__puppeteer	eval004	code:Accessibility.ts->accessibility.test.ts	TRUE	SerializedAXNode	SerializedAXNode	yes	SerializedAXNode:2/2
+puppeteer__puppeteer	eval004	code:WebMCP.ts->webmcp.test.ts	TRUE	WebMCPToolCallResult		no	WebMCPToolCallResult:0/4
+puppeteer__puppeteer	eval004	code:Configuration.ts->getConfiguration.ts	TRUE	ChromeHeadlessShellSettings,ChromeSettings,Configuration,FirefoxSettings	ChromeSettings,Configuration	yes	ChromeHeadlessShellSettings:0/2 ChromeSettings:2/2 Configuration:7/9 FirefoxSettings:0/2
+puppeteer__puppeteer	eval004	code:Configuration.ts->install.ts	TRUE	ChromeHeadlessShellSettings,ChromeSettings,FirefoxSettings	ChromeSettings	yes	ChromeHeadlessShellSettings:0/2 ChromeSettings:2/2 FirefoxSettings:0/2
+puppeteer__puppeteer	eval004	code:LaunchOptions.ts->mocha-utils.ts	NOT TRUE	LaunchOptions	LaunchOptions	yes	LaunchOptions:3/8
