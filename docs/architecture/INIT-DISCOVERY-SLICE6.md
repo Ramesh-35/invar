@@ -1,6 +1,8 @@
 # INIT-DISCOVERY-SLICE6: tsconfig paths and earned silence in egress discovery
 
-Status: DRAFT r1 for ruling. Implementation NOT authorized. Parent: the
+Status: RATIFIED (S6-D1 to S6-D4), implemented and LANDED; STAGE3-EVAL-006
+met every pre-registered target (sections J and K). Sections 0 to I are the
+draft r1 text as committed in b09f2d1, unchanged. Parent: the
 founder's direction of 2026-10-20 (an egress honesty slice, pre-registered
 at zero yield). Baseline: d4488ac.
 
@@ -142,3 +144,53 @@ S6-D4 STAGE3-EVAL-006 runs without adjudication, as section F.
 Stop and report on: any proposal byte changing; any of the 1,393 silences
 outside the three classes above; any fixture collision; any need for a
 parser or dependency.
+
+## J. Rulings of 2026-10-20 (recorded)
+
+S6-D1 to S6-D4 RATIFIED as drafted: root tsconfig only, `extends` not
+followed; earned silence follows re-exports, alias specifiers included;
+egress barrel depth stays one level; STAGE3-EVAL-006 without adjudication.
+Pre-registered by the founder: 113 proposals, byte-identical to EVAL-005
+(OmniRoute 6); OmniRoute's 619 path abstentions become 79 specific ones;
+0 silent drops, audited over all 1,393 reached imports; the suite green
+with 0 warnings; 10 of 10 repositories exit 0, deterministic. The draft's
+fuller OmniRoute figure, 682 to 144 abstentions, was checked as well.
+
+## K. Results
+
+Gate 0 PASS: 59 of 59 crate hashes identical at b09f2d1 (ledger
+c6f6949f6c5d, Mac and sandbox).
+Gate 1 PASS: tests/init_slice6_test.rs frozen before engine code
+(14ad07665a04): the declared S6-F1 to F10, F4b, N1 (golden recorded on the
+d4488ac binary) and M1, plus two added before code and recorded here:
+S6-F6b (`import { x }` then `export { x }`, the form 166 earned silences
+on OmniRoute take) and S6-F11 (an unreadable file on the re-export path,
+named by B4). 12 failed on the baseline as declared; F9, N1 and M1, the
+controls, passed.
+Gate 2 PASS: valuepairs.rs only (and strings.rs, which keeps the generic
+reason: one field added to its World): root tsconfig `paths` with exact
+and longest single-`*` matching, targets in order; the unscanned-directory
+reason; the no-key reason; earned silence in K1 (declarations, local
+export lists, `export ... from`, at most five levels, each (file, name)
+once; a Zod schema, an unread file or a cut path anywhere on the path
+outranks a value). The JSONC reader is local: valuepairs stays
+self-contained, as its module header requires.
+Gate 3 PASS: 8 of 8 section E mutants caught from scratch.
+Gate 4 PASS: 343 of 343 tests, 0 compiler warnings, release binary
+03f3e34956d7.
+Gate 5: STAGE3-EVAL-006, every target met
+(docs/evidence/stage3/eval006/LEDGER.md).
+
+Corrections to this draft, found during the gates and stated:
+
+S6-F-01 The 1,393 imports that reach K1's silent branch on OmniRoute are
+not all newly reachable: 1,284 come through path aliases (new), 109 are
+relative imports that are already silent on main. B4 audits all of them,
+which is the rule as written; section 0 called all 1,393 newly reachable.
+S6-F-02 docs/evidence/slice6/k1-silences.tsv as committed in b09f2d1 was
+the output of the classifier's first, narrow-scope run (53 "declared
+nowhere"), which finished in the background after the corrected run and
+overwrote it. The committed classifier and every count in this document
+are the corrected ones; the file is replaced in the landing commit, and
+its class label "zod-unreached" renamed "zod-not-object", which is what
+the two are.

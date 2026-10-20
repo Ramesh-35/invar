@@ -19,25 +19,25 @@ src/app/api/v1/_shared/elevenLabsProxy.ts	1	getProviderCredentialsWithQuotaPrefl
 src/app/api/v1/_shared/elevenLabsProxy.ts	5	isAllRateLimitedCredentials	@/app/api/v1/_shared/rateLimit	src/app/api/v1/_shared/rateLimit.ts	earned-value
 src/app/api/v1/_shared/elevenLabsProxy.ts	5	rateLimitedProviderResponse	@/app/api/v1/_shared/rateLimit	src/app/api/v1/_shared/rateLimit.ts	earned-value
 src/app/api/v1/_shared/elevenLabsProxy.ts	9	buildErrorBody	@omniroute/open-sse/utils/error.ts	open-sse/utils/error.ts	earned-value
-src/app/api/v1/_shared/elevenLabsProxy.ts	9	sanitizeErrorMessage	@omniroute/open-sse/utils/error.ts	open-sse/utils/error.ts	UNEARNED nowhere
+src/app/api/v1/_shared/elevenLabsProxy.ts	9	sanitizeErrorMessage	@omniroute/open-sse/utils/error.ts	open-sse/utils/error.ts	earned-value
 src/app/api/v1/_shared/elevenLabsProxy.ts	10	CORS_HEADERS	@/shared/utils/cors	src/shared/utils/cors.ts	earned-value
 src/app/api/v1/_shared/elevenLabsProxy.ts	10	handleCorsOptions	@/shared/utils/cors	src/shared/utils/cors.ts	earned-value
 src/app/api/v1/_shared/elevenLabsProxy.ts	11	enforceApiKeyPolicy	@/shared/utils/apiKeyPolicy	src/shared/utils/apiKeyPolicy.ts	earned-value
-src/app/api/v1/_shared/elevenLabsProxy.ts	12	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
-src/app/api/v1/_shared/elevenLabsProxy.ts	12	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/_shared/elevenLabsProxy.ts	12	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
+src/app/api/v1/_shared/elevenLabsProxy.ts	12	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/_shared/elevenLabsProxy.ts	12	resolveKeyConnectionScope	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/_shared/fishAudioProxy.ts	1	clearRecoveredProviderState	@/sse/services/auth	src/sse/services/auth.ts	earned-value
 src/app/api/v1/_shared/fishAudioProxy.ts	1	getProviderCredentialsWithQuotaPreflight	@/sse/services/auth	src/sse/services/auth.ts	earned-value
 src/app/api/v1/_shared/fishAudioProxy.ts	5	buildErrorBody	@omniroute/open-sse/utils/error.ts	open-sse/utils/error.ts	earned-value
-src/app/api/v1/_shared/fishAudioProxy.ts	5	sanitizeErrorMessage	@omniroute/open-sse/utils/error.ts	open-sse/utils/error.ts	UNEARNED nowhere
+src/app/api/v1/_shared/fishAudioProxy.ts	5	sanitizeErrorMessage	@omniroute/open-sse/utils/error.ts	open-sse/utils/error.ts	earned-value
 src/app/api/v1/_shared/fishAudioProxy.ts	6	CORS_HEADERS	@/shared/utils/cors	src/shared/utils/cors.ts	earned-value
 src/app/api/v1/_shared/fishAudioProxy.ts	6	handleCorsOptions	@/shared/utils/cors	src/shared/utils/cors.ts	earned-value
 src/app/api/v1/_shared/fishAudioProxy.ts	7	enforceApiKeyPolicyWithScope	@/app/api/v1/_shared/keyScopedRoute	src/app/api/v1/_shared/keyScopedRoute.ts	earned-value
 src/app/api/v1/_shared/fishAudioProxy.ts	7	unusableCredentialsResponse	@/app/api/v1/_shared/keyScopedRoute	src/app/api/v1/_shared/keyScopedRoute.ts	earned-value
 src/app/api/v1/_shared/keyScopedRoute.ts	6	enforceApiKeyPolicy	@/shared/utils/apiKeyPolicy	src/shared/utils/apiKeyPolicy.ts	earned-value
 src/app/api/v1/_shared/keyScopedRoute.ts	6	ApiKeyPolicyResult	@/shared/utils/apiKeyPolicy	src/shared/utils/apiKeyPolicy.ts	earned-type
-src/app/api/v1/_shared/keyScopedRoute.ts	7	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
-src/app/api/v1/_shared/keyScopedRoute.ts	7	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/_shared/keyScopedRoute.ts	7	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
+src/app/api/v1/_shared/keyScopedRoute.ts	7	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/_shared/keyScopedRoute.ts	7	resolveKeyConnectionScope	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/_shared/keyScopedRoute.ts	12	isAllRateLimitedCredentials	./rateLimit	src/app/api/v1/_shared/rateLimit.ts	earned-value
 src/app/api/v1/_shared/keyScopedRoute.ts	12	rateLimitedProviderResponse	./rateLimit	src/app/api/v1/_shared/rateLimit.ts	earned-value
@@ -60,8 +60,8 @@ src/app/api/v1/_shared/videoModelResolution.ts	1	getAllCustomModels	@/lib/db/mod
 src/app/api/v1/_shared/videoModelResolution.ts	2	parseVideoModel	@omniroute/open-sse/config/videoRegistry.ts	open-sse/config/videoRegistry.ts	earned-value
 src/app/api/v1/_shared/videoModelResolution.ts	3	getProviderCredentialsWithQuotaPreflight	@/sse/services/auth	src/sse/services/auth.ts	earned-value
 src/app/api/v1/_shared/videoModelResolution.ts	4	isAllRateLimitedCredentials	@/app/api/v1/_shared/rateLimit	src/app/api/v1/_shared/rateLimit.ts	earned-value
-src/app/api/v1/_shared/videoModelResolution.ts	5	keylessProviderRejection	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
-src/app/api/v1/_shared/videoModelResolution.ts	5	withoutKeyScopeBlocked	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/_shared/videoModelResolution.ts	5	keylessProviderRejection	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
+src/app/api/v1/_shared/videoModelResolution.ts	5	withoutKeyScopeBlocked	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/accounts/[id]/limits/route.ts	3	isAuthenticated	@/shared/utils/apiAuth	src/shared/utils/apiAuth.ts	earned-value
 src/app/api/v1/accounts/[id]/limits/route.ts	4	isValidationFailure	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
 src/app/api/v1/accounts/[id]/limits/route.ts	4	validateBody	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
@@ -72,13 +72,13 @@ src/app/api/v1/agents/credentials/route.ts	3	saveCloudAgentCredential	@/lib/clou
 src/app/api/v1/agents/credentials/route.ts	3	maskApiKey	@/lib/cloudAgent/credentials	src/lib/cloudAgent/credentials.ts	earned-value
 src/app/api/v1/agents/credentials/route.ts	8	getCloudAgentCorsHeaders	@/lib/cloudAgent/api	src/lib/cloudAgent/api.ts	earned-value
 src/app/api/v1/agents/credentials/route.ts	8	requireCloudAgentManagementAuth	@/lib/cloudAgent/api	src/lib/cloudAgent/api.ts	earned-value
-src/app/api/v1/agents/credentials/route.ts	10	sanitizeErrorMessage	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	UNEARNED nowhere
+src/app/api/v1/agents/credentials/route.ts	10	sanitizeErrorMessage	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	earned-value
 src/app/api/v1/agents/health/route.ts	2	getAgent	@/lib/cloudAgent/registry	src/lib/cloudAgent/registry.ts	earned-value
 src/app/api/v1/agents/health/route.ts	2	getAvailableAgents	@/lib/cloudAgent/registry	src/lib/cloudAgent/registry.ts	earned-value
 src/app/api/v1/agents/health/route.ts	3	getCloudAgentCredentialFromDb	@/lib/cloudAgent/credentials	src/lib/cloudAgent/credentials.ts	earned-value
 src/app/api/v1/agents/health/route.ts	4	getCloudAgentCorsHeaders	@/lib/cloudAgent/api	src/lib/cloudAgent/api.ts	earned-value
 src/app/api/v1/agents/health/route.ts	4	requireCloudAgentManagementAuth	@/lib/cloudAgent/api	src/lib/cloudAgent/api.ts	earned-value
-src/app/api/v1/agents/health/route.ts	6	sanitizeErrorMessage	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	UNEARNED nowhere
+src/app/api/v1/agents/health/route.ts	6	sanitizeErrorMessage	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	earned-value
 src/app/api/v1/agents/tasks/[id]/route.ts	2	getAgent	@/lib/cloudAgent/registry	src/lib/cloudAgent/registry.ts	earned-value
 src/app/api/v1/agents/tasks/[id]/route.ts	3	createCloudAgentTaskTable	@/lib/cloudAgent/db	src/lib/cloudAgent/db.ts	earned-value
 src/app/api/v1/agents/tasks/[id]/route.ts	3	getCloudAgentTaskById	@/lib/cloudAgent/db	src/lib/cloudAgent/db.ts	earned-value
@@ -88,7 +88,7 @@ src/app/api/v1/agents/tasks/[id]/route.ts	9	getCloudAgentCorsHeaders	@/lib/cloud
 src/app/api/v1/agents/tasks/[id]/route.ts	9	getCloudAgentCredentials	@/lib/cloudAgent/api	src/lib/cloudAgent/api.ts	earned-value
 src/app/api/v1/agents/tasks/[id]/route.ts	9	requireCloudAgentManagementAuth	@/lib/cloudAgent/api	src/lib/cloudAgent/api.ts	earned-value
 src/app/api/v1/agents/tasks/[id]/route.ts	9	serializeCloudAgentTask	@/lib/cloudAgent/api	src/lib/cloudAgent/api.ts	earned-value
-src/app/api/v1/agents/tasks/[id]/route.ts	17	sanitizeErrorMessage	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	UNEARNED nowhere
+src/app/api/v1/agents/tasks/[id]/route.ts	17	sanitizeErrorMessage	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	earned-value
 src/app/api/v1/agents/tasks/route.ts	2	getAgent	@/lib/cloudAgent/registry	src/lib/cloudAgent/registry.ts	earned-value
 src/app/api/v1/agents/tasks/route.ts	3	CloudAgentTaskRow	@/lib/cloudAgent/db	src/lib/cloudAgent/db.ts	earned-type
 src/app/api/v1/agents/tasks/route.ts	4	createCloudAgentTaskTable	@/lib/cloudAgent/db	src/lib/cloudAgent/db.ts	earned-value
@@ -101,7 +101,7 @@ src/app/api/v1/agents/tasks/route.ts	12	getCloudAgentCorsHeaders	@/lib/cloudAgen
 src/app/api/v1/agents/tasks/route.ts	12	getCloudAgentCredentials	@/lib/cloudAgent/api	src/lib/cloudAgent/api.ts	earned-value
 src/app/api/v1/agents/tasks/route.ts	12	requireCloudAgentManagementAuth	@/lib/cloudAgent/api	src/lib/cloudAgent/api.ts	earned-value
 src/app/api/v1/agents/tasks/route.ts	12	serializeCloudAgentTask	@/lib/cloudAgent/api	src/lib/cloudAgent/api.ts	earned-value
-src/app/api/v1/agents/tasks/route.ts	20	sanitizeErrorMessage	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	UNEARNED nowhere
+src/app/api/v1/agents/tasks/route.ts	20	sanitizeErrorMessage	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	earned-value
 src/app/api/v1/alpha/search/route.ts	2	handleSearch	@omniroute/open-sse/handlers/search.ts	open-sse/handlers/search.ts	earned-value
 src/app/api/v1/alpha/search/route.ts	3	recordSearchUsageCost	@omniroute/open-sse/handlers/search/reportedCost.ts	open-sse/handlers/search/reportedCost.ts	earned-value
 src/app/api/v1/alpha/search/route.ts	4	getProviderCredentialsWithQuotaPreflight	@/sse/services/auth	src/sse/services/auth.ts	earned-value
@@ -113,9 +113,9 @@ src/app/api/v1/alpha/search/route.ts	10	errorResponse	@omniroute/open-sse/utils/
 src/app/api/v1/alpha/search/route.ts	11	HTTP_STATUS	@omniroute/open-sse/config/constants.ts	open-sse/config/constants.ts	earned-value
 src/app/api/v1/alpha/search/route.ts	13	toJsonErrorPayload	@/shared/utils/upstreamError	src/shared/utils/upstreamError.ts	earned-value
 src/app/api/v1/alpha/search/route.ts	14	enforceApiKeyPolicy	@/shared/utils/apiKeyPolicy	src/shared/utils/apiKeyPolicy.ts	earned-value
-src/app/api/v1/alpha/search/route.ts	15	keyAdmitsKeylessProviders	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/alpha/search/route.ts	15	keyAdmitsKeylessProviders	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/alpha/search/route.ts	15	resolveKeyConnectionScope	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
-src/app/api/v1/alpha/search/route.ts	15	withoutKeyScopeBlocked	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/alpha/search/route.ts	15	withoutKeyScopeBlocked	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/alpha/search/route.ts	20	formatValidationMessage	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
 src/app/api/v1/alpha/search/route.ts	20	isValidationFailure	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
 src/app/api/v1/alpha/search/route.ts	20	validateBody	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
@@ -142,9 +142,9 @@ src/app/api/v1/audio/speech/route.ts	10	errorResponse	@omniroute/open-sse/utils/
 src/app/api/v1/audio/speech/route.ts	11	HTTP_STATUS	@omniroute/open-sse/config/constants.ts	open-sse/config/constants.ts	earned-value
 src/app/api/v1/audio/speech/route.ts	12	enforceApiKeyPolicy	@/shared/utils/apiKeyPolicy	src/shared/utils/apiKeyPolicy.ts	earned-value
 src/app/api/v1/audio/speech/route.ts	13	createComboTargetKeyGate	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
-src/app/api/v1/audio/speech/route.ts	13	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
-src/app/api/v1/audio/speech/route.ts	13	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
-src/app/api/v1/audio/speech/route.ts	13	keylessProviderRejection	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/audio/speech/route.ts	13	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
+src/app/api/v1/audio/speech/route.ts	13	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
+src/app/api/v1/audio/speech/route.ts	13	keylessProviderRejection	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/audio/speech/route.ts	13	resolveKeyConnectionScope	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/audio/speech/route.ts	21	isValidationFailure	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
 src/app/api/v1/audio/speech/route.ts	21	validateBody	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
@@ -169,9 +169,9 @@ src/app/api/v1/audio/transcriptions/route.ts	19	errorResponse	@omniroute/open-ss
 src/app/api/v1/audio/transcriptions/route.ts	20	HTTP_STATUS	@omniroute/open-sse/config/constants.ts	open-sse/config/constants.ts	earned-value
 src/app/api/v1/audio/transcriptions/route.ts	21	enforceApiKeyPolicy	@/shared/utils/apiKeyPolicy	src/shared/utils/apiKeyPolicy.ts	earned-value
 src/app/api/v1/audio/transcriptions/route.ts	22	createComboTargetKeyGate	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
-src/app/api/v1/audio/transcriptions/route.ts	22	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
-src/app/api/v1/audio/transcriptions/route.ts	22	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
-src/app/api/v1/audio/transcriptions/route.ts	22	keylessProviderRejection	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/audio/transcriptions/route.ts	22	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
+src/app/api/v1/audio/transcriptions/route.ts	22	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
+src/app/api/v1/audio/transcriptions/route.ts	22	keylessProviderRejection	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/audio/transcriptions/route.ts	22	resolveKeyConnectionScope	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/audio/transcriptions/route.ts	29	isAllRateLimitedCredentials	@/app/api/v1/_shared/rateLimit	src/app/api/v1/_shared/rateLimit.ts	earned-value
 src/app/api/v1/audio/transcriptions/route.ts	29	rateLimitedProviderResponse	@/app/api/v1/_shared/rateLimit	src/app/api/v1/_shared/rateLimit.ts	earned-value
@@ -192,7 +192,7 @@ src/app/api/v1/audio/translations/route.ts	13	errorResponse	@omniroute/open-sse/
 src/app/api/v1/audio/translations/route.ts	14	HTTP_STATUS	@omniroute/open-sse/config/constants.ts	open-sse/config/constants.ts	earned-value
 src/app/api/v1/audio/translations/route.ts	15	enforceApiKeyPolicy	@/shared/utils/apiKeyPolicy	src/shared/utils/apiKeyPolicy.ts	earned-value
 src/app/api/v1/audio/translations/route.ts	16	createComboTargetKeyGate	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
-src/app/api/v1/audio/translations/route.ts	16	keylessProviderRejection	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/audio/translations/route.ts	16	keylessProviderRejection	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/audio/translations/route.ts	16	resolveKeyConnectionScope	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/audio/translations/route.ts	21	unusableCredentialsResponse	@/app/api/v1/_shared/keyScopedRoute	src/app/api/v1/_shared/keyScopedRoute.ts	earned-value
 src/app/api/v1/audio/translations/route.ts	22	attachOmniRouteMetaToResponse	@/domain/omnirouteResponseMeta	src/domain/omnirouteResponseMeta.ts	earned-value
@@ -251,7 +251,7 @@ src/app/api/v1/batches/route.ts	12	enforceApiKeyPolicy	@/shared/utils/apiKeyPoli
 src/app/api/v1/batches/route.ts	13	formatBatchResponse	./formatBatchResponse	src/app/api/v1/batches/formatBatchResponse.ts	earned-value
 src/app/api/v1/batches/route.ts	14	parseBatchListLimit	./parseListLimit	src/app/api/v1/batches/parseListLimit.ts	earned-value
 src/app/api/v1/batches/route.ts	15	buildErrorBody	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	earned-value
-src/app/api/v1/batches/route.ts	15	sanitizeErrorMessage	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	UNEARNED nowhere
+src/app/api/v1/batches/route.ts	15	sanitizeErrorMessage	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	earned-value
 src/app/api/v1/chat/completions/route.ts	2	CORS_HEADERS	@/shared/utils/cors	src/shared/utils/cors.ts	earned-value
 src/app/api/v1/chat/completions/route.ts	2	handleCorsOptions	@/shared/utils/cors	src/shared/utils/cors.ts	earned-value
 src/app/api/v1/chat/completions/route.ts	3	callCloudWithMachineId	@/shared/utils/cloud	src/shared/utils/cloud.ts	earned-value
@@ -294,8 +294,8 @@ src/app/api/v1/classify/route.ts	6	withInjectionGuard	@/middleware/promptInjecti
 src/app/api/v1/classify/route.ts	7	errorResponse	@omniroute/open-sse/utils/error.ts	open-sse/utils/error.ts	earned-value
 src/app/api/v1/classify/route.ts	8	HTTP_STATUS	@omniroute/open-sse/config/constants.ts	open-sse/config/constants.ts	earned-value
 src/app/api/v1/classify/route.ts	9	enforceApiKeyPolicy	@/shared/utils/apiKeyPolicy	src/shared/utils/apiKeyPolicy.ts	earned-value
-src/app/api/v1/classify/route.ts	10	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
-src/app/api/v1/classify/route.ts	10	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/classify/route.ts	10	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
+src/app/api/v1/classify/route.ts	10	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/classify/route.ts	10	resolveKeyConnectionScope	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/classify/route.ts	16	isValidationFailure	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
 src/app/api/v1/classify/route.ts	16	validateBody	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
@@ -439,19 +439,19 @@ src/app/api/v1/images/generations/route.ts	8	getImageProvider	@omniroute/open-ss
 src/app/api/v1/images/generations/route.ts	8	getImageModelEntry	@omniroute/open-sse/config/imageRegistry.ts	open-sse/config/imageRegistry.ts	earned-value
 src/app/api/v1/images/generations/route.ts	8	modalitiesRequireImageInput	@omniroute/open-sse/config/imageRegistry.ts	open-sse/config/imageRegistry.ts	earned-value
 src/app/api/v1/images/generations/route.ts	14	errorResponse	@omniroute/open-sse/utils/error.ts	open-sse/utils/error.ts	earned-value
-src/app/api/v1/images/generations/route.ts	14	sanitizeErrorMessage	@omniroute/open-sse/utils/error.ts	open-sse/utils/error.ts	UNEARNED nowhere
+src/app/api/v1/images/generations/route.ts	14	sanitizeErrorMessage	@omniroute/open-sse/utils/error.ts	open-sse/utils/error.ts	earned-value
 src/app/api/v1/images/generations/route.ts	14	unavailableResponse	@omniroute/open-sse/utils/error.ts	open-sse/utils/error.ts	earned-value
 src/app/api/v1/images/generations/route.ts	19	HTTP_STATUS	@omniroute/open-sse/config/constants.ts	open-sse/config/constants.ts	earned-value
 src/app/api/v1/images/generations/route.ts	20	isAllRateLimitedCredentials	@/app/api/v1/_shared/rateLimit	src/app/api/v1/_shared/rateLimit.ts	earned-value
 src/app/api/v1/images/generations/route.ts	22	toJsonErrorPayload	@/shared/utils/upstreamError	src/shared/utils/upstreamError.ts	earned-value
 src/app/api/v1/images/generations/route.ts	23	enforceApiKeyPolicy	@/shared/utils/apiKeyPolicy	src/shared/utils/apiKeyPolicy.ts	earned-value
 src/app/api/v1/images/generations/route.ts	24	createComboTargetKeyGate	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
-src/app/api/v1/images/generations/route.ts	24	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
-src/app/api/v1/images/generations/route.ts	24	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
-src/app/api/v1/images/generations/route.ts	24	keylessProviderRejection	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/images/generations/route.ts	24	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
+src/app/api/v1/images/generations/route.ts	24	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
+src/app/api/v1/images/generations/route.ts	24	keylessProviderRejection	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/images/generations/route.ts	24	narrowConnectionScope	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/images/generations/route.ts	24	resolveKeyConnectionScope	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
-src/app/api/v1/images/generations/route.ts	24	withoutKeyScopeBlocked	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/images/generations/route.ts	24	withoutKeyScopeBlocked	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/images/generations/route.ts	34	isValidationFailure	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
 src/app/api/v1/images/generations/route.ts	34	validateBody	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
 src/app/api/v1/images/generations/route.ts	36	getComboByName	@/lib/db/combos	src/lib/db/combos.ts	earned-value
@@ -488,7 +488,7 @@ src/app/api/v1/images/upscale/route.ts	8	withInjectionGuard	@/middleware/promptI
 src/app/api/v1/images/upscale/route.ts	9	getProviderCredentialsWithQuotaPreflight	@/sse/services/auth	src/sse/services/auth.ts	earned-value
 src/app/api/v1/images/upscale/route.ts	9	clearRecoveredProviderState	@/sse/services/auth	src/sse/services/auth.ts	earned-value
 src/app/api/v1/images/upscale/route.ts	13	errorResponse	@omniroute/open-sse/utils/error.ts	open-sse/utils/error.ts	earned-value
-src/app/api/v1/images/upscale/route.ts	13	sanitizeErrorMessage	@omniroute/open-sse/utils/error.ts	open-sse/utils/error.ts	UNEARNED nowhere
+src/app/api/v1/images/upscale/route.ts	13	sanitizeErrorMessage	@omniroute/open-sse/utils/error.ts	open-sse/utils/error.ts	earned-value
 src/app/api/v1/images/upscale/route.ts	13	unavailableResponse	@omniroute/open-sse/utils/error.ts	open-sse/utils/error.ts	earned-value
 src/app/api/v1/images/upscale/route.ts	18	HTTP_STATUS	@omniroute/open-sse/config/constants.ts	open-sse/config/constants.ts	earned-value
 src/app/api/v1/images/upscale/route.ts	20	toJsonErrorPayload	@/shared/utils/upstreamError	src/shared/utils/upstreamError.ts	earned-value
@@ -545,7 +545,7 @@ src/app/api/v1/management/proxy-subscriptions/[id]/route.ts	3	getSubscriptionByI
 src/app/api/v1/management/proxy-subscriptions/[id]/route.ts	3	updateSubscription	@/lib/proxySubscription	src/lib/proxySubscription/index.ts	earned-value
 src/app/api/v1/management/proxy-subscriptions/[id]/route.ts	3	deleteSubscription	@/lib/proxySubscription	src/lib/proxySubscription/index.ts	earned-value
 src/app/api/v1/management/proxy-subscriptions/[id]/route.ts	3	redactSubscriptionUrl	@/lib/proxySubscription	src/lib/proxySubscription/index.ts	earned-value
-src/app/api/v1/management/proxy-subscriptions/[id]/route.ts	3	proxySubscriptionUpdateSchema	@/lib/proxySubscription	src/lib/proxySubscription/index.ts	UNEARNED zod-unreached src/lib/proxySubscription/schema.ts:207
+src/app/api/v1/management/proxy-subscriptions/[id]/route.ts	3	proxySubscriptionUpdateSchema	@/lib/proxySubscription	src/lib/proxySubscription/index.ts	UNEARNED zod-not-object src/lib/proxySubscription/schema.ts:207
 src/app/api/v1/management/proxy-subscriptions/[id]/route.ts	3	firstIssueMessage	@/lib/proxySubscription	src/lib/proxySubscription/index.ts	earned-value
 src/app/api/v1/management/proxy-subscriptions/route.ts	1	requireManagementAuth	@/lib/api/requireManagementAuth	src/lib/api/requireManagementAuth.ts	earned-value
 src/app/api/v1/management/proxy-subscriptions/route.ts	2	createErrorResponseFromUnknown	@/lib/api/errorResponse	src/lib/api/errorResponse.ts	earned-value
@@ -556,7 +556,7 @@ src/app/api/v1/management/proxy-subscriptions/route.ts	8	listSubscriptions	@/lib
 src/app/api/v1/management/proxy-subscriptions/route.ts	8	createSubscription	@/lib/proxySubscription	src/lib/proxySubscription/index.ts	earned-value
 src/app/api/v1/management/proxy-subscriptions/route.ts	8	startSubscriptionScheduler	@/lib/proxySubscription	src/lib/proxySubscription/index.ts	earned-value
 src/app/api/v1/management/proxy-subscriptions/route.ts	8	redactSubscriptionUrl	@/lib/proxySubscription	src/lib/proxySubscription/index.ts	earned-value
-src/app/api/v1/management/proxy-subscriptions/route.ts	8	proxySubscriptionCreateSchema	@/lib/proxySubscription	src/lib/proxySubscription/index.ts	UNEARNED zod-unreached src/lib/proxySubscription/schema.ts:139
+src/app/api/v1/management/proxy-subscriptions/route.ts	8	proxySubscriptionCreateSchema	@/lib/proxySubscription	src/lib/proxySubscription/index.ts	UNEARNED zod-not-object src/lib/proxySubscription/schema.ts:139
 src/app/api/v1/management/proxy-subscriptions/route.ts	8	firstIssueMessage	@/lib/proxySubscription	src/lib/proxySubscription/index.ts	earned-value
 src/app/api/v1/me/status/route.ts	3	buildApiKeySelfServiceStatus	@/lib/usage/apiKeySelfService	src/lib/usage/apiKeySelfService.ts	earned-value
 src/app/api/v1/me/status/route.ts	4	hasSelfUsageScope	@/shared/constants/selfServiceScopes	src/shared/constants/selfServiceScopes.ts	earned-value
@@ -594,7 +594,7 @@ src/app/api/v1/models/[...model]/route.ts	2	getUnifiedModelsResponse	../catalog	
 src/app/api/v1/models/[...model]/route.ts	3	handleGetModelById	../modelById	src/app/api/v1/models/modelById.ts	earned-value
 src/app/api/v1/models/catalog.ts	1	createCatalogConnectionExclusionFilter	@/lib/providerModels/copilotCatalogRejections	src/lib/providerModels/copilotCatalogRejections.ts	earned-value
 src/app/api/v1/models/catalog.ts	2	PROVIDER_MODELS	@/shared/constants/models	src/shared/constants/models.ts	earned-value
-src/app/api/v1/models/catalog.ts	2	PROVIDER_ID_TO_ALIAS	@/shared/constants/models	src/shared/constants/models.ts	UNEARNED nowhere
+src/app/api/v1/models/catalog.ts	2	PROVIDER_ID_TO_ALIAS	@/shared/constants/models	src/shared/constants/models.ts	earned-value
 src/app/api/v1/models/catalog.ts	3	NOAUTH_PROVIDERS	@/shared/constants/providers	src/shared/constants/providers.ts	earned-value
 src/app/api/v1/models/catalog.ts	4	getCombos	@/lib/db/combos	src/lib/db/combos.ts	earned-value
 src/app/api/v1/models/catalog.ts	5	createHiddenModelLookup	@/lib/hiddenModelLookup	src/lib/hiddenModelLookup.ts	earned-value
@@ -751,7 +751,7 @@ src/app/api/v1/models/catalogOrder.ts	27	groupSortPriority	@/shared/constants/ca
 src/app/api/v1/models/catalogPaidFilter.ts	1	isFreeForProvider	@/shared/utils/freeModels	src/shared/utils/freeModels.ts	earned-value
 src/app/api/v1/models/catalogPaidFilter.ts	2	resolveProviderId	@/shared/constants/providers	src/shared/constants/providers.ts	earned-value
 src/app/api/v1/models/catalogProviderMaps.ts	1	PROVIDER_MODELS	@/shared/constants/models	src/shared/constants/models.ts	earned-value
-src/app/api/v1/models/catalogProviderMaps.ts	1	PROVIDER_ID_TO_ALIAS	@/shared/constants/models	src/shared/constants/models.ts	UNEARNED nowhere
+src/app/api/v1/models/catalogProviderMaps.ts	1	PROVIDER_ID_TO_ALIAS	@/shared/constants/models	src/shared/constants/models.ts	earned-value
 src/app/api/v1/models/catalogProviderMaps.ts	2	AI_PROVIDERS	@/shared/constants/providers	src/shared/constants/providers.ts	earned-value
 src/app/api/v1/models/catalogProviderMaps.ts	3	parseModel	@omniroute/open-sse/services/model	open-sse/services/model.ts	earned-value
 src/app/api/v1/models/catalogProviderMaps.ts	3	resolveCanonicalProviderModel	@omniroute/open-sse/services/model	open-sse/services/model.ts	earned-value
@@ -817,8 +817,8 @@ src/app/api/v1/moderations/route.ts	7	parseModerationModel	@omniroute/open-sse/c
 src/app/api/v1/moderations/route.ts	8	errorResponse	@omniroute/open-sse/utils/error.ts	open-sse/utils/error.ts	earned-value
 src/app/api/v1/moderations/route.ts	9	HTTP_STATUS	@omniroute/open-sse/config/constants.ts	open-sse/config/constants.ts	earned-value
 src/app/api/v1/moderations/route.ts	10	enforceApiKeyPolicy	@/shared/utils/apiKeyPolicy	src/shared/utils/apiKeyPolicy.ts	earned-value
-src/app/api/v1/moderations/route.ts	11	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
-src/app/api/v1/moderations/route.ts	11	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/moderations/route.ts	11	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
+src/app/api/v1/moderations/route.ts	11	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/moderations/route.ts	11	resolveKeyConnectionScope	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/moderations/route.ts	17	isValidationFailure	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
 src/app/api/v1/moderations/route.ts	17	validateBody	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
@@ -854,8 +854,8 @@ src/app/api/v1/ocr/route.ts	12	parseOcrModel	@omniroute/open-sse/config/ocrRegis
 src/app/api/v1/ocr/route.ts	13	errorResponse	@omniroute/open-sse/utils/error.ts	open-sse/utils/error.ts	earned-value
 src/app/api/v1/ocr/route.ts	14	HTTP_STATUS	@omniroute/open-sse/config/constants.ts	open-sse/config/constants.ts	earned-value
 src/app/api/v1/ocr/route.ts	15	enforceApiKeyPolicy	@/shared/utils/apiKeyPolicy	src/shared/utils/apiKeyPolicy.ts	earned-value
-src/app/api/v1/ocr/route.ts	16	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
-src/app/api/v1/ocr/route.ts	16	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/ocr/route.ts	16	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
+src/app/api/v1/ocr/route.ts	16	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/ocr/route.ts	16	resolveKeyConnectionScope	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/ocr/route.ts	22	isValidationFailure	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
 src/app/api/v1/ocr/route.ts	22	validateBody	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
@@ -891,8 +891,8 @@ src/app/api/v1/providers/[provider]/embeddings/route.ts	4	extractApiKey	@/sse/se
 src/app/api/v1/providers/[provider]/embeddings/route.ts	4	isValidApiKey	@/sse/services/auth	src/sse/services/auth.ts	earned-value
 src/app/api/v1/providers/[provider]/embeddings/route.ts	10	handleEmbedding	@omniroute/open-sse/handlers/embeddings.ts	open-sse/handlers/embeddings.ts	earned-value
 src/app/api/v1/providers/[provider]/embeddings/route.ts	12	enforceApiKeyPolicy	@/shared/utils/apiKeyPolicy	src/shared/utils/apiKeyPolicy.ts	earned-value
-src/app/api/v1/providers/[provider]/embeddings/route.ts	13	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
-src/app/api/v1/providers/[provider]/embeddings/route.ts	13	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/providers/[provider]/embeddings/route.ts	13	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
+src/app/api/v1/providers/[provider]/embeddings/route.ts	13	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/providers/[provider]/embeddings/route.ts	13	resolveKeyConnectionScope	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/providers/[provider]/embeddings/route.ts	19	isValidationFailure	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
 src/app/api/v1/providers/[provider]/embeddings/route.ts	19	validateBody	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
@@ -969,7 +969,7 @@ src/app/api/v1/relay/chat/completions/bifrost/route.ts	34	checkRateLimit	@/lib/d
 src/app/api/v1/relay/chat/completions/bifrost/route.ts	34	recordRelayUsage	@/lib/db/relayProxies	src/lib/db/relayProxies.ts	earned-value
 src/app/api/v1/relay/chat/completions/bifrost/route.ts	35	buildErrorBody	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	earned-value
 src/app/api/v1/relay/chat/completions/bifrost/route.ts	35	parseUpstreamError	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	earned-value
-src/app/api/v1/relay/chat/completions/bifrost/route.ts	35	sanitizeErrorMessage	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	UNEARNED nowhere
+src/app/api/v1/relay/chat/completions/bifrost/route.ts	35	sanitizeErrorMessage	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	earned-value
 src/app/api/v1/relay/chat/completions/bifrost/route.ts	40	getProviderPluginManifestHeader	@omniroute/open-sse/config/providerPluginManifestUrl.ts	open-sse/config/providerPluginManifestUrl.ts	earned-value
 src/app/api/v1/relay/chat/completions/bifrost/route.ts	42	checkIpRateLimit	../relaySecurity	src/app/api/v1/relay/chat/completions/relaySecurity.ts	earned-value
 src/app/api/v1/relay/chat/completions/bifrost/route.ts	42	extractToken	../relaySecurity	src/app/api/v1/relay/chat/completions/relaySecurity.ts	earned-value
@@ -990,7 +990,7 @@ src/app/api/v1/relay/chat/completions/route.ts	14	checkRateLimit	@/lib/db/relayP
 src/app/api/v1/relay/chat/completions/route.ts	14	recordRelayUsage	@/lib/db/relayProxies	src/lib/db/relayProxies.ts	earned-value
 src/app/api/v1/relay/chat/completions/route.ts	15	buildErrorBody	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	earned-value
 src/app/api/v1/relay/chat/completions/route.ts	15	parseUpstreamError	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	earned-value
-src/app/api/v1/relay/chat/completions/route.ts	15	sanitizeErrorMessage	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	UNEARNED nowhere
+src/app/api/v1/relay/chat/completions/route.ts	15	sanitizeErrorMessage	@omniroute/open-sse/utils/error	open-sse/utils/error.ts	earned-value
 src/app/api/v1/relay/chat/completions/route.ts	20	checkIpRateLimit	./relaySecurity	src/app/api/v1/relay/chat/completions/relaySecurity.ts	earned-value
 src/app/api/v1/relay/chat/completions/route.ts	20	extractToken	./relaySecurity	src/app/api/v1/relay/chat/completions/relaySecurity.ts	earned-value
 src/app/api/v1/relay/chat/completions/route.ts	20	getClientIp	./relaySecurity	src/app/api/v1/relay/chat/completions/relaySecurity.ts	earned-value
@@ -1022,8 +1022,8 @@ src/app/api/v1/rerank/route.ts	9	errorResponse	@omniroute/open-sse/utils/error.t
 src/app/api/v1/rerank/route.ts	10	HTTP_STATUS	@omniroute/open-sse/config/constants.ts	open-sse/config/constants.ts	earned-value
 src/app/api/v1/rerank/route.ts	11	enforceApiKeyPolicy	@/shared/utils/apiKeyPolicy	src/shared/utils/apiKeyPolicy.ts	earned-value
 src/app/api/v1/rerank/route.ts	12	createComboTargetKeyGate	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
-src/app/api/v1/rerank/route.ts	12	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
-src/app/api/v1/rerank/route.ts	12	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/rerank/route.ts	12	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
+src/app/api/v1/rerank/route.ts	12	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/rerank/route.ts	12	resolveKeyConnectionScope	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/rerank/route.ts	19	isValidationFailure	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
 src/app/api/v1/rerank/route.ts	19	validateBody	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
@@ -1105,9 +1105,9 @@ src/app/api/v1/search/route.ts	17	errorResponse	@omniroute/open-sse/utils/error.
 src/app/api/v1/search/route.ts	18	HTTP_STATUS	@omniroute/open-sse/config/constants.ts	open-sse/config/constants.ts	earned-value
 src/app/api/v1/search/route.ts	20	toJsonErrorPayload	@/shared/utils/upstreamError	src/shared/utils/upstreamError.ts	earned-value
 src/app/api/v1/search/route.ts	21	enforceApiKeyPolicy	@/shared/utils/apiKeyPolicy	src/shared/utils/apiKeyPolicy.ts	earned-value
-src/app/api/v1/search/route.ts	22	keyAdmitsKeylessProviders	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/search/route.ts	22	keyAdmitsKeylessProviders	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/search/route.ts	22	resolveKeyConnectionScope	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
-src/app/api/v1/search/route.ts	22	withoutKeyScopeBlocked	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/search/route.ts	22	withoutKeyScopeBlocked	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/search/route.ts	28	formatValidationMessage	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
 src/app/api/v1/search/route.ts	28	isValidationFailure	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
 src/app/api/v1/search/route.ts	28	validateBody	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
@@ -1128,8 +1128,8 @@ src/app/api/v1/segment/route.ts	6	withInjectionGuard	@/middleware/promptInjectio
 src/app/api/v1/segment/route.ts	7	errorResponse	@omniroute/open-sse/utils/error.ts	open-sse/utils/error.ts	earned-value
 src/app/api/v1/segment/route.ts	8	HTTP_STATUS	@omniroute/open-sse/config/constants.ts	open-sse/config/constants.ts	earned-value
 src/app/api/v1/segment/route.ts	9	enforceApiKeyPolicy	@/shared/utils/apiKeyPolicy	src/shared/utils/apiKeyPolicy.ts	earned-value
-src/app/api/v1/segment/route.ts	10	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
-src/app/api/v1/segment/route.ts	10	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/segment/route.ts	10	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
+src/app/api/v1/segment/route.ts	10	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/segment/route.ts	10	resolveKeyConnectionScope	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/segment/route.ts	16	isValidationFailure	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
 src/app/api/v1/segment/route.ts	16	validateBody	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
@@ -1187,8 +1187,8 @@ src/app/api/v1/videos/generations/route.ts	11	errorResponse	@omniroute/open-sse/
 src/app/api/v1/videos/generations/route.ts	12	HTTP_STATUS	@omniroute/open-sse/config/constants.ts	open-sse/config/constants.ts	earned-value
 src/app/api/v1/videos/generations/route.ts	14	enforceApiKeyPolicy	@/shared/utils/apiKeyPolicy	src/shared/utils/apiKeyPolicy.ts	earned-value
 src/app/api/v1/videos/generations/route.ts	15	createComboTargetKeyGate	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
-src/app/api/v1/videos/generations/route.ts	15	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
-src/app/api/v1/videos/generations/route.ts	15	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/videos/generations/route.ts	15	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
+src/app/api/v1/videos/generations/route.ts	15	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/videos/generations/route.ts	15	resolveKeyConnectionScope	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/videos/generations/route.ts	21	isAllRateLimitedCredentials	@/app/api/v1/_shared/rateLimit	src/app/api/v1/_shared/rateLimit.ts	earned-value
 src/app/api/v1/videos/generations/route.ts	21	rateLimitedProviderResponse	@/app/api/v1/_shared/rateLimit	src/app/api/v1/_shared/rateLimit.ts	earned-value
@@ -1364,8 +1364,8 @@ src/app/api/v1/web/fetch/route.ts	19	WebFetchProviderId	@omniroute/open-sse/hand
 src/app/api/v1/web/fetch/route.ts	29	getProviderCredentialsWithQuotaPreflight	@/sse/services/auth	src/sse/services/auth.ts	earned-value
 src/app/api/v1/web/fetch/route.ts	30	resolveClientApiKey	@/sse/services/clientApiKeyResolver	src/sse/services/clientApiKeyResolver.ts	earned-value
 src/app/api/v1/web/fetch/route.ts	31	enforceApiKeyPolicyWithScope	@/app/api/v1/_shared/keyScopedRoute	src/app/api/v1/_shared/keyScopedRoute.ts	earned-value
-src/app/api/v1/web/fetch/route.ts	32	keyAdmitsKeylessProviders	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
-src/app/api/v1/web/fetch/route.ts	32	withoutKeyScopeBlocked	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/web/fetch/route.ts	32	keyAdmitsKeylessProviders	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
+src/app/api/v1/web/fetch/route.ts	32	withoutKeyScopeBlocked	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/web/fetch/route.ts	36	isRequireApiKeyEnabled	@/shared/utils/featureFlags	src/shared/utils/featureFlags.ts	earned-value
 src/app/api/v1/web/fetch/route.ts	38	isValidationFailure	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
 src/app/api/v1/web/fetch/route.ts	38	validateBody	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
@@ -1377,10 +1377,10 @@ src/app/api/v1/web/map/route.ts	3	errorResponse	@omniroute/open-sse/utils/error.
 src/app/api/v1/web/map/route.ts	4	getProviderCredentialsWithQuotaPreflight	@/sse/services/auth	src/sse/services/auth.ts	earned-value
 src/app/api/v1/web/map/route.ts	5	resolveClientApiKey	@/sse/services/clientApiKeyResolver	src/sse/services/clientApiKeyResolver.ts	earned-value
 src/app/api/v1/web/map/route.ts	6	enforceApiKeyPolicy	@/shared/utils/apiKeyPolicy	src/shared/utils/apiKeyPolicy.ts	earned-value
-src/app/api/v1/web/map/route.ts	7	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
-src/app/api/v1/web/map/route.ts	7	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/web/map/route.ts	7	isKeyScopeBlockedCredentials	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
+src/app/api/v1/web/map/route.ts	7	keyScopeBlockedResponse	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/web/map/route.ts	7	resolveKeyConnectionScope	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
-src/app/api/v1/web/map/route.ts	7	withoutKeyScopeBlocked	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	UNEARNED nowhere
+src/app/api/v1/web/map/route.ts	7	withoutKeyScopeBlocked	@/sse/services/keyConnectionScope	src/sse/services/keyConnectionScope.ts	earned-value
 src/app/api/v1/web/map/route.ts	13	isRequireApiKeyEnabled	@/shared/utils/featureFlags	src/shared/utils/featureFlags.ts	earned-value
 src/app/api/v1/web/map/route.ts	14	validateBody	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value
 src/app/api/v1/web/map/route.ts	14	isValidationFailure	@/shared/validation/helpers	src/shared/validation/helpers.ts	earned-value

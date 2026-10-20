@@ -1,0 +1,13 @@
+# mutation: targets tried last to first (CM-S6-3)
+# catch: s6_f3_targets_are_tried_in_order
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -1008,7 +1008,7 @@
+         }
+         let (key, targets, cap, _) = best?;
+         let mut candidates = Vec::new();
+-        for tg in targets {
++        for tg in targets.iter().rev() {
+             let v = match cap {
+                 Some(c) => tg.replacen('*', c, 1),
+                 None => tg.clone(),

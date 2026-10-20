@@ -13,6 +13,13 @@
 //! consumer pairs only for type-blind consumers. Everything that cannot be
 //! stated statically is an explicit abstention, never a guess.
 //!
+//! Since INIT-DISCOVERY-SLICE6, K1 also resolves path aliases from the root
+//! tsconfig.json `compilerOptions.paths` (no `extends`, no nested configs),
+//! and its silence is earned: an import that reaches no Zod object schema is
+//! silent only when the name is declared, in the target file or along its
+//! re-exports, as a non-Zod value or a type, with every file on that path
+//! readable. Otherwise it abstains with the reason.
+//!
 //! This module is self-contained: it does not modify or depend on private
 //! parts of the slice 1 engine (`codepairs`), only its public constants.
 
@@ -411,6 +418,14 @@ struct Module {
     decls: Vec<ZodDecl>,
     imports: Vec<Imp>,
     reexports: Vec<Reex>,
+    /// SLICE6 earned silence: names declared as a value (function, class,
+    /// enum, const, let, var) or a type (type, interface); names declared as
+    /// a Zod schema (`= z.`) with their line; `export { a as b }` lists
+    /// without `from`, as (exported, local).
+    values: BTreeSet<String>,
+    types: BTreeSet<String>,
+    zodish: BTreeMap<String, usize>,
+    local_exports: Vec<(String, String)>,
 }
 
 fn braces(t: &Text, open: usize, close: usize) -> Vec<(String, String)> {
@@ -439,9 +454,54 @@ fn from_spec(t: &Text, i: usize) -> Option<(String, usize)> {
     t.string_at(t.ws(i + 4))
 }
 
+/// SLICE6: every `kw name` declaration in masked text, and `= z.` schemas.
+fn scan_declarations(t: &Text, md: &mut Module) {
+    let m = &t.m;
+    for i in 0..m.len() {
+        if !is_ident_start(m[i]) || (i > 0 && (is_ident(m[i - 1]) || m[i - 1] == b'.')) {
+            continue;
+        }
+        let Some((word, e)) = t.ident(i) else { continue };
+        let value = matches!(word.as_str(), "function" | "class" | "enum" | "const" | "let" | "var");
+        let typed = matches!(word.as_str(), "type" | "interface");
+        if !value && !typed {
+            continue;
+        }
+        let mut j = t.ws(e);
+        if word == "function" && m.get(j) == Some(&b'*') {
+            j = t.ws(j + 1);
+        }
+        let Some((name, ne)) = t.ident(j) else { continue };
+        if typed {
+            let k = t.ws(ne);
+            if matches!(m.get(k), Some(b'=') | Some(b'<') | Some(b'{') | Some(b'e')) {
+                md.types.insert(name);
+            }
+            continue;
+        }
+        if matches!(word.as_str(), "const" | "let" | "var") {
+            // `= z.` after an optional type annotation, on this statement
+            let mut k = t.ws(ne);
+            if m.get(k) == Some(&b':') {
+                while k < m.len() && !matches!(m[k], b'=' | b';' | b'\n') {
+                    k += 1;
+                }
+            }
+            if m.get(k) == Some(&b'=') && m.get(k + 1) != Some(&b'=') {
+                let v = t.ws(k + 1);
+                if t.kw(v, "z") && m.get(t.ws(v + 1)) == Some(&b'.') {
+                    md.zodish.entry(name.clone()).or_insert(t.line(j));
+                }
+            }
+        }
+        md.values.insert(name);
+    }
+}
+
 fn scan_module(text: &str) -> Module {
     let t = Text::new(text);
     let mut md = Module { decls: scan_zod(text), ..Default::default() };
+    scan_declarations(&t, &mut md);
     let n = t.m.len();
     let mut depth = 0i64;
     let mut i = 0;
@@ -487,6 +547,10 @@ fn scan_module(text: &str) -> Module {
                             i = e;
                             continue;
                         }
+                        // SLICE6: `export { a as b };`, no `from`
+                        md.local_exports.extend(braces(&t, j, end).into_iter().map(|(local, exp)| (exp, local)));
+                        i = end;
+                        continue;
                     }
                 } else if t.m.get(j) == Some(&b'*') {
                     let mut k = t.ws(j + 1);
@@ -748,6 +812,73 @@ struct World {
     /// package name -> dirs
     pkgs: BTreeMap<String, Vec<String>>,
     mods: BTreeMap<String, Module>,
+    /// SLICE6: root tsconfig `paths` as (pattern, targets joined to
+    /// baseUrl), and the repository root for the unscanned-directory check.
+    /// None: no root tsconfig defines `paths` (the generic reason stands).
+    aliases: Option<Vec<(String, Vec<String>)>>,
+    root: std::path::PathBuf,
+}
+
+/// Comments and trailing commas removed, so tsconfig JSONC parses as JSON.
+fn jsonc(text: &str) -> String {
+    let c: Vec<char> = text.chars().collect();
+    let mut o = String::with_capacity(text.len());
+    let (mut i, mut s) = (0, false);
+    while i < c.len() {
+        let ch = c[i];
+        if s {
+            o.push(ch);
+            if ch == '\\' && i + 1 < c.len() {
+                o.push(c[i + 1]);
+                i += 2;
+                continue;
+            }
+            s = ch != '"';
+            i += 1;
+            continue;
+        }
+        if ch == '"' {
+            s = true;
+        } else if ch == '/' && c.get(i + 1) == Some(&'/') {
+            while i < c.len() && c[i] != '\n' {
+                i += 1;
+            }
+            continue;
+        } else if ch == '/' && c.get(i + 1) == Some(&'*') {
+            i += 2;
+            while i + 1 < c.len() && !(c[i] == '*' && c[i + 1] == '/') {
+                i += 1;
+            }
+            i += 2;
+            continue;
+        } else if ch == '}' || ch == ']' {
+            let k = o.trim_end().len();
+            if o[..k].ends_with(',') {
+                o.truncate(k - 1);
+            }
+        }
+        o.push(ch);
+        i += 1;
+    }
+    o
+}
+
+/// The root tsconfig.json `compilerOptions.paths`, targets joined to
+/// `baseUrl` (default "."). `extends` is not followed (ruling S6-D1).
+fn root_aliases(root: &Path) -> Option<Vec<(String, Vec<String>)>> {
+    let text = std::fs::read_to_string(root.join("tsconfig.json")).ok()?;
+    let cfg: serde_json::Value = serde_json::from_str(&jsonc(&text)).ok()?;
+    let base = cfg["compilerOptions"]["baseUrl"].as_str().unwrap_or(".").to_string();
+    let paths = cfg["compilerOptions"]["paths"].as_object()?;
+    let mut out: Vec<(String, Vec<String>)> = paths
+        .iter()
+        .map(|(k, v)| {
+            let targets = v.as_array().map(|a| a.iter().filter_map(|x| x.as_str()).map(|x| join(&base, x)).collect()).unwrap_or_default();
+            (k.clone(), targets)
+        })
+        .collect();
+    out.sort();
+    Some(out)
 }
 
 fn norm(path: &str) -> Option<String> {
@@ -816,7 +947,14 @@ impl World {
                 None => Res::Unresolved("no such source file".into()),
             };
         }
-        if spec.starts_with("@/") || spec.starts_with("~/") || spec.starts_with('#') {
+        if let Some(aliases) = &self.aliases {
+            if let Some(r) = self.resolve_alias(aliases, spec) {
+                return r;
+            }
+            if spec.starts_with("@/") || spec.starts_with("~/") || spec.starts_with('#') {
+                return Res::Unresolved(format!("path alias {spec:?} matches no key of the root tsconfig paths; not guessed"));
+            }
+        } else if spec.starts_with("@/") || spec.starts_with("~/") || spec.starts_with('#') {
             return Res::Unresolved("path alias (tsconfig paths are not read)".into());
         }
         let mut best: Option<(&String, &Vec<String>)> = None;
@@ -845,6 +983,136 @@ impl World {
         }
         Res::Unresolved(format!("workspace package {name:?} has no matching source file for {spec:?}"))
     }
+}
+
+impl World {
+    /// SLICE6: an exact key, else the longest single-`*` pattern; each target
+    /// in order, the first that probes. None: no key matches.
+    fn resolve_alias(&self, aliases: &[(String, Vec<String>)], spec: &str) -> Option<Res> {
+        let mut best: Option<(&str, &[String], Option<&str>, usize)> = None;
+        for (k, targets) in aliases {
+            if k == spec {
+                best = Some((k, targets, None, usize::MAX));
+                break;
+            }
+            if let Some((pre, suf)) = k.split_once('*') {
+                if !suf.contains('*')
+                    && spec.len() >= pre.len() + suf.len()
+                    && spec.starts_with(pre)
+                    && spec.ends_with(suf)
+                    && best.is_none_or(|b| pre.len() > b.3)
+                {
+                    best = Some((k, targets, Some(&spec[pre.len()..spec.len() - suf.len()]), pre.len()));
+                }
+            }
+        }
+        let (key, targets, cap, _) = best?;
+        let mut candidates = Vec::new();
+        for tg in targets {
+            let v = match cap {
+                Some(c) => tg.replacen('*', c, 1),
+                None => tg.clone(),
+            };
+            let Some(n) = norm(&v) else { continue };
+            if let Some(f) = self.probe(&n) {
+                return Some(Res::File(f));
+            }
+            candidates.push(n);
+        }
+        for n in &candidates {
+            let mut on_disk = vec![n.clone()];
+            on_disk.extend(SRC_EXTS.iter().map(|e| format!("{n}.{e}")));
+            on_disk.extend(SRC_EXTS.iter().map(|e| format!("{n}/index.{e}")));
+            if let Some(hit) = on_disk.into_iter().find(|c| self.root.join(c).is_file()) {
+                return Some(Res::Unresolved(format!(
+                    "path alias {spec:?} matches tsconfig paths {key:?}; its target {hit} lies in a directory init does not scan; not guessed"
+                )));
+            }
+        }
+        Some(Res::Unresolved(format!("path alias {spec:?} matches tsconfig paths {key:?} but no target file exists; not guessed")))
+    }
+
+    /// SLICE6 earned silence for a name that reached no Zod object schema:
+    /// walk the target's declarations and re-exports (at most five levels,
+    /// each (file, name) once).
+    fn silence(&self, file: &str, name: &str, unreadable: &BTreeSet<String>) -> Silence {
+        let mut seen = BTreeSet::new();
+        self.silence_at(file, name, unreadable, 0, &mut seen)
+    }
+
+    fn silence_at(&self, file: &str, name: &str, unreadable: &BTreeSet<String>, depth: usize, seen: &mut BTreeSet<(String, String)>) -> Silence {
+        if unreadable.contains(file) {
+            return Silence::Unread(file.to_string());
+        }
+        let Some(md) = self.mods.get(file) else { return Silence::Nowhere };
+        if let Some(line) = md.zodish.get(name) {
+            let site = format!("{file}:{line}");
+            return if md.decls.iter().any(|d| d.name == name) { Silence::ZodUnreached(site) } else { Silence::ZodNotObject(site) };
+        }
+        if md.values.contains(name) || md.types.contains(name) {
+            return Silence::Earned;
+        }
+        let mut next: Vec<(String, String)> = Vec::new();
+        for (exp, local) in &md.local_exports {
+            if exp == name {
+                for imp in &md.imports {
+                    if let Some((orig, _)) = imp.names.iter().find(|(_, l)| l == local) {
+                        next.push((imp.spec.clone(), orig.clone()));
+                    }
+                }
+            }
+        }
+        for r in &md.reexports {
+            match &r.names {
+                None => next.push((r.spec.clone(), name.to_string())),
+                Some(ns) => {
+                    if let Some((_, orig)) = ns.iter().find(|(e, _)| e == name) {
+                        next.push((r.spec.clone(), orig.clone()));
+                    }
+                }
+            }
+        }
+        let mut results = Vec::new();
+        for (spec, orig) in next {
+            match self.resolve(&spec, file) {
+                Res::File(t) => {
+                    if depth + 1 > 5 {
+                        results.push(Silence::TooDeep);
+                    } else if seen.insert((t.clone(), orig.clone())) {
+                        results.push(self.silence_at(&t, &orig, unreadable, depth + 1, seen));
+                    }
+                }
+                _ => results.push(Silence::Nowhere),
+            }
+        }
+        // a Zod schema anywhere on the path, then an unread file, then a
+        // cut path, outrank a value: silence must be earned everywhere
+        for pick in [0u8, 1, 2, 3] {
+            for r in &results {
+                let hit = match (pick, r) {
+                    (0, Silence::ZodNotObject(_) | Silence::ZodUnreached(_)) => true,
+                    (1, Silence::Unread(_)) => true,
+                    (2, Silence::TooDeep) => true,
+                    (3, Silence::Earned) => true,
+                    _ => false,
+                };
+                if hit {
+                    return r.clone();
+                }
+            }
+        }
+        Silence::Nowhere
+    }
+}
+
+#[derive(Debug, Clone)]
+enum Silence {
+    Earned,
+    ZodNotObject(String),
+    ZodUnreached(String),
+    Unread(String),
+    TooDeep,
+    Nowhere,
 }
 
 enum Found {
@@ -1054,7 +1322,13 @@ pub fn egress_marks(toml_text: &str) -> Vec<String> {
 pub fn discover_values(root: &Path, files: &[String], oversized: &[String], marks: &[String]) -> ValueDiscovery {
     let mut out = ValueDiscovery::default();
     let src: Vec<&String> = files.iter().filter(|f| SRC_EXTS.contains(&ext_of(f))).collect();
-    let mut w = World { files: src.iter().map(|f| (*f).clone()).collect(), pkgs: BTreeMap::new(), mods: BTreeMap::new() };
+    let mut w = World {
+        files: src.iter().map(|f| (*f).clone()).collect(),
+        pkgs: BTreeMap::new(),
+        mods: BTreeMap::new(),
+        aliases: root_aliases(root),
+        root: root.to_path_buf(),
+    };
     for f in files.iter().filter(|f| f.rsplit('/').next() == Some("package.json")) {
         if let Ok(text) = std::fs::read_to_string(root.join(f)) {
             if let Some(name) = serde_json::from_str::<serde_json::Value>(&text)
@@ -1124,7 +1398,19 @@ pub fn discover_values(root: &Path, files: &[String], oversized: &[String], mark
             };
             for (imported, local) in &imp.names {
                 match w.find(&target, imported) {
-                    Found::NotShape => {}
+                    Found::NotShape => {
+                        let why = match w.silence(&target, imported, &unreadable) {
+                            Silence::Earned => continue,
+                            Silence::ZodNotObject(site) => format!("declared as a Zod schema at {site} that is not an object shape; not guessed"),
+                            Silence::ZodUnreached(site) => {
+                                format!("declared as a Zod schema at {site}, which egress discovery did not reach from {target} (one barrel level is followed); not guessed")
+                            }
+                            Silence::Unread(u) => format!("{u} on its re-export path could not be read; silence is not earned; not guessed"),
+                            Silence::TooDeep => format!("its re-export path from {target} is longer than 5 levels; silence is not earned; not guessed"),
+                            Silence::Nowhere => format!("not declared in {target} or along its re-exports; not guessed"),
+                        };
+                        out.abstentions.push(Abstention { code: "UNRESOLVED", location: loc.clone(), reason: format!("{imported} from {:?}: {why}", imp.spec) });
+                    }
                     Found::Barrel2 => out.abstentions.push(Abstention {
                         code: "BARREL2",
                         location: loc.clone(),

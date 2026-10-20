@@ -1,0 +1,34 @@
+# invar.lock: the producer fields this repository depends on.
+# Written by `invar lock`. Accept a reviewed producer change with
+# `invar lock --update`. Waivers are written by hand and kept.
+
+[lock]
+format = "1"
+
+[[contract]]
+id = "code:Accessibility.ts->accessibility.test.ts"
+producer = "packages/puppeteer-core/src/cdp/Accessibility.ts"
+blake3 = "688da396a6644f12a5e5b60b5756c39613f3a0e72f0b768e1a324dbabb02aba5"
+recorded_at = "2026-10-20T17:15:32Z"
+bind = "code 2026-10-20 SerializedAXNode.children SerializedAXNode[]"
+bind = "code 2026-10-20 SerializedAXNode.focused boolean"
+members = "code SerializedAXNode atomic autocomplete backendNodeId busy checked children description details disabled errormessage expanded focused haspopup invalid keyshortcuts level live loaderId modal multiline multiselectable name orientation pressed readonly relevant required role roledescription selected url value valuemax valuemin valuetext"
+
+[[contract]]
+id = "code:ElementHandle.ts->elementhandle.test.ts"
+producer = "packages/puppeteer-core/src/api/ElementHandle.ts"
+blake3 = "720576c51e638972d91f6ae13cfb02fe2da85ea6fd8de3922ccb5c11e0822a0d"
+recorded_at = "2026-10-20T17:15:32Z"
+bind = "code 2026-10-20 Point.x number"
+bind = "code 2026-10-20 Point.y number"
+members = "code Point x y"
+
+[[contract]]
+id = "code:LaunchOptions.ts->mocha-utils.ts"
+producer = "packages/puppeteer-core/src/node/LaunchOptions.ts"
+blake3 = "9a821ff0861d7940ce4ab07576542af483335bd0fcd1e5f34bfc2cade1032121"
+recorded_at = "2026-10-20T17:15:32Z"
+bind = "code 2026-10-20 LaunchOptions.args string[]"
+bind = "code 2026-10-20 LaunchOptions.executablePath string"
+bind = "code 2026-10-20 LaunchOptions.extraPrefsFirefox Record<string"
+members = "code LaunchOptions args browser channel debuggingPort devtools dumpio enableExtensions env executablePath extensionsEnabledInIncognito extraPrefsFirefox handleSIGHUP handleSIGINT handleSIGTERM headless ignoreDefaultArgs pipe signal timeout userDataDir waitForInitialPage"

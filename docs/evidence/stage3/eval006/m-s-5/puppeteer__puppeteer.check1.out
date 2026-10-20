@@ -1,0 +1,17 @@
+INVAR check (3 contract(s))
+  [HOLDS]    code:ElementHandle.ts->elementhandle.test.ts (schema)
+      note: producer unchanged since lock (2026-10-20T17:15:32Z)
+      note: 14 read field(s) not in invar.lock (border, content, height, innerHTML, isolatedHandle); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:Accessibility.ts->accessibility.test.ts (schema)
+      note: producer unchanged since lock (2026-10-20T17:15:32Z)
+      note: 26 read field(s) not in invar.lock (atomic, busy, checked, description, details); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:LaunchOptions.ts->mocha-utils.ts (schema)
+      note: producer unchanged since lock (2026-10-20T17:15:32Z)
+      note: 7 read field(s) not in invar.lock (browser, dumpio, env, handleSIGINT, headless); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+result: ALL 3 contract(s) hold
+summary: held 3 | violated 0 | skipped or not evaluated 0
+measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)
+check exit 0

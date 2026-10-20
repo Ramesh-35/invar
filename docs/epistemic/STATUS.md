@@ -1620,3 +1620,19 @@ caught for SLICE5, SLICE4, SLICE3B and LOCK-SLICE1. Not claimed: scope
 analysis, inferred types, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE4.md, INIT-DISCOVERY-SLICE5.md,
 LOCK-SLICE1.md; docs/evidence/stage3/eval004 and eval005.
+
+## 2026-10-20: INIT-DISCOVERY-SLICE6 implemented (tsconfig paths and earned silence in egress discovery)
+
+Egress discovery now reads the root tsconfig.json `compilerOptions.paths`
+(exact key, else the longest single-`*` pattern, targets in order; no
+`extends`), and its silence is earned: an import that reaches no Zod
+object schema is silent only when the name is declared, in the target or
+along its re-exports, as a non-Zod value or a type, with every file on the
+path readable; otherwise it abstains with the reason. A zero-yield,
+honesty-only slice, pre-registered as such. STAGE3-EVAL-006: 113 proposals,
+byte-identical; OmniRoute's 619 "tsconfig paths are not read" abstentions
+become 79 specific ones (abstentions 682 to 144); 0 silent drops, every one
+of 1,393 reached imports agreeing with an independent classifier; 343 of
+343 tests, zero warnings; 8 of 8 mutations caught. Not claimed: `extends`
+chains, nested tsconfig files, or any proposal gain. Record:
+docs/architecture/INIT-DISCOVERY-SLICE6.md; docs/evidence/stage3/eval006.

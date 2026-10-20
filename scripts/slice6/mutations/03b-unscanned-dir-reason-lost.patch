@@ -1,0 +1,13 @@
+# mutation: the unscanned-directory reason replaced by the no-file reason
+# catch: s6_f4b_a_target_only_inside_an_unscanned_directory_says_so
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -1023,7 +1023,7 @@
+             let mut on_disk = vec![n.clone()];
+             on_disk.extend(SRC_EXTS.iter().map(|e| format!("{n}.{e}")));
+             on_disk.extend(SRC_EXTS.iter().map(|e| format!("{n}/index.{e}")));
+-            if let Some(hit) = on_disk.into_iter().find(|c| self.root.join(c).is_file()) {
++            if let Some(hit) = on_disk.into_iter().find(|c| false && self.root.join(c).is_file()) {
+                 return Some(Res::Unresolved(format!(
+                     "path alias {spec:?} matches tsconfig paths {key:?}; its target {hit} lies in a directory init does not scan; not guessed"
+                 )));

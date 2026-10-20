@@ -1,0 +1,14 @@
+# mutation: a matching alias with no target guessed as its first candidate (CM-S6-1)
+# catch: s6_f4_a_matching_alias_without_a_target_abstains
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -1019,6 +1019,9 @@
+             }
+             candidates.push(n);
+         }
++        if let Some(n) = candidates.first() {
++            return Some(Res::File(format!("{n}.ts")));
++        }
+         for n in &candidates {
+             let mut on_disk = vec![n.clone()];
+             on_disk.extend(SRC_EXTS.iter().map(|e| format!("{n}.{e}")));

@@ -1,0 +1,11 @@
+repo	binary	exit1	exit2	deterministic	sec1	sec2	summary
+freeCodeCamp__freeCodeCamp	03f3e34956d7	0	0	yes	1	1	SUMMARY packages=15 candidates=372 proposals=0 abstentions=367 inventory=3 status=COMPLETE
+vuejs__vue	03f3e34956d7	0	0	yes	0	0	SUMMARY packages=3 candidates=0 proposals=0 abstentions=0 inventory=0 status=COMPLETE
+excalidraw__excalidraw	03f3e34956d7	0	0	yes	2	1	SUMMARY packages=10 candidates=3866 proposals=26 abstentions=1708 inventory=0 status=COMPLETE
+earendil-works__pi	03f3e34956d7	0	0	yes	3	3	SUMMARY packages=16 candidates=2554 proposals=63 abstentions=2980 inventory=4 status=COMPLETE
+thedotmack__claude-mem	03f3e34956d7	0	0	yes	2	2	SUMMARY packages=0 candidates=0 proposals=3 abstentions=18 inventory=195 status=COMPLETE
+microsoft__playwright	03f3e34956d7	0	0	yes	3	3	SUMMARY packages=16 candidates=94 proposals=0 abstentions=489 inventory=0 status=COMPLETE
+puppeteer__puppeteer	03f3e34956d7	0	0	yes	1	1	SUMMARY packages=10 candidates=155 proposals=5 abstentions=174 inventory=4 status=COMPLETE
+ChatGPTNextWeb__NextChat	03f3e34956d7	0	0	yes	0	0	SUMMARY packages=0 candidates=0 proposals=0 abstentions=1 inventory=0 status=ABSTAINED
+Egonex-AI__Understand-Anything	03f3e34956d7	0	0	yes	1	1	SUMMARY packages=7 candidates=73 proposals=10 abstentions=85 inventory=1 status=COMPLETE
+diegosouzapw__OmniRoute	03f3e34956d7	0	0	yes	8	7	SUMMARY packages=2 candidates=0 proposals=6 abstentions=144 inventory=72 status=TRUNCATED

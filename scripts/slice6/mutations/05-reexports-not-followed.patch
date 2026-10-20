@@ -1,0 +1,13 @@
+# mutation: the silence check does not follow `export ... from` (CM-S6-6)
+# catch: s6_f6_a_value_re_exported_through_an_alias_is_silent
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -1062,7 +1062,7 @@
+                 }
+             }
+         }
+-        for r in &md.reexports {
++        for r in md.reexports.iter().take(0) {
+             match &r.names {
+                 None => next.push((r.spec.clone(), name.to_string())),
+                 Some(ns) => {

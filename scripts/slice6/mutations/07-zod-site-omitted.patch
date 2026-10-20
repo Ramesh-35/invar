@@ -1,0 +1,13 @@
+# mutation: the Zod schema's site omitted from the reason
+# catch: s6_f7_a_zod_schema_that_is_not_an_object_abstains
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -1401,7 +1401,7 @@
+                     Found::NotShape => {
+                         let why = match w.silence(&target, imported, &unreadable) {
+                             Silence::Earned => continue,
+-                            Silence::ZodNotObject(site) => format!("declared as a Zod schema at {site} that is not an object shape; not guessed"),
++                            Silence::ZodNotObject(_site) => "declared as a Zod schema that is not an object shape; not guessed".to_string(),
+                             Silence::ZodUnreached(site) => {
+                                 format!("declared as a Zod schema at {site}, which egress discovery did not reach from {target} (one barrel level is followed); not guessed")
+                             }

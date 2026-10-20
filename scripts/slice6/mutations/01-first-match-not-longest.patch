@@ -1,0 +1,13 @@
+# mutation: the first matching pattern wins instead of the longest (CM-S6-2)
+# catch: s6_f2_the_longest_pattern_wins
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -1000,7 +1000,7 @@
+                     && spec.len() >= pre.len() + suf.len()
+                     && spec.starts_with(pre)
+                     && spec.ends_with(suf)
+-                    && best.is_none_or(|b| pre.len() > b.3)
++                    && best.is_none()
+                 {
+                     best = Some((k, targets, Some(&spec[pre.len()..spec.len() - suf.len()]), pre.len()));
+                 }

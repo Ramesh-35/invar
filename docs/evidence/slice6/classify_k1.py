@@ -9,8 +9,10 @@ Declarations are read on comment- and string-masked text.
     Zod schema (`= z.` or `= z\n`), and never as a type: egress discovery
     proposes Zod values only, so the import is not a schema.
   earned-type: declared only as type/interface: not a value at all.
-  UNEARNED zod-unreached: declared as a Zod schema in scope, but K1 did not
-    reach it from the target.
+  UNEARNED zod-not-object: declared as a Zod schema (`= z.`) in scope, yet
+    K1 found no Zod object schema of that name from the target: a Zod
+    schema that is not an object (both on OmniRoute are
+    `z.unknown().transform(...)`), or one K1 did not reach.
   UNEARNED nowhere: declared nowhere in scope.
   UNEARNED unread: scope has a file that could not be read (>1MB or not UTF-8).
 Usage: classify_k1.py <census> <repo root> <out.tsv>"""
@@ -76,7 +78,7 @@ for l in open(census):
     if not l.startswith("K1NOTSHAPE\t"): continue
     _, f, line, name, spec, target = l.rstrip("\n").split("\t")
     zod, typ, val, unread = index("")
-    if name in zod: k = "UNEARNED zod-unreached " + zod[name]
+    if name in zod: k = "UNEARNED zod-not-object " + zod[name]
     elif name in val: k = "earned-value"
     elif name in typ: k = "earned-type"
     elif unread: k = "UNEARNED unread " + unread[0]

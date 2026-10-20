@@ -1,0 +1,10 @@
+INVAR init: scanned 1946 file(s)
+  packages           : 16 qualifying workspace package(s)
+  candidates         : 2554 named import(s) across packages examined
+  contracts proposed : 63 (heuristic; receiver of field reads not verified; review before trusting)
+  abstentions        : 2980 (init declined; see ABSTAIN lines)
+  inventory only     : 4 item(s), schema files included, never proposed
+  wrote              : ./invar.toml
+  next               : run `invar lock` before `invar check`; without a lock, check evaluates only payload.<field> reads and says nothing about these proposals
+  hint               : after `invar lock`, run `invar backtest` to replay your locked fields over this repository's git history
+SUMMARY packages=16 candidates=2554 proposals=63 abstentions=2980 inventory=4 status=COMPLETE

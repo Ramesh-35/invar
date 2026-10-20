@@ -1,0 +1,13 @@
+# mutation: the K1 silent branch restored: no earned-silence check (CM-S6-4)
+# catch: s6_f7_a_zod_schema_that_is_not_an_object_abstains
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -1399,7 +1399,7 @@
+             for (imported, local) in &imp.names {
+                 match w.find(&target, imported) {
+                     Found::NotShape => {
+-                        let why = match w.silence(&target, imported, &unreadable) {
++                        let why = match Silence::Earned {
+                             Silence::Earned => continue,
+                             Silence::ZodNotObject(site) => format!("declared as a Zod schema at {site} that is not an object shape; not guessed"),
+                             Silence::ZodUnreached(site) => {

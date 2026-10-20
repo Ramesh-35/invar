@@ -584,7 +584,8 @@ pub fn discover_strings(root: &Path, files: &[String], oversized: &[String]) -> 
         .iter()
         .filter(|f| SRC_EXTS.contains(&ext_of(f)) && !oversized.contains(f))
         .collect();
-    let mut w = World { files: src.iter().map(|f| (*f).clone()).collect(), pkgs: BTreeMap::new(), mods: BTreeMap::new() };
+    // SLICE6 changes egress discovery only: strings keep the generic alias reason.
+    let mut w = World { files: src.iter().map(|f| (*f).clone()).collect(), pkgs: BTreeMap::new(), mods: BTreeMap::new(), aliases: None, root: root.to_path_buf() };
     let mut pkg_dirs: BTreeSet<String> = BTreeSet::new();
     for f in files.iter().filter(|f| f.rsplit('/').next() == Some("package.json")) {
         pkg_dirs.insert(dir_of(f).to_string());

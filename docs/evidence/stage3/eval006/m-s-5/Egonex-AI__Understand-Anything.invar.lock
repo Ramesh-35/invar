@@ -1,0 +1,123 @@
+# invar.lock: the producer fields this repository depends on.
+# Written by `invar lock`. Accept a reviewed producer change with
+# `invar lock --update`. Waivers are written by hand and kept.
+
+[lock]
+format = "1"
+
+[[contract]]
+id = "code:types.ts->DomainGraphView.tsx"
+producer = "understand-anything-plugin/packages/core/src/types.ts"
+blake3 = "d5d3176a92507b4747803995d7a05e60b1149c1073496e6f44cc6f7c1f1a4e12"
+recorded_at = "2026-10-20T17:15:21Z"
+bind = "code 2026-10-20 GraphNode.domainMeta DomainMeta"
+bind = "code 2026-10-20 GraphNode.filePath string"
+bind = "code 2026-10-20 GraphNode.summary string"
+bind = "code 2026-10-20 KnowledgeGraph.edges GraphEdge[]"
+bind = "code 2026-10-20 KnowledgeGraph.nodes GraphNode[]"
+members = "code GraphNode complexity domainMeta figmaMeta filePath id knowledgeMeta languageNotes lineRange name summary tags type"
+members = "code KnowledgeGraph edges kind layers nodes project tour version"
+
+[[contract]]
+id = "code:types.ts->GraphView.tsx"
+producer = "understand-anything-plugin/packages/core/src/types.ts"
+blake3 = "d5d3176a92507b4747803995d7a05e60b1149c1073496e6f44cc6f7c1f1a4e12"
+recorded_at = "2026-10-20T17:15:21Z"
+bind = "code 2026-10-20 GraphNode.complexity 'simple' | 'moderate' | 'complex'"
+bind = "code 2026-10-20 GraphNode.filePath string"
+bind = "code 2026-10-20 GraphNode.summary string"
+bind = "code 2026-10-20 GraphNode.tags string[]"
+members = "code GraphNode complexity domainMeta figmaMeta filePath id knowledgeMeta languageNotes lineRange name summary tags type"
+
+[[contract]]
+id = "code:types.ts->KnowledgeGraphView.tsx"
+producer = "understand-anything-plugin/packages/core/src/types.ts"
+blake3 = "d5d3176a92507b4747803995d7a05e60b1149c1073496e6f44cc6f7c1f1a4e12"
+recorded_at = "2026-10-20T17:15:21Z"
+bind = "code 2026-10-20 KnowledgeGraph.edges GraphEdge[]"
+bind = "code 2026-10-20 KnowledgeGraph.layers Layer[]"
+bind = "code 2026-10-20 KnowledgeGraph.nodes GraphNode[]"
+members = "code KnowledgeGraph edges kind layers nodes project tour version"
+
+[[contract]]
+id = "code:types.ts->NodeInfo.tsx"
+producer = "understand-anything-plugin/packages/core/src/types.ts"
+blake3 = "d5d3176a92507b4747803995d7a05e60b1149c1073496e6f44cc6f7c1f1a4e12"
+recorded_at = "2026-10-20T17:15:21Z"
+bind = "code 2026-10-20 GraphNode.complexity 'simple' | 'moderate' | 'complex'"
+bind = "code 2026-10-20 GraphNode.domainMeta DomainMeta"
+bind = "code 2026-10-20 GraphNode.figmaMeta FigmaMeta"
+bind = "code 2026-10-20 GraphNode.filePath string"
+bind = "code 2026-10-20 GraphNode.knowledgeMeta KnowledgeMeta"
+bind = "code 2026-10-20 GraphNode.languageNotes string"
+bind = "code 2026-10-20 GraphNode.lineRange [number"
+bind = "code 2026-10-20 GraphNode.summary string"
+bind = "code 2026-10-20 GraphNode.tags string[]"
+bind = "code 2026-10-20 KnowledgeGraph.edges GraphEdge[]"
+bind = "code 2026-10-20 KnowledgeGraph.nodes GraphNode[]"
+members = "code GraphNode complexity domainMeta figmaMeta filePath id knowledgeMeta languageNotes lineRange name summary tags type"
+members = "code KnowledgeGraph edges kind layers nodes project tour version"
+
+[[contract]]
+id = "code:types.ts->context-builder.ts"
+producer = "understand-anything-plugin/packages/core/src/types.ts"
+blake3 = "d5d3176a92507b4747803995d7a05e60b1149c1073496e6f44cc6f7c1f1a4e12"
+recorded_at = "2026-10-20T17:15:21Z"
+bind = "code 2026-10-20 KnowledgeGraph.edges GraphEdge[]"
+bind = "code 2026-10-20 KnowledgeGraph.layers Layer[]"
+bind = "code 2026-10-20 KnowledgeGraph.nodes GraphNode[]"
+bind = "code 2026-10-20 KnowledgeGraph.project ProjectMeta"
+members = "code KnowledgeGraph edges kind layers nodes project tour version"
+
+[[contract]]
+id = "code:types.ts->edgeAggregation.ts"
+producer = "understand-anything-plugin/packages/core/src/types.ts"
+blake3 = "d5d3176a92507b4747803995d7a05e60b1149c1073496e6f44cc6f7c1f1a4e12"
+recorded_at = "2026-10-20T17:15:21Z"
+bind = "code 2026-10-20 GraphEdge.source string"
+bind = "code 2026-10-20 GraphEdge.target string"
+bind = "code 2026-10-20 KnowledgeGraph.edges GraphEdge[]"
+bind = "code 2026-10-20 KnowledgeGraph.layers Layer[]"
+members = "code GraphEdge description direction source target type weight"
+members = "code KnowledgeGraph edges kind layers nodes project tour version"
+
+[[contract]]
+id = "code:types.ts->explain-builder.ts"
+producer = "understand-anything-plugin/packages/core/src/types.ts"
+blake3 = "d5d3176a92507b4747803995d7a05e60b1149c1073496e6f44cc6f7c1f1a4e12"
+recorded_at = "2026-10-20T17:15:21Z"
+bind = "code 2026-10-20 GraphEdge.source string"
+bind = "code 2026-10-20 GraphEdge.target string"
+bind = "code 2026-10-20 GraphNode.filePath string"
+bind = "code 2026-10-20 GraphNode.languageNotes string"
+bind = "code 2026-10-20 GraphNode.lineRange [number"
+members = "code GraphEdge description direction source target type weight"
+members = "code GraphNode complexity domainMeta figmaMeta filePath id knowledgeMeta languageNotes lineRange name summary tags type"
+
+[[contract]]
+id = "code:types.ts->filters.ts"
+producer = "understand-anything-plugin/packages/core/src/types.ts"
+blake3 = "d5d3176a92507b4747803995d7a05e60b1149c1073496e6f44cc6f7c1f1a4e12"
+recorded_at = "2026-10-20T17:15:21Z"
+bind = "code 2026-10-20 GraphEdge.source string"
+bind = "code 2026-10-20 GraphEdge.target string"
+members = "code GraphEdge description direction source target type weight"
+
+[[contract]]
+id = "code:types.ts->louvain.ts"
+producer = "understand-anything-plugin/packages/core/src/types.ts"
+blake3 = "d5d3176a92507b4747803995d7a05e60b1149c1073496e6f44cc6f7c1f1a4e12"
+recorded_at = "2026-10-20T17:15:21Z"
+bind = "code 2026-10-20 GraphEdge.source string"
+bind = "code 2026-10-20 GraphEdge.target string"
+members = "code GraphEdge description direction source target type weight"
+
+[[contract]]
+id = "code:types.ts->store.ts"
+producer = "understand-anything-plugin/packages/core/src/types.ts"
+blake3 = "d5d3176a92507b4747803995d7a05e60b1149c1073496e6f44cc6f7c1f1a4e12"
+recorded_at = "2026-10-20T17:15:21Z"
+bind = "code 2026-10-20 KnowledgeGraph.layers Layer[]"
+bind = "code 2026-10-20 KnowledgeGraph.nodes GraphNode[]"
+bind = "code 2026-10-20 KnowledgeGraph.tour TourStep[]"
+members = "code KnowledgeGraph edges kind layers nodes project tour version"

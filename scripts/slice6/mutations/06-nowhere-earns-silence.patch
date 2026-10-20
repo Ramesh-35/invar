@@ -1,0 +1,13 @@
+# mutation: a name declared nowhere earns silence (CM-S6-5)
+# catch: s6_f8_a_name_declared_nowhere_abstains
+--- a/crates/invar-falsify/src/valuepairs.rs
++++ b/crates/invar-falsify/src/valuepairs.rs
+@@ -1407,7 +1407,7 @@
+                             }
+                             Silence::Unread(u) => format!("{u} on its re-export path could not be read; silence is not earned; not guessed"),
+                             Silence::TooDeep => format!("its re-export path from {target} is longer than 5 levels; silence is not earned; not guessed"),
+-                            Silence::Nowhere => format!("not declared in {target} or along its re-exports; not guessed"),
++                            Silence::Nowhere => continue,
+                         };
+                         out.abstentions.push(Abstention { code: "UNRESOLVED", location: loc.clone(), reason: format!("{imported} from {:?}: {why}", imp.spec) });
+                     }
