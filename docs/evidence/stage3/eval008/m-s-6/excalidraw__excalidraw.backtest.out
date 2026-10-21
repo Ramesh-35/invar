@@ -1,0 +1,26 @@
+invar backtest (invar.toml, 1 contract(s), depth 50)
+note: shallow history; the oldest replayed commit is the shallow boundary, and its date is the cutoff, not a change
+
+code:renderElement.ts->staticScene.ts: packages/element/src/renderElement.ts (11 commit(s) replayed)
+  ElementRenderState.offset
+    2026-02-02 f39ac4a65333 absent
+    2026-09-15 a9186480121a present
+    never absent after introduction
+  ElementRenderState.opacity
+    2026-02-02 f39ac4a65333 absent
+    2026-09-15 a9186480121a present
+    never absent after introduction
+  RenderPositionOffset.x
+    2026-02-02 f39ac4a65333 absent
+    2026-09-15 a9186480121a present
+    never absent after introduction
+  RenderPositionOffset.y
+    2026-02-02 f39ac4a65333 absent
+    2026-09-15 a9186480121a present
+    never absent after introduction
+
+Timelines replay today's extraction over past file contents. They are
+not replayed verdicts: waivers, selectors and samples are today's, and a
+past consumer may not have read the field yet. Unreadable commits are
+stated, never guessed.
+exit 0

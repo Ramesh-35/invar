@@ -1659,3 +1659,27 @@ warnings; 15 of 15 mutations caught. Not claimed: scope analysis (the one
 NOT TRUE is a same-named receiver of another type), inferred types,
 property types across files, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE7.md; docs/evidence/stage3/eval007.
+
+## 2026-10-21: INIT-DISCOVERY-SLICE8 and LOCK-SLICE2 implemented (receivers reached through a property declared as the shape)
+
+A field read now also counts for shape S through a property whose written
+type is S, at most two hops from a receiver typed in the consumer file
+(`r.p.f`, `r.a.p.f`, their aliases and array elements). The receiver's
+type is declared in that file or imported by name and resolved by the
+existing resolver; each member type is read as written and must be
+exactly S, Readonly<S>, S[] or Array<S> (an inline object type may be the
+middle hop), and S must resolve to the very shape, not another of its
+name. Applied to every shape, only where it does not qualify without it.
+Such proposals carry their own status line and an E4 naming the property
+path; the init header says so; a pair reached only this way numbers after
+every existing pair, so no id moves. LOCK-SLICE2: lock reads one-line
+`= Readonly<{ ... }>` bodies (corpus: 3 fields added in 2 of 17,795 files,
+0 removed, 0 retyped). STAGE3-EVAL-008: proposals 152 to 162, 34 new
+shapes (27 R6 conversions, 7 RECV rescues), 0 silent drops, 0 ids renamed;
+precision 34 of 34 TRUE (14 of 14 outside the draft probe's sample), AI
+adjudication by two blind agents, conservative merge; 25 of 25 touched
+contracts round-trip. 397 of 397 tests, zero warnings; 18 of 18 and 5 of 5
+mutations caught. Not claimed: scope analysis, inferred or narrowed types,
+three or more hops, or general detection capability. Record:
+docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
+docs/evidence/stage3/eval008.

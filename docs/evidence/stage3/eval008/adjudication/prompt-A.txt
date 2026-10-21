@@ -1,0 +1,18 @@
+You are an independent code reviewer adjudicating 34 proposed "contracts" found by a static-analysis tool in open-source TypeScript monorepos. You have no stake in the tool; judge only what the source code shows. Work alone; do not look for or read any other adjudicator's output, any file whose name starts with "adjudicator-", or the tool's own source code.
+
+WHAT EACH ITEM CLAIMS: a TypeScript shape (an interface or object type) is declared in one workspace package. A file of another package has a value with a written type T (a parameter, variable or property annotation), and T has a property whose written type is the shape (or an array or Readonly of it), directly or one property further (`x.p.field` or `x.a.p.field`). The tool claims the consumer reads at least two of the shape's fields through such a property path, or through a variable assigned the property's value, or an element of it. The E4 line names the property path and where T comes from. Some items are shapes the consumer also imports by name; judge them the same way. The tool did NOT verify scopes: the same variable name may be declared differently elsewhere in the file, and the cited reads might be on unrelated objects with same-named properties.
+
+THE RUBRIC (apply exactly):
+An item is TRUE iff reading the producer and consumer sites shows a real cross-file agreement: the consumer actually reads the cited fields from a value of the named shape (here, typically the value of the named property, or an element of it if it is an array), so that renaming or removing one of those fields in the producer without updating the consumer is a bug a reviewer would flag.
+NOT TRUE if the cited reads are on some other object (a different type, an untyped value, a same-named variable bound to something else), if the cited reads do not touch the shape, or if you cannot establish the link.
+UNSURE counts as NOT TRUE. Be conservative.
+
+INPUTS:
+- The packet: /tmp/claude-0/-home-claude/0ad2ce1c-afee-57af-87cf-f7a4a128779f/scratchpad/s1/eval008-adj/packet.md . It lists 34 items as "### <repo> <n>: <id> (judge only: <shape>)" with lines E2 (where the shape is declared), E4 (how the tool tied the reads to the shape: which property path, where it is declared, where its type comes from), E5 (fields read, with consumer file:line), plus short quoted snippets. Judge only the shape named in the heading.
+- Full source of each repository at the exact pinned commit, read-only, at:
+  /tmp/claude-0/-home-claude/0ad2ce1c-afee-57af-87cf-f7a4a128779f/scratchpad/s1/e2c/<repo>/   where <repo> is the name used in the packet. The packet's file paths are relative to that directory.
+Use the snippets as a starting point, but open the consumer file around each cited read line to see which expression the field is read from and how that expression is typed, and open the type declarations named in E4 to confirm the property's written type. Check at least the cited reads; one confirmed read on a correctly typed value is not enough if most of the cited fields are read off other objects. Use Read and Grep only; do not modify anything.
+
+OUTPUT: write a tab-separated file to /tmp/claude-0/-home-claude/0ad2ce1c-afee-57af-87cf-f7a4a128779f/scratchpad/s1/eval008-adj/adjudicator-A.tsv with a header line
+repo	n	id	shape	verdict	sentence
+and exactly one line per item (34 lines), in packet order, where verdict is TRUE or NOT TRUE and sentence is one plain sentence of evidence (name the expression you checked and how it is typed, e.g. "graph.edges at View.tsx:49 reads a param typed KnowledgeGraph whose edges is GraphEdge[]"). Do not use em dash characters anywhere. When finished, reply with only: the count of TRUE, the count of NOT TRUE, and the path of the file.

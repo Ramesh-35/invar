@@ -1,0 +1,13 @@
+# mutation: the init header keeps the SLICE7 sentence
+# catch: s8_h1_the_header_names_the_property_route
+--- a/crates/invar-falsify/src/init.rs
++++ b/crates/invar-falsify/src/init.rs
+@@ -810,7 +810,7 @@
+     s.push_str("# workspace package, with at least 2 of its direct fields read in a file of\n");
+     s.push_str("# another, each on a receiver declared as that shape in that file, assigned\n");
+     s.push_str("# from a function imported from the shape's package whose declared return\n");
+-    s.push_str("# type is the shape, or read through a property, at most two hops from a\n");
++    s.push_str("# type is the shape, or read through a property at most two hops from a\n");
+     s.push_str("# receiver typed in that file, whose declared type is the shape (field\n");
+     s.push_str("# writes excluded; types are not inferred).\n");
+     s.push_str("# Review every block before trusting a verdict. Schema files are inventory\n");

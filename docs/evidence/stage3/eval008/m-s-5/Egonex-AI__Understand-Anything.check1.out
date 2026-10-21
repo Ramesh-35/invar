@@ -1,0 +1,29 @@
+INVAR check (6 contract(s))
+  [HOLDS]    code:types.ts->DomainGraphView.tsx (schema)
+      note: producer unchanged since lock (2026-10-21T16:42:39Z)
+      note: 10 read field(s) not in invar.lock (businessRules, description, direction, entities, entryPoint); run `invar lock --update` to bind them
+  durability: held since 2026-10-21 (0 days)
+  [HOLDS]    code:types.ts->GraphView.tsx (schema)
+      note: producer unchanged since lock (2026-10-21T16:42:39Z)
+      note: 10 read field(s) not in invar.lock (description, edges, id, layers, name); run `invar lock --update` to bind them
+  durability: held since 2026-10-21 (0 days)
+  [HOLDS]    code:types.ts->KnowledgeGraphView.tsx (schema)
+      note: producer unchanged since lock (2026-10-21T16:42:39Z)
+      note: 6 read field(s) not in invar.lock (id, name, nodeId, nodeIds, type); run `invar lock --update` to bind them
+  durability: held since 2026-10-21 (0 days)
+  [HOLDS]    code:types.ts->NodeInfo.tsx (schema)
+      note: producer unchanged since lock (2026-10-21T16:42:39Z)
+      note: 8 read field(s) not in invar.lock (backlinks, category, id, name, steps); run `invar lock --update` to bind them
+  durability: held since 2026-10-21 (0 days)
+  [HOLDS]    code:types.ts->context-builder.ts (schema)
+      note: producer unchanged since lock (2026-10-21T16:42:39Z)
+      note: 8 read field(s) not in invar.lock (complexity, description, id, name, nodeId); run `invar lock --update` to bind them
+  durability: held since 2026-10-21 (0 days)
+  [HOLDS]    code:types.ts->diff-analyzer.ts (schema)
+      note: producer unchanged since lock (2026-10-21T16:42:39Z)
+      note: 7 read field(s) not in invar.lock (description, id, name, nodeIds, project); run `invar lock --update` to bind them
+  durability: held since 2026-10-21 (0 days)
+result: ALL 6 contract(s) hold
+summary: held 6 | violated 0 | skipped or not evaluated 0
+measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)
+exit 0

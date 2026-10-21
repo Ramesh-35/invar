@@ -1,0 +1,22 @@
+# PROPOSED code:renderElement.ts->staticScene.ts
+# status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @excalidraw/element at packages/element/package.json (package.json "workspaces" entry "packages/*")
+# E2 ElementRenderState declared at packages/element/src/renderElement.ts:151
+# E2 RenderPositionOffset declared at packages/element/src/renderElement.ts:118
+# E3 consumer package @excalidraw/excalidraw at packages/excalidraw/package.json (package.json "workspaces" entry "packages/*")
+# E4 ElementRenderState imported at packages/excalidraw/renderer/staticScene.ts:30 from "@excalidraw/element", resolved to packages/element/src/index.ts, re-exported by barrel packages/element/src/index.ts:88 from packages/element/src/renderElement.ts
+# E4 RenderPositionOffset not imported by name; resolved via property ElementRenderState.offset declared in packages/element/src/renderElement.ts:154, ElementRenderState imported at packages/excalidraw/renderer/staticScene.ts:30 from "@excalidraw/element"
+# E5 ElementRenderState fields read: offset (packages/excalidraw/renderer/staticScene.ts:212), opacity (packages/excalidraw/renderer/staticScene.ts:269)
+# E5 ElementRenderState stoplisted reads: (none)
+# E5 RenderPositionOffset fields read: x (packages/excalidraw/renderer/staticScene.ts:212), y (packages/excalidraw/renderer/staticScene.ts:213)
+# E5 RenderPositionOffset stoplisted reads: (none)
+# E6 pair packages/element/src/renderElement.ts -> packages/excalidraw/renderer/staticScene.ts
+# category: unknown
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:renderElement.ts->staticScene.ts"
+producer = "packages/element/src/renderElement.ts"
+consumer = "packages/excalidraw/renderer/staticScene.ts"
+evidence = "ElementRenderState offset opacity"
+evidence = "RenderPositionOffset x y"

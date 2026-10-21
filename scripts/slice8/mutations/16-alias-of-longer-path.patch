@@ -1,0 +1,15 @@
+# mutation: an alias of a longer expression than the path ties it
+# catch: s8_f16b_an_alias_of_a_longer_expression_ties_nothing
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1343,9 +1343,7 @@
+                 }
+                 // an alias `y = <path>` that ends the expression
+                 if k >= 2 && t.p(k - 1, b'=') && !t.p(k - 2, b'=') && !t.p(k - 2, b'!') {
+-                    let ends = j >= all.len()
+-                        || matches!(&all[j].0, Tok::P(b';' | b',' | b')'))
+-                        || m[all[j - 1].1..all[j].1].contains(&b'\n');
++                    let ends = true;
+                     if let (true, Some(y)) = (ends, t.id(k - 2)) {
+                         vals.push((y.to_string(), pp.end_arr));
+                     }

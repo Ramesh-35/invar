@@ -1,0 +1,9 @@
+INVAR check (1 contract(s))
+  [HOLDS]    code:renderElement.ts->staticScene.ts (schema)
+      note: producer unchanged since lock (2026-10-21T16:42:43Z)
+      note: 17 read field(s) not in invar.lock (angle, appState, context, element, elementsMap); run `invar lock --update` to bind them
+  durability: held since 2026-10-21 (0 days)
+result: ALL 1 contract(s) hold
+summary: held 1 | violated 0 | skipped or not evaluated 0
+measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)
+exit 0

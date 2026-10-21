@@ -1,0 +1,13 @@
+# mutation: a member's type name resolved in the consumer file, not where the member is written
+# catch: s8_f7_the_same_name_from_another_package_is_not_the_shape
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1220,7 +1220,7 @@
+                 let mut hop2: Vec<(String, String, usize, String, bool)> = Vec::new(); // (a, p2, line, file, arr)
+                 match &pt {
+                     MType::Named(h, arr) => {
+-                        if self.resolve(&tf, h).is_some_and(|(hf, hd)| hf == g && hd.name == s) {
++                        if self.resolve(f, h).is_some_and(|(hf, hd)| hf == g && hd.name == s) {
+                             out.push(PropPath {
+                                 ty: ty.clone(),
+                                 chain: vec![p.clone()],

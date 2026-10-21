@@ -1,0 +1,8 @@
+  + contract code:types.ts->DomainGraphView.tsx (8 bindings)
+  + contract code:types.ts->GraphView.tsx (6 bindings)
+  + contract code:types.ts->KnowledgeGraphView.tsx (8 bindings)
+  + contract code:types.ts->NodeInfo.tsx (19 bindings)
+  + contract code:types.ts->context-builder.ts (11 bindings)
+  + contract code:types.ts->diff-analyzer.ts (4 bindings)
+wrote ./invar.lock (6 contract(s), 56 binding(s))
+exit 0

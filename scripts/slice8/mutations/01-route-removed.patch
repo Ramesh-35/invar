@@ -1,0 +1,13 @@
+# mutation: the property route removed: no path ties anything
+# catch: s8_f1_one_hop_proposes
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1200,7 +1200,7 @@
+     /// Every path of at most two hops from a type written in consumer `f`
+     /// to the shape `s` declared in `g`.
+     fn paths(&mut self, f: &str, s: &str, g: &str) -> Vec<PropPath> {
+-        let Some(fi) = self.infos.get(f) else { return Vec::new() };
++        let Some(fi) = self.infos.get(f).filter(|_| false) else { return Vec::new() };
+         let mut names: BTreeMap<String, String> = BTreeMap::new();
+         for d in &fi.decls {
+             names.entry(d.name.clone()).or_insert_with(|| format!("{} declared at {f}:{}", d.name, d.line));

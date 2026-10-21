@@ -1,0 +1,13 @@
+# mutation: the second hop removed (S8-D1: two hops ruled)
+# catch: s8_f11_two_hops_propose s8_f11c_two_hops_through_an_inline_object_type_propose
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1252,7 +1252,7 @@
+                         }
+                     }
+                 }
+-                for (a, p2, l2, file, a2) in hop2 {
++                for (a, p2, l2, file, a2) in hop2.into_iter().filter(|_| false) {
+                     out.push(PropPath {
+                         ty: ty.clone(),
+                         chain: vec![a.clone(), p2.clone()],

@@ -1,0 +1,19 @@
+# mutation: the elements of an array property are not followed (for-of, callbacks)
+# catch: s8_f3_an_array_property_binds_its_elements s8_f3b_array_callbacks_and_indexing
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1330,12 +1330,12 @@
+                         read(t.skip_group(j, b'[', b']'), i);
+                     }
+                     // `for (const e of <path>)` and `<path>.map((e) =>`
+-                    if k >= 5 && t.is(k - 1, "of") && t.p(k - 4, b'(') && t.is(k - 5, "for") && t.p(j, b')') {
++                    if false && k >= 5 && t.is(k - 1, "of") && t.p(k - 4, b'(') && t.is(k - 5, "for") && t.p(j, b')') {
+                         if let Some(e) = t.id(k - 2) {
+                             vals.push((e.to_string(), false));
+                         }
+                     }
+-                    if let Some(e) = callback_param(&t, j) {
++                    if let Some(e) = callback_param(&t, j).filter(|_| false) {
+                         vals.push((e, false));
+                     }
+                 } else {

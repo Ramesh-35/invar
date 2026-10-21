@@ -342,6 +342,19 @@ fn same_line_members(t: &str) -> Vec<&str> {
                 open = Some(i + 1);
                 break;
             }
+            // LOCK-SLICE2: `= Readonly<{ ... }>`, the one wrapped body init
+            // proposes, opens at its brace; nothing else inside `<...>` does.
+            b'=' if d <= 0 && b.get(i + 1) != Some(&b'>') && b.get(i + 1) != Some(&b'=') => {
+                let rest = t[i + 1..].trim_start();
+                if let Some(r) = rest.strip_prefix("Readonly") {
+                    if let Some(r) = r.trim_start().strip_prefix('<') {
+                        if r.trim_start().starts_with('{') {
+                            open = Some(b.len() - r.trim_start().len() + 1);
+                            break;
+                        }
+                    }
+                }
+            }
             _ => {}
         }
     }

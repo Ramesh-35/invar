@@ -1,0 +1,16 @@
+# mutation: property-only pairs numbered in discovery order (an existing id moves)
+# catch: s8_f17_a_property_only_pair_numbers_after_existing_pairs
+--- a/crates/invar-falsify/src/init.rs
++++ b/crates/invar-falsify/src/init.rs
+@@ -376,9 +376,9 @@
+     let late = |p: &crate::codepairs::CodePair| !p.shapes.is_empty() && p.shapes.iter().all(|s| !s.props.is_empty());
+     let mut taken: BTreeSet<String> = d.proposals.iter().map(|p| p.id.clone()).collect();
+     let mut ids: Vec<String> = vec![String::new(); code.pairs.len()];
+-    for pass in [false, true] {
++    for pass in [false] {
+         for (i, pair) in code.pairs.iter().enumerate() {
+-            if late(pair) != pass {
++            if late(pair) && false != pass {
+                 continue;
+             }
+             let base_id = format!("code:{}->{}", file_name(&pair.producer), file_name(&pair.consumer));

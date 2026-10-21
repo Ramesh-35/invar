@@ -1,0 +1,398 @@
+# PROPOSED code:types.ts->nested-tool-calls.ts
+# status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-agent-core at packages/agent/package.json (package.json "workspaces" entry "packages/*")
+# E2 AgentToolCallOutcome declared at packages/agent/src/types.ts:449
+# E2 AgentToolResult declared at packages/agent/src/types.ts:424
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 AgentToolCallOutcome imported at packages/coding-agent/src/core/nested-tool-calls.ts:11 from "@earendil-works/pi-agent-core", resolved to packages/agent/src/index.ts, re-exported by barrel packages/agent/src/index.ts:5 from packages/agent/src/types.ts
+# E4 AgentToolResult imported at packages/coding-agent/src/core/nested-tool-calls.ts:11 from "@earendil-works/pi-agent-core", resolved to packages/agent/src/index.ts, re-exported by barrel packages/agent/src/index.ts:5 from packages/agent/src/types.ts; receiver resolved via property AgentToolCallOutcome.result declared in packages/agent/src/types.ts:451
+# E5 AgentToolCallOutcome fields read: durationMs (packages/coding-agent/src/core/nested-tool-calls.ts:246), isError (packages/coding-agent/src/core/nested-tool-calls.ts:237)
+# E5 AgentToolCallOutcome stoplisted reads: result
+# E5 AgentToolResult fields read: content (packages/coding-agent/src/core/nested-tool-calls.ts:155), usage (packages/coding-agent/src/core/nested-tool-calls.ts:239)
+# E5 AgentToolResult stoplisted reads: (none)
+# E6 pair packages/agent/src/types.ts -> packages/coding-agent/src/core/nested-tool-calls.ts
+# category: production
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->nested-tool-calls.ts"
+producer = "packages/agent/src/types.ts"
+consumer = "packages/coding-agent/src/core/nested-tool-calls.ts"
+evidence = "AgentToolCallOutcome durationMs isError"
+evidence = "AgentToolResult content usage"
+
+# PROPOSED code:types.ts->auth-command.ts
+# status: PROPOSED (heuristic; receiver reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 ModelAuth declared at packages/ai/src/auth/types.ts:7
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 ModelAuth not imported by name; resolved via property AuthResult.auth declared in packages/ai/src/auth/types.ts:105, AuthResult imported at packages/coding-agent/src/cli/auth-command.ts:1 from "@earendil-works/pi-ai"
+# E5 ModelAuth fields read: apiKey (packages/coding-agent/src/cli/auth-command.ts:121), headers (packages/coding-agent/src/cli/auth-command.ts:122)
+# E5 ModelAuth stoplisted reads: (none)
+# E6 pair packages/ai/src/auth/types.ts -> packages/coding-agent/src/cli/auth-command.ts
+# category: production
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->auth-command.ts"
+producer = "packages/ai/src/auth/types.ts"
+consumer = "packages/coding-agent/src/cli/auth-command.ts"
+evidence = "ModelAuth apiKey headers"
+
+# PROPOSED code:types.ts->agent-session.ts
+# status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 AuthResult declared at packages/ai/src/auth/types.ts:104
+# E2 ModelAuth declared at packages/ai/src/auth/types.ts:7
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 AuthResult imported at packages/coding-agent/src/core/agent-session.ts:35 from "@earendil-works/pi-ai/compat", resolved to packages/ai/src/compat.ts, re-exported through packages/ai/src/compat.ts:27 -> packages/ai/src/index.ts:24 from packages/ai/src/auth/types.ts
+# E4 ModelAuth not imported by name; resolved via property AuthResult.auth declared in packages/ai/src/auth/types.ts:105, AuthResult imported at packages/coding-agent/src/core/agent-session.ts:35 from "@earendil-works/pi-ai/compat"
+# E5 AuthResult fields read: auth (packages/coding-agent/src/core/agent-session.ts:552), env (packages/coding-agent/src/core/agent-session.ts:558)
+# E5 AuthResult stoplisted reads: (none)
+# E5 ModelAuth fields read: apiKey (packages/coding-agent/src/core/agent-session.ts:552), baseUrl (packages/coding-agent/src/core/agent-session.ts:553), headers (packages/coding-agent/src/core/agent-session.ts:552)
+# E5 ModelAuth stoplisted reads: (none)
+# E6 pair packages/ai/src/auth/types.ts -> packages/coding-agent/src/core/agent-session.ts
+# category: production
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->agent-session.ts"
+producer = "packages/ai/src/auth/types.ts"
+consumer = "packages/coding-agent/src/core/agent-session.ts"
+evidence = "AuthResult auth env"
+evidence = "ModelAuth apiKey baseUrl headers"
+
+# PROPOSED code:types.ts->bug-report.ts#2
+# status: PROPOSED (heuristic; receiver reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 ProviderAuth declared at packages/ai/src/auth/types.ts:252
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 ProviderAuth not imported by name; resolved via property Provider.auth declared in packages/ai/src/models.ts:169, Provider imported at packages/coding-agent/src/core/bug-report.ts:4 from "@earendil-works/pi-ai/compat"
+# E5 ProviderAuth fields read: apiKey (packages/coding-agent/src/core/bug-report.ts:113), oauth (packages/coding-agent/src/core/bug-report.ts:114)
+# E5 ProviderAuth stoplisted reads: (none)
+# E6 pair packages/ai/src/auth/types.ts -> packages/coding-agent/src/core/bug-report.ts
+# category: production
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->bug-report.ts#2"
+producer = "packages/ai/src/auth/types.ts"
+consumer = "packages/coding-agent/src/core/bug-report.ts"
+evidence = "ProviderAuth apiKey oauth"
+
+# PROPOSED code:types.ts->model-runtime.ts
+# status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 AuthResult declared at packages/ai/src/auth/types.ts:104
+# E2 ModelAuth declared at packages/ai/src/auth/types.ts:7
+# E2 ProviderAuth declared at packages/ai/src/auth/types.ts:252
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 AuthResult imported at packages/coding-agent/src/core/model-runtime.ts:2 from "@earendil-works/pi-ai", resolved to packages/ai/src/index.ts, re-exported by barrel packages/ai/src/index.ts:24 from packages/ai/src/auth/types.ts
+# E4 ModelAuth not imported by name; resolved via property AuthResult.auth declared in packages/ai/src/auth/types.ts:105, AuthResult imported at packages/coding-agent/src/core/model-runtime.ts:2 from "@earendil-works/pi-ai"
+# E4 ProviderAuth not imported by name; resolved via property Provider.auth declared in packages/ai/src/models.ts:169, Provider imported at packages/coding-agent/src/core/model-runtime.ts:2 from "@earendil-works/pi-ai"
+# E5 AuthResult fields read: auth (packages/coding-agent/src/core/model-runtime.ts:574), env (packages/coding-agent/src/core/model-runtime.ts:568)
+# E5 AuthResult stoplisted reads: (none)
+# E5 ModelAuth fields read: apiKey (packages/coding-agent/src/core/model-runtime.ts:692), baseUrl (packages/coding-agent/src/core/model-runtime.ts:686), headers (packages/coding-agent/src/core/model-runtime.ts:574)
+# E5 ModelAuth stoplisted reads: (none)
+# E5 ProviderAuth fields read: apiKey (packages/coding-agent/src/core/model-runtime.ts:900), oauth (packages/coding-agent/src/core/model-runtime.ts:900)
+# E5 ProviderAuth stoplisted reads: (none)
+# E6 pair packages/ai/src/auth/types.ts -> packages/coding-agent/src/core/model-runtime.ts
+# category: production
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->model-runtime.ts"
+producer = "packages/ai/src/auth/types.ts"
+consumer = "packages/coding-agent/src/core/model-runtime.ts"
+evidence = "AuthResult auth env"
+evidence = "ModelAuth apiKey baseUrl headers"
+evidence = "ProviderAuth apiKey oauth"
+
+# PROPOSED code:types.ts->provider-composer.ts
+# status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 AuthResult declared at packages/ai/src/auth/types.ts:104
+# E2 ModelAuth declared at packages/ai/src/auth/types.ts:7
+# E2 ProviderAuth declared at packages/ai/src/auth/types.ts:252
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 AuthResult imported at packages/coding-agent/src/core/provider-composer.ts:1 from "@earendil-works/pi-ai", resolved to packages/ai/src/index.ts, re-exported by barrel packages/ai/src/index.ts:24 from packages/ai/src/auth/types.ts
+# E4 ModelAuth imported at packages/coding-agent/src/core/provider-composer.ts:1 from "@earendil-works/pi-ai", resolved to packages/ai/src/index.ts, re-exported by barrel packages/ai/src/index.ts:24 from packages/ai/src/auth/types.ts
+# E4 ProviderAuth not imported by name; resolved via property Provider.auth declared in packages/ai/src/models.ts:169, Provider imported at packages/coding-agent/src/core/provider-composer.ts:1 from "@earendil-works/pi-ai"
+# E5 AuthResult fields read: auth (packages/coding-agent/src/core/provider-composer.ts:478), env (packages/coding-agent/src/core/provider-composer.ts:475)
+# E5 AuthResult stoplisted reads: (none)
+# E5 ModelAuth fields read: apiKey (packages/coding-agent/src/core/provider-composer.ts:382), headers (packages/coding-agent/src/core/provider-composer.ts:380)
+# E5 ModelAuth stoplisted reads: (none)
+# E5 ProviderAuth fields read: apiKey (packages/coding-agent/src/core/provider-composer.ts:423), oauth (packages/coding-agent/src/core/provider-composer.ts:425)
+# E5 ProviderAuth stoplisted reads: (none)
+# E6 pair packages/ai/src/auth/types.ts -> packages/coding-agent/src/core/provider-composer.ts
+# category: production
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->provider-composer.ts"
+producer = "packages/ai/src/auth/types.ts"
+consumer = "packages/coding-agent/src/core/provider-composer.ts"
+evidence = "AuthResult auth env"
+evidence = "ModelAuth apiKey headers"
+evidence = "ProviderAuth apiKey oauth"
+
+# PROPOSED code:faux.ts->harness-generation-recovery.test.ts
+# status: PROPOSED (heuristic; receiver reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E2 FauxProviderState declared at packages/ai/src/providers/faux.ts:103
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via property ChatSetup.faux declared in packages/durable/test/chat-support.ts:27, ChatSetup imported at packages/durable/test/harness-generation-recovery.test.ts:9 from "./chat-support.ts"
+# E4 FauxProviderState not imported by name; resolved via property ChatSetup.faux.state declared in packages/ai/src/providers/faux.ts:152, ChatSetup imported at packages/durable/test/harness-generation-recovery.test.ts:9 from "./chat-support.ts"
+# E5 FauxProviderHandle fields read: setResponses (packages/durable/test/harness-generation-recovery.test.ts:55), state (packages/durable/test/harness-generation-recovery.test.ts:196)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E5 FauxProviderState fields read: callCount (packages/durable/test/harness-generation-recovery.test.ts:196), deferredFetchCount (packages/durable/test/harness-generation-recovery.test.ts:286)
+# E5 FauxProviderState stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/harness-generation-recovery.test.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->harness-generation-recovery.test.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/harness-generation-recovery.test.ts"
+evidence = "FauxProviderHandle setResponses state"
+evidence = "FauxProviderState callCount deferredFetchCount"
+
+# PROPOSED code:faux.ts->harness-generation.test.ts
+# status: PROPOSED (heuristic; receiver reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E2 FauxProviderState declared at packages/ai/src/providers/faux.ts:103
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via property ChatSetup.faux declared in packages/durable/test/chat-support.ts:27, ChatSetup imported at packages/durable/test/harness-generation.test.ts:31 from "./chat-support.ts"
+# E4 FauxProviderState not imported by name; resolved via property ChatSetup.faux.state declared in packages/ai/src/providers/faux.ts:152, ChatSetup imported at packages/durable/test/harness-generation.test.ts:31 from "./chat-support.ts"
+# E5 FauxProviderHandle fields read: getPendingResponseCount (packages/durable/test/harness-generation.test.ts:215), setResponses (packages/durable/test/harness-generation.test.ts:92), state (packages/durable/test/harness-generation.test.ts:227)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E5 FauxProviderState fields read: callCount (packages/durable/test/harness-generation.test.ts:227), cancelledDeferred (packages/durable/test/harness-generation.test.ts:323), deferredFetchCount (packages/durable/test/harness-generation.test.ts:280)
+# E5 FauxProviderState stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/harness-generation.test.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->harness-generation.test.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/harness-generation.test.ts"
+evidence = "FauxProviderHandle getPendingResponseCount setResponses state"
+evidence = "FauxProviderState callCount cancelledDeferred deferredFetchCount"
+
+# PROPOSED code:faux.ts->harness-inbox.test.ts
+# status: PROPOSED (heuristic; receiver reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via property ChatSetup.faux declared in packages/durable/test/chat-support.ts:27, ChatSetup imported at packages/durable/test/harness-inbox.test.ts:36 from "./chat-support.ts"
+# E5 FauxProviderHandle fields read: setResponses (packages/durable/test/harness-inbox.test.ts:114), state (packages/durable/test/harness-inbox.test.ts:170)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/harness-inbox.test.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->harness-inbox.test.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/harness-inbox.test.ts"
+evidence = "FauxProviderHandle setResponses state"
+
+# PROPOSED code:faux.ts->harness-input-entries.test.ts
+# status: PROPOSED (heuristic; receiver reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via property ChatSetup.faux declared in packages/durable/test/chat-support.ts:27, ChatSetup imported at packages/durable/test/harness-input-entries.test.ts:29 from "./chat-support.ts"
+# E5 FauxProviderHandle fields read: setResponses (packages/durable/test/harness-input-entries.test.ts:103), state (packages/durable/test/harness-input-entries.test.ts:378)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/harness-input-entries.test.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->harness-input-entries.test.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/harness-input-entries.test.ts"
+evidence = "FauxProviderHandle setResponses state"
+
+# PROPOSED code:faux.ts->harness-tools.test.ts
+# status: PROPOSED (heuristic; receiver reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via property ChatSetup.faux declared in packages/durable/test/chat-support.ts:27, ChatSetup imported at packages/durable/test/harness-tools.test.ts:37 from "./chat-support.ts"
+# E5 FauxProviderHandle fields read: setResponses (packages/durable/test/harness-tools.test.ts:66), state (packages/durable/test/harness-tools.test.ts:109)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/harness-tools.test.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->harness-tools.test.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/harness-tools.test.ts"
+evidence = "FauxProviderHandle setResponses state"
+
+# PROPOSED code:types.ts->custom-footer.ts
+# status: PROPOSED (heuristic; receiver reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 Usage declared at packages/ai/src/types.ts:451
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 Usage not imported by name; resolved via property AssistantMessage.usage declared in packages/ai/src/types.ts:583, AssistantMessage imported at packages/coding-agent/examples/extensions/custom-footer.ts:11 from "@earendil-works/pi-ai"
+# E5 Usage fields read: cost (packages/coding-agent/examples/extensions/custom-footer.ts:40), input (packages/coding-agent/examples/extensions/custom-footer.ts:38), output (packages/coding-agent/examples/extensions/custom-footer.ts:39)
+# E5 Usage stoplisted reads: (none)
+# E6 pair packages/ai/src/types.ts -> packages/coding-agent/examples/extensions/custom-footer.ts
+# category: example
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->custom-footer.ts"
+producer = "packages/ai/src/types.ts"
+consumer = "packages/coding-agent/examples/extensions/custom-footer.ts"
+evidence = "Usage cost input output"
+
+# PROPOSED code:types.ts->index.ts#2
+# status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 AssistantMessage declared at packages/ai/src/types.ts:570
+# E2 Model declared at packages/ai/src/types.ts:839
+# E2 SimpleStreamOptions declared at packages/ai/src/types.ts:369
+# E2 Usage declared at packages/ai/src/types.ts:451
+# E3 consumer package pi-extension-custom-provider-anthropic at packages/coding-agent/examples/extensions/custom-provider-anthropic/package.json (package.json "workspaces" entry "packages/coding-agent/examples/extensions/custom-provider-anthropic")
+# E4 AssistantMessage imported at packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:26 from "@earendil-works/pi-ai", resolved to packages/ai/src/index.ts, re-exported by barrel packages/ai/src/index.ts:37 from packages/ai/src/types.ts
+# E4 Model imported at packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:26 from "@earendil-works/pi-ai", resolved to packages/ai/src/index.ts, re-exported by barrel packages/ai/src/index.ts:37 from packages/ai/src/types.ts
+# E4 SimpleStreamOptions imported at packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:26 from "@earendil-works/pi-ai", resolved to packages/ai/src/index.ts, re-exported by barrel packages/ai/src/index.ts:37 from packages/ai/src/types.ts
+# E4 Usage not imported by name; resolved via property AssistantMessage.usage declared in packages/ai/src/types.ts:583, AssistantMessage imported at packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:26 from "@earendil-works/pi-ai"
+# E5 AssistantMessage fields read: content (packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:458), errorMessage (packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:560), stopReason (packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:556), usage (packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:462)
+# E5 AssistantMessage stoplisted reads: (none)
+# E5 Model fields read: maxTokens (packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:405), reasoning (packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:440)
+# E5 Model stoplisted reads: (none)
+# E5 SimpleStreamOptions fields read: reasoning (packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:440), thinkingBudgets (packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:447)
+# E5 SimpleStreamOptions stoplisted reads: (none)
+# E5 Usage fields read: cacheRead (packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:467), cacheWrite (packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:467), input (packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:467), output (packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:467)
+# E5 Usage stoplisted reads: (none)
+# E6 pair packages/ai/src/types.ts -> packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts
+# category: unknown
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->index.ts#2"
+producer = "packages/ai/src/types.ts"
+consumer = "packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts"
+evidence = "AssistantMessage content errorMessage stopReason usage"
+evidence = "Model maxTokens reasoning"
+evidence = "SimpleStreamOptions reasoning thinkingBudgets"
+evidence = "Usage cacheRead cacheWrite input output"
+
+# PROPOSED code:types.ts->cache-stats.ts
+# status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 AssistantMessage declared at packages/ai/src/types.ts:570
+# E2 Usage declared at packages/ai/src/types.ts:451
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 AssistantMessage imported at packages/coding-agent/src/core/cache-stats.ts:1 from "@earendil-works/pi-ai", resolved to packages/ai/src/index.ts, re-exported by barrel packages/ai/src/index.ts:37 from packages/ai/src/types.ts
+# E4 Usage not imported by name; resolved via property AssistantMessage.usage declared in packages/ai/src/types.ts:583, AssistantMessage imported at packages/coding-agent/src/core/cache-stats.ts:1 from "@earendil-works/pi-ai"
+# E5 AssistantMessage fields read: model (packages/coding-agent/src/core/cache-stats.ts:82), provider (packages/coding-agent/src/core/cache-stats.ts:82), timestamp (packages/coding-agent/src/core/cache-stats.ts:87), usage (packages/coding-agent/src/core/cache-stats.ts:61)
+# E5 AssistantMessage stoplisted reads: (none)
+# E5 Usage fields read: cacheRead (packages/coding-agent/src/core/cache-stats.ts:62), cacheWrite (packages/coding-agent/src/core/cache-stats.ts:62), cost (packages/coding-agent/src/core/cache-stats.ts:78), input (packages/coding-agent/src/core/cache-stats.ts:62)
+# E5 Usage stoplisted reads: (none)
+# E6 pair packages/ai/src/types.ts -> packages/coding-agent/src/core/cache-stats.ts
+# category: production
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->cache-stats.ts"
+producer = "packages/ai/src/types.ts"
+consumer = "packages/coding-agent/src/core/cache-stats.ts"
+evidence = "AssistantMessage model provider timestamp usage"
+evidence = "Usage cacheRead cacheWrite cost input"
+
+# PROPOSED code:types.ts->virtual-models.test.ts
+# status: PROPOSED (heuristic; receiver reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 AssistantMessage declared at packages/ai/src/types.ts:570
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 AssistantMessage not imported by name; resolved via property ModelRouteRequest.failed.message declared in packages/coding-agent/src/core/virtual-models.ts:64, ModelRouteRequest imported at packages/coding-agent/test/suite/virtual-models.test.ts:6 from "../../src/core/virtual-models.ts"
+# E5 AssistantMessage fields read: errorMessage (packages/coding-agent/test/suite/virtual-models.test.ts:93), stopReason (packages/coding-agent/test/suite/virtual-models.test.ts:146)
+# E5 AssistantMessage stoplisted reads: (none)
+# E6 pair packages/ai/src/types.ts -> packages/coding-agent/test/suite/virtual-models.test.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->virtual-models.test.ts"
+producer = "packages/ai/src/types.ts"
+consumer = "packages/coding-agent/test/suite/virtual-models.test.ts"
+evidence = "AssistantMessage errorMessage stopReason"
+
+# PROPOSED code:types.ts->test-harness.test.ts
+# status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 AssistantMessage declared at packages/ai/src/types.ts:570
+# E2 Usage declared at packages/ai/src/types.ts:451
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 AssistantMessage imported at packages/coding-agent/test/test-harness.test.ts:7 from "@earendil-works/pi-ai", resolved to packages/ai/src/index.ts, re-exported by barrel packages/ai/src/index.ts:37 from packages/ai/src/types.ts
+# E4 Usage not imported by name; resolved via property AssistantMessage.usage declared in packages/ai/src/types.ts:583, AssistantMessage imported at packages/coding-agent/test/test-harness.test.ts:7 from "@earendil-works/pi-ai"
+# E5 AssistantMessage fields read: content (packages/coding-agent/test/test-harness.test.ts:30), stopReason (packages/coding-agent/test/test-harness.test.ts:31), usage (packages/coding-agent/test/test-harness.test.ts:131)
+# E5 AssistantMessage stoplisted reads: (none)
+# E5 Usage fields read: input (packages/coding-agent/test/test-harness.test.ts:131), output (packages/coding-agent/test/test-harness.test.ts:132)
+# E5 Usage stoplisted reads: (none)
+# E6 pair packages/ai/src/types.ts -> packages/coding-agent/test/test-harness.test.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->test-harness.test.ts"
+producer = "packages/ai/src/types.ts"
+consumer = "packages/coding-agent/test/test-harness.test.ts"
+evidence = "AssistantMessage content stopReason usage"
+evidence = "Usage input output"
+
+# PROPOSED code:types.ts->harness-inbox.test.ts
+# status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 AssistantMessage declared at packages/ai/src/types.ts:570
+# E2 Usage declared at packages/ai/src/types.ts:451
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 AssistantMessage imported at packages/durable/test/harness-inbox.test.ts:5 from "@earendil-works/pi-ai", resolved to packages/ai/src/index.ts, re-exported by barrel packages/ai/src/index.ts:37 from packages/ai/src/types.ts
+# E4 Usage imported at packages/durable/test/harness-inbox.test.ts:5 from "@earendil-works/pi-ai", resolved to packages/ai/src/index.ts, re-exported by barrel packages/ai/src/index.ts:37 from packages/ai/src/types.ts; receiver resolved via property AssistantMessage.usage declared in packages/ai/src/types.ts:583
+# E5 AssistantMessage fields read: role (packages/durable/test/harness-inbox.test.ts:97), stopReason (packages/durable/test/harness-inbox.test.ts:852), usage (packages/durable/test/harness-inbox.test.ts:800)
+# E5 AssistantMessage stoplisted reads: (none)
+# E5 Usage fields read: input (packages/durable/test/harness-inbox.test.ts:800), output (packages/durable/test/harness-inbox.test.ts:801), totalTokens (packages/durable/test/harness-inbox.test.ts:802)
+# E5 Usage stoplisted reads: (none)
+# E6 pair packages/ai/src/types.ts -> packages/durable/test/harness-inbox.test.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->harness-inbox.test.ts"
+producer = "packages/ai/src/types.ts"
+consumer = "packages/durable/test/harness-inbox.test.ts"
+evidence = "AssistantMessage role stopReason usage"
+evidence = "Usage input output totalTokens"
+
+# PROPOSED code:types.ts->system-order-cache-e2e.test.ts
+# status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 AssistantMessage declared at packages/ai/src/types.ts:570
+# E2 Usage declared at packages/ai/src/types.ts:451
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 AssistantMessage imported at packages/durable/test/system-order-cache-e2e.test.ts:1 from "@earendil-works/pi-ai", resolved to packages/ai/src/index.ts, re-exported by barrel packages/ai/src/index.ts:37 from packages/ai/src/types.ts
+# E4 Usage not imported by name; resolved via property AssistantMessage.usage declared in packages/ai/src/types.ts:583, AssistantMessage imported at packages/durable/test/system-order-cache-e2e.test.ts:1 from "@earendil-works/pi-ai"
+# E5 AssistantMessage fields read: errorMessage (packages/durable/test/system-order-cache-e2e.test.ts:118), role (packages/durable/test/system-order-cache-e2e.test.ts:62), stopReason (packages/durable/test/system-order-cache-e2e.test.ts:118), usage (packages/durable/test/system-order-cache-e2e.test.ts:122)
+# E5 AssistantMessage stoplisted reads: (none)
+# E5 Usage fields read: cacheRead (packages/durable/test/system-order-cache-e2e.test.ts:122), cacheWrite (packages/durable/test/system-order-cache-e2e.test.ts:122), input (packages/durable/test/system-order-cache-e2e.test.ts:122)
+# E5 Usage stoplisted reads: (none)
+# E6 pair packages/ai/src/types.ts -> packages/durable/test/system-order-cache-e2e.test.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->system-order-cache-e2e.test.ts"
+producer = "packages/ai/src/types.ts"
+consumer = "packages/durable/test/system-order-cache-e2e.test.ts"
+evidence = "AssistantMessage errorMessage role stopReason usage"
+evidence = "Usage cacheRead cacheWrite input"

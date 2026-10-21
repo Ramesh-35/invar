@@ -1,0 +1,13 @@
+# mutation: a member type followed by anything still counts (CM-S8-1)
+# catch: s8_f5_unpermitted_member_types_tie_nothing
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1096,7 +1096,7 @@
+         }
+         j += 1;
+     }
+-    ends(j).then_some(MType::Named(head, arr))
++    Some(MType::Named(head, arr))
+ }
+ 
+ /// Members `name[?]: type` directly inside the brace group `open`..`close`.

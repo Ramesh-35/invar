@@ -73,8 +73,11 @@ pub struct ShapeEvidence {
     /// declaring file, line); empty when no such route was needed.
     pub via: Vec<Via>,
     /// SLICE7: false when the shape is not imported by name (reached only
-    /// through `via`).
+    /// through `via` or `props`).
     pub named: bool,
+    /// SLICE8: the property paths its counted reads went through; empty
+    /// when no such path was needed.
+    pub props: Vec<Prop>,
 }
 
 /// SLICE7 provenance of one route: the function (as imported), its
@@ -1011,6 +1014,433 @@ fn used_routes(fields: &[(String, usize)], routes: &RouteReads, avail: &BTreeMap
         }
     }
     used.into_iter().collect()
+}
+
+// --------------------------------------------------- property routes (SLICE8)
+//
+// A read counts for shape S through a property whose written type is S, at
+// most two hops from a receiver with a written type T in the consumer file:
+// `r.p.f`, `r.a.p.f`. T is declared in that file or imported by name and
+// resolved by the existing resolver; every member type is read as written
+// and must be exactly S, Readonly<S>, S[] or Array<S> (an inline object
+// type is allowed as the middle hop), and S must resolve to the very shape,
+// not to another of the same name. Types are never inferred.
+
+/// A member's written type, as far as SLICE8 reads it.
+#[derive(Debug, Clone)]
+enum MType {
+    /// (type name, is an array of it)
+    Named(String, bool),
+    /// `{ ... }`: its members, (name, line, type)
+    Inline(Vec<(String, usize, MType)>),
+}
+
+/// One property path from a receiver type to the shape.
+#[derive(Debug, Clone)]
+struct PropPath {
+    /// The receiver's type, as written in the consumer file.
+    ty: String,
+    chain: Vec<String>,
+    end_arr: bool,
+    prov: Prop,
+}
+
+/// SLICE8 provenance of one property path: `Ty.a.p`, the declaring file
+/// and line of its last member, and where Ty comes from in the consumer.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Prop {
+    pub path: String,
+    pub decl_file: String,
+    pub decl_line: usize,
+    pub origin: String,
+}
+
+/// The written type starting at token `j`, strictly: [Readonly<|Array<] H
+/// [<..>] [[]] [>], then the end of the member.
+fn member_type(t: &Toks, m: &[u8], mut j: usize, depth_end: usize) -> Option<MType> {
+    let ends = |k: usize| {
+        k >= depth_end
+            || matches!(t.0.get(k), Some((Tok::P(b';' | b',' | b'}'), _)))
+            || (k > 0 && m[t.0[k - 1].1..t.0[k].1].contains(&b'\n') && !matches!(t.0.get(k), Some((Tok::P(b'|' | b'&' | b'.'), _))))
+    };
+    if t.p(j, b'{') {
+        let close = t.skip_group(j, b'{', b'}');
+        let inner = inline_members(t, m, j, close);
+        return ends(close).then_some(MType::Inline(inner));
+    }
+    let mut wrap = 0;
+    let mut arr = false;
+    if matches!(t.id(j), Some("Readonly" | "Array")) && t.p(j + 1, b'<') {
+        arr = t.is(j, "Array");
+        j += 2;
+        wrap = 1;
+    }
+    let head = t.id(j)?.to_string();
+    if t.p(j + 1, b'.') {
+        return None;
+    }
+    j += 1;
+    if t.p(j, b'<') {
+        j = t.skip_group(j, b'<', b'>');
+    }
+    if t.p(j, b'[') && t.p(j + 1, b']') {
+        if wrap > 0 {
+            return None;
+        }
+        arr = true;
+        j += 2;
+    }
+    if wrap > 0 {
+        if !t.p(j, b'>') {
+            return None;
+        }
+        j += 1;
+    }
+    ends(j).then_some(MType::Named(head, arr))
+}
+
+/// Members `name[?]: type` directly inside the brace group `open`..`close`.
+fn inline_members(t: &Toks, m: &[u8], open: usize, close: usize) -> Vec<(String, usize, MType)> {
+    let mut out = Vec::new();
+    let mut d = 0i32;
+    let mut k = open;
+    while k < close {
+        if t.p(k, b'{') || t.p(k, b'(') || t.p(k, b'[') {
+            d += 1;
+        } else if t.p(k, b'}') || t.p(k, b')') || t.p(k, b']') {
+            d -= 1;
+        } else if d == 1 {
+            let start = k == open + 1 || matches!(t.0.get(k - 1), Some((Tok::P(b';' | b','), _))) || m[t.0[k - 1].1..t.0[k].1].contains(&b'\n');
+            let n = if t.is(k, "readonly") && t.id(k + 1).is_some() { k + 1 } else { k };
+            if let (true, Some(name)) = (start, t.id(n)) {
+                let colon = if t.p(n + 1, b'?') { n + 2 } else { n + 1 };
+                if t.p(colon, b':') {
+                    if let Some(ty) = member_type(t, m, colon + 1, close - 1) {
+                        let line = m[..t.0[n].1].iter().filter(|&&b| b == b'\n').count() + 1;
+                        out.push((name.to_string(), line, ty));
+                    }
+                }
+            }
+        }
+        k += 1;
+    }
+    out
+}
+
+/// The members of an object declaration with their written types.
+fn decl_member_types(fi: &FileInfo, decl: &Decl) -> Vec<(String, usize, MType)> {
+    let m = &fi.masked;
+    let all = tokens(m);
+    let t = Toks(&all);
+    let line = |k: usize| m[..all[k].1].iter().filter(|&&b| b == b'\n').count() + 1;
+    for k in 0..all.len() {
+        if !(t.is(k, "interface") || t.is(k, "type")) || !t.is(k + 1, &decl.name) || line(k) != decl.line {
+            continue;
+        }
+        let mut j = k + 2;
+        if t.p(j, b'<') {
+            j = t.skip_group(j, b'<', b'>');
+        }
+        while j < all.len() && !t.p(j, b'{') && !t.p(j, b';') {
+            j += 1;
+        }
+        if !t.p(j, b'{') {
+            return Vec::new();
+        }
+        let close = t.skip_group(j, b'{', b'}');
+        return inline_members(&t, m, j, close);
+    }
+    Vec::new()
+}
+
+/// Type lookups for SLICE8, memoized per (file, name).
+struct PropIndex<'c, 'i> {
+    ctx: &'c Ctx<'c>,
+    infos: &'i BTreeMap<String, FileInfo>,
+    types: BTreeMap<(String, String), Option<(String, Decl)>>,
+    members: BTreeMap<(String, String), Vec<(String, usize, MType)>>,
+}
+
+impl PropIndex<'_, '_> {
+    /// The object declaration a type name written in `file` denotes: a
+    /// single declaration of that name in the file, else a named import of
+    /// it resolved by the existing resolver to exactly one declaration.
+    fn resolve(&mut self, file: &str, name: &str) -> Option<(String, Decl)> {
+        let key = (file.to_string(), name.to_string());
+        if let Some(r) = self.types.get(&key) {
+            return r.clone();
+        }
+        let fi = self.infos.get(file);
+        let r = fi.and_then(|fi| {
+            let local: Vec<&Decl> = fi.decls.iter().filter(|d| d.name == name).collect();
+            match local.as_slice() {
+                [d] => return matches!(d.kind, Kind::Object(_)).then(|| (file.to_string(), (*d).clone())),
+                [] => {}
+                _ => return None,
+            }
+            let imps: Vec<(&Import, &String)> = fi.imports.iter().flat_map(|i| i.locals.iter().filter(|(l, _)| l == name).map(move |(_, o)| (i, o))).collect();
+            let [(imp, orig)] = imps.as_slice() else { return None };
+            let (_, Res::File(target)) = self.ctx.resolve(&imp.spec, file, false) else { return None };
+            match find_shape(self.ctx, self.infos, orig, &target) {
+                Found::Decl { file: d, decl, .. } if matches!(decl.kind, Kind::Object(_)) => Some((d, decl)),
+                _ => None,
+            }
+        });
+        self.types.insert(key, r.clone());
+        r
+    }
+    fn members_of(&mut self, file: &str, decl: &Decl) -> Vec<(String, usize, MType)> {
+        let key = (file.to_string(), decl.name.clone());
+        if !self.members.contains_key(&key) {
+            let ms = self.infos.get(file).map(|fi| decl_member_types(fi, decl)).unwrap_or_default();
+            self.members.insert(key.clone(), ms);
+        }
+        self.members[&key].clone()
+    }
+    /// Every path of at most two hops from a type written in consumer `f`
+    /// to the shape `s` declared in `g`.
+    fn paths(&mut self, f: &str, s: &str, g: &str) -> Vec<PropPath> {
+        let Some(fi) = self.infos.get(f) else { return Vec::new() };
+        let mut names: BTreeMap<String, String> = BTreeMap::new();
+        for d in &fi.decls {
+            names.entry(d.name.clone()).or_insert_with(|| format!("{} declared at {f}:{}", d.name, d.line));
+        }
+        for imp in &fi.imports {
+            for (local, _) in &imp.locals {
+                names.entry(local.clone()).or_insert_with(|| format!("{local} imported at {f}:{} from {:?}", imp.line, imp.spec));
+            }
+        }
+        let mut out = Vec::new();
+        for (ty, origin) in names {
+            let Some((tf, td)) = self.resolve(f, &ty) else { continue };
+            if tf == g && td.name == s {
+                continue;
+            }
+            for (p, pl, pt) in self.members_of(&tf, &td) {
+                let mut hop2: Vec<(String, String, usize, String, bool)> = Vec::new(); // (a, p2, line, file, arr)
+                match &pt {
+                    MType::Named(h, arr) => {
+                        if self.resolve(&tf, h).is_some_and(|(hf, hd)| hf == g && hd.name == s) {
+                            out.push(PropPath {
+                                ty: ty.clone(),
+                                chain: vec![p.clone()],
+                                end_arr: *arr,
+                                prov: Prop { path: format!("{ty}.{p}"), decl_file: tf.clone(), decl_line: pl, origin: origin.clone() },
+                            });
+                            continue;
+                        }
+                        if *arr {
+                            continue;
+                        }
+                        if let Some((uf, ud)) = self.resolve(&tf, h) {
+                            for (p2, l2, t2) in self.members_of(&uf, &ud) {
+                                if let MType::Named(h2, a2) = t2 {
+                                    if self.resolve(&uf, &h2).is_some_and(|(hf, hd)| hf == g && hd.name == s) {
+                                        hop2.push((p.clone(), p2, l2, uf.clone(), a2));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    MType::Inline(ms) => {
+                        for (p2, l2, t2) in ms {
+                            if let MType::Named(h2, a2) = t2 {
+                                if self.resolve(&tf, h2).is_some_and(|(hf, hd)| hf == g && hd.name == s) {
+                                    hop2.push((p.clone(), p2.clone(), *l2, tf.clone(), *a2));
+                                }
+                            }
+                        }
+                    }
+                }
+                for (a, p2, l2, file, a2) in hop2 {
+                    out.push(PropPath {
+                        ty: ty.clone(),
+                        chain: vec![a.clone(), p2.clone()],
+                        end_arr: a2,
+                        prov: Prop { path: format!("{ty}.{a}.{p2}"), decl_file: file, decl_line: l2, origin: origin.clone() },
+                    });
+                }
+            }
+        }
+        out
+    }
+}
+
+/// Reads of the shape's fields through property paths in this file, and
+/// per field key the paths (by index into `paths`) they were read through.
+fn path_reads(fi: &FileInfo, paths: &[PropPath]) -> (BTreeMap<String, (String, usize)>, BTreeMap<String, BTreeSet<usize>>) {
+    let m = &fi.masked;
+    let all = tokens(m);
+    let t = Toks(&all);
+    let mut out: BTreeMap<String, (String, usize)> = BTreeMap::new();
+    let mut used: BTreeMap<String, BTreeSet<usize>> = BTreeMap::new();
+    // the end of `base[..]?.a?.p` at token k, if it matches the path
+    // (`?.` as the field reader sees it; `!.` is not a read there)
+    let walk = |k: usize, base_arr: bool, chain: &[String]| -> Option<usize> {
+        let mut j = k + 1;
+        if base_arr {
+            if !t.p(j, b'[') {
+                return None;
+            }
+            j = t.skip_group(j, b'[', b']');
+        }
+        for c in chain {
+            if t.p(j, b'?') {
+                j += 1;
+            }
+            if !(t.p(j, b'.') && t.is(j + 1, c)) {
+                return None;
+            }
+            j += 2;
+        }
+        Some(j)
+    };
+    let mut read = |j: usize, i: usize| {
+        let mut j = j;
+        if t.p(j, b'?') {
+            j += 1;
+        }
+        if !t.p(j, b'.') {
+            return;
+        }
+        let Some(f) = t.id(j + 1) else { return };
+        let off = all[j + 1].1;
+        if !written(m, off) {
+            let line = m[..off].iter().filter(|&&b| b == b'\n').count() + 1;
+            out.entry(name_key(f)).or_insert((f.to_string(), line));
+            used.entry(name_key(f)).or_default().insert(i);
+        }
+    };
+    for (i, pp) in paths.iter().enumerate() {
+        let (one, arr, _) = receivers(&t, m, &pp.ty, &BTreeMap::new());
+        // values of the path: (alias or element name, is an array of S)
+        let mut vals: Vec<(String, bool)> = Vec::new();
+        for k in 0..all.len() {
+            let Some(r) = t.id(k) else { continue };
+            if k > 0 && t.p(k - 1, b'.') {
+                continue;
+            }
+            for base_arr in [false, true] {
+                if !(if base_arr { arr.contains(r) } else { one.contains(r) }) {
+                    continue;
+                }
+                let Some(j) = walk(k, base_arr, &pp.chain) else { continue };
+                if pp.end_arr {
+                    if t.p(j, b'[') {
+                        read(t.skip_group(j, b'[', b']'), i);
+                    }
+                    // `for (const e of <path>)` and `<path>.map((e) =>`
+                    if k >= 5 && t.is(k - 1, "of") && t.p(k - 4, b'(') && t.is(k - 5, "for") && t.p(j, b')') {
+                        if let Some(e) = t.id(k - 2) {
+                            vals.push((e.to_string(), false));
+                        }
+                    }
+                    if let Some(e) = callback_param(&t, j) {
+                        vals.push((e, false));
+                    }
+                } else {
+                    read(j, i);
+                }
+                // an alias `y = <path>` that ends the expression
+                if k >= 2 && t.p(k - 1, b'=') && !t.p(k - 2, b'=') && !t.p(k - 2, b'!') {
+                    let ends = j >= all.len()
+                        || matches!(&all[j].0, Tok::P(b';' | b',' | b')'))
+                        || m[all[j - 1].1..all[j].1].contains(&b'\n');
+                    if let (true, Some(y)) = (ends, t.id(k - 2)) {
+                        vals.push((y.to_string(), pp.end_arr));
+                    }
+                }
+            }
+        }
+        // the values' own reads: `y.f`, `y[i].f`, and their elements
+        let mut more = Vec::new();
+        for (y, is_arr) in &vals {
+            if !*is_arr {
+                continue;
+            }
+            for k in 0..all.len() {
+                if !t.is(k, y) || (k > 0 && t.p(k - 1, b'.')) {
+                    continue;
+                }
+                if k >= 5 && t.is(k - 1, "of") && t.p(k - 4, b'(') && t.is(k - 5, "for") && t.p(k + 1, b')') {
+                    if let Some(e) = t.id(k - 2) {
+                        more.push((e.to_string(), false));
+                    }
+                }
+                if let Some(e) = callback_param(&t, k + 1) {
+                    more.push((e, false));
+                }
+            }
+        }
+        vals.extend(more);
+        for (y, is_arr) in &vals {
+            for k in 0..all.len() {
+                if !t.is(k, y) || (k > 0 && t.p(k - 1, b'.')) {
+                    continue;
+                }
+                if *is_arr {
+                    if t.p(k + 1, b'[') {
+                        read(t.skip_group(k + 1, b'[', b']'), i);
+                    }
+                } else {
+                    read(k + 1, i);
+                }
+            }
+        }
+    }
+    (out, used)
+}
+
+/// The fields of a shape counted through its declared receivers, its SLICE7
+/// routes and its property paths together, when they reach MIN_FIELDS:
+/// (fields, stoplisted, routes used, paths used).
+type WithPaths = (Vec<(String, usize)>, Vec<String>, Vec<Via>, Vec<Prop>);
+
+fn with_paths(
+    fi: &FileInfo,
+    shape: &str,
+    members: &[(String, usize)],
+    stop: &BTreeSet<String>,
+    avail: &BTreeMap<String, (Route, Via)>,
+    paths: &[PropPath],
+) -> Option<WithPaths> {
+    let routes_only: BTreeMap<String, Route> = avail.iter().map(|(k, (r, _))| (k.clone(), r.clone())).collect();
+    let (mut reads, rr) = receiver_reads(fi, shape, &routes_only);
+    let (pr, used) = path_reads(fi, paths);
+    for (k, (s, l)) in pr {
+        let e = reads.entry(k).or_insert((s, l));
+        e.1 = e.1.min(l);
+    }
+    let (fields, stoplisted) = collect_fields(members, &reads, stop);
+    (fields.len() >= MIN_FIELDS).then(|| {
+        let via = used_routes(&fields, &rr, avail);
+        let props = used_props(&fields, &used, paths);
+        (fields, stoplisted, via, props)
+    })
+}
+
+/// `[?].map((e)` / `.filter(e =>` ... at token j: the callback's parameter.
+fn callback_param(t: &Toks, j: usize) -> Option<String> {
+    let dot = if t.p(j, b'?') { j + 1 } else { j };
+    if !(t.p(dot, b'.')
+        && matches!(t.id(dot + 1), Some("map" | "filter" | "forEach" | "find" | "findLast" | "findIndex" | "some" | "every" | "flatMap" | "sort"))
+        && t.p(dot + 2, b'('))
+    {
+        return None;
+    }
+    let q = if t.p(dot + 3, b'(') { dot + 4 } else { dot + 3 };
+    t.id(q).map(str::to_string)
+}
+
+/// The provenance of the paths a shape's counted fields were read through.
+fn used_props(fields: &[(String, usize)], used: &BTreeMap<String, BTreeSet<usize>>, paths: &[PropPath]) -> Vec<Prop> {
+    let mut out: BTreeSet<Prop> = BTreeSet::new();
+    for (f, _) in fields {
+        for i in used.get(&name_key(f)).into_iter().flatten() {
+            out.insert(paths[*i].prov.clone());
+        }
+    }
+    out.into_iter().collect()
 }
 
 // ------------------------------------------------------- return types (SLICE7)
@@ -2170,6 +2600,8 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
             }
         }
     }
+    // SLICE8: type lookups for property paths, shared by every consumer.
+    let mut pidx = PropIndex { ctx: &ctx, infos: &infos, types: BTreeMap::new(), members: BTreeMap::new() };
     for (f, fi) in &infos {
         let Some(c) = ctx.pkg_of(f) else { continue };
         let mut imported_from: BTreeMap<usize, usize> = BTreeMap::new(); // pkg -> first import line
@@ -2301,6 +2733,20 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
                                         }
                                     }
                                 }
+                                // SLICE8: property paths, only for a shape that still does not qualify.
+                                let mut props = Vec::new();
+                                if fields.len() < MIN_FIELDS {
+                                    let paths = pidx.paths(f, &decl.name, &d);
+                                    if !paths.is_empty() {
+                                        let avail = route_fns(p, name, &imported_locals, &pkg_funcs, &pkg_shape_names);
+                                        if let Some((f1, s1, v1, p1)) = with_paths(fi, name, members, &stop, &avail, &paths) {
+                                            fields = f1;
+                                            stoplisted = s1;
+                                            via = v1;
+                                            props = p1;
+                                        }
+                                    }
+                                }
                                 if fields.len() < MIN_FIELDS && accessed >= MIN_FIELDS {
                                     let why = format!(
                                         "{name}: {accessed} of its fields are accessed in this file, {} read on a receiver declared as {name}; the others are writes or are read off values init cannot tie to {name}; not guessed",
@@ -2320,6 +2766,7 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
                                         stoplisted,
                                         via,
                                         named: true,
+                                        props,
                                     };
                                     let rel = f[pkgs[c].dir.len() + 1..].to_string();
                                     let pair = pairs
@@ -2387,6 +2834,43 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
                                     stoplisted,
                                     via,
                                     named: false,
+                                    props: Vec::new(),
+                                };
+                                let rel = f[pkgs[c].dir.len() + 1..].to_string();
+                                let pair = pairs.entry((g.clone(), f.clone())).or_insert_with(|| CodePair {
+                                    producer: g.clone(),
+                                    consumer: f.clone(),
+                                    producer_pkg: pkgs[*p].clone(),
+                                    consumer_pkg: pkgs[c].clone(),
+                                    category: category(&rel),
+                                    shapes: Vec::new(),
+                                });
+                                if !pair.shapes.iter().any(|s| s.shape == ev.shape) {
+                                    pair.shapes.push(ev);
+                                }
+                                continue;
+                            }
+                        }
+                    }
+                    // SLICE8: a shape not imported by name, read through a property
+                    // declared as it, at most two hops from a typed receiver.
+                    if read.len() >= MIN_FIELDS {
+                        let paths = pidx.paths(f, &d.name, g);
+                        if !paths.is_empty() {
+                            let avail = route_fns(*p, ename, &imported_locals, &pkg_funcs, &pkg_shape_names);
+                            if let Some((fields, stoplisted, via, props)) = with_paths(fi, ename, members, &stop, &avail, &paths) {
+                                let ev = ShapeEvidence {
+                                    shape: ename.clone(),
+                                    decl_line: d.line,
+                                    import_line: 0,
+                                    specifier: String::new(),
+                                    resolved: g.clone(),
+                                    barrel: Vec::new(),
+                                    fields,
+                                    stoplisted,
+                                    via,
+                                    named: false,
+                                    props,
                                 };
                                 let rel = f[pkgs[c].dir.len() + 1..].to_string();
                                 let pair = pairs.entry((g.clone(), f.clone())).or_insert_with(|| CodePair {

@@ -1,0 +1,14 @@
+# mutation: a receiver with no written type taken as the type (CM-S8-5)
+# catch: s8_f10_an_untyped_receiver_ties_nothing
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1312,7 +1312,8 @@
+         }
+     };
+     for (i, pp) in paths.iter().enumerate() {
+-        let (one, arr, _) = receivers(&t, m, &pp.ty, &BTreeMap::new());
++        let (mut one, arr, _) = receivers(&t, m, &pp.ty, &BTreeMap::new());
++        one.insert("j".to_string());
+         // values of the path: (alias or element name, is an array of S)
+         let mut vals: Vec<(String, bool)> = Vec::new();
+         for k in 0..all.len() {

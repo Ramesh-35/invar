@@ -1,0 +1,18 @@
+# invar.lock: the producer fields this repository depends on.
+# Written by `invar lock`. Accept a reviewed producer change with
+# `invar lock --update`. Waivers are written by hand and kept.
+
+[lock]
+format = "1"
+
+[[contract]]
+id = "code:renderElement.ts->staticScene.ts"
+producer = "packages/element/src/renderElement.ts"
+blake3 = "89033ef7c7f6fb4a1f925585a1d18eede906da52e02c74314108eb5a85f74647"
+recorded_at = "2026-10-21T16:42:43Z"
+bind = "code 2026-10-21 ElementRenderState.offset RenderPositionOffset"
+bind = "code 2026-10-21 ElementRenderState.opacity number"
+bind = "code 2026-10-21 RenderPositionOffset.x number"
+bind = "code 2026-10-21 RenderPositionOffset.y number"
+members = "code ElementRenderState offset opacity"
+members = "code RenderPositionOffset x y"

@@ -1,0 +1,13 @@
+# mutation: an array receiver's indexed elements are not followed
+# catch: s8_f4_an_array_receiver_binds_its_elements
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1320,7 +1320,7 @@
+             if k > 0 && t.p(k - 1, b'.') {
+                 continue;
+             }
+-            for base_arr in [false, true] {
++            for base_arr in [false] {
+                 if !(if base_arr { arr.contains(r) } else { one.contains(r) }) {
+                     continue;
+                 }

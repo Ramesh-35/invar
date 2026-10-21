@@ -369,16 +369,38 @@ pub fn discover(root: &Path) -> Discovery {
     d.repo_abstained = code.repo_abstained;
     d.truncated |= code.truncated;
     d.abstentions = code.abstentions;
-    for pair in &code.pairs {
-        let base_id = format!("code:{}->{}", file_name(&pair.producer), file_name(&pair.consumer));
-        // alpha.29 uniqueness rule: deterministic `#2`, `#3` in discovery
-        // order (byte order of producer, then consumer path).
-        let mut id = base_id.clone();
-        let mut n = 2;
-        while d.proposals.iter().any(|p| p.id == id) {
-            id = format!("{base_id}#{n}");
-            n += 1;
+    // alpha.29 uniqueness rule: deterministic `#2`, `#3` in discovery order
+    // (byte order of producer, then consumer path). SLICE8 (founder,
+    // 2026-10-21): a pair every shape of which is reached only through a
+    // property path numbers after every other pair, so no existing id moves.
+    let late = |p: &crate::codepairs::CodePair| !p.shapes.is_empty() && p.shapes.iter().all(|s| !s.props.is_empty());
+    let mut taken: BTreeSet<String> = d.proposals.iter().map(|p| p.id.clone()).collect();
+    let mut ids: Vec<String> = vec![String::new(); code.pairs.len()];
+    for pass in [false, true] {
+        for (i, pair) in code.pairs.iter().enumerate() {
+            if late(pair) != pass {
+                continue;
+            }
+            let base_id = format!("code:{}->{}", file_name(&pair.producer), file_name(&pair.consumer));
+            let shapes_ok = pair.shapes.iter().all(|s| {
+                let ok = |x: &str| toml_safe(x) && !x.chars().any(char::is_whitespace);
+                ok(&s.shape) && s.fields.iter().all(|(f, _)| ok(f))
+            });
+            if !shapes_ok || ![&base_id, &pair.producer, &pair.consumer].iter().all(|v| toml_safe(v)) {
+                continue; // abstained UNREPRESENTABLE below; it takes no id
+            }
+            let mut id = base_id.clone();
+            let mut n = 2;
+            while taken.contains(&id) {
+                id = format!("{base_id}#{n}");
+                n += 1;
+            }
+            taken.insert(id.clone());
+            ids[i] = id;
         }
+    }
+    for (i, pair) in code.pairs.iter().enumerate() {
+        let id = if ids[i].is_empty() { format!("code:{}->{}", file_name(&pair.producer), file_name(&pair.consumer)) } else { ids[i].clone() };
         let evidence_keys: Vec<String> = pair
             .shapes
             .iter()
@@ -706,6 +728,16 @@ fn k2_lines(p: &crate::valuepairs::K2Pair) -> Vec<String> {
 pub const ROUTE_STATUS: &str = "status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)";
 pub const MIXED_STATUS: &str = "status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file or assigned from an imported function's declared return type; field writes excluded; types are not inferred)";
 
+/// SLICE8 (rulings S8-D2, S8-D3): a proposal whose every shape is reached
+/// through a property declared as the shape, and one mixing such a shape
+/// with any other kind.
+pub const PROP_STATUS: &str = "status: PROPOSED (heuristic; receiver reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)";
+pub const PROP_MIXED: &str = "status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)";
+
+fn prop_text(ps: &[crate::codepairs::Prop]) -> String {
+    ps.iter().map(|p| format!("{} declared in {}:{}", p.path, p.decl_file, p.decl_line)).collect::<Vec<_>>().join(" and ")
+}
+
 fn via_text(vs: &[crate::codepairs::Via]) -> String {
     vs.iter().map(|v| format!("{}() declared in {}:{}", v.function, v.decl_file, v.decl_line)).collect::<Vec<_>>().join(" and ")
 }
@@ -713,7 +745,14 @@ fn via_text(vs: &[crate::codepairs::Via]) -> String {
 fn evidence_lines(p: &crate::codepairs::CodePair) -> Vec<String> {
     let pkg = |k: &crate::codepairs::Package| format!("{} at {}/package.json ({})", k.name, k.dir, k.marker);
     let routed = p.shapes.iter().filter(|s| !s.via.is_empty()).count();
-    let status = if routed == 0 {
+    let by_prop = p.shapes.iter().filter(|s| !s.props.is_empty()).count();
+    let status = if by_prop > 0 {
+        if by_prop == p.shapes.len() && routed == 0 {
+            PROP_STATUS
+        } else {
+            PROP_MIXED
+        }
+    } else if routed == 0 {
         PROPOSAL_STATUS
     } else if routed == p.shapes.len() {
         ROUTE_STATUS
@@ -737,11 +776,24 @@ fn evidence_lines(p: &crate::codepairs::CodePair) -> Vec<String> {
         };
         if !s.named {
             // SLICE7 (S7-D3): reached only through the return type of an imported function
-            let imports: Vec<String> = s.via.iter().map(|x| format!("{} imported at {}:{} from {:?}", x.function, p.consumer, x.import_line, x.specifier)).collect();
-            v.push(format!("E4 {} not imported by name; resolved via return type of {}, {}", s.shape, via_text(&s.via), imports.join(", ")));
+            let mut ways = Vec::new();
+            if !s.via.is_empty() {
+                let imports: Vec<String> = s.via.iter().map(|x| format!("{} imported at {}:{} from {:?}", x.function, p.consumer, x.import_line, x.specifier)).collect();
+                ways.push(format!("via return type of {}, {}", via_text(&s.via), imports.join(", ")));
+            }
+            if !s.props.is_empty() {
+                // SLICE8 (R-S8-2): the property, its declaration, and where its type comes from
+                let mut origins: Vec<&str> = s.props.iter().map(|x| x.origin.as_str()).collect();
+                origins.dedup();
+                ways.push(format!("via property {}, {}", prop_text(&s.props), origins.join(", ")));
+            }
+            v.push(format!("E4 {} not imported by name; resolved {}", s.shape, ways.join("; resolved ")));
             continue;
         }
-        let route = if s.via.is_empty() { String::new() } else { format!("; receiver resolved via return type of {}", via_text(&s.via)) };
+        let mut route = if s.via.is_empty() { String::new() } else { format!("; receiver resolved via return type of {}", via_text(&s.via)) };
+        if !s.props.is_empty() {
+            route.push_str(&format!("; receiver resolved via property {}", prop_text(&s.props)));
+        }
         v.push(format!(
             "E4 {} imported at {}:{} from {:?}, resolved to {}{via}{route}",
             s.shape, p.consumer, s.import_line, s.specifier, s.resolved
@@ -778,9 +830,11 @@ pub fn render_manifest_opts(d: &Discovery, full_inventory: bool) -> String {
     s.push_str("# HONEST SCOPE: discovery is HEURISTIC (text patterns, not a parser). Each\n");
     s.push_str("# [[invariant]] block below is a PROPOSAL: a TypeScript shape exported by one\n");
     s.push_str("# workspace package, with at least 2 of its direct fields read in a file of\n");
-    s.push_str("# another, each on a receiver declared as that shape in that file or\n");
-    s.push_str("# assigned from a function imported from the shape's package whose declared\n");
-    s.push_str("# return type is the shape (field writes excluded; types are not inferred).\n");
+    s.push_str("# another, each on a receiver declared as that shape in that file, assigned\n");
+    s.push_str("# from a function imported from the shape's package whose declared return\n");
+    s.push_str("# type is the shape, or read through a property, at most two hops from a\n");
+    s.push_str("# receiver typed in that file, whose declared type is the shape (field\n");
+    s.push_str("# writes excluded; types are not inferred).\n");
     s.push_str("# Review every block before trusting a verdict. Schema files are inventory\n");
     s.push_str("# only. ABSTAIN lines are refusals to propose, not negative findings. Paths\n");
     s.push_str("# are relative to this file.\n\n");

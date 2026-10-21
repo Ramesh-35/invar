@@ -1,0 +1,13 @@
+# mutation: a mixed block given the property-only status line
+# catch: s8_f12_a_mixed_block_carries_the_combined_line
+--- a/crates/invar-falsify/src/init.rs
++++ b/crates/invar-falsify/src/init.rs
+@@ -725,7 +725,7 @@
+     let routed = p.shapes.iter().filter(|s| !s.via.is_empty()).count();
+     let by_prop = p.shapes.iter().filter(|s| !s.props.is_empty()).count();
+     let status = if by_prop > 0 {
+-        if by_prop == p.shapes.len() && routed == 0 {
++        if routed == 0 {
+             PROP_STATUS
+         } else {
+             PROP_MIXED

@@ -1,0 +1,171 @@
+ChatGPTNextWeb__NextChat.invar.toml: blocks +0 -0 changed 0; abstentions removed {} added {}
+  other lines differing: ['# another, each on a receiver declared as that shape in that file, assigned', "# from a function imported from the shape's package whose declared return", '# type is the shape, or read through a property, at most two hops from a', '# receiver typed in that file, whose declared type is the shape (field', '# writes excluded; types are not inferred).', '# another, each on a receiver declared as that shape in that file or', "# assigned from a function imported from the shape's package whose declared", '# return type is the shape (field writes excluded; types are not inferred).']
+Egonex-AI__Understand-Anything.invar.toml: blocks +1 -0 changed 5; abstentions removed {'R6': 7, 'RECV': 5} added {}
+  changed code:types.ts->DomainGraphView.tsx:
+    + # status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+    + # E2 GraphEdge declared at understand-anything-plugin/packages/core/src/types.ts:70
+    + # E4 GraphEdge not imported by name; resolved via property KnowledgeGraph.edges declared in understand-anything-plugin/packages/core/src/types.ts:112, KnowledgeGraph imported at understand-anything-plugin/packages/dashboard/src/components/DomainGraphView.tsx:23 from "@understand-anything/core/types"
+    + # E5 GraphEdge fields read: source (understand-anything-plugin/packages/dashboard/src/components/DomainGraphView.tsx:49), target (understand-anything-plugin/packages/dashboard/src/components/DomainGraphView.tsx:111), weight (understand-anything-plugin/packages/dashboard/src/components/DomainGraphView.tsx:111)
+    + # E5 GraphEdge stoplisted reads: description, type
+    + evidence = "GraphEdge source target weight"
+    - # status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)
+  changed code:types.ts->GraphView.tsx:
+    + # status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+    + # E2 GraphEdge declared at understand-anything-plugin/packages/core/src/types.ts:70
+    + # E4 GraphEdge imported at understand-anything-plugin/packages/dashboard/src/components/GraphView.tsx:27 from "@understand-anything/core/types", resolved to understand-anything-plugin/packages/core/src/types.ts; receiver resolved via property LayerDetailTopology.intraContainer declared in understand-anything-plugin/packages/dashboard/src/components/GraphView.tsx:370
+    + # E5 GraphEdge fields read: source (understand-anything-plugin/packages/dashboard/src/components/GraphView.tsx:479), target (understand-anything-plugin/packages/dashboard/src/components/GraphView.tsx:479)
+    + # E5 GraphEdge stoplisted reads: type
+    + evidence = "GraphEdge source target"
+    - # status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)
+  changed code:types.ts->KnowledgeGraphView.tsx:
+    + # status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+    + # E2 GraphEdge declared at understand-anything-plugin/packages/core/src/types.ts:70
+    + # E2 GraphNode declared at understand-anything-plugin/packages/core/src/types.ts:54
+    + # E4 GraphEdge not imported by name; resolved via property KnowledgeGraph.edges declared in understand-anything-plugin/packages/core/src/types.ts:112, KnowledgeGraph imported at understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx:28 from "@understand-anything/core/types"
+    + # E4 GraphNode not imported by name; resolved via property KnowledgeGraph.nodes declared in understand-anything-plugin/packages/core/src/types.ts:111, KnowledgeGraph imported at understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx:28 from "@understand-anything/core/types"
+    + # E5 GraphEdge fields read: source (understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx:86), target (understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx:87)
+    + # E5 GraphEdge stoplisted reads: type
+    + # E5 GraphNode fields read: complexity (understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx:283), summary (understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx:282), tags (understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx:295)
+    + # E5 GraphNode stoplisted reads: id, name, type
+    + evidence = "GraphEdge source target"
+    + evidence = "GraphNode complexity summary tags"
+    - # status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)
+  changed code:types.ts->NodeInfo.tsx:
+    + # status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+    + # E2 DomainMeta declared at understand-anything-plugin/packages/core/src/types.ts:32
+    + # E2 GraphEdge declared at understand-anything-plugin/packages/core/src/types.ts:70
+    + # E2 KnowledgeMeta declared at understand-anything-plugin/packages/core/src/types.ts:24
+    + # E4 DomainMeta not imported by name; resolved via property GraphNode.domainMeta declared in understand-anything-plugin/packages/core/src/types.ts:64, GraphNode imported at understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:4 from "@understand-anything/core/types"
+    + # E4 GraphEdge not imported by name; resolved via property KnowledgeGraph.edges declared in understand-anything-plugin/packages/core/src/types.ts:112, KnowledgeGraph imported at understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:4 from "@understand-anything/core/types"
+    + # E4 KnowledgeMeta not imported by name; resolved via property GraphNode.knowledgeMeta declared in understand-anything-plugin/packages/core/src/types.ts:65, GraphNode imported at understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:4 from "@understand-anything/core/types"
+    + # E5 DomainMeta fields read: businessRules (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:181), crossDomainInteractions (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:191), entities (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:171), entryPoint (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:231)
+    + # E5 DomainMeta stoplisted reads: (none)
+    + # E5 GraphEdge fields read: source (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:72), target (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:73)
+    + # E5 GraphEdge stoplisted reads: type
+    + # E5 KnowledgeMeta fields read: content (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:142), wikilinks (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:104)
+    + # E5 KnowledgeMeta stoplisted reads: (none)
+    + evidence = "DomainMeta businessRules crossDomainInteractions entities entryPoint"
+    + evidence = "GraphEdge source target"
+    + evidence = "KnowledgeMeta content wikilinks"
+    - # status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)
+  changed code:types.ts->context-builder.ts:
+    + # status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+    + # E2 GraphEdge declared at understand-anything-plugin/packages/core/src/types.ts:70
+    + # E2 GraphNode declared at understand-anything-plugin/packages/core/src/types.ts:54
+    + # E2 ProjectMeta declared at understand-anything-plugin/packages/core/src/types.ts:97
+    + # E4 GraphEdge imported at understand-anything-plugin/src/context-builder.ts:2 from "@understand-anything/core", resolved to understand-anything-plugin/packages/core/src/index.ts, re-exported by barrel understand-anything-plugin/packages/core/src/index.ts:1 from understand-anything-plugin/packages/core/src/types.ts; receiver resolved via property ChatContext.relevantEdges declared in understand-anything-plugin/src/context-builder.ts:15 and KnowledgeGraph.edges declared in understand-anything-plugin/packages/core/src/types.ts:112
+    + # E4 GraphNode imported at understand-anything-plugin/src/context-builder.ts:2 from "@understand-anything/core", resolved to understand-anything-plugin/packages/core/src/index.ts, re-exported by barrel understand-anything-plugin/packages/core/src/index.ts:1 from understand-anything-plugin/packages/core/src/types.ts; receiver resolved via property ChatContext.relevantNodes declared in understand-anything-plugin/src/context-builder.ts:14
+    + # E4 ProjectMeta not imported by name; resolved via property KnowledgeGraph.project declared in understand-anything-plugin/packages/core/src/types.ts:110, KnowledgeGraph imported at understand-anything-plugin/src/context-builder.ts:2 from "@understand-anything/core"
+    + # E5 GraphEdge fields read: source (understand-anything-plugin/src/context-builder.ts:42), target (understand-anything-plugin/src/context-builder.ts:43)
+    + # E5 GraphEdge stoplisted reads: description
+    + # E5 GraphNode fields read: filePath (understand-anything-plugin/src/context-builder.ts:114), languageNotes (understand-anything-plugin/src/context-builder.ts:122), tags (understand-anything-plugin/src/context-builder.ts:119)
+    + # E5 GraphNode stoplisted reads: id
+    + # E5 ProjectMeta fields read: frameworks (understand-anything-plugin/src/context-builder.ts:74), languages (understand-anything-plugin/src/context-builder.ts:73)
+    + # E5 ProjectMeta stoplisted reads: description, name
+    + evidence = "GraphEdge source target"
+    + evidence = "GraphNode filePath languageNotes tags"
+    + evidence = "ProjectMeta frameworks languages"
+    - # status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)
+  other lines differing: ['# another, each on a receiver declared as that shape in that file, assigned', "# from a function imported from the shape's package whose declared return", '# type is the shape, or read through a property, at most two hops from a', '# receiver typed in that file, whose declared type is the shape (field', '# writes excluded; types are not inferred).', 'contracts_proposed = "12"', 'abstentions = "72"', '# SUMMARY packages=7 candidates=73 proposals=12 abstentions=72 inventory=1 status=COMPLETE', '# another, each on a receiver declared as that shape in that file or', "# assigned from a function imported from the shape's package whose declared", '# return type is the shape (field writes excluded; types are not inferred).', 'contracts_proposed = "11"', 'abstentions = "84"', '# SUMMARY packages=7 candidates=73 proposals=11 abstentions=84 inventory=1 status=COMPLETE']
+diegosouzapw__OmniRoute.invar.toml: blocks +0 -0 changed 0; abstentions removed {} added {}
+  other lines differing: ['# another, each on a receiver declared as that shape in that file, assigned', "# from a function imported from the shape's package whose declared return", '# type is the shape, or read through a property, at most two hops from a', '# receiver typed in that file, whose declared type is the shape (field', '# writes excluded; types are not inferred).', '# another, each on a receiver declared as that shape in that file or', "# assigned from a function imported from the shape's package whose declared", '# return type is the shape (field writes excluded; types are not inferred).']
+earendil-works__pi.invar.toml: blocks +9 -0 changed 9; abstentions removed {'R6': 19, 'RECV': 2} added {}
+  changed code:types.ts->agent-session.ts:
+    + # status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+    + # E2 ModelAuth declared at packages/ai/src/auth/types.ts:7
+    + # E4 ModelAuth not imported by name; resolved via property AuthResult.auth declared in packages/ai/src/auth/types.ts:105, AuthResult imported at packages/coding-agent/src/core/agent-session.ts:35 from "@earendil-works/pi-ai/compat"
+    + # E5 ModelAuth fields read: apiKey (packages/coding-agent/src/core/agent-session.ts:552), baseUrl (packages/coding-agent/src/core/agent-session.ts:553), headers (packages/coding-agent/src/core/agent-session.ts:552)
+    + # E5 ModelAuth stoplisted reads: (none)
+    + evidence = "ModelAuth apiKey baseUrl headers"
+    - # status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)
+  changed code:types.ts->cache-stats.ts:
+    + # status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+    + # E2 Usage declared at packages/ai/src/types.ts:451
+    + # E4 Usage not imported by name; resolved via property AssistantMessage.usage declared in packages/ai/src/types.ts:583, AssistantMessage imported at packages/coding-agent/src/core/cache-stats.ts:1 from "@earendil-works/pi-ai"
+    + # E5 Usage fields read: cacheRead (packages/coding-agent/src/core/cache-stats.ts:62), cacheWrite (packages/coding-agent/src/core/cache-stats.ts:62), cost (packages/coding-agent/src/core/cache-stats.ts:78), input (packages/coding-agent/src/core/cache-stats.ts:62)
+    + # E5 Usage stoplisted reads: (none)
+    + evidence = "Usage cacheRead cacheWrite cost input"
+    - # status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)
+  changed code:types.ts->harness-inbox.test.ts:
+    + # status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+    + # E2 Usage declared at packages/ai/src/types.ts:451
+    + # E4 Usage imported at packages/durable/test/harness-inbox.test.ts:5 from "@earendil-works/pi-ai", resolved to packages/ai/src/index.ts, re-exported by barrel packages/ai/src/index.ts:37 from packages/ai/src/types.ts; receiver resolved via property AssistantMessage.usage declared in packages/ai/src/types.ts:583
+    + # E5 Usage fields read: input (packages/durable/test/harness-inbox.test.ts:800), output (packages/durable/test/harness-inbox.test.ts:801), totalTokens (packages/durable/test/harness-inbox.test.ts:802)
+    + # E5 Usage stoplisted reads: (none)
+    + evidence = "Usage input output totalTokens"
+    - # status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)
+  changed code:types.ts->index.ts#2:
+    + # status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+    + # E2 Usage declared at packages/ai/src/types.ts:451
+    + # E4 Usage not imported by name; resolved via property AssistantMessage.usage declared in packages/ai/src/types.ts:583, AssistantMessage imported at packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:26 from "@earendil-works/pi-ai"
+    + # E5 Usage fields read: cacheRead (packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:467), cacheWrite (packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:467), input (packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:467), output (packages/coding-agent/examples/extensions/custom-provider-anthropic/index.ts:467)
+    + # E5 Usage stoplisted reads: (none)
+    + evidence = "Usage cacheRead cacheWrite input output"
+    - # status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)
+  changed code:types.ts->model-runtime.ts:
+    + # status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+    + # E2 ModelAuth declared at packages/ai/src/auth/types.ts:7
+    + # E2 ProviderAuth declared at packages/ai/src/auth/types.ts:252
+    + # E4 ModelAuth not imported by name; resolved via property AuthResult.auth declared in packages/ai/src/auth/types.ts:105, AuthResult imported at packages/coding-agent/src/core/model-runtime.ts:2 from "@earendil-works/pi-ai"
+    + # E4 ProviderAuth not imported by name; resolved via property Provider.auth declared in packages/ai/src/models.ts:169, Provider imported at packages/coding-agent/src/core/model-runtime.ts:2 from "@earendil-works/pi-ai"
+    + # E5 ModelAuth fields read: apiKey (packages/coding-agent/src/core/model-runtime.ts:692), baseUrl (packages/coding-agent/src/core/model-runtime.ts:686), headers (packages/coding-agent/src/core/model-runtime.ts:574)
+    + # E5 ModelAuth stoplisted reads: (none)
+    + # E5 ProviderAuth fields read: apiKey (packages/coding-agent/src/core/model-runtime.ts:900), oauth (packages/coding-agent/src/core/model-runtime.ts:900)
+    + # E5 ProviderAuth stoplisted reads: (none)
+    + evidence = "ModelAuth apiKey baseUrl headers"
+    + evidence = "ProviderAuth apiKey oauth"
+    - # status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)
+  changed code:types.ts->nested-tool-calls.ts:
+    + # status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+    + # E2 AgentToolResult declared at packages/agent/src/types.ts:424
+    + # E4 AgentToolResult imported at packages/coding-agent/src/core/nested-tool-calls.ts:11 from "@earendil-works/pi-agent-core", resolved to packages/agent/src/index.ts, re-exported by barrel packages/agent/src/index.ts:5 from packages/agent/src/types.ts; receiver resolved via property AgentToolCallOutcome.result declared in packages/agent/src/types.ts:451
+    + # E5 AgentToolResult fields read: content (packages/coding-agent/src/core/nested-tool-calls.ts:155), usage (packages/coding-agent/src/core/nested-tool-calls.ts:239)
+    + # E5 AgentToolResult stoplisted reads: (none)
+    + evidence = "AgentToolResult content usage"
+    - # status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)
+  changed code:types.ts->provider-composer.ts:
+    + # status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+    + # E2 ProviderAuth declared at packages/ai/src/auth/types.ts:252
+    + # E4 ProviderAuth not imported by name; resolved via property Provider.auth declared in packages/ai/src/models.ts:169, Provider imported at packages/coding-agent/src/core/provider-composer.ts:1 from "@earendil-works/pi-ai"
+    + # E5 ProviderAuth fields read: apiKey (packages/coding-agent/src/core/provider-composer.ts:423), oauth (packages/coding-agent/src/core/provider-composer.ts:425)
+    + # E5 ProviderAuth stoplisted reads: (none)
+    + evidence = "ProviderAuth apiKey oauth"
+    - # status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)
+  changed code:types.ts->system-order-cache-e2e.test.ts:
+    + # status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+    + # E2 Usage declared at packages/ai/src/types.ts:451
+    + # E4 Usage not imported by name; resolved via property AssistantMessage.usage declared in packages/ai/src/types.ts:583, AssistantMessage imported at packages/durable/test/system-order-cache-e2e.test.ts:1 from "@earendil-works/pi-ai"
+    + # E5 Usage fields read: cacheRead (packages/durable/test/system-order-cache-e2e.test.ts:122), cacheWrite (packages/durable/test/system-order-cache-e2e.test.ts:122), input (packages/durable/test/system-order-cache-e2e.test.ts:122)
+    + # E5 Usage stoplisted reads: (none)
+    + evidence = "Usage cacheRead cacheWrite input"
+    - # status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)
+  changed code:types.ts->test-harness.test.ts:
+    + # status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+    + # E2 Usage declared at packages/ai/src/types.ts:451
+    + # E4 Usage not imported by name; resolved via property AssistantMessage.usage declared in packages/ai/src/types.ts:583, AssistantMessage imported at packages/coding-agent/test/test-harness.test.ts:7 from "@earendil-works/pi-ai"
+    + # E5 Usage fields read: input (packages/coding-agent/test/test-harness.test.ts:131), output (packages/coding-agent/test/test-harness.test.ts:132)
+    + # E5 Usage stoplisted reads: (none)
+    + evidence = "Usage input output"
+    - # status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)
+  other lines differing: ['# another, each on a receiver declared as that shape in that file, assigned', "# from a function imported from the shape's package whose declared return", '# type is the shape, or read through a property, at most two hops from a', '# receiver typed in that file, whose declared type is the shape (field', '# writes excluded; types are not inferred).', 'contracts_proposed = "108"', 'abstentions = "2922"', '# SUMMARY packages=16 candidates=2554 proposals=108 abstentions=2922 inventory=4 status=COMPLETE', '# another, each on a receiver declared as that shape in that file or', "# assigned from a function imported from the shape's package whose declared", '# return type is the shape (field writes excluded; types are not inferred).', 'contracts_proposed = "99"', 'abstentions = "2943"', '# SUMMARY packages=16 candidates=2554 proposals=99 abstentions=2943 inventory=4 status=COMPLETE']
+excalidraw__excalidraw.invar.toml: blocks +0 -0 changed 1; abstentions removed {'R6': 1} added {}
+  changed code:renderElement.ts->staticScene.ts:
+    + # status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+    + # E2 RenderPositionOffset declared at packages/element/src/renderElement.ts:118
+    + # E4 RenderPositionOffset not imported by name; resolved via property ElementRenderState.offset declared in packages/element/src/renderElement.ts:154, ElementRenderState imported at packages/excalidraw/renderer/staticScene.ts:30 from "@excalidraw/element"
+    + # E5 RenderPositionOffset fields read: x (packages/excalidraw/renderer/staticScene.ts:212), y (packages/excalidraw/renderer/staticScene.ts:213)
+    + # E5 RenderPositionOffset stoplisted reads: (none)
+    + evidence = "RenderPositionOffset x y"
+    - # status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)
+  other lines differing: ['# another, each on a receiver declared as that shape in that file, assigned', "# from a function imported from the shape's package whose declared return", '# type is the shape, or read through a property, at most two hops from a', '# receiver typed in that file, whose declared type is the shape (field', '# writes excluded; types are not inferred).', 'abstentions = "1705"', '# SUMMARY packages=10 candidates=3866 proposals=28 abstentions=1705 inventory=0 status=COMPLETE', '# another, each on a receiver declared as that shape in that file or', "# assigned from a function imported from the shape's package whose declared", '# return type is the shape (field writes excluded; types are not inferred).', 'abstentions = "1706"', '# SUMMARY packages=10 candidates=3866 proposals=28 abstentions=1706 inventory=0 status=COMPLETE']
+freeCodeCamp__freeCodeCamp.invar.toml: blocks +0 -0 changed 0; abstentions removed {} added {}
+  other lines differing: ['# another, each on a receiver declared as that shape in that file, assigned', "# from a function imported from the shape's package whose declared return", '# type is the shape, or read through a property, at most two hops from a', '# receiver typed in that file, whose declared type is the shape (field', '# writes excluded; types are not inferred).', '# another, each on a receiver declared as that shape in that file or', "# assigned from a function imported from the shape's package whose declared", '# return type is the shape (field writes excluded; types are not inferred).']
+microsoft__playwright.invar.toml: blocks +0 -0 changed 0; abstentions removed {} added {}
+  other lines differing: ['# another, each on a receiver declared as that shape in that file, assigned', "# from a function imported from the shape's package whose declared return", '# type is the shape, or read through a property, at most two hops from a', '# receiver typed in that file, whose declared type is the shape (field', '# writes excluded; types are not inferred).', '# another, each on a receiver declared as that shape in that file or', "# assigned from a function imported from the shape's package whose declared", '# return type is the shape (field writes excluded; types are not inferred).']
+puppeteer__puppeteer.invar.toml: blocks +0 -0 changed 0; abstentions removed {} added {}
+  other lines differing: ['# another, each on a receiver declared as that shape in that file, assigned', "# from a function imported from the shape's package whose declared return", '# type is the shape, or read through a property, at most two hops from a', '# receiver typed in that file, whose declared type is the shape (field', '# writes excluded; types are not inferred).', '# another, each on a receiver declared as that shape in that file or', "# assigned from a function imported from the shape's package whose declared", '# return type is the shape (field writes excluded; types are not inferred).']
+thedotmack__claude-mem.invar.toml: blocks +0 -0 changed 0; abstentions removed {} added {}
+  other lines differing: ['# another, each on a receiver declared as that shape in that file, assigned', "# from a function imported from the shape's package whose declared return", '# type is the shape, or read through a property, at most two hops from a', '# receiver typed in that file, whose declared type is the shape (field', '# writes excluded; types are not inferred).', '# another, each on a receiver declared as that shape in that file or', "# assigned from a function imported from the shape's package whose declared", '# return type is the shape (field writes excluded; types are not inferred).']
+vuejs__vue.invar.toml: blocks +0 -0 changed 0; abstentions removed {} added {}
+  other lines differing: ['# another, each on a receiver declared as that shape in that file, assigned', "# from a function imported from the shape's package whose declared return", '# type is the shape, or read through a property, at most two hops from a', '# receiver typed in that file, whose declared type is the shape (field', '# writes excluded; types are not inferred).', '# another, each on a receiver declared as that shape in that file or', "# assigned from a function imported from the shape's package whose declared", '# return type is the shape (field writes excluded; types are not inferred).']
+total {'add': 10, 'rem': 0, 'chg': 15}

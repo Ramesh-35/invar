@@ -1,0 +1,13 @@
+# mutation: an alias of the property value ties nothing
+# catch: s8_f2_an_alias_of_the_property_value_proposes
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1346,7 +1346,7 @@
+                     let ends = j >= all.len()
+                         || matches!(&all[j].0, Tok::P(b';' | b',' | b')'))
+                         || m[all[j - 1].1..all[j].1].contains(&b'\n');
+-                    if let (true, Some(y)) = (ends, t.id(k - 2)) {
++                    if let (false, Some(y)) = (ends, t.id(k - 2)) {
+                         vals.push((y.to_string(), pp.end_arr));
+                     }
+                 }

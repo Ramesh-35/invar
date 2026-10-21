@@ -1,0 +1,12 @@
+# mutation: the first `Readonly<{` on the line opened, wherever it is
+# catch: l2_f6_a_readonly_member_type_is_not_a_body
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -358,6 +358,7 @@
+             _ => {}
+         }
+     }
++    let open = t.find("Readonly<{").map(|i| i + "Readonly<{".len()).or(open);
+     let Some(start) = open else { return Vec::new() };
+     let mut out = Vec::new();
+     let (mut d, mut seg) = (0i32, start);

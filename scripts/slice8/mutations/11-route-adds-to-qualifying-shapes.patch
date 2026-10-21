@@ -1,0 +1,13 @@
+# mutation: the property route consulted for a shape that already qualifies
+# catch: s8_f13_the_route_never_adds_reads_to_a_shape_that_already_qualifies
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -2735,7 +2735,7 @@
+                                 }
+                                 // SLICE8: property paths, only for a shape that still does not qualify.
+                                 let mut props = Vec::new();
+-                                if fields.len() < MIN_FIELDS {
++                                if fields.len() < MIN_FIELDS || true {
+                                     let paths = pidx.paths(f, &decl.name, &d);
+                                     if !paths.is_empty() {
+                                         let avail = route_fns(p, name, &imported_locals, &pkg_funcs, &pkg_shape_names);

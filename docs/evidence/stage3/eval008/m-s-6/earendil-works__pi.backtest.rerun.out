@@ -1,0 +1,299 @@
+invar backtest (invar.toml, 18 contract(s), depth 50)
+note: shallow history; the oldest replayed commit is the shallow boundary, and its date is the cutoff, not a change
+
+code:faux.ts->harness-generation-recovery.test.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.state
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderState.callCount
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderState.deferredFetchCount
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->harness-generation.test.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.getPendingResponseCount
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.state
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderState.callCount
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderState.cancelledDeferred
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderState.deferredFetchCount
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->harness-inbox.test.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.state
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->harness-input-entries.test.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.state
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->harness-tools.test.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.state
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:types.ts->agent-session.ts: packages/ai/src/auth/types.ts (1 commit(s) replayed)
+  AuthResult.auth
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AuthResult.env
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ModelAuth.apiKey
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ModelAuth.baseUrl
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ModelAuth.headers
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:types.ts->auth-command.ts: packages/ai/src/auth/types.ts (1 commit(s) replayed)
+  ModelAuth.apiKey
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ModelAuth.headers
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:types.ts->bug-report.ts#2: packages/ai/src/auth/types.ts (1 commit(s) replayed)
+  ProviderAuth.apiKey
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ProviderAuth.oauth
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:types.ts->cache-stats.ts: packages/ai/src/types.ts (4 commit(s) replayed)
+  AssistantMessage.model
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AssistantMessage.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AssistantMessage.timestamp
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AssistantMessage.usage
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Usage.cacheRead
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Usage.cacheWrite
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Usage.cost
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Usage.input
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:types.ts->custom-footer.ts: packages/ai/src/types.ts (4 commit(s) replayed)
+  Usage.cost
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Usage.input
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Usage.output
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:types.ts->harness-inbox.test.ts: packages/ai/src/types.ts (4 commit(s) replayed)
+  AssistantMessage.role
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AssistantMessage.stopReason
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AssistantMessage.usage
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Usage.input
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Usage.output
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Usage.totalTokens
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:types.ts->index.ts#2: packages/ai/src/types.ts (4 commit(s) replayed)
+  AssistantMessage.content
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AssistantMessage.errorMessage
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AssistantMessage.stopReason
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AssistantMessage.usage
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Model.maxTokens
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Model.reasoning
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  SimpleStreamOptions.reasoning
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  SimpleStreamOptions.thinkingBudgets
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Usage.cacheRead
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Usage.cacheWrite
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Usage.input
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Usage.output
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:types.ts->model-runtime.ts: packages/ai/src/auth/types.ts (1 commit(s) replayed)
+  AuthResult.auth
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AuthResult.env
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ModelAuth.apiKey
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ModelAuth.baseUrl
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ModelAuth.headers
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ProviderAuth.apiKey
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ProviderAuth.oauth
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:types.ts->nested-tool-calls.ts: packages/agent/src/types.ts (1 commit(s) replayed)
+  AgentToolCallOutcome.durationMs
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AgentToolCallOutcome.isError
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AgentToolResult.content
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AgentToolResult.usage
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:types.ts->provider-composer.ts: packages/ai/src/auth/types.ts (1 commit(s) replayed)
+  AuthResult.auth
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AuthResult.env
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ModelAuth.apiKey
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ModelAuth.headers
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ProviderAuth.apiKey
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ProviderAuth.oauth
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:types.ts->system-order-cache-e2e.test.ts: packages/ai/src/types.ts (4 commit(s) replayed)
+  AssistantMessage.errorMessage
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AssistantMessage.role
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AssistantMessage.stopReason
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AssistantMessage.usage
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Usage.cacheRead
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Usage.cacheWrite
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Usage.input
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:types.ts->test-harness.test.ts: packages/ai/src/types.ts (4 commit(s) replayed)
+  AssistantMessage.content
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AssistantMessage.stopReason
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AssistantMessage.usage
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Usage.input
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  Usage.output
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:types.ts->virtual-models.test.ts: packages/ai/src/types.ts (4 commit(s) replayed)
+  AssistantMessage.errorMessage
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  AssistantMessage.stopReason
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+Timelines replay today's extraction over past file contents. They are
+not replayed verdicts: waivers, selectors and samples are today's, and a
+past consumer may not have read the field yet. Unreadable commits are
+stated, never guessed.
+exit 0

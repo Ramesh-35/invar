@@ -1,0 +1,13 @@
+# mutation: the property path omitted from E4 provenance
+# catch: s8_f1_one_hop_proposes
+--- a/crates/invar-falsify/src/init.rs
++++ b/crates/invar-falsify/src/init.rs
+@@ -713,7 +713,7 @@
+ pub const PROP_MIXED: &str = "status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)";
+ 
+ fn prop_text(ps: &[crate::codepairs::Prop]) -> String {
+-    ps.iter().map(|p| format!("{} declared in {}:{}", p.path, p.decl_file, p.decl_line)).collect::<Vec<_>>().join(" and ")
++    ps.iter().map(|p| format!("declared in {}:{}", p.decl_file, p.decl_line)).collect::<Vec<_>>().join(" and ")
+ }
+ 
+ fn via_text(vs: &[crate::codepairs::Via]) -> String {

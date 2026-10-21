@@ -1,0 +1,16 @@
+You are an independent code reviewer adjudicating 20 candidate "contracts" in open-source TypeScript monorepos. You have no stake in any tool; judge only what the source code shows. Work alone; do not read any file whose name starts with "adjudicator-", any file outside the packet and the repositories named below, or any tool's source code.
+
+WHAT EACH ITEM CLAIMS: a TypeScript shape (an interface or object type) declared in one file is used in another file (the "consumer") WITHOUT the consumer importing the shape by name, and the consumer reads at least two of the listed fields from a value of that shape. A typical way this happens: the consumer has a variable typed as some other type T, and T has a property whose declared type is the shape, so `x.prop.field` reads a field of the shape. The claim may be wrong: the reads may be on unrelated objects with same-named properties.
+
+THE RUBRIC (apply exactly):
+An item is TRUE iff the consumer actually reads at least two of the listed fields from a value whose declared type is the named shape (directly, through a property typed as the shape, through an element of an array of it, or through a variable assigned such a value), so that renaming or removing one of those fields in the shape's declaration without updating the consumer is a bug a reviewer would flag.
+NOT TRUE if fewer than two of the listed fields are read from such a value, if the reads are on another type, or if you cannot establish the link. UNSURE counts as NOT TRUE. Be conservative.
+
+INPUTS:
+- The packet: /tmp/claude-0/-home-claude/0ad2ce1c-afee-57af-87cf-f7a4a128779f/scratchpad/s1/s8adj/packet.md . It lists 20 items as "### <repo> <n>: <shape> (<declaration file>:<line>) read in <consumer file>", the fields to check, the declaration, and one sample line per field (the sample line is only a hint: it may not be the relevant read).
+- Full source of each repository, read-only, at /tmp/claude-0/-home-claude/0ad2ce1c-afee-57af-87cf-f7a4a128779f/scratchpad/s1/e2c/<repo>/ ; packet paths are relative to that directory.
+Open the consumer file, find where each listed field is read, and work out the declared type of the value it is read from (follow the variable to its declaration, and follow property types into other files when needed). Use Read and Grep only; do not modify anything.
+
+OUTPUT: write a tab-separated file to /tmp/claude-0/-home-claude/0ad2ce1c-afee-57af-87cf-f7a4a128779f/scratchpad/s1/s8adj/adjudicator-B.tsv with a header line
+repo	n	shape	verdict	sentence
+and exactly one line per item (20 lines), in packet order; verdict is TRUE or NOT TRUE; sentence is one plain sentence of evidence naming the value you checked and how it is typed. Do not use em dash characters anywhere. When finished, reply with only: the count of TRUE, the count of NOT TRUE, and the path of the file.

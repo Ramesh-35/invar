@@ -1,0 +1,12 @@
+# mutation: a type the resolver finds twice is taken from its first declaration (CM-S8-2)
+# catch: s8_f6_an_ambiguous_type_ties_nothing
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1183,6 +1183,7 @@
+             let (_, Res::File(target)) = self.ctx.resolve(&imp.spec, file, false) else { return None };
+             match find_shape(self.ctx, self.infos, orig, &target) {
+                 Found::Decl { file: d, decl, .. } if matches!(decl.kind, Kind::Object(_)) => Some((d, decl)),
++                Found::Ambig(fs) => fs.first().and_then(|g| self.infos.get(g).and_then(|gi| gi.decls.iter().find(|d| d.name == **orig).cloned()).map(|d| (g.clone(), d))),
+                 _ => None,
+             }
+         });

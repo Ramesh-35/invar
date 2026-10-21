@@ -218,6 +218,11 @@ fn s5_n1_a_typed_proposal_changes_only_the_s5_d4_text() {
         .replace(
             "# workspace package, imported by name in another, with at least 2 of its\n# direct fields read there, each on a receiver declared as that shape in\n# the consumer file (field writes excluded; types are not inferred).\n",
             "# workspace package, with at least 2 of its direct fields read in a file of\n# another, each on a receiver declared as that shape in that file or\n# assigned from a function imported from the shape's package whose declared\n# return type is the shape (field writes excluded; types are not inferred).\n",
+        )
+        // S8-D3 (INIT-DISCOVERY-SLICE8): the header sentence, and nothing else.
+        .replace(
+            "# another, each on a receiver declared as that shape in that file or\n# assigned from a function imported from the shape's package whose declared\n# return type is the shape (field writes excluded; types are not inferred).\n",
+            "# another, each on a receiver declared as that shape in that file, assigned\n# from a function imported from the shape's package whose declared return\n# type is the shape, or read through a property, at most two hops from a\n# receiver typed in that file, whose declared type is the shape (field\n# writes excluded; types are not inferred).\n",
         );
     assert_ne!(want, N1_SLICE4);
     assert_eq!(o.raw, want);

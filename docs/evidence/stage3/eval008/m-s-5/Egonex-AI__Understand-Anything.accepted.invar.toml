@@ -1,0 +1,172 @@
+# PROPOSED code:types.ts->DomainGraphView.tsx
+# status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @understand-anything/core at understand-anything-plugin/packages/core/package.json (pnpm-workspace.yaml entry "understand-anything-plugin/packages/*")
+# E2 GraphEdge declared at understand-anything-plugin/packages/core/src/types.ts:70
+# E2 GraphNode declared at understand-anything-plugin/packages/core/src/types.ts:54
+# E2 KnowledgeGraph declared at understand-anything-plugin/packages/core/src/types.ts:107
+# E3 consumer package @understand-anything/dashboard at understand-anything-plugin/packages/dashboard/package.json (pnpm-workspace.yaml entry "understand-anything-plugin/packages/*")
+# E4 GraphEdge not imported by name; resolved via property KnowledgeGraph.edges declared in understand-anything-plugin/packages/core/src/types.ts:112, KnowledgeGraph imported at understand-anything-plugin/packages/dashboard/src/components/DomainGraphView.tsx:23 from "@understand-anything/core/types"
+# E4 GraphNode imported at understand-anything-plugin/packages/dashboard/src/components/DomainGraphView.tsx:23 from "@understand-anything/core/types", resolved to understand-anything-plugin/packages/core/src/types.ts
+# E4 KnowledgeGraph imported at understand-anything-plugin/packages/dashboard/src/components/DomainGraphView.tsx:23 from "@understand-anything/core/types", resolved to understand-anything-plugin/packages/core/src/types.ts
+# E5 GraphEdge fields read: source (understand-anything-plugin/packages/dashboard/src/components/DomainGraphView.tsx:49), target (understand-anything-plugin/packages/dashboard/src/components/DomainGraphView.tsx:111), weight (understand-anything-plugin/packages/dashboard/src/components/DomainGraphView.tsx:111)
+# E5 GraphEdge stoplisted reads: description, type
+# E5 GraphNode fields read: domainMeta (understand-anything-plugin/packages/dashboard/src/components/DomainGraphView.tsx:32), filePath (understand-anything-plugin/packages/dashboard/src/components/DomainGraphView.tsx:148), summary (understand-anything-plugin/packages/dashboard/src/components/DomainGraphView.tsx:57)
+# E5 GraphNode stoplisted reads: id, name
+# E5 KnowledgeGraph fields read: edges (understand-anything-plugin/packages/dashboard/src/components/DomainGraphView.tsx:47), nodes (understand-anything-plugin/packages/dashboard/src/components/DomainGraphView.tsx:43)
+# E5 KnowledgeGraph stoplisted reads: (none)
+# E6 pair understand-anything-plugin/packages/core/src/types.ts -> understand-anything-plugin/packages/dashboard/src/components/DomainGraphView.tsx
+# category: production
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->DomainGraphView.tsx"
+producer = "understand-anything-plugin/packages/core/src/types.ts"
+consumer = "understand-anything-plugin/packages/dashboard/src/components/DomainGraphView.tsx"
+evidence = "GraphEdge source target weight"
+evidence = "GraphNode domainMeta filePath summary"
+evidence = "KnowledgeGraph edges nodes"
+
+# PROPOSED code:types.ts->GraphView.tsx
+# status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @understand-anything/core at understand-anything-plugin/packages/core/package.json (pnpm-workspace.yaml entry "understand-anything-plugin/packages/*")
+# E2 GraphEdge declared at understand-anything-plugin/packages/core/src/types.ts:70
+# E2 GraphNode declared at understand-anything-plugin/packages/core/src/types.ts:54
+# E3 consumer package @understand-anything/dashboard at understand-anything-plugin/packages/dashboard/package.json (pnpm-workspace.yaml entry "understand-anything-plugin/packages/*")
+# E4 GraphEdge imported at understand-anything-plugin/packages/dashboard/src/components/GraphView.tsx:27 from "@understand-anything/core/types", resolved to understand-anything-plugin/packages/core/src/types.ts; receiver resolved via property LayerDetailTopology.intraContainer declared in understand-anything-plugin/packages/dashboard/src/components/GraphView.tsx:370
+# E4 GraphNode imported at understand-anything-plugin/packages/dashboard/src/components/GraphView.tsx:27 from "@understand-anything/core/types", resolved to understand-anything-plugin/packages/core/src/types.ts
+# E5 GraphEdge fields read: source (understand-anything-plugin/packages/dashboard/src/components/GraphView.tsx:479), target (understand-anything-plugin/packages/dashboard/src/components/GraphView.tsx:479)
+# E5 GraphEdge stoplisted reads: type
+# E5 GraphNode fields read: complexity (understand-anything-plugin/packages/dashboard/src/components/GraphView.tsx:570), filePath (understand-anything-plugin/packages/dashboard/src/components/GraphView.tsx:567), summary (understand-anything-plugin/packages/dashboard/src/components/GraphView.tsx:569), tags (understand-anything-plugin/packages/dashboard/src/components/GraphView.tsx:571)
+# E5 GraphNode stoplisted reads: id, name, type
+# E6 pair understand-anything-plugin/packages/core/src/types.ts -> understand-anything-plugin/packages/dashboard/src/components/GraphView.tsx
+# category: production
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->GraphView.tsx"
+producer = "understand-anything-plugin/packages/core/src/types.ts"
+consumer = "understand-anything-plugin/packages/dashboard/src/components/GraphView.tsx"
+evidence = "GraphEdge source target"
+evidence = "GraphNode complexity filePath summary tags"
+
+# PROPOSED code:types.ts->KnowledgeGraphView.tsx
+# status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @understand-anything/core at understand-anything-plugin/packages/core/package.json (pnpm-workspace.yaml entry "understand-anything-plugin/packages/*")
+# E2 GraphEdge declared at understand-anything-plugin/packages/core/src/types.ts:70
+# E2 GraphNode declared at understand-anything-plugin/packages/core/src/types.ts:54
+# E2 KnowledgeGraph declared at understand-anything-plugin/packages/core/src/types.ts:107
+# E3 consumer package @understand-anything/dashboard at understand-anything-plugin/packages/dashboard/package.json (pnpm-workspace.yaml entry "understand-anything-plugin/packages/*")
+# E4 GraphEdge not imported by name; resolved via property KnowledgeGraph.edges declared in understand-anything-plugin/packages/core/src/types.ts:112, KnowledgeGraph imported at understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx:28 from "@understand-anything/core/types"
+# E4 GraphNode not imported by name; resolved via property KnowledgeGraph.nodes declared in understand-anything-plugin/packages/core/src/types.ts:111, KnowledgeGraph imported at understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx:28 from "@understand-anything/core/types"
+# E4 KnowledgeGraph imported at understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx:28 from "@understand-anything/core/types", resolved to understand-anything-plugin/packages/core/src/types.ts
+# E5 GraphEdge fields read: source (understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx:86), target (understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx:87)
+# E5 GraphEdge stoplisted reads: type
+# E5 GraphNode fields read: complexity (understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx:283), summary (understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx:282), tags (understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx:295)
+# E5 GraphNode stoplisted reads: id, name, type
+# E5 KnowledgeGraph fields read: edges (understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx:85), layers (understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx:91), nodes (understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx:100)
+# E5 KnowledgeGraph stoplisted reads: (none)
+# E6 pair understand-anything-plugin/packages/core/src/types.ts -> understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx
+# category: production
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->KnowledgeGraphView.tsx"
+producer = "understand-anything-plugin/packages/core/src/types.ts"
+consumer = "understand-anything-plugin/packages/dashboard/src/components/KnowledgeGraphView.tsx"
+evidence = "GraphEdge source target"
+evidence = "GraphNode complexity summary tags"
+evidence = "KnowledgeGraph edges layers nodes"
+
+# PROPOSED code:types.ts->NodeInfo.tsx
+# status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @understand-anything/core at understand-anything-plugin/packages/core/package.json (pnpm-workspace.yaml entry "understand-anything-plugin/packages/*")
+# E2 DomainMeta declared at understand-anything-plugin/packages/core/src/types.ts:32
+# E2 GraphEdge declared at understand-anything-plugin/packages/core/src/types.ts:70
+# E2 GraphNode declared at understand-anything-plugin/packages/core/src/types.ts:54
+# E2 KnowledgeGraph declared at understand-anything-plugin/packages/core/src/types.ts:107
+# E2 KnowledgeMeta declared at understand-anything-plugin/packages/core/src/types.ts:24
+# E3 consumer package @understand-anything/dashboard at understand-anything-plugin/packages/dashboard/package.json (pnpm-workspace.yaml entry "understand-anything-plugin/packages/*")
+# E4 DomainMeta not imported by name; resolved via property GraphNode.domainMeta declared in understand-anything-plugin/packages/core/src/types.ts:64, GraphNode imported at understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:4 from "@understand-anything/core/types"
+# E4 GraphEdge not imported by name; resolved via property KnowledgeGraph.edges declared in understand-anything-plugin/packages/core/src/types.ts:112, KnowledgeGraph imported at understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:4 from "@understand-anything/core/types"
+# E4 GraphNode imported at understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:4 from "@understand-anything/core/types", resolved to understand-anything-plugin/packages/core/src/types.ts
+# E4 KnowledgeGraph imported at understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:4 from "@understand-anything/core/types", resolved to understand-anything-plugin/packages/core/src/types.ts
+# E4 KnowledgeMeta not imported by name; resolved via property GraphNode.knowledgeMeta declared in understand-anything-plugin/packages/core/src/types.ts:65, GraphNode imported at understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:4 from "@understand-anything/core/types"
+# E5 DomainMeta fields read: businessRules (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:181), crossDomainInteractions (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:191), entities (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:171), entryPoint (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:231)
+# E5 DomainMeta stoplisted reads: (none)
+# E5 GraphEdge fields read: source (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:72), target (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:73)
+# E5 GraphEdge stoplisted reads: type
+# E5 GraphNode fields read: complexity (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:332), domainMeta (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:161), figmaMeta (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:56), filePath (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:261), knowledgeMeta (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:68), languageNotes (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:433), lineRange (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:268), summary (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:405), tags (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:459)
+# E5 GraphNode stoplisted reads: id, name, type
+# E5 KnowledgeGraph fields read: edges (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:71), nodes (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:73)
+# E5 KnowledgeGraph stoplisted reads: (none)
+# E5 KnowledgeMeta fields read: content (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:142), wikilinks (understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx:104)
+# E5 KnowledgeMeta stoplisted reads: (none)
+# E6 pair understand-anything-plugin/packages/core/src/types.ts -> understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx
+# category: production
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->NodeInfo.tsx"
+producer = "understand-anything-plugin/packages/core/src/types.ts"
+consumer = "understand-anything-plugin/packages/dashboard/src/components/NodeInfo.tsx"
+evidence = "DomainMeta businessRules crossDomainInteractions entities entryPoint"
+evidence = "GraphEdge source target"
+evidence = "GraphNode complexity domainMeta figmaMeta filePath knowledgeMeta languageNotes lineRange summary tags"
+evidence = "KnowledgeGraph edges nodes"
+evidence = "KnowledgeMeta content wikilinks"
+
+# PROPOSED code:types.ts->context-builder.ts
+# status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file, assigned from an imported function's declared return type, or reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @understand-anything/core at understand-anything-plugin/packages/core/package.json (pnpm-workspace.yaml entry "understand-anything-plugin/packages/*")
+# E2 GraphEdge declared at understand-anything-plugin/packages/core/src/types.ts:70
+# E2 GraphNode declared at understand-anything-plugin/packages/core/src/types.ts:54
+# E2 KnowledgeGraph declared at understand-anything-plugin/packages/core/src/types.ts:107
+# E2 ProjectMeta declared at understand-anything-plugin/packages/core/src/types.ts:97
+# E3 consumer package @understand-anything/skill at understand-anything-plugin/package.json (pnpm-workspace.yaml entry "understand-anything-plugin")
+# E4 GraphEdge imported at understand-anything-plugin/src/context-builder.ts:2 from "@understand-anything/core", resolved to understand-anything-plugin/packages/core/src/index.ts, re-exported by barrel understand-anything-plugin/packages/core/src/index.ts:1 from understand-anything-plugin/packages/core/src/types.ts; receiver resolved via property ChatContext.relevantEdges declared in understand-anything-plugin/src/context-builder.ts:15 and KnowledgeGraph.edges declared in understand-anything-plugin/packages/core/src/types.ts:112
+# E4 GraphNode imported at understand-anything-plugin/src/context-builder.ts:2 from "@understand-anything/core", resolved to understand-anything-plugin/packages/core/src/index.ts, re-exported by barrel understand-anything-plugin/packages/core/src/index.ts:1 from understand-anything-plugin/packages/core/src/types.ts; receiver resolved via property ChatContext.relevantNodes declared in understand-anything-plugin/src/context-builder.ts:14
+# E4 KnowledgeGraph imported at understand-anything-plugin/src/context-builder.ts:2 from "@understand-anything/core", resolved to understand-anything-plugin/packages/core/src/index.ts, re-exported by barrel understand-anything-plugin/packages/core/src/index.ts:1 from understand-anything-plugin/packages/core/src/types.ts
+# E4 ProjectMeta not imported by name; resolved via property KnowledgeGraph.project declared in understand-anything-plugin/packages/core/src/types.ts:110, KnowledgeGraph imported at understand-anything-plugin/src/context-builder.ts:2 from "@understand-anything/core"
+# E5 GraphEdge fields read: source (understand-anything-plugin/src/context-builder.ts:42), target (understand-anything-plugin/src/context-builder.ts:43)
+# E5 GraphEdge stoplisted reads: description
+# E5 GraphNode fields read: filePath (understand-anything-plugin/src/context-builder.ts:114), languageNotes (understand-anything-plugin/src/context-builder.ts:122), tags (understand-anything-plugin/src/context-builder.ts:119)
+# E5 GraphNode stoplisted reads: id
+# E5 KnowledgeGraph fields read: edges (understand-anything-plugin/src/context-builder.ts:41), layers (understand-anything-plugin/src/context-builder.ts:66), nodes (understand-anything-plugin/src/context-builder.ts:33), project (understand-anything-plugin/src/context-builder.ts:71)
+# E5 KnowledgeGraph stoplisted reads: (none)
+# E5 ProjectMeta fields read: frameworks (understand-anything-plugin/src/context-builder.ts:74), languages (understand-anything-plugin/src/context-builder.ts:73)
+# E5 ProjectMeta stoplisted reads: description, name
+# E6 pair understand-anything-plugin/packages/core/src/types.ts -> understand-anything-plugin/src/context-builder.ts
+# category: production
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->context-builder.ts"
+producer = "understand-anything-plugin/packages/core/src/types.ts"
+consumer = "understand-anything-plugin/src/context-builder.ts"
+evidence = "GraphEdge source target"
+evidence = "GraphNode filePath languageNotes tags"
+evidence = "KnowledgeGraph edges layers nodes project"
+evidence = "ProjectMeta frameworks languages"
+
+# PROPOSED code:types.ts->diff-analyzer.ts
+# status: PROPOSED (heuristic; receiver reached through a property declared as the shape, at most two hops; field writes excluded; types are not inferred)
+# E1 producer package @understand-anything/core at understand-anything-plugin/packages/core/package.json (pnpm-workspace.yaml entry "understand-anything-plugin/packages/*")
+# E2 GraphEdge declared at understand-anything-plugin/packages/core/src/types.ts:70
+# E2 GraphNode declared at understand-anything-plugin/packages/core/src/types.ts:54
+# E3 consumer package @understand-anything/skill at understand-anything-plugin/package.json (pnpm-workspace.yaml entry "understand-anything-plugin")
+# E4 GraphEdge imported at understand-anything-plugin/src/diff-analyzer.ts:1 from "@understand-anything/core", resolved to understand-anything-plugin/packages/core/src/index.ts, re-exported by barrel understand-anything-plugin/packages/core/src/index.ts:1 from understand-anything-plugin/packages/core/src/types.ts; receiver resolved via property DiffContext.impactedEdges declared in understand-anything-plugin/src/diff-analyzer.ts:13
+# E4 GraphNode imported at understand-anything-plugin/src/diff-analyzer.ts:1 from "@understand-anything/core", resolved to understand-anything-plugin/packages/core/src/index.ts, re-exported by barrel understand-anything-plugin/packages/core/src/index.ts:1 from understand-anything-plugin/packages/core/src/types.ts; receiver resolved via property DiffContext.affectedNodes declared in understand-anything-plugin/src/diff-analyzer.ts:12 and DiffContext.changedNodes declared in understand-anything-plugin/src/diff-analyzer.ts:11
+# E5 GraphEdge fields read: source (understand-anything-plugin/src/diff-analyzer.ts:46), target (understand-anything-plugin/src/diff-analyzer.ts:47)
+# E5 GraphEdge stoplisted reads: type
+# E5 GraphNode fields read: complexity (understand-anything-plugin/src/diff-analyzer.ts:161), filePath (understand-anything-plugin/src/diff-analyzer.ts:34)
+# E5 GraphNode stoplisted reads: id
+# E6 pair understand-anything-plugin/packages/core/src/types.ts -> understand-anything-plugin/src/diff-analyzer.ts
+# category: production
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:types.ts->diff-analyzer.ts"
+producer = "understand-anything-plugin/packages/core/src/types.ts"
+consumer = "understand-anything-plugin/src/diff-analyzer.ts"
+evidence = "GraphEdge source target"
+evidence = "GraphNode complexity filePath"

@@ -1,0 +1,4 @@
+file	scope	field	type
+./earendil-works__pi/packages/chord/test/replicated-state.test.ts	SourceValue	value	number
+./excalidraw__excalidraw/packages/element/src/renderElement.ts	RenderPositionOffset	x	number
+./excalidraw__excalidraw/packages/element/src/renderElement.ts	RenderPositionOffset	y	number

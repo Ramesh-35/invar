@@ -1,0 +1,14 @@
+# mutation: `?.` between hops not followed
+# catch: s8_f5c_optional_access_between_hops_proposes
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1285,9 +1285,6 @@
+             j = t.skip_group(j, b'[', b']');
+         }
+         for c in chain {
+-            if t.p(j, b'?') {
+-                j += 1;
+-            }
+             if !(t.p(j, b'.') && t.is(j + 1, c)) {
+                 return None;
+             }

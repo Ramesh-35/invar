@@ -1,0 +1,13 @@
+# mutation: the property suffix omitted from a named shape's E4
+# catch: s8_f1b_a_type_declared_in_the_consumer_file_rescues_a_named_shape
+--- a/crates/invar-falsify/src/init.rs
++++ b/crates/invar-falsify/src/init.rs
+@@ -770,7 +770,7 @@
+         }
+         let mut route = if s.via.is_empty() { String::new() } else { format!("; receiver resolved via return type of {}", via_text(&s.via)) };
+         if !s.props.is_empty() {
+-            route.push_str(&format!("; receiver resolved via property {}", prop_text(&s.props)));
++            route.push_str("");
+         }
+         v.push(format!(
+             "E4 {} imported at {}:{} from {:?}, resolved to {}{via}{route}",

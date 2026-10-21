@@ -1,0 +1,13 @@
+# mutation: `Readonly <{` (spaces) not opened
+# catch: l2_f3_spacing_and_nesting
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -347,7 +347,7 @@
+             b'=' if d <= 0 && b.get(i + 1) != Some(&b'>') && b.get(i + 1) != Some(&b'=') => {
+                 let rest = t[i + 1..].trim_start();
+                 if let Some(r) = rest.strip_prefix("Readonly") {
+-                    if let Some(r) = r.trim_start().strip_prefix('<') {
++                    if let Some(r) = r.strip_prefix('<') {
+                         if r.trim_start().starts_with('{') {
+                             open = Some(b.len() - r.trim_start().len() + 1);
+                             break;
