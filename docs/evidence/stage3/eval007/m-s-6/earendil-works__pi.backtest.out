@@ -1,0 +1,335 @@
+invar backtest (invar.toml, 36 contract(s), depth 50)
+note: shallow history; the oldest replayed commit is the shallow boundary, and its date is the cutoff, not a change
+
+code:faux.ts->11-extension-state.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->14-chat.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->15-system-prompt.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->17-coding-tools.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->18-print.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->19-json.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->20-inbox.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->21-late-join.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->22-subagent-foreground.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->23-subagent-background.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->25-compaction.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->26-coding-agent.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->27-plan-mode.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->2753-reload-stale-resource-settings.test.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderRegistration.api
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderRegistration.models
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderRegistration.unregister
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->28-reviewer.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->2860-replaced-session-context.test.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderRegistration.api
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderRegistration.models
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderRegistration.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderRegistration.unregister
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->29-sandbox-per-conversation.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->30-tool-override.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->31-reload-and-restart.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->5596-missing-theme-export.test.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderRegistration.api
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderRegistration.models
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderRegistration.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderRegistration.unregister
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->8964-extension-provider-streaming.test.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.api
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.models
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->agent-session-runtime-events.test.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderRegistration.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderRegistration.unregister
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->agent-session-runtime.test.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderRegistration.api
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderRegistration.models
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderRegistration.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderRegistration.unregister
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->codemode-bench.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->harness-host-inputs.test.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->jev-router-example.test.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.appendResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->nested-images-bench.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->nested-tools-bench.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->scheduler-fanout-bench.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->tool-output-bench.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->virtual-models.test.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:faux.ts->worker.ts: packages/ai/src/providers/faux.ts (2 commit(s) replayed)
+  FauxProviderHandle.provider
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FauxProviderHandle.setResponses
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:fuzzy.ts->session-selector-search.ts: packages/tui/src/fuzzy.ts (1 commit(s) replayed)
+  FuzzyMatch.matches
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  FuzzyMatch.score
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:output.ts->tool.ts: packages/chord/src/output.ts (3 commit(s) replayed)
+  OutputLimits.maxBytes
+    2026-10-15 4a5d37291531 present
+    never absent after introduction
+  OutputLimits.maxLines
+    2026-10-15 4a5d37291531 present
+    never absent after introduction
+  OutputLimits.retain
+    2026-10-15 4a5d37291531 present
+    never absent after introduction
+  OutputSlice.droppedBytes
+    2026-10-15 4a5d37291531 present
+    never absent after introduction
+  OutputSlice.droppedLines
+    2026-10-15 4a5d37291531 present
+    never absent after introduction
+  OutputSlice.text
+    2026-10-15 4a5d37291531 present
+    never absent after introduction
+
+code:transcript.ts->agent-loop.ts: packages/ai/src/utils/transcript.ts (1 commit(s) replayed)
+  ToolStateChanges.toolsAdded
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  ToolStateChanges.toolsRemoved
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+code:truncate.ts->index.ts: packages/coding-agent/src/core/tools/truncate.ts (1 commit(s) replayed)
+  TruncationResult.content
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+  TruncationResult.truncated
+    2026-10-06 4c28a6865c42 present
+    never absent after introduction
+
+Timelines replay today's extraction over past file contents. They are
+not replayed verdicts: waivers, selectors and samples are today's, and a
+past consumer may not have read the field yet. Unreadable commits are
+stated, never guessed.
+exit 0

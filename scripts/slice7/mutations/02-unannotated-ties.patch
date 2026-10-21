@@ -1,0 +1,13 @@
+# mutation: a declaration with no permitted return type still ties (CM-S7-1)
+# catch: s7_f5_no_written_return_type_ties_nothing
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1064,7 +1064,7 @@
+             continue;
+         }
+         let close = t.skip_group(open, b'(', b')');
+-        let ret = if t.p(close, b':') { return_form(&t, close + 1) } else { None };
++        let ret = if t.p(close, b':') { return_form(&t, close + 1) } else { Some(("Result".to_string(), RetForm::One)) };
+         out.push((name.to_string(), line(k), ret));
+     }
+     out

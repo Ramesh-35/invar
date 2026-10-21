@@ -1,0 +1,24 @@
+invar backtest (invar.toml, 2 contract(s), depth 50)
+note: shallow history; the oldest replayed commit is the shallow boundary, and its date is the cutoff, not a change
+
+code:stickyNote.ts->restore.ts: packages/element/src/stickyNote.ts (1 commit(s) replayed)
+  StickyNoteLayout.container
+    2026-09-10 afa3a653fc5d present
+    never absent after introduction
+  StickyNoteLayout.text
+    2026-09-10 afa3a653fc5d present
+    never absent after introduction
+
+code:stickyNote.ts->stickyNotes.test.tsx: packages/element/src/stickyNote.ts (1 commit(s) replayed)
+  StickyNoteLayout.container
+    2026-09-10 afa3a653fc5d present
+    never absent after introduction
+  StickyNoteLayout.text
+    2026-09-10 afa3a653fc5d present
+    never absent after introduction
+
+Timelines replay today's extraction over past file contents. They are
+not replayed verdicts: waivers, selectors and samples are today's, and a
+past consumer may not have read the field yet. Unreadable commits are
+stated, never guessed.
+exit 0

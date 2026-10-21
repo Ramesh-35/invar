@@ -1,0 +1,24 @@
+# invar.lock: the producer fields this repository depends on.
+# Written by `invar lock`. Accept a reviewed producer change with
+# `invar lock --update`. Waivers are written by hand and kept.
+
+[lock]
+format = "1"
+
+[[contract]]
+id = "code:stickyNote.ts->restore.ts"
+producer = "packages/element/src/stickyNote.ts"
+blake3 = "69afee8eee142a91550a0e3e7a047f38ef6474f08dfebf0faac6066398f41996"
+recorded_at = "2026-10-20T18:22:37Z"
+bind = "code 2026-10-20 StickyNoteLayout.container Pick<"
+bind = "code 2026-10-20 StickyNoteLayout.text Pick<"
+members = "code StickyNoteLayout container text"
+
+[[contract]]
+id = "code:stickyNote.ts->stickyNotes.test.tsx"
+producer = "packages/element/src/stickyNote.ts"
+blake3 = "69afee8eee142a91550a0e3e7a047f38ef6474f08dfebf0faac6066398f41996"
+recorded_at = "2026-10-20T18:22:37Z"
+bind = "code 2026-10-20 StickyNoteLayout.container Pick<"
+bind = "code 2026-10-20 StickyNoteLayout.text Pick<"
+members = "code StickyNoteLayout container text"

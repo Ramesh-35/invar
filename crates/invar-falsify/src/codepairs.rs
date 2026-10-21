@@ -68,6 +68,24 @@ pub struct ShapeEvidence {
     pub barrel: Vec<(String, usize)>,
     pub fields: Vec<(String, usize)>,
     pub stoplisted: Vec<String>,
+    /// SLICE7: the imported functions whose written return type tied the
+    /// receivers this shape's reads were counted through, as (function,
+    /// declaring file, line); empty when no such route was needed.
+    pub via: Vec<Via>,
+    /// SLICE7: false when the shape is not imported by name (reached only
+    /// through `via`).
+    pub named: bool,
+}
+
+/// SLICE7 provenance of one route: the function (as imported), its
+/// declaring file and line, and the import's line and specifier.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Via {
+    pub function: String,
+    pub decl_file: String,
+    pub decl_line: usize,
+    pub import_line: usize,
+    pub specifier: String,
 }
 
 /// A (producer declaring file, consumer file) pair with qualifying shapes.
@@ -276,6 +294,8 @@ struct Import {
     line: usize,
     spec: String,
     named: Vec<String>,
+    /// SLICE7: (local binding, original name) of each braced item.
+    locals: Vec<(String, String)>,
     /// SLICE3B: names imported type-only (`import type {..}`, or an inline
     /// `type X` inside the braces), by original name.
     type_only: BTreeSet<String>,
@@ -621,6 +641,7 @@ fn top_statement(t: &Text, i: usize, fi: &mut FileInfo) -> Option<usize> {
             }
         }
         let mut named = Vec::new();
+        let mut locals = Vec::new();
         let mut type_only = BTreeSet::new();
         // default identifier
         if let Some((_, e)) = t.ident(j) {
@@ -641,12 +662,13 @@ fn top_statement(t: &Text, i: usize, fi: &mut FileInfo) -> Option<usize> {
             }
         } else if t.m.get(j) == Some(&b'{') {
             let close = t.close(j)?;
-            named = brace_names(t, j, close).into_iter().map(|(_, orig)| orig).collect();
+            locals = brace_names(t, j, close);
+            named = locals.iter().map(|(_, orig)| orig.clone()).collect();
             type_only = if statement_type_only { named.iter().cloned().collect() } else { inline_type_names(t, j, close) };
             j = close;
         }
         let (spec, end) = from_spec(t, j)?;
-        fi.imports.push(Import { line, spec, named, type_only });
+        fi.imports.push(Import { line, spec, named, locals, type_only });
         return Some(end);
     }
     if t.kw(i, "export") {
@@ -927,9 +949,171 @@ fn returning(t: &Toks, shape: &str) -> BTreeSet<String> {
     fns
 }
 
+/// The shape's member fields found in `reads`: (distinctive, stoplisted).
+fn collect_fields(members: &[(String, usize)], reads: &BTreeMap<String, (String, usize)>, stop: &BTreeSet<String>) -> (Vec<(String, usize)>, Vec<String>) {
+    let mut fields = Vec::new();
+    let mut stoplisted = Vec::new();
+    for (m, _) in members {
+        let k = name_key(m);
+        if let Some((_, line)) = reads.get(&k) {
+            if stop.contains(&k) {
+                stoplisted.push(m.clone());
+            } else {
+                fields.push((m.clone(), *line));
+            }
+        }
+    }
+    fields.sort();
+    fields.dedup_by(|a, b| a.0 == b.0);
+    stoplisted.sort();
+    stoplisted.dedup();
+    (fields, stoplisted)
+}
+
+/// SLICE7: the routes available in one consumer file for shape `s` of
+/// package `p`: local function name -> (route, provenance). A route exists
+/// only when the shape's name is declared once in the package, and the
+/// imported function is declared there exactly once, with a permitted
+/// written return type whose head is `s` (B2).
+fn route_fns(
+    p: usize,
+    s: &str,
+    locals: &BTreeMap<usize, Vec<(String, String, usize, String)>>,
+    funcs: &BTreeMap<usize, BTreeMap<String, Vec<(String, usize, Option<(String, RetForm)>)>>>,
+    shape_names: &BTreeMap<usize, BTreeMap<String, usize>>,
+) -> BTreeMap<String, (Route, Via)> {
+    let mut out = BTreeMap::new();
+    if shape_names.get(&p).and_then(|m| m.get(s)) != Some(&1) {
+        return out;
+    }
+    let (Some(ls), Some(fs)) = (locals.get(&p), funcs.get(&p)) else { return out };
+    for (local, orig, line, spec) in ls {
+        let Some(ds) = fs.get(orig) else { continue };
+        if let [(file, dl, Some((head, form)))] = ds.as_slice() {
+            if head == s {
+                let via = Via { function: orig.clone(), decl_file: file.clone(), decl_line: *dl, import_line: *line, specifier: spec.clone() };
+                out.insert(local.clone(), ((*form, file.clone(), *dl), via));
+            }
+        }
+    }
+    out
+}
+
+/// The `via` list of a shape: the routes its counted fields were read
+/// through, in function order.
+fn used_routes(fields: &[(String, usize)], routes: &RouteReads, avail: &BTreeMap<String, (Route, Via)>) -> Vec<Via> {
+    let mut used: BTreeSet<Via> = BTreeSet::new();
+    for (m, _) in fields {
+        for local in routes.get(&name_key(m)).into_iter().flatten() {
+            if let Some((_, v)) = avail.get(local) {
+                used.insert(v.clone());
+            }
+        }
+    }
+    used.into_iter().collect()
+}
+
+// ------------------------------------------------------- return types (SLICE7)
+//
+// A function declaration's written return type, read strictly: exactly S,
+// Readonly<S>, Promise<S>, S[] or Array<S> (S may carry its own type
+// arguments), followed by the body, an arrow or the end of the
+// declaration. Anything else (a union, Partial<S>, Promise<S[]>, Box<S>)
+// is a declaration with no usable return type: it still counts toward
+// uniqueness, and it ties nothing.
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+enum RetForm {
+    One,
+    Arr,
+    Promise,
+}
+
+/// A route a receiver can be tied through: (form, declaring file, line).
+type Route = (RetForm, String, usize);
+
+/// Every function declaration in this file: (name, line, written return
+/// type as (head, form) when it is one of the permitted forms).
+fn function_decls(fi: &FileInfo) -> Vec<(String, usize, Option<(String, RetForm)>)> {
+    let m = &fi.masked;
+    let all = tokens(m);
+    let t = Toks(&all);
+    let line = |k: usize| m[..all[k].1].iter().filter(|&&b| b == b'\n').count() + 1;
+    let mut out = Vec::new();
+    for k in 0..all.len() {
+        // `function name(` / `function name<T>(`
+        let (name, open) = if t.is(k, "function") {
+            let j = if t.p(k + 1, b'*') { k + 2 } else { k + 1 };
+            let Some(n) = t.id(j) else { continue };
+            let o = if t.p(j + 1, b'<') { t.skip_group(j + 1, b'<', b'>') } else { j + 1 };
+            (n, o)
+        } else if matches!(t.id(k), Some("const" | "let")) && t.id(k + 1).is_some() && t.p(k + 2, b'=') && !t.p(k + 3, b'=') {
+            // `const name = (` / `= async (` / `= <T>(`
+            let mut o = k + 3;
+            if t.is(o, "async") {
+                o += 1;
+            }
+            if t.p(o, b'<') {
+                o = t.skip_group(o, b'<', b'>');
+            }
+            (t.id(k + 1).unwrap(), o)
+        } else {
+            continue;
+        };
+        if !t.p(open, b'(') {
+            continue;
+        }
+        let close = t.skip_group(open, b'(', b')');
+        let ret = if t.p(close, b':') { return_form(&t, close + 1) } else { None };
+        out.push((name.to_string(), line(k), ret));
+    }
+    out
+}
+
+fn return_form(t: &Toks, mut j: usize) -> Option<(String, RetForm)> {
+    let mut form = RetForm::One;
+    let mut wrap = 0;
+    if t.is(j, "Promise") && t.p(j + 1, b'<') {
+        form = RetForm::Promise;
+        j += 2;
+        wrap += 1;
+    } else if matches!(t.id(j), Some("Readonly" | "Array")) && t.p(j + 1, b'<') {
+        if t.is(j, "Array") {
+            form = RetForm::Arr;
+        }
+        j += 2;
+        wrap += 1;
+    }
+    let head = t.id(j)?.to_string();
+    if t.p(j + 1, b'.') {
+        return None;
+    }
+    j += 1;
+    if t.p(j, b'<') {
+        j = t.skip_group(j, b'<', b'>');
+    }
+    if t.p(j, b'[') && t.p(j + 1, b']') {
+        if wrap > 0 {
+            return None;
+        }
+        form = RetForm::Arr;
+        j += 2;
+    }
+    for _ in 0..wrap {
+        if !t.p(j, b'>') {
+            return None;
+        }
+        j += 1;
+    }
+    let end = t.p(j, b'{') || t.p(j, b';') || (t.p(j, b'=') && t.p(j + 1, b'>')) || j >= t.0.len();
+    end.then_some((head, form))
+}
+
 /// Receivers declared as `shape`: (single values, arrays of S).
-fn receivers(t: &Toks, shape: &str) -> (BTreeSet<String>, BTreeSet<String>) {
+fn receivers(t: &Toks, m: &[u8], shape: &str, imported: &BTreeMap<String, Route>) -> (BTreeSet<String>, BTreeSet<String>, BTreeMap<String, String>) {
     let fns = returning(t, shape);
+    // SLICE7: receiver -> the imported function that tied it
+    let mut routed: BTreeMap<String, String> = BTreeMap::new();
     let mut one: BTreeSet<String> = BTreeSet::new();
     let mut arr: BTreeSet<String> = BTreeSet::new();
     fn put(one: &mut BTreeSet<String>, arr: &mut BTreeSet<String>, name: &str, is_arr: bool) {
@@ -986,6 +1170,21 @@ fn receivers(t: &Toks, shape: &str) -> (BTreeSet<String>, BTreeSet<String>) {
         if t.id(local).is_some_and(|f| fns.contains(f)) && t.p(local + 1, b'(') {
             put(&mut one, &mut arr, name, false);
         }
+        // SLICE7: `r = [await] f(...)` with f imported (B2); the call must end
+        // the expression: nothing chained onto its result.
+        if let Some(f) = t.id(q) {
+            let awaited = q == start + 1 && t.is(start, "await");
+            if let (Some((form, _, _)), true, true) = (imported.get(f), q == start || awaited, t.p(q + 1, b'(')) {
+                let close = t.skip_group(q + 1, b'(', b')');
+                let ends = close >= t.0.len()
+                    || matches!(&t.0[close].0, Tok::P(b';') | Tok::P(b',') | Tok::P(b')') | Tok::P(b'}') | Tok::P(b']'))
+                    || (matches!(&t.0[close].0, Tok::Id(_)) && m[t.0[close - 1].1..t.0[close].1].contains(&b'\n'));
+                if ends && (*form != RetForm::Promise || awaited) {
+                    put(&mut one, &mut arr, name, *form == RetForm::Arr);
+                    routed.insert(name.to_string(), f.to_string());
+                }
+            }
+        }
         // an explicit type argument: `r = [await] a.b.f<S ...>(`
         while t.id(q).is_some() && t.p(q + 1, b'.') {
             q += 2;
@@ -1016,6 +1215,9 @@ fn receivers(t: &Toks, shape: &str) -> (BTreeSet<String>, BTreeSet<String>) {
             if let (Some(r), Some(a)) = (t.id(k + 3), t.id(k + 5)) {
                 if arrays.contains(a) && t.p(k + 6, b')') {
                     put(&mut one, &mut arr, r, false);
+                    if let Some(f) = routed.get(a).cloned() {
+                        routed.insert(r.to_string(), f);
+                    }
                 }
             }
         }
@@ -1034,10 +1236,13 @@ fn receivers(t: &Toks, shape: &str) -> (BTreeSet<String>, BTreeSet<String>) {
             let q = if t.p(dot + 3, b'(') { dot + 4 } else { dot + 3 };
             if let Some(r) = t.id(q) {
                 put(&mut one, &mut arr, r, false);
+                if let Some(f) = routed.get(a).cloned() {
+                    routed.insert(r.to_string(), f);
+                }
             }
         }
     }
-    (one, arr)
+    (one, arr, routed)
 }
 
 /// Is the property access whose name starts at byte `off` a write?
@@ -1055,11 +1260,16 @@ fn written(m: &[u8], mut i: usize) -> bool {
 
 /// Reads (name_key -> (spelling, first line)) of fields through receivers
 /// declared as `shape` in this file: `r.f`, `r?.f`, `this.r.f`, `a[i].f`.
-fn receiver_reads(fi: &FileInfo, shape: &str) -> BTreeMap<String, (String, usize)> {
+/// Reads per field key, and (SLICE7) per field key the imported functions
+/// whose returned values it was read off.
+type RouteReads = BTreeMap<String, BTreeSet<String>>;
+
+fn receiver_reads(fi: &FileInfo, shape: &str, imported: &BTreeMap<String, Route>) -> (BTreeMap<String, (String, usize)>, RouteReads) {
     let m = &fi.masked;
     let all = tokens(m);
     let t = Toks(&all);
-    let (one, arr) = receivers(&t, shape);
+    let (one, arr, routed) = receivers(&t, m, shape, imported);
+    let mut routes: RouteReads = BTreeMap::new();
     let mut out: BTreeMap<String, (String, usize)> = BTreeMap::new();
     for k in 0..all.len() {
         let Some(r) = t.id(k) else { continue };
@@ -1084,9 +1294,14 @@ fn receiver_reads(fi: &FileInfo, shape: &str) -> BTreeMap<String, (String, usize
         if !written(m, off) {
             let line = m[..off].iter().filter(|&&b| b == b'\n').count() + 1;
             out.entry(name_key(f)).or_insert((f.to_string(), line));
+            if !via_this {
+                if let Some(func) = routed.get(r) {
+                    routes.entry(name_key(f)).or_default().insert(func.clone());
+                }
+            }
         }
     }
-    out
+    (out, routes)
 }
 
 // ------------------------------------------------------------ membership
@@ -1941,6 +2156,20 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
             }
         }
     }
+    // SLICE7: per package, every function declaration (with its permitted
+    // written return type, if any), and how many exported shapes carry each name.
+    let mut pkg_funcs: BTreeMap<usize, BTreeMap<String, Vec<(String, usize, Option<(String, RetForm)>)>>> = BTreeMap::new();
+    let mut pkg_shape_names: BTreeMap<usize, BTreeMap<String, usize>> = BTreeMap::new();
+    for (g, gi) in &infos {
+        if let Some(p) = ctx.pkg_of(g) {
+            for (n, line, ret) in function_decls(gi) {
+                pkg_funcs.entry(p).or_default().entry(n).or_default().push((g.clone(), line, ret));
+            }
+            for (ename, _) in gi.exported_shapes() {
+                *pkg_shape_names.entry(p).or_default().entry(ename).or_insert(0) += 1;
+            }
+        }
+    }
     for (f, fi) in &infos {
         let Some(c) = ctx.pkg_of(f) else { continue };
         let mut imported_from: BTreeMap<usize, usize> = BTreeMap::new(); // pkg -> first import line
@@ -1948,6 +2177,8 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
         // Names imported by name from each package, resolved or not: R6 is
         // about shapes NOT imported by name.
         let mut imported_names: BTreeMap<usize, BTreeSet<String>> = BTreeMap::new();
+        // SLICE7: (local, original, import line, specifier) per package.
+        let mut imported_locals: BTreeMap<usize, Vec<(String, String, usize, String)>> = BTreeMap::new();
         for imp in &fi.imports {
             let (pkg, res) = ctx.resolve(&imp.spec, f, true);
             if matches!(res, Res::NotCandidate) {
@@ -1957,6 +2188,9 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
                 let e = imported_from.entry(p).or_insert(imp.line);
                 *e = (*e).min(imp.line);
                 imported_names.entry(p).or_default().extend(imp.named.iter().cloned());
+                for (local, orig) in &imp.locals {
+                    imported_locals.entry(p).or_default().push((local.clone(), orig.clone(), imp.line, imp.spec.clone()));
+                }
             }
             for name in &imp.named {
                 out.candidates += 1;
@@ -2041,10 +2275,8 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
                                 format!("{name} at {d}:{} is not an object type ({what})", decl.line),
                             ),
                             Kind::Object(members) => {
-                                let mut fields = Vec::new();
-                                let mut stoplisted = Vec::new();
                                 // SLICE5: only reads through a receiver declared as the shape.
-                                let declared = receiver_reads(fi, name);
+                                let (declared, _) = receiver_reads(fi, name, &BTreeMap::new());
                                 let accessed = members
                                     .iter()
                                     .filter(|(m, _)| {
@@ -2052,20 +2284,23 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
                                         fi.reads.contains_key(&k) && !stop.contains(&k)
                                     })
                                     .count();
-                                for (m, _) in members {
-                                    let k = name_key(m);
-                                    if let Some((_, line)) = declared.get(&k) {
-                                        if stop.contains(&k) {
-                                            stoplisted.push(m.clone());
-                                        } else {
-                                            fields.push((m.clone(), *line));
+                                let (mut fields, mut stoplisted) = collect_fields(members, &declared, &stop);
+                                // SLICE7: the imported-return-type route, only for a shape
+                                // that does not qualify without it (existing evidence never moves).
+                                let mut via = Vec::new();
+                                if fields.len() < MIN_FIELDS {
+                                    let avail = route_fns(p, name, &imported_locals, &pkg_funcs, &pkg_shape_names);
+                                    if !avail.is_empty() {
+                                        let routes_only: BTreeMap<String, Route> = avail.iter().map(|(k, (r, _))| (k.clone(), r.clone())).collect();
+                                        let (r1, rr) = receiver_reads(fi, name, &routes_only);
+                                        let (f1, s1) = collect_fields(members, &r1, &stop);
+                                        if f1.len() >= MIN_FIELDS {
+                                            via = used_routes(&f1, &rr, &avail);
+                                            fields = f1;
+                                            stoplisted = s1;
                                         }
                                     }
                                 }
-                                fields.sort();
-                                fields.dedup_by(|a, b| a.0 == b.0);
-                                stoplisted.sort();
-                                stoplisted.dedup();
                                 if fields.len() < MIN_FIELDS && accessed >= MIN_FIELDS {
                                     let why = format!(
                                         "{name}: {accessed} of its fields are accessed in this file, {} read on a receiver declared as {name}; the others are writes or are read off values init cannot tie to {name}; not guessed",
@@ -2083,6 +2318,8 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
                                         barrel,
                                         fields,
                                         stoplisted,
+                                        via,
+                                        named: true,
                                     };
                                     let rel = f[pkgs[c].dir.len() + 1..].to_string();
                                     let pair = pairs
@@ -2129,6 +2366,44 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
                         .collect();
                     read.sort();
                     read.dedup();
+                    // SLICE7: a shape not imported by name, read through receivers
+                    // its package's functions are declared to return.
+                    if read.len() >= MIN_FIELDS {
+                        let avail = route_fns(*p, ename, &imported_locals, &pkg_funcs, &pkg_shape_names);
+                        if !avail.is_empty() {
+                            let routes_only: BTreeMap<String, Route> = avail.iter().map(|(k, (r, _))| (k.clone(), r.clone())).collect();
+                            let (r1, rr) = receiver_reads(fi, ename, &routes_only);
+                            let (fields, stoplisted) = collect_fields(members, &r1, &stop);
+                            if fields.len() >= MIN_FIELDS {
+                                let via = used_routes(&fields, &rr, &avail);
+                                let ev = ShapeEvidence {
+                                    shape: ename.clone(),
+                                    decl_line: d.line,
+                                    import_line: via[0].import_line,
+                                    specifier: via[0].specifier.clone(),
+                                    resolved: g.clone(),
+                                    barrel: Vec::new(),
+                                    fields,
+                                    stoplisted,
+                                    via,
+                                    named: false,
+                                };
+                                let rel = f[pkgs[c].dir.len() + 1..].to_string();
+                                let pair = pairs.entry((g.clone(), f.clone())).or_insert_with(|| CodePair {
+                                    producer: g.clone(),
+                                    consumer: f.clone(),
+                                    producer_pkg: pkgs[*p].clone(),
+                                    consumer_pkg: pkgs[c].clone(),
+                                    category: category(&rel),
+                                    shapes: Vec::new(),
+                                });
+                                if !pair.shapes.iter().any(|s| s.shape == ev.shape) {
+                                    pair.shapes.push(ev);
+                                }
+                                continue;
+                            }
+                        }
+                    }
                     if read.len() >= MIN_FIELDS {
                         out.abstentions.push(Abstention {
                             code: "R6",

@@ -1636,3 +1636,26 @@ of 1,393 reached imports agreeing with an independent classifier; 343 of
 343 tests, zero warnings; 8 of 8 mutations caught. Not claimed: `extends`
 chains, nested tsconfig files, or any proposal gain. Record:
 docs/architecture/INIT-DISCOVERY-SLICE6.md; docs/evidence/stage3/eval006.
+
+## 2026-10-21: INIT-DISCOVERY-SLICE7 implemented (receivers assigned from an imported function's declared return type)
+
+A field read now also counts for shape S through a receiver assigned
+`r = [await] f(...)`, where f is imported by name from S's package,
+declared there exactly once with a written return type of S, Readonly<S>,
+Promise<S> (awaited), S[] or Array<S>, S's name is declared once in that
+package, and nothing is chained onto the call. Return types are read as
+written, never inferred. Applied to every shape, but only to one that
+does not qualify without it, so no existing evidence moves. A proposal
+reached this way names the function in its E4 line and carries its own
+status line, and the header init writes at the top of every invar.toml
+no longer says every shape is imported by name (an init output change).
+STAGE3-EVAL-007: proposals 113 to 152 (39 new pairs, 1 shape added to an
+existing pair), R6 abstentions -39, RECV -1, 0 silent drops, every other
+proposal and 7 of 10 repositories byte-identical; precision 39 of 40 new
+shapes TRUE (97.5 percent; 32 of 32 in pi's faux test-provider pattern, 7
+of 8 outside it), AI adjudication by two blind agents, conservative
+merge; 39 of 39 TRUE contracts round-trip. 364 of 364 tests, zero
+warnings; 15 of 15 mutations caught. Not claimed: scope analysis (the one
+NOT TRUE is a same-named receiver of another type), inferred types,
+property types across files, or general detection capability. Record:
+docs/architecture/INIT-DISCOVERY-SLICE7.md; docs/evidence/stage3/eval007.

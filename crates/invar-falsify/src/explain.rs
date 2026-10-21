@@ -100,7 +100,7 @@ const REGISTRY: &[(&str, &str, &str, &str, &str, &str)] = &[
      "none; non-egress proofs are a later version, never a silent pass",
      "INVAR-PROOF-001.md"),
     ("R6", "abstention", "invar init, slice 2 inventory",
-     "a file reads two or more fields of an exported shape without importing it by name; out of v1, stated, never proposed",
+     "a file reads two or more fields of an exported shape without importing it by name, and no receiver is tied to it by an imported function's declared return type (slice 7); out of v1, stated, never proposed",
      "import the shape by name if the pair should become a contract",
      "INIT-DISCOVERY-SLICE2.md"),
     ("RECV", "abstention", "invar init, code-pair discovery (slice 5)",

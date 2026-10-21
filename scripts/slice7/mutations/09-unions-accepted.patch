@@ -1,0 +1,13 @@
+# mutation: a union return type (S | undefined) accepted
+# catch: s7_f10_an_unsupported_return_form_ties_nothing
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1106,7 +1106,7 @@
+         j += 1;
+     }
+     let end = t.p(j, b'{') || t.p(j, b';') || (t.p(j, b'=') && t.p(j + 1, b'>')) || j >= t.0.len();
+-    end.then_some((head, form))
++    Some((head, form))
+ }
+ 
+ /// Receivers declared as `shape`: (single values, arrays of S).

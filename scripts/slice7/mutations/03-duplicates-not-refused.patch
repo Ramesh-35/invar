@@ -1,0 +1,13 @@
+# mutation: a function declared twice in the package still ties (CM-S7-2)
+# catch: s7_f6b_a_duplicate_declaration_is_refused_in_any_file_order
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -989,7 +989,7 @@
+     let (Some(ls), Some(fs)) = (locals.get(&p), funcs.get(&p)) else { return out };
+     for (local, orig, line, spec) in ls {
+         let Some(ds) = fs.get(orig) else { continue };
+-        if let [(file, dl, Some((head, form)))] = ds.as_slice() {
++        if let Some((file, dl, Some((head, form)))) = ds.first() {
+             if head == s {
+                 let via = Via { function: orig.clone(), decl_file: file.clone(), decl_line: *dl, import_line: *line, specifier: spec.clone() };
+                 out.insert(local.clone(), ((*form, file.clone(), *dl), via));

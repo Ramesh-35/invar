@@ -1,0 +1,652 @@
+# PROPOSED code:faux.ts->agent-session-runtime-events.test.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderRegistration declared at packages/ai/src/providers/faux.ts:134
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderRegistration not imported by name; resolved via return type of registerFauxProvider() declared in packages/ai/src/compat.ts:162, registerFauxProvider imported at packages/coding-agent/test/agent-session-runtime-events.test.ts:4 from "@earendil-works/pi-ai/compat"
+# E5 FauxProviderRegistration fields read: setResponses (packages/coding-agent/test/agent-session-runtime-events.test.ts:43), unregister (packages/coding-agent/test/agent-session-runtime-events.test.ts:106)
+# E5 FauxProviderRegistration stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/coding-agent/test/agent-session-runtime-events.test.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->agent-session-runtime-events.test.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/coding-agent/test/agent-session-runtime-events.test.ts"
+evidence = "FauxProviderRegistration setResponses unregister"
+
+# PROPOSED code:faux.ts->jev-router-example.test.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/coding-agent/test/jev-router-example.test.ts:2 from "@earendil-works/pi-ai"
+# E5 FauxProviderHandle fields read: appendResponses (packages/coding-agent/test/jev-router-example.test.ts:94), provider (packages/coding-agent/test/jev-router-example.test.ts:82)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/coding-agent/test/jev-router-example.test.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->jev-router-example.test.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/coding-agent/test/jev-router-example.test.ts"
+evidence = "FauxProviderHandle appendResponses provider"
+
+# PROPOSED code:faux.ts->agent-session-runtime.test.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderRegistration declared at packages/ai/src/providers/faux.ts:134
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderRegistration not imported by name; resolved via return type of registerFauxProvider() declared in packages/ai/src/compat.ts:162, registerFauxProvider imported at packages/coding-agent/test/suite/agent-session-runtime.test.ts:4 from "@earendil-works/pi-ai/compat"
+# E5 FauxProviderRegistration fields read: api (packages/coding-agent/test/suite/agent-session-runtime.test.ts:70), models (packages/coding-agent/test/suite/agent-session-runtime.test.ts:71), setResponses (packages/coding-agent/test/suite/agent-session-runtime.test.ts:54), unregister (packages/coding-agent/test/suite/agent-session-runtime.test.ts:116)
+# E5 FauxProviderRegistration stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/coding-agent/test/suite/agent-session-runtime.test.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->agent-session-runtime.test.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/coding-agent/test/suite/agent-session-runtime.test.ts"
+evidence = "FauxProviderRegistration api models setResponses unregister"
+
+# PROPOSED code:faux.ts->2753-reload-stale-resource-settings.test.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderRegistration declared at packages/ai/src/providers/faux.ts:134
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderRegistration not imported by name; resolved via return type of registerFauxProvider() declared in packages/ai/src/compat.ts:162, registerFauxProvider imported at packages/coding-agent/test/suite/regressions/2753-reload-stale-resource-settings.test.ts:4 from "@earendil-works/pi-ai/compat"
+# E5 FauxProviderRegistration fields read: api (packages/coding-agent/test/suite/regressions/2753-reload-stale-resource-settings.test.ts:53), models (packages/coding-agent/test/suite/regressions/2753-reload-stale-resource-settings.test.ts:54), unregister (packages/coding-agent/test/suite/regressions/2753-reload-stale-resource-settings.test.ts:90)
+# E5 FauxProviderRegistration stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/coding-agent/test/suite/regressions/2753-reload-stale-resource-settings.test.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->2753-reload-stale-resource-settings.test.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/coding-agent/test/suite/regressions/2753-reload-stale-resource-settings.test.ts"
+evidence = "FauxProviderRegistration api models unregister"
+
+# PROPOSED code:faux.ts->2860-replaced-session-context.test.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderRegistration declared at packages/ai/src/providers/faux.ts:134
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderRegistration not imported by name; resolved via return type of registerFauxProvider() declared in packages/ai/src/compat.ts:162, registerFauxProvider imported at packages/coding-agent/test/suite/regressions/2860-replaced-session-context.test.ts:4 from "@earendil-works/pi-ai/compat"
+# E5 FauxProviderRegistration fields read: api (packages/coding-agent/test/suite/regressions/2860-replaced-session-context.test.ts:66), models (packages/coding-agent/test/suite/regressions/2860-replaced-session-context.test.ts:67), setResponses (packages/coding-agent/test/suite/regressions/2860-replaced-session-context.test.ts:46), unregister (packages/coding-agent/test/suite/regressions/2860-replaced-session-context.test.ts:138)
+# E5 FauxProviderRegistration stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/coding-agent/test/suite/regressions/2860-replaced-session-context.test.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->2860-replaced-session-context.test.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/coding-agent/test/suite/regressions/2860-replaced-session-context.test.ts"
+evidence = "FauxProviderRegistration api models setResponses unregister"
+
+# PROPOSED code:faux.ts->5596-missing-theme-export.test.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderRegistration declared at packages/ai/src/providers/faux.ts:134
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderRegistration not imported by name; resolved via return type of registerFauxProvider() declared in packages/ai/src/compat.ts:162, registerFauxProvider imported at packages/coding-agent/test/suite/regressions/5596-missing-theme-export.test.ts:5 from "@earendil-works/pi-ai/compat"
+# E5 FauxProviderRegistration fields read: api (packages/coding-agent/test/suite/regressions/5596-missing-theme-export.test.ts:40), models (packages/coding-agent/test/suite/regressions/5596-missing-theme-export.test.ts:41), setResponses (packages/coding-agent/test/suite/regressions/5596-missing-theme-export.test.ts:31), unregister (packages/coding-agent/test/suite/regressions/5596-missing-theme-export.test.ts:76)
+# E5 FauxProviderRegistration stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/coding-agent/test/suite/regressions/5596-missing-theme-export.test.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->5596-missing-theme-export.test.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/coding-agent/test/suite/regressions/5596-missing-theme-export.test.ts"
+evidence = "FauxProviderRegistration api models setResponses unregister"
+
+# PROPOSED code:faux.ts->8964-extension-provider-streaming.test.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/coding-agent/test/suite/regressions/8964-extension-provider-streaming.test.ts:1 from "@earendil-works/pi-ai"
+# E5 FauxProviderHandle fields read: api (packages/coding-agent/test/suite/regressions/8964-extension-provider-streaming.test.ts:24), models (packages/coding-agent/test/suite/regressions/8964-extension-provider-streaming.test.ts:27), provider (packages/coding-agent/test/suite/regressions/8964-extension-provider-streaming.test.ts:23), setResponses (packages/coding-agent/test/suite/regressions/8964-extension-provider-streaming.test.ts:12)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/coding-agent/test/suite/regressions/8964-extension-provider-streaming.test.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->8964-extension-provider-streaming.test.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/coding-agent/test/suite/regressions/8964-extension-provider-streaming.test.ts"
+evidence = "FauxProviderHandle api models provider setResponses"
+
+# PROPOSED code:faux.ts->virtual-models.test.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/coding-agent/test/virtual-models.test.ts:4 from "@earendil-works/pi-ai"
+# E5 FauxProviderHandle fields read: provider (packages/coding-agent/test/virtual-models.test.ts:33), setResponses (packages/coding-agent/test/virtual-models.test.ts:214)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/coding-agent/test/virtual-models.test.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->virtual-models.test.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/coding-agent/test/virtual-models.test.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->worker.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test-workers/worker.ts:5 from "@earendil-works/pi-ai"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test-workers/worker.ts:61), setResponses (packages/durable/test-workers/worker.ts:59)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test-workers/worker.ts
+# category: unknown
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->worker.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test-workers/worker.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->codemode-bench.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/codemode-bench.ts:13 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/codemode-bench.ts:49), setResponses (packages/durable/test/codemode-bench.ts:61)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/codemode-bench.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->codemode-bench.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/codemode-bench.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->11-extension-state.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/examples/11-extension-state.ts:7 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/examples/11-extension-state.ts:59), setResponses (packages/durable/test/examples/11-extension-state.ts:65)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/examples/11-extension-state.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->11-extension-state.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/examples/11-extension-state.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->14-chat.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/examples/14-chat.ts:6 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/examples/14-chat.ts:14), setResponses (packages/durable/test/examples/14-chat.ts:15)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/examples/14-chat.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->14-chat.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/examples/14-chat.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->15-system-prompt.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/examples/15-system-prompt.ts:6 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/examples/15-system-prompt.ts:22), setResponses (packages/durable/test/examples/15-system-prompt.ts:23)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/examples/15-system-prompt.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->15-system-prompt.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/examples/15-system-prompt.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->17-coding-tools.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/examples/17-coding-tools.ts:12 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/examples/17-coding-tools.ts:33), setResponses (packages/durable/test/examples/17-coding-tools.ts:36)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/examples/17-coding-tools.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->17-coding-tools.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/examples/17-coding-tools.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->18-print.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/examples/18-print.ts:8 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/examples/18-print.ts:23), setResponses (packages/durable/test/examples/18-print.ts:25)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/examples/18-print.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->18-print.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/examples/18-print.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->19-json.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/examples/19-json.ts:14 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/examples/19-json.ts:60), setResponses (packages/durable/test/examples/19-json.ts:62)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/examples/19-json.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->19-json.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/examples/19-json.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->20-inbox.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/examples/20-inbox.ts:7 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/examples/20-inbox.ts:24), setResponses (packages/durable/test/examples/20-inbox.ts:22)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/examples/20-inbox.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->20-inbox.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/examples/20-inbox.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->21-late-join.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/examples/21-late-join.ts:8 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/examples/21-late-join.ts:50), setResponses (packages/durable/test/examples/21-late-join.ts:45)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/examples/21-late-join.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->21-late-join.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/examples/21-late-join.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->22-subagent-foreground.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/examples/22-subagent-foreground.ts:11 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/examples/22-subagent-foreground.ts:88), setResponses (packages/durable/test/examples/22-subagent-foreground.ts:91)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/examples/22-subagent-foreground.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->22-subagent-foreground.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/examples/22-subagent-foreground.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->23-subagent-background.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/examples/23-subagent-background.ts:14 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/examples/23-subagent-background.ts:223), setResponses (packages/durable/test/examples/23-subagent-background.ts:254)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/examples/23-subagent-background.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->23-subagent-background.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/examples/23-subagent-background.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->25-compaction.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/examples/25-compaction.ts:7 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/examples/25-compaction.ts:44), setResponses (packages/durable/test/examples/25-compaction.ts:42)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/examples/25-compaction.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->25-compaction.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/examples/25-compaction.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->26-coding-agent.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/examples/26-coding-agent.ts:11 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/examples/26-coding-agent.ts:58), setResponses (packages/durable/test/examples/26-coding-agent.ts:60)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/examples/26-coding-agent.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->26-coding-agent.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/examples/26-coding-agent.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->27-plan-mode.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/examples/27-plan-mode.ts:11 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/examples/27-plan-mode.ts:71), setResponses (packages/durable/test/examples/27-plan-mode.ts:72)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/examples/27-plan-mode.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->27-plan-mode.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/examples/27-plan-mode.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->28-reviewer.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/examples/28-reviewer.ts:11 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/examples/28-reviewer.ts:54), setResponses (packages/durable/test/examples/28-reviewer.ts:55)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/examples/28-reviewer.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->28-reviewer.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/examples/28-reviewer.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->29-sandbox-per-conversation.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/examples/29-sandbox-per-conversation.ts:11 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/examples/29-sandbox-per-conversation.ts:30), setResponses (packages/durable/test/examples/29-sandbox-per-conversation.ts:33)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/examples/29-sandbox-per-conversation.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->29-sandbox-per-conversation.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/examples/29-sandbox-per-conversation.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->30-tool-override.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/examples/30-tool-override.ts:11 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/examples/30-tool-override.ts:61), setResponses (packages/durable/test/examples/30-tool-override.ts:66)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/examples/30-tool-override.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->30-tool-override.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/examples/30-tool-override.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->31-reload-and-restart.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/examples/31-reload-and-restart.ts:11 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/examples/31-reload-and-restart.ts:40), setResponses (packages/durable/test/examples/31-reload-and-restart.ts:42)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/examples/31-reload-and-restart.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->31-reload-and-restart.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/examples/31-reload-and-restart.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->harness-host-inputs.test.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/harness-host-inputs.test.ts:1 from "@earendil-works/pi-ai"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/harness-host-inputs.test.ts:31), setResponses (packages/durable/test/harness-host-inputs.test.ts:29)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/harness-host-inputs.test.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->harness-host-inputs.test.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/harness-host-inputs.test.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->nested-images-bench.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/nested-images-bench.ts:20 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/nested-images-bench.ts:174), setResponses (packages/durable/test/nested-images-bench.ts:201)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/nested-images-bench.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->nested-images-bench.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/nested-images-bench.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->nested-tools-bench.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/nested-tools-bench.ts:17 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/nested-tools-bench.ts:99), setResponses (packages/durable/test/nested-tools-bench.ts:147)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/nested-tools-bench.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->nested-tools-bench.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/nested-tools-bench.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->scheduler-fanout-bench.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/scheduler-fanout-bench.ts:10 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/scheduler-fanout-bench.ts:18), setResponses (packages/durable/test/scheduler-fanout-bench.ts:50)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/scheduler-fanout-bench.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->scheduler-fanout-bench.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/scheduler-fanout-bench.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:faux.ts->tool-output-bench.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 FauxProviderHandle declared at packages/ai/src/providers/faux.ts:146
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 FauxProviderHandle not imported by name; resolved via return type of fauxProvider() declared in packages/ai/src/providers/faux.ts:704, fauxProvider imported at packages/durable/test/tool-output-bench.ts:18 from "@earendil-works/pi-ai/providers/faux"
+# E5 FauxProviderHandle fields read: provider (packages/durable/test/tool-output-bench.ts:136), setResponses (packages/durable/test/tool-output-bench.ts:186)
+# E5 FauxProviderHandle stoplisted reads: (none)
+# E6 pair packages/ai/src/providers/faux.ts -> packages/durable/test/tool-output-bench.ts
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:faux.ts->tool-output-bench.ts"
+producer = "packages/ai/src/providers/faux.ts"
+consumer = "packages/durable/test/tool-output-bench.ts"
+evidence = "FauxProviderHandle provider setResponses"
+
+# PROPOSED code:transcript.ts->agent-loop.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-ai at packages/ai/package.json (package.json "workspaces" entry "packages/*")
+# E2 ToolStateChanges declared at packages/ai/src/utils/transcript.ts:144
+# E3 consumer package @earendil-works/pi-agent-core at packages/agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 ToolStateChanges imported at packages/agent/src/agent-loop.ts:6 from "@earendil-works/pi-ai", resolved to packages/ai/src/index.ts, re-exported by barrel packages/ai/src/index.ts:44 from packages/ai/src/utils/transcript.ts; receiver resolved via return type of getToolStateChanges() declared in packages/ai/src/utils/transcript.ts:150
+# E5 ToolStateChanges fields read: toolsAdded (packages/agent/src/agent-loop.ts:351), toolsRemoved (packages/agent/src/agent-loop.ts:351)
+# E5 ToolStateChanges stoplisted reads: (none)
+# E6 pair packages/ai/src/utils/transcript.ts -> packages/agent/src/agent-loop.ts
+# category: production
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:transcript.ts->agent-loop.ts"
+producer = "packages/ai/src/utils/transcript.ts"
+consumer = "packages/agent/src/agent-loop.ts"
+evidence = "ToolStateChanges toolsAdded toolsRemoved"
+
+# PROPOSED code:output.ts->tool.ts
+# status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file or assigned from an imported function's declared return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/chord at packages/chord/package.json (package.json "workspaces" entry "packages/*")
+# E2 OutputLimits declared at packages/chord/src/output.ts:7
+# E2 OutputSlice declared at packages/chord/src/output.ts:13
+# E3 consumer package @earendil-works/pi-durable at packages/durable/package.json (package.json "workspaces" entry "packages/*")
+# E4 OutputLimits imported at packages/durable/src/harness/tool.ts:4 from "@earendil-works/chord/output", resolved to packages/chord/src/output.ts
+# E4 OutputSlice not imported by name; resolved via return type of boundOutput() declared in packages/chord/src/output.ts:49, boundOutput imported at packages/durable/src/harness/tool.ts:4 from "@earendil-works/chord/output"
+# E5 OutputLimits fields read: maxBytes (packages/durable/src/harness/tool.ts:324), maxLines (packages/durable/src/harness/tool.ts:325), retain (packages/durable/src/harness/tool.ts:322)
+# E5 OutputLimits stoplisted reads: (none)
+# E5 OutputSlice fields read: droppedBytes (packages/durable/src/harness/tool.ts:555), droppedLines (packages/durable/src/harness/tool.ts:919), text (packages/durable/src/harness/tool.ts:917)
+# E5 OutputSlice stoplisted reads: (none)
+# E6 pair packages/chord/src/output.ts -> packages/durable/src/harness/tool.ts
+# category: production
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:output.ts->tool.ts"
+producer = "packages/chord/src/output.ts"
+consumer = "packages/durable/src/harness/tool.ts"
+evidence = "OutputLimits maxBytes maxLines retain"
+evidence = "OutputSlice droppedBytes droppedLines text"
+
+# PROPOSED code:truncate.ts->index.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E2 TruncationResult declared at packages/coding-agent/src/core/tools/truncate.ts:15
+# E3 consumer package pi-extension-gondolin at packages/coding-agent/examples/extensions/gondolin/package.json (package.json "workspaces" entry "packages/coding-agent/examples/extensions/gondolin")
+# E4 TruncationResult not imported by name; resolved via return type of truncateHead() declared in packages/coding-agent/src/core/tools/truncate.ts:78, truncateHead imported at packages/coding-agent/examples/extensions/gondolin/index.ts:25 from "@earendil-works/pi-coding-agent"
+# E5 TruncationResult fields read: content (packages/coding-agent/examples/extensions/gondolin/index.ts:293), truncated (packages/coding-agent/examples/extensions/gondolin/index.ts:303)
+# E5 TruncationResult stoplisted reads: (none)
+# E6 pair packages/coding-agent/src/core/tools/truncate.ts -> packages/coding-agent/examples/extensions/gondolin/index.ts
+# category: unknown
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:truncate.ts->index.ts"
+producer = "packages/coding-agent/src/core/tools/truncate.ts"
+consumer = "packages/coding-agent/examples/extensions/gondolin/index.ts"
+evidence = "TruncationResult content truncated"
+
+# PROPOSED code:fuzzy.ts->session-selector-search.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @earendil-works/pi-tui at packages/tui/package.json (package.json "workspaces" entry "packages/*")
+# E2 FuzzyMatch declared at packages/tui/src/fuzzy.ts:7
+# E3 consumer package @earendil-works/pi-coding-agent at packages/coding-agent/package.json (package.json "workspaces" entry "packages/*")
+# E4 FuzzyMatch not imported by name; resolved via return type of fuzzyMatch() declared in packages/tui/src/fuzzy.ts:12, fuzzyMatch imported at packages/coding-agent/src/modes/interactive/components/session-selector-search.ts:1 from "@earendil-works/pi-tui"
+# E5 FuzzyMatch fields read: matches (packages/coding-agent/src/modes/interactive/components/session-selector-search.ts:149), score (packages/coding-agent/src/modes/interactive/components/session-selector-search.ts:150)
+# E5 FuzzyMatch stoplisted reads: (none)
+# E6 pair packages/tui/src/fuzzy.ts -> packages/coding-agent/src/modes/interactive/components/session-selector-search.ts
+# category: production
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:fuzzy.ts->session-selector-search.ts"
+producer = "packages/tui/src/fuzzy.ts"
+consumer = "packages/coding-agent/src/modes/interactive/components/session-selector-search.ts"
+evidence = "FuzzyMatch matches score"

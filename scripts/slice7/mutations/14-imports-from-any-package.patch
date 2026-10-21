@@ -1,0 +1,13 @@
+# mutation: functions imported from any package considered (CM-S7-3)
+# catch: s7_f17_a_function_imported_from_another_package_ties_nothing
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -2184,7 +2184,7 @@
+             if matches!(res, Res::NotCandidate) {
+                 continue;
+             }
+-            if let Some(p) = pkg {
++            if let Some(p) = pkg.map(|_| 0usize) {
+                 let e = imported_from.entry(p).or_insert(imp.line);
+                 *e = (*e).min(imp.line);
+                 imported_names.entry(p).or_default().extend(imp.named.iter().cloned());

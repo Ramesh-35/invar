@@ -1,0 +1,13 @@
+INVAR check (2 contract(s))
+  [HOLDS]    code:stickyNote.ts->restore.ts (schema)
+      note: producer unchanged since lock (2026-10-20T18:22:37Z)
+      note: 18 read field(s) not in invar.lock (angle, backgroundColor, baseFontSize, baseHeight, created); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+  [HOLDS]    code:stickyNote.ts->stickyNotes.test.tsx (schema)
+      note: producer unchanged since lock (2026-10-20T18:22:37Z)
+      note: 16 read field(s) not in invar.lock (angle, backgroundColor, baseFontSize, baseHeight, color); run `invar lock --update` to bind them
+  durability: held since 2026-10-20 (0 days)
+result: ALL 2 contract(s) hold
+summary: held 2 | violated 0 | skipped or not evaluated 0
+measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)
+exit 0

@@ -1,0 +1,16 @@
+# invar.lock: the producer fields this repository depends on.
+# Written by `invar lock`. Accept a reviewed producer change with
+# `invar lock --update`. Waivers are written by hand and kept.
+
+[lock]
+format = "1"
+
+[[contract]]
+id = "code:schema.ts->App.tsx"
+producer = "understand-anything-plugin/packages/core/src/schema.ts"
+blake3 = "d17680d5488d350d83663e284cc34481ffc1bbe369ed619945e94196860cf29d"
+recorded_at = "2026-10-20T18:22:30Z"
+bind = "code 2026-10-20 ValidationResult.fatal string"
+bind = "code 2026-10-20 ValidationResult.issues GraphIssue[]"
+bind = "code 2026-10-20 ValidationResult.success boolean"
+members = "code ValidationResult data errors fatal issues success"

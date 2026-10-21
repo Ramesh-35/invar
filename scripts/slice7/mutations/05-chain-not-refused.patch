@@ -1,0 +1,13 @@
+# mutation: a member access on the call result still ties (CM-S7-5)
+# catch: s7_f8_a_property_of_the_call_result_is_not_the_shape
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1179,7 +1179,7 @@
+                 let ends = close >= t.0.len()
+                     || matches!(&t.0[close].0, Tok::P(b';') | Tok::P(b',') | Tok::P(b')') | Tok::P(b'}') | Tok::P(b']'))
+                     || (matches!(&t.0[close].0, Tok::Id(_)) && m[t.0[close - 1].1..t.0[close].1].contains(&b'\n'));
+-                if ends && (*form != RetForm::Promise || awaited) {
++                if (ends || true) && (*form != RetForm::Promise || awaited) {
+                     put(&mut one, &mut arr, name, *form == RetForm::Arr);
+                     routed.insert(name.to_string(), f.to_string());
+                 }

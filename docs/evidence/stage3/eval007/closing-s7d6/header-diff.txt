@@ -1,0 +1,100 @@
+== ChatGPTNextWeb__NextChat.invar.toml
+5,7c5,8
+< # workspace package, imported by name in another, with at least 2 of its
+< # direct fields read there, each on a receiver declared as that shape in
+< # the consumer file (field writes excluded; types are not inferred).
+---
+> # workspace package, with at least 2 of its direct fields read in a file of
+> # another, each on a receiver declared as that shape in that file or
+> # assigned from a function imported from the shape's package whose declared
+> # return type is the shape (field writes excluded; types are not inferred).
+== Egonex-AI__Understand-Anything.invar.toml
+5,7c5,8
+< # workspace package, imported by name in another, with at least 2 of its
+< # direct fields read there, each on a receiver declared as that shape in
+< # the consumer file (field writes excluded; types are not inferred).
+---
+> # workspace package, with at least 2 of its direct fields read in a file of
+> # another, each on a receiver declared as that shape in that file or
+> # assigned from a function imported from the shape's package whose declared
+> # return type is the shape (field writes excluded; types are not inferred).
+== diegosouzapw__OmniRoute.invar.toml
+5,7c5,8
+< # workspace package, imported by name in another, with at least 2 of its
+< # direct fields read there, each on a receiver declared as that shape in
+< # the consumer file (field writes excluded; types are not inferred).
+---
+> # workspace package, with at least 2 of its direct fields read in a file of
+> # another, each on a receiver declared as that shape in that file or
+> # assigned from a function imported from the shape's package whose declared
+> # return type is the shape (field writes excluded; types are not inferred).
+== earendil-works__pi.invar.toml
+5,7c5,8
+< # workspace package, imported by name in another, with at least 2 of its
+< # direct fields read there, each on a receiver declared as that shape in
+< # the consumer file (field writes excluded; types are not inferred).
+---
+> # workspace package, with at least 2 of its direct fields read in a file of
+> # another, each on a receiver declared as that shape in that file or
+> # assigned from a function imported from the shape's package whose declared
+> # return type is the shape (field writes excluded; types are not inferred).
+== excalidraw__excalidraw.invar.toml
+5,7c5,8
+< # workspace package, imported by name in another, with at least 2 of its
+< # direct fields read there, each on a receiver declared as that shape in
+< # the consumer file (field writes excluded; types are not inferred).
+---
+> # workspace package, with at least 2 of its direct fields read in a file of
+> # another, each on a receiver declared as that shape in that file or
+> # assigned from a function imported from the shape's package whose declared
+> # return type is the shape (field writes excluded; types are not inferred).
+== freeCodeCamp__freeCodeCamp.invar.toml
+5,7c5,8
+< # workspace package, imported by name in another, with at least 2 of its
+< # direct fields read there, each on a receiver declared as that shape in
+< # the consumer file (field writes excluded; types are not inferred).
+---
+> # workspace package, with at least 2 of its direct fields read in a file of
+> # another, each on a receiver declared as that shape in that file or
+> # assigned from a function imported from the shape's package whose declared
+> # return type is the shape (field writes excluded; types are not inferred).
+== microsoft__playwright.invar.toml
+5,7c5,8
+< # workspace package, imported by name in another, with at least 2 of its
+< # direct fields read there, each on a receiver declared as that shape in
+< # the consumer file (field writes excluded; types are not inferred).
+---
+> # workspace package, with at least 2 of its direct fields read in a file of
+> # another, each on a receiver declared as that shape in that file or
+> # assigned from a function imported from the shape's package whose declared
+> # return type is the shape (field writes excluded; types are not inferred).
+== puppeteer__puppeteer.invar.toml
+5,7c5,8
+< # workspace package, imported by name in another, with at least 2 of its
+< # direct fields read there, each on a receiver declared as that shape in
+< # the consumer file (field writes excluded; types are not inferred).
+---
+> # workspace package, with at least 2 of its direct fields read in a file of
+> # another, each on a receiver declared as that shape in that file or
+> # assigned from a function imported from the shape's package whose declared
+> # return type is the shape (field writes excluded; types are not inferred).
+== thedotmack__claude-mem.invar.toml
+5,7c5,8
+< # workspace package, imported by name in another, with at least 2 of its
+< # direct fields read there, each on a receiver declared as that shape in
+< # the consumer file (field writes excluded; types are not inferred).
+---
+> # workspace package, with at least 2 of its direct fields read in a file of
+> # another, each on a receiver declared as that shape in that file or
+> # assigned from a function imported from the shape's package whose declared
+> # return type is the shape (field writes excluded; types are not inferred).
+== vuejs__vue.invar.toml
+5,7c5,8
+< # workspace package, imported by name in another, with at least 2 of its
+< # direct fields read there, each on a receiver declared as that shape in
+< # the consumer file (field writes excluded; types are not inferred).
+---
+> # workspace package, with at least 2 of its direct fields read in a file of
+> # another, each on a receiver declared as that shape in that file or
+> # assigned from a function imported from the shape's package whose declared
+> # return type is the shape (field writes excluded; types are not inferred).

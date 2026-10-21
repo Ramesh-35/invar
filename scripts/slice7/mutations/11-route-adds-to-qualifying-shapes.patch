@@ -1,0 +1,20 @@
+# mutation: the route consulted for shapes that already qualify (existing evidence moves)
+# catch: s7_f14_the_route_never_adds_reads_to_a_shape_that_already_qualifies
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -2288,13 +2288,13 @@
+                                 // SLICE7: the imported-return-type route, only for a shape
+                                 // that does not qualify without it (existing evidence never moves).
+                                 let mut via = Vec::new();
+-                                if fields.len() < MIN_FIELDS {
++                                if fields.len() < MIN_FIELDS || true {
+                                     let avail = route_fns(p, name, &imported_locals, &pkg_funcs, &pkg_shape_names);
+                                     if !avail.is_empty() {
+                                         let routes_only: BTreeMap<String, Route> = avail.iter().map(|(k, (r, _))| (k.clone(), r.clone())).collect();
+                                         let (r1, rr) = receiver_reads(fi, name, &routes_only);
+                                         let (f1, s1) = collect_fields(members, &r1, &stop);
+-                                        if f1.len() >= MIN_FIELDS {
++                                        if f1.len() >= MIN_FIELDS && f1.len() >= fields.len() {
+                                             via = used_routes(&f1, &rr, &avail);
+                                             fields = f1;
+                                             stoplisted = s1;

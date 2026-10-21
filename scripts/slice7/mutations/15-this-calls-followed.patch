@@ -1,0 +1,18 @@
+# mutation: `this.f(...)` treated as a call of the imported f
+# catch: s7_f16_this_dot_calls_are_not_followed
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1172,10 +1172,10 @@
+         }
+         // SLICE7: `r = [await] f(...)` with f imported (B2); the call must end
+         // the expression: nothing chained onto its result.
+-        if let Some(f) = t.id(q) {
++        if let Some(f) = t.id(local) {
+             let awaited = q == start + 1 && t.is(start, "await");
+-            if let (Some((form, _, _)), true, true) = (imported.get(f), q == start || awaited, t.p(q + 1, b'(')) {
+-                let close = t.skip_group(q + 1, b'(', b')');
++            if let (Some((form, _, _)), true, true) = (imported.get(f), q == start || awaited, t.p(local + 1, b'(')) {
++                let close = t.skip_group(local + 1, b'(', b')');
+                 let ends = close >= t.0.len()
+                     || matches!(&t.0[close].0, Tok::P(b';') | Tok::P(b',') | Tok::P(b')') | Tok::P(b'}') | Tok::P(b']'))
+                     || (matches!(&t.0[close].0, Tok::Id(_)) && m[t.0[close - 1].1..t.0[close].1].contains(&b'\n'));

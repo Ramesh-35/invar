@@ -436,20 +436,37 @@ fn a02_ambiguous_shape_abstains() {
     );
 }
 
+// SUPERSEDED by INIT-DISCOVERY-SLICE7 under ruling S7-D4 (2026-10-21), the
+// standing rule of S3-D1: this fixture pinned R6 on a receiver typed by an
+// imported function's written return type (`exec(): Result`), the limit
+// SLICE7 lifts. Original name and body, kept verbatim (also in
+// docs/architecture/INIT-DISCOVERY-SLICE7.md section K):
+//     fn u01_inferred_type_abstains_r6()
+//     expect(
+//         &init(&d),
+//         &[],
+//         &["ABSTAIN R6 b/src/x.ts:1 reads exit_code, stdout_text of Result (a/run.ts:4) without importing it by name (out of v1)"],
+//         &[],
+//         "SUMMARY packages=2 candidates=1 proposals=0 abstentions=1 inventory=0 status=COMPLETE",
+//     );
+// The reason it existed stands for every receiver whose type is inferred;
+// only a function the shape's package declares, once, with a written return
+// type of the shape now ties a receiver. The proposal carries SLICE7's
+// status line, which this file's shared parser does not accept by design,
+// so the raw output is checked here (the full assertions are S7-F1).
 #[test]
-fn u01_inferred_type_abstains_r6() {
+fn u01_return_type_receiver_proposes_by_slice7() {
     let run = "export function exec(c: string): Result {\n  return null as any;\n}\nexport interface Result {\n  stdout_text: string;\n  exit_code: number;\n}\n";
     let d = ws(
         "u01",
         &[ROOT_AB, PKG_A, PKG_B, ("a/run.ts", run), ("b/src/x.ts", "import { exec } from 'a/run';\nexport const f = () => {\n  const r = exec('x');\n  return [r.stdout_text, r.exit_code];\n};\n")],
     );
-    expect(
-        &init(&d),
-        &[],
-        &["ABSTAIN R6 b/src/x.ts:1 reads exit_code, stdout_text of Result (a/run.ts:4) without importing it by name (out of v1)"],
-        &[],
-        "SUMMARY packages=2 candidates=1 proposals=0 abstentions=1 inventory=0 status=COMPLETE",
-    );
+    let o = Command::new(env!("CARGO_BIN_EXE_invar")).args(["init", "--stdout", "--root"]).arg(&d).output().unwrap();
+    assert_eq!(o.status.code(), Some(0));
+    let m = String::from_utf8(o.stdout).unwrap();
+    assert!(m.contains("\n# E4 Result not imported by name; resolved via return type of exec() declared in a/run.ts:1, exec imported at b/src/x.ts:1 from \"a/run\"\n"), "{m}");
+    assert!(!m.contains("# ABSTAIN R6 "), "{m}");
+    assert!(m.ends_with("# SUMMARY packages=2 candidates=1 proposals=1 abstentions=0 inventory=0 status=COMPLETE\n"), "{m}");
 }
 
 // SUPERSEDED by INIT-DISCOVERY-SLICE4 under ruling S4-D1 (2026-10-19), the

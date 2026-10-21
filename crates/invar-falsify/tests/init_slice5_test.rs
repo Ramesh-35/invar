@@ -213,7 +213,12 @@ fn s5_n1_a_typed_proposal_changes_only_the_s5_d4_text() {
             "# direct fields read there. The receiver of those reads is NOT verified.\n",
             "# direct fields read there, each on a receiver declared as that shape in\n# the consumer file (field writes excluded; types are not inferred).\n",
         )
-        .replace("# status: PROPOSED (heuristic; receiver of field reads not verified)\n", &format!("# {STATUS}\n"));
+        .replace("# status: PROPOSED (heuristic; receiver of field reads not verified)\n", &format!("# {STATUS}\n"))
+        // S7-D6 (INIT-DISCOVERY-SLICE7): the header sentence, and nothing else.
+        .replace(
+            "# workspace package, imported by name in another, with at least 2 of its\n# direct fields read there, each on a receiver declared as that shape in\n# the consumer file (field writes excluded; types are not inferred).\n",
+            "# workspace package, with at least 2 of its direct fields read in a file of\n# another, each on a receiver declared as that shape in that file or\n# assigned from a function imported from the shape's package whose declared\n# return type is the shape (field writes excluded; types are not inferred).\n",
+        );
     assert_ne!(want, N1_SLICE4);
     assert_eq!(o.raw, want);
 }

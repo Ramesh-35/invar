@@ -1,0 +1,13 @@
+# mutation: a shape name declared twice in the package still ties
+# catch: s7_f15_a_shape_name_declared_twice_in_the_package_ties_nothing
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -983,7 +983,7 @@
+     shape_names: &BTreeMap<usize, BTreeMap<String, usize>>,
+ ) -> BTreeMap<String, (Route, Via)> {
+     let mut out = BTreeMap::new();
+-    if shape_names.get(&p).and_then(|m| m.get(s)) != Some(&1) {
++    if shape_names.get(&p).and_then(|m| m.get(s)).is_none() {
+         return out;
+     }
+     let (Some(ls), Some(fs)) = (locals.get(&p), funcs.get(&p)) else { return out };

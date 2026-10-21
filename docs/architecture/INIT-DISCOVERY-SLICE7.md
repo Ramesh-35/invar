@@ -1,7 +1,9 @@
 # INIT-DISCOVERY-SLICE7: receivers typed by an imported function's return type
 
-Status: DRAFT r1 for ruling. Implementation NOT authorized. Parent: the R6
-measurement (docs/evidence/r6-probe/) and the founder's queue of
+Status: RATIFIED (S7-D1 to S7-D6), implemented through Gates 0 to 5 and
+LANDED; STAGE3-EVAL-007 met every gate of the ruling (sections J and K). Sections
+0 to I are the draft r1 text as committed in a52c7f0, unchanged. Parent:
+the R6 measurement (docs/evidence/r6-probe/) and the founder's queue of
 2026-10-20. Baseline: b0a8c79.
 
 ## 0. Evidence, measured on b0a8c79 before this draft (throwaway prototype)
@@ -140,3 +142,102 @@ pattern, which is 31 of the 39.
 Stop and report on: any existing proposal changing beyond S7-D2; any
 conversion outside the measured set; any fixture collision beyond u01; any
 need for a parser or dependency.
+
+## J. Rulings of 2026-10-21 (recorded)
+
+S7-D1 uniform scope, APPROVED: one rule for every shape, applied only to a
+shape that does not qualify without it, so no existing evidence moves.
+S7-D2 APPROVED with a narrower text: a proposal whose shapes are all
+reached through the route carries `PROPOSED (heuristic; receiver assigned
+from imported function return type; field writes excluded; types are not
+inferred)`; every other proposal keeps today's line byte for byte. A
+proposal that mixes declared and routed shapes (founder, same day) gains
+the route shape in its own block and carries `PROPOSED (heuristic;
+counted reads are on receivers declared as the shape in this file or
+assigned from an imported function's declared return type; field writes
+excluded; types are not inferred)`.
+S7-D3 APPROVED: E4 names the function and its declaration, `{S} not
+imported by name; resolved via return type of {f}() declared in
+{file}:{line}, {f} imported at {consumer}:{line} from {spec:?}`; a shape
+also imported by name keeps its E4 and gains `; receiver resolved via
+return type of {f}() declared in {file}:{line}`. Abstain if ambiguous.
+S7-D4 APPROVED: slice 1 u01 superseded, the original kept verbatim, its
+error codes kept; the R6 explain text gains the slice 7 clause.
+S7-D5 APPROVED: blind adjudication of every new shape from the frozen
+release binary, reported for all shapes, for the faux pattern and
+excluding it, with denominators; 60 percent floor, a hard gate.
+Also ruled: fixtures frozen before implementation; the property-chaining
+gap closed; 100 percent of non-equivalent mutants caught, equivalents
+recorded; byte preservation; determinism on 10 repositories; no tuning
+to the expected count; no cross-file property types.
+S7-D6 (founder, 2026-10-21, on finding S7-F-04) APPROVED for SLICE7: the
+header init writes at the top of every invar.toml must not misstate how a
+shape was reached. It now reads "a TypeScript shape exported by one
+workspace package, with at least 2 of its direct fields read in a file of
+another, each on a receiver declared as that shape in that file or
+assigned from a function imported from the shape's package whose declared
+return type is the shape (field writes excluded; types are not
+inferred)". The ruled clause is added verbatim; "imported by name in
+another" is dropped with it, because it is false for the same 40 shapes.
+
+## K. Results
+
+Gate 0 PASS: every crate file identical to b0a8c79 (Mac and sandbox).
+Gate 1 PASS: tests/init_slice7_test.rs frozen before engine code
+(9b1864b7538e): S7-F1 to F4b, F5 to F11, F12 (uniform RECV rescue), F13
+(mixed block), F14 (golden: the route never adds reads to a shape that
+already qualifies), F15 (a shape name declared twice in the package), F16
+(`this.f()` not followed), N1 (golden). Slice 1 u01 superseded as
+`u01_return_type_receiver_proposes_by_slice7` (3957506278f3).
+Gate 2 PASS: codepairs.rs, init.rs and explain.rs only. Per package: an
+index of function declarations with their written return type, and of
+shape names. A receiver `r = [await] f(...)` is tied to S only when f is
+imported by name from S's package, declared there exactly once, returns
+exactly S, Readonly<S>, Promise<S> (awaited), S[] or Array<S>, S is
+declared once by that name in the package, and the call ends the
+expression (no `.`, `?.`, `[`, `!`, `??` or `||` after it). Stop
+conditions checked on the six cloned repositories: none hit.
+Gate 3 PASS: 15 of 15 mutants caught from scratch (scripts/slice7), the
+section E eight plus seven for the bounds added at Gate 1.
+Gate 4 PASS: 364 of 364 tests, 0 compiler warnings, release binary
+029c0c286ecf; changed files exactly the five above plus the new test file.
+After S7-D6: 364 of 364, 0 warnings, release binary 681fc1463275; init.rs
+changes by the header sentence only, and the goldens of slices 3 to 7 by
+that sentence only, each with its original lines kept verbatim (S5-D4
+precedent). Reverting those lines in tests/init_slice7_test.rs gives back
+the Gate 1 bytes, 9b1864b7538e, above the Gate 3 marker.
+Gate 5 PASS: STAGE3-EVAL-007 (docs/evidence/stage3/eval007/LEDGER.md):
+152 proposals; precision 39 of 40 new shapes TRUE (97.5 percent),
+agreement 40 of 40; 0 silent drops; 39 of 39 TRUE contracts round-trip.
+Closing re-measurement on 681fc1463275: 10 of 10 exit 0, deterministic;
+each output differs from EVAL-007 in exactly the header sentence (3 lines
+to 4) and nothing else (eval007/closing-s7d6).
+
+Corrections to this draft, found during the gates and stated:
+
+S7-F-01 Section 0 and section F forecast 153 proposals and 42 shapes for
+the uniform variant; the engine gives 152 and 40. The prototype accepted
+a return type written `S | undefined`; the ruled forms do not. The two
+prototype conversions that used it are gone, and nothing else moved.
+S7-F-02 Gate 3, first run: 3 of 15 mutants survived, and each was a fault
+in the test set, not the engine. Mutant 03 (duplicate declarations not
+refused) survived S7-F6 because the duplicate's file sorted before the
+real declaration and returned another type, so the first declaration
+happened to tie nothing; S7-F6b puts a duplicate returning the shape
+after it. Mutant 14 (functions imported from any package) had no fixture
+at all: section D declared none for CM-S7-3; S7-F17 is that fixture.
+Mutant 15 as first written did not change the engine's behaviour (an
+equivalent mutant, written wrongly: it moved a variable the route never
+read); it was rewritten to follow `this.f(...)` and is caught by S7-F16.
+S7-F6b and S7-F17 were appended after the Gate 1 freeze, below a marker;
+the bytes above it are the frozen file (9b1864b7538e).
+S7-F-03 The R6 probe's README calls the faux pattern one function and one
+shape (`registerFauxProvider`, FauxProviderRegistration). Its own TSV, and
+the engine, show two: `fauxProvider()` (FauxProviderHandle, 27) and
+`registerFauxProvider()` (FauxProviderRegistration, 5).
+S7-F-04 (resolved by S7-D6) The header that `invar init` writes at the top
+of every invar.toml says each proposal's shape is "imported by name" and
+each read is "on a receiver declared as that shape in the consumer file".
+For the 40 route shapes that is no longer true; their status and E4 lines
+say so, the header does not. Changing the header changes every non-empty
+init output, which S7-D2 did not authorize; ruled as S7-D6 above.

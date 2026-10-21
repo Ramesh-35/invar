@@ -1,0 +1,13 @@
+# mutation: a mixed block given the route-only status line
+# catch: s7_f13_a_mixed_block_carries_the_combined_line
+--- a/crates/invar-falsify/src/init.rs
++++ b/crates/invar-falsify/src/init.rs
+@@ -715,7 +715,7 @@
+     let routed = p.shapes.iter().filter(|s| !s.via.is_empty()).count();
+     let status = if routed == 0 {
+         PROPOSAL_STATUS
+-    } else if routed == p.shapes.len() {
++    } else if routed >= 1 {
+         ROUTE_STATUS
+     } else {
+         MIXED_STATUS

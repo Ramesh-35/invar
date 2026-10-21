@@ -1,0 +1,20 @@
+invar backtest (invar.toml, 1 contract(s), depth 50)
+
+code:schema.ts->App.tsx: understand-anything-plugin/packages/core/src/schema.ts (15 commit(s) replayed)
+  ValidationResult.fatal
+    2026-03-15 b75235919e97 absent
+    2026-03-26 28e3bd163175 present
+    never absent after introduction
+  ValidationResult.issues
+    2026-03-15 b75235919e97 absent
+    2026-03-26 28e3bd163175 present
+    never absent after introduction
+  ValidationResult.success
+    2026-03-15 b75235919e97 present
+    never absent after introduction
+
+Timelines replay today's extraction over past file contents. They are
+not replayed verdicts: waivers, selectors and samples are today's, and a
+past consumer may not have read the field yet. Unreadable commits are
+stated, never guessed.
+exit 0

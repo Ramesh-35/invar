@@ -1,0 +1,13 @@
+# mutation: the function name omitted from E4 provenance
+# catch: s7_f1_the_u01_workspace_proposes_by_return_type
+--- a/crates/invar-falsify/src/init.rs
++++ b/crates/invar-falsify/src/init.rs
+@@ -707,7 +707,7 @@
+ pub const MIXED_STATUS: &str = "status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file or assigned from an imported function's declared return type; field writes excluded; types are not inferred)";
+ 
+ fn via_text(vs: &[crate::codepairs::Via]) -> String {
+-    vs.iter().map(|v| format!("{}() declared in {}:{}", v.function, v.decl_file, v.decl_line)).collect::<Vec<_>>().join(" and ")
++    vs.iter().map(|v| format!("() declared in {}:{}", v.decl_file, v.decl_line)).collect::<Vec<_>>().join(" and ")
+ }
+ 
+ fn evidence_lines(p: &crate::codepairs::CodePair) -> Vec<String> {

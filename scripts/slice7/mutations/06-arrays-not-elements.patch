@@ -1,0 +1,13 @@
+# mutation: an array return binds the array as a single value
+# catch: s7_f4_an_array_binds_its_elements
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1180,7 +1180,7 @@
+                     || matches!(&t.0[close].0, Tok::P(b';') | Tok::P(b',') | Tok::P(b')') | Tok::P(b'}') | Tok::P(b']'))
+                     || (matches!(&t.0[close].0, Tok::Id(_)) && m[t.0[close - 1].1..t.0[close].1].contains(&b'\n'));
+                 if ends && (*form != RetForm::Promise || awaited) {
+-                    put(&mut one, &mut arr, name, *form == RetForm::Arr);
++                    put(&mut one, &mut arr, name, false);
+                     routed.insert(name.to_string(), f.to_string());
+                 }
+             }

@@ -1,0 +1,35 @@
+# PROPOSED code:stickyNote.ts->restore.ts
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @excalidraw/element at packages/element/package.json (package.json "workspaces" entry "packages/*")
+# E2 StickyNoteLayout declared at packages/element/src/stickyNote.ts:548
+# E3 consumer package @excalidraw/excalidraw at packages/excalidraw/package.json (package.json "workspaces" entry "packages/*")
+# E4 StickyNoteLayout not imported by name; resolved via return type of getStickyNoteLayout() declared in packages/element/src/stickyNote.ts:669, getStickyNoteLayout imported at packages/excalidraw/data/restore.ts:53 from "@excalidraw/element"
+# E5 StickyNoteLayout fields read: container (packages/excalidraw/data/restore.ts:948), text (packages/excalidraw/data/restore.ts:949)
+# E5 StickyNoteLayout stoplisted reads: (none)
+# E6 pair packages/element/src/stickyNote.ts -> packages/excalidraw/data/restore.ts
+# category: unknown
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:stickyNote.ts->restore.ts"
+producer = "packages/element/src/stickyNote.ts"
+consumer = "packages/excalidraw/data/restore.ts"
+evidence = "StickyNoteLayout container text"
+
+# PROPOSED code:stickyNote.ts->stickyNotes.test.tsx
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @excalidraw/element at packages/element/package.json (package.json "workspaces" entry "packages/*")
+# E2 StickyNoteLayout declared at packages/element/src/stickyNote.ts:548
+# E3 consumer package @excalidraw/excalidraw at packages/excalidraw/package.json (package.json "workspaces" entry "packages/*")
+# E4 StickyNoteLayout not imported by name; resolved via return type of getStickyNoteLayout() declared in packages/element/src/stickyNote.ts:669, getStickyNoteLayout imported at packages/excalidraw/tests/stickyNotes.test.tsx:13 from "@excalidraw/element"
+# E5 StickyNoteLayout fields read: container (packages/excalidraw/tests/stickyNotes.test.tsx:264), text (packages/excalidraw/tests/stickyNotes.test.tsx:265)
+# E5 StickyNoteLayout stoplisted reads: (none)
+# E6 pair packages/element/src/stickyNote.ts -> packages/excalidraw/tests/stickyNotes.test.tsx
+# category: test
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:stickyNote.ts->stickyNotes.test.tsx"
+producer = "packages/element/src/stickyNote.ts"
+consumer = "packages/excalidraw/tests/stickyNotes.test.tsx"
+evidence = "StickyNoteLayout container text"

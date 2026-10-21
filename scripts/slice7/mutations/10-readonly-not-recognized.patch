@@ -1,0 +1,13 @@
+# mutation: Readonly<S> not recognized
+# catch: s7_f3_readonly_proposes
+--- a/crates/invar-falsify/src/codepairs.rs
++++ b/crates/invar-falsify/src/codepairs.rs
+@@ -1077,7 +1077,7 @@
+         form = RetForm::Promise;
+         j += 2;
+         wrap += 1;
+-    } else if matches!(t.id(j), Some("Readonly" | "Array")) && t.p(j + 1, b'<') {
++    } else if matches!(t.id(j), Some("Array")) && t.p(j + 1, b'<') {
+         if t.is(j, "Array") {
+             form = RetForm::Arr;
+         }

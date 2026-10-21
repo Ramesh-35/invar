@@ -1,0 +1,4 @@
+  + contract code:stickyNote.ts->restore.ts (2 bindings)
+  + contract code:stickyNote.ts->stickyNotes.test.tsx (2 bindings)
+wrote ./invar.lock (2 contract(s), 4 binding(s))
+exit 0

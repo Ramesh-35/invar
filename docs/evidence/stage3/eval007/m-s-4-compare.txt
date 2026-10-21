@@ -1,0 +1,22 @@
+ChatGPTNextWeb__NextChat.invar.toml: byte-identical
+Egonex-AI__Understand-Anything.invar.toml: blocks +1 -0 changed 0; abstentions removed {'R6': 1} added {}
+  other lines differing: ['contracts_proposed = "11"', 'abstentions = "84"', '# SUMMARY packages=7 candidates=73 proposals=11 abstentions=84 inventory=1 status=COMPLETE', 'contracts_proposed = "10"', 'abstentions = "85"', '# SUMMARY packages=7 candidates=73 proposals=10 abstentions=85 inventory=1 status=COMPLETE']
+diegosouzapw__OmniRoute.invar.toml: byte-identical
+earendil-works__pi.invar.toml: blocks +36 -0 changed 1; abstentions removed {'R6': 36, 'RECV': 1} added {}
+  changed code:output.ts->tool.ts:
+    + # status: PROPOSED (heuristic; counted reads are on receivers declared as the shape in this file or assigned from an imported function's declared return type; field writes excluded; types are not inferred)
+    + # E2 OutputSlice declared at packages/chord/src/output.ts:13
+    + # E4 OutputSlice not imported by name; resolved via return type of boundOutput() declared in packages/chord/src/output.ts:49, boundOutput imported at packages/durable/src/harness/tool.ts:4 from "@earendil-works/chord/output"
+    + # E5 OutputSlice fields read: droppedBytes (packages/durable/src/harness/tool.ts:555), droppedLines (packages/durable/src/harness/tool.ts:919), text (packages/durable/src/harness/tool.ts:917)
+    + # E5 OutputSlice stoplisted reads: (none)
+    + evidence = "OutputSlice droppedBytes droppedLines text"
+    - # status: PROPOSED (heuristic; each counted read is on a receiver declared as the shape in this file; field writes excluded; types are not inferred)
+  other lines differing: ['contracts_proposed = "99"', 'abstentions = "2943"', '# SUMMARY packages=16 candidates=2554 proposals=99 abstentions=2943 inventory=4 status=COMPLETE', 'contracts_proposed = "63"', 'abstentions = "2980"', '# SUMMARY packages=16 candidates=2554 proposals=63 abstentions=2980 inventory=4 status=COMPLETE']
+excalidraw__excalidraw.invar.toml: blocks +2 -0 changed 0; abstentions removed {'R6': 2} added {}
+  other lines differing: ['contracts_proposed = "28"', 'abstentions = "1706"', '# SUMMARY packages=10 candidates=3866 proposals=28 abstentions=1706 inventory=0 status=COMPLETE', 'contracts_proposed = "26"', 'abstentions = "1708"', '# SUMMARY packages=10 candidates=3866 proposals=26 abstentions=1708 inventory=0 status=COMPLETE']
+freeCodeCamp__freeCodeCamp.invar.toml: byte-identical
+microsoft__playwright.invar.toml: byte-identical
+puppeteer__puppeteer.invar.toml: byte-identical
+thedotmack__claude-mem.invar.toml: byte-identical
+vuejs__vue.invar.toml: byte-identical
+total {'add': 39, 'rem': 0, 'chg': 1}

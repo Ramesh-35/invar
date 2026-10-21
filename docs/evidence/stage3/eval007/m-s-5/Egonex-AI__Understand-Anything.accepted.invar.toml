@@ -1,0 +1,17 @@
+# PROPOSED code:schema.ts->App.tsx
+# status: PROPOSED (heuristic; receiver assigned from imported function return type; field writes excluded; types are not inferred)
+# E1 producer package @understand-anything/core at understand-anything-plugin/packages/core/package.json (pnpm-workspace.yaml entry "understand-anything-plugin/packages/*")
+# E2 ValidationResult declared at understand-anything-plugin/packages/core/src/schema.ts:492
+# E3 consumer package @understand-anything/dashboard at understand-anything-plugin/packages/dashboard/package.json (pnpm-workspace.yaml entry "understand-anything-plugin/packages/*")
+# E4 ValidationResult not imported by name; resolved via return type of validateGraph() declared in understand-anything-plugin/packages/core/src/schema.ts:563, validateGraph imported at understand-anything-plugin/packages/dashboard/src/App.tsx:2 from "@understand-anything/core/schema"
+# E5 ValidationResult fields read: fatal (understand-anything-plugin/packages/dashboard/src/App.tsx:182), issues (understand-anything-plugin/packages/dashboard/src/App.tsx:170), success (understand-anything-plugin/packages/dashboard/src/App.tsx:168)
+# E5 ValidationResult stoplisted reads: data
+# E6 pair understand-anything-plugin/packages/core/src/schema.ts -> understand-anything-plugin/packages/dashboard/src/App.tsx
+# category: production
+# lock: run `invar lock` before `invar check`. Without a lock, check evaluates only payload.<field> reads and says nothing about this proposal (a HOLDS would be vacuous). `invar lock` binds every field of the producer file that the consumer mentions in any form, which is wider than the evidence above.
+[[invariant]]
+kind = "schema"
+id = "code:schema.ts->App.tsx"
+producer = "understand-anything-plugin/packages/core/src/schema.ts"
+consumer = "understand-anything-plugin/packages/dashboard/src/App.tsx"
+evidence = "ValidationResult fatal issues success"
