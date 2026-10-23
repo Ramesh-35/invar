@@ -1684,6 +1684,30 @@ three or more hops, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
 docs/evidence/stage3/eval008.
 
+## 2026-10-23: CHECK-INCR-1 implemented (reuse a HOLDS on unchanged inputs)
+
+`invar check` reuses a HOLDS verdict when the engine, the contract's
+invar.toml block, its invar.lock entry and the bytes of every file the
+evaluation read are all unchanged, and no waiver or locked sample names the
+contract. Records live in invar.lock (`held`, `held_input`, written by
+`invar lock`, which now evaluates) and in the local, non-authoritative
+`.invar/cache/verdicts.json`. A reused contract prints `[HOLDS] <id>
+(<kind>) unchanged since lock <time>` (or `since last run`) and counts as
+held; exit codes are unchanged, and `--no-reuse` evaluates everything.
+Under `--ci` the cache is never used and a lock record is reused only when
+`--lock-signers` verified the lock in that run; unsigned CI evaluates
+everything (an unsigned `held_input` hash is writable by anyone who can
+edit a PR's lock). Measured on the EVAL-008 corpus (sandbox, Linux x86_64),
+replaying the last 100 commits of all 6 repositories against `--no-reuse`:
+equal exit codes at all 600 commits, equal tags on all 5,128 evaluable
+contract-commit pairs, zero disagreements; 69.4% (excalidraw) to 99.2%
+(puppeteer) of checks reused; pi's mean evaluable-commit check 89.7 ms to
+17.5 ms. 424 of 424 tests, zero warnings; 22 of 22 mutants caught. Not
+claimed: latency elsewhere; mechanical proof that the captured input set is
+complete (it is a code-reading argument checked by fixtures and the
+replay); tamper-evidence of unsigned locks. Record:
+docs/architecture/CHECK-INCR-1.md; docs/evidence/incr.
+
 ## 2026-10-22: CHECK-PERF-1 implemented (memoized check analyses)
 
 `invar check` and the `check` tool of `invar mcp` remember their pure

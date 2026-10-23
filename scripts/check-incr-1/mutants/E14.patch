@@ -1,0 +1,14 @@
+# E14: missing input treated as unchanged
+diff --git a/crates/invar-falsify/src/reuse.rs b/crates/invar-falsify/src/reuse.rs
+index 784ff47..01c5920 100644
+--- a/crates/invar-falsify/src/reuse.rs
++++ b/crates/invar-falsify/src/reuse.rs
+@@ -141,7 +141,7 @@ pub(crate) fn inputs_unchanged(rec: &Held, resolver: &Resolver) -> Option<Vec<Fe
+         let p = match seen.get(reference.as_str()) {
+             Some(p) => p.clone(),
+             None => {
+-                let r = resolver.resolve(reference).ok()?;
++                let Ok(r) = resolver.resolve(reference) else { seen.insert(reference, None); continue };
+                 if blake3::hash(r.text.as_bytes()).to_hex().as_str() != hash {
+                     return None;
+                 }

@@ -25,7 +25,7 @@ fn put(root: &Path, rel: &str, body: &str) {
 }
 
 fn invar(dir: &Path, args: &[&str]) -> (i32, String) {
-    let o = Command::new(env!("CARGO_BIN_EXE_invar")).args(args).current_dir(dir).output().unwrap();
+    let o = Command::new(env!("CARGO_BIN_EXE_invar")).args(no_reuse(args)).current_dir(dir).output().unwrap();
     let mut s = String::from_utf8_lossy(&o.stdout).to_string();
     s.push_str(&String::from_utf8_lossy(&o.stderr));
     (o.status.code().unwrap_or(-1), s)
@@ -250,4 +250,14 @@ fn p_f6_each_contract_keeps_its_own_pointer() {
     let (code, out) = invar(&d, &["check"]);
     assert_eq!(code, 0, "{out}");
     assert!(out.contains("  [HOLDS]    orders (schema)\n") && out.contains("  [HOLDS]    refunds (schema)\n"), "{out}");
+}
+
+/// CHECK-INCR-1 (K-2): these tests exercise evaluation, so `check` runs with
+/// `--no-reuse`; reuse is tested in check_incr1_test.rs.
+fn no_reuse<'a>(args: &[&'a str]) -> Vec<&'a str> {
+    let mut v = args.to_vec();
+    if v.first() == Some(&"check") && !v.contains(&"--no-reuse") {
+        v.push("--no-reuse");
+    }
+    v
 }

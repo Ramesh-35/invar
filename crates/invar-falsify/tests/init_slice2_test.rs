@@ -148,7 +148,7 @@ fn init(dir: &Path) -> Out {
 }
 
 fn invar(dir: &Path, args: &[&str]) -> (i32, String) {
-    let o = Command::new(bin()).args(args).current_dir(dir).output().unwrap();
+    let o = Command::new(bin()).args(no_reuse(args)).current_dir(dir).output().unwrap();
     let mut s = String::from_utf8_lossy(&o.stdout).to_string();
     s.push_str(&String::from_utf8_lossy(&o.stderr));
     (o.status.code().unwrap_or(-1), s)
@@ -658,4 +658,14 @@ fn d_shared_every_proposal_is_deterministic_and_carries_its_disclaimer() {
     // The two contract classes stay distinct in the output text.
     assert!(o.raw.contains("EMITTED-SHAPE contract, not a producer/consumer pair"));
     assert!(o.raw.contains("A proposal never claims the consumer is correct."));
+}
+
+/// CHECK-INCR-1 (K-2): these tests exercise evaluation, so `check` runs with
+/// `--no-reuse`; reuse is tested in check_incr1_test.rs.
+fn no_reuse<'a>(args: &[&'a str]) -> Vec<&'a str> {
+    let mut v = args.to_vec();
+    if v.first() == Some(&"check") && !v.contains(&"--no-reuse") {
+        v.push("--no-reuse");
+    }
+    v
 }

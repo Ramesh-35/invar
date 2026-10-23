@@ -101,6 +101,10 @@ pub struct LockedContract {
     /// Every field of each bound type when locked: (source, scope, fields).
     /// Lets `invar fix --suggest` see what was added beside a removal.
     pub members: Vec<(String, String, Vec<String>)>,
+    /// CHECK-INCR-1: the HOLDS this entry was evaluated to when locked, with
+    /// the engine, block, entry and input hashes it depends on (`held`,
+    /// `held_input`). Not part of the entry's identity: `diff` ignores it.
+    pub held: Option<crate::reuse::Held>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -627,10 +631,12 @@ pub fn compute(sections: &Sections, resolver: &Resolver, prev: &Lock, today: i64
             recorded_at: now.clone(),
             bindings,
             members,
+            held: None,
         };
         if let Some(o) = old {
             let mut same = o.clone();
             same.recorded_at = c.recorded_at.clone();
+            same.held = c.held.clone();
             if same == c {
                 c.recorded_at = o.recorded_at.clone();
             }
@@ -696,10 +702,12 @@ fn egress_entry(d: &Declared, resolver: &Resolver, prev: &Lock, today: i64, now:
         recorded_at: now.to_string(),
         bindings,
         members: vec![("code".into(), shape, sorted)],
+        held: None,
     };
     if let Some(o) = old {
         let mut same = o.clone();
         same.recorded_at = c.recorded_at.clone();
+        same.held = c.held.clone();
         if same == c {
             c.recorded_at = o.recorded_at.clone();
         }
@@ -780,10 +788,12 @@ fn strings_entry(
         recorded_at: now.to_string(),
         bindings,
         members: vec![("code".into(), shape, sorted)],
+        held: None,
     };
     if let Some(o) = old {
         let mut same = o.clone();
         same.recorded_at = c.recorded_at.clone();
+        same.held = c.held.clone();
         if same == c {
             c.recorded_at = o.recorded_at.clone();
         }
@@ -919,6 +929,61 @@ fn q(v: &str) -> Result<String> {
     Ok(format!("\"{v}\""))
 }
 
+/// One `[[contract]]` entry as `render` writes it, without its `held`
+/// record: the text whose BLAKE3 is the record's entry hash (CHECK-INCR-1).
+pub fn render_entry(c: &LockedContract) -> Result<String> {
+    let mut s = String::new();
+    s.push_str(&format!(
+        "\n[[contract]]\nid = {}\nproducer = {}\n",
+        q(&c.id)?,
+        q(&c.producer)?
+    ));
+    if let Some(p) = &c.pointer {
+        s.push_str(&format!("pointer = {}\n", q(p)?));
+    }
+    s.push_str(&format!("blake3 = {}\n", q(&c.blake3)?));
+    if let (Some(pc), Some(h)) = (&c.producer_code, &c.blake3_code) {
+        s.push_str(&format!(
+            "producer_code = {}\nblake3_code = {}\n",
+            q(pc)?,
+            q(h)?
+        ));
+    }
+    s.push_str(&format!("recorded_at = {}\n", q(&c.recorded_at)?));
+    for b in &c.bindings {
+        s.push_str(&format!("bind = {}\n", q(&bind_line(b))?));
+    }
+    for (src, scope, fields) in &c.members {
+        let scope = if scope.is_empty() {
+            "-"
+        } else {
+            scope.as_str()
+        };
+        let fields: Vec<String> = fields.iter().map(|f| esc_field(f)).collect();
+        s.push_str(&format!(
+            "members = {}\n",
+            q(&format!("{src} {scope} {}", fields.join(" ")))?
+        ));
+    }
+    Ok(s)
+}
+
+/// CHECK-INCR-1 (ruling I-D6): `held` changes, one line each, apart from the
+/// binding changes `diff` reports. They are never LOCK_DRIFT.
+pub fn diff_held(old: &Lock, new: &Lock) -> Vec<String> {
+    let mut out = Vec::new();
+    for n in &new.contracts {
+        let o = old.contracts.iter().find(|c| c.id == n.id).and_then(|c| c.held.as_ref());
+        match (o, &n.held) {
+            (None, Some(_)) => out.push(format!("held {}: recorded", n.id)),
+            (Some(_), None) => out.push(format!("held {}: removed (no reusable HOLDS when locked)", n.id)),
+            (Some(a), Some(b)) if a != b => out.push(format!("held {}: re-recorded (an input, the engine, the block or the entry changed)", n.id)),
+            _ => {}
+        }
+    }
+    out
+}
+
 /// Deterministic text: contracts by id, bindings sorted, waivers as written.
 pub fn render(lock: &Lock) -> Result<String> {
     // Lowest format that expresses the content: value-witness states need
@@ -941,37 +1006,12 @@ pub fn render(lock: &Lock) -> Result<String> {
          [lock]\nformat = \"{format}\"\n",
     );
     for c in &lock.contracts {
-        s.push_str(&format!(
-            "\n[[contract]]\nid = {}\nproducer = {}\n",
-            q(&c.id)?,
-            q(&c.producer)?
-        ));
-        if let Some(p) = &c.pointer {
-            s.push_str(&format!("pointer = {}\n", q(p)?));
-        }
-        s.push_str(&format!("blake3 = {}\n", q(&c.blake3)?));
-        if let (Some(pc), Some(h)) = (&c.producer_code, &c.blake3_code) {
-            s.push_str(&format!(
-                "producer_code = {}\nblake3_code = {}\n",
-                q(pc)?,
-                q(h)?
-            ));
-        }
-        s.push_str(&format!("recorded_at = {}\n", q(&c.recorded_at)?));
-        for b in &c.bindings {
-            s.push_str(&format!("bind = {}\n", q(&bind_line(b))?));
-        }
-        for (src, scope, fields) in &c.members {
-            let scope = if scope.is_empty() {
-                "-"
-            } else {
-                scope.as_str()
-            };
-            let fields: Vec<String> = fields.iter().map(|f| esc_field(f)).collect();
-            s.push_str(&format!(
-                "members = {}\n",
-                q(&format!("{src} {scope} {}", fields.join(" ")))?
-            ));
+        s.push_str(&render_entry(c)?);
+        if let Some(h) = &c.held {
+            s.push_str(&format!("held = {}\n", q(&h.line())?));
+            for (hash, reference) in &h.inputs {
+                s.push_str(&format!("held_input = {}\n", q(&format!("{hash} {reference}"))?));
+            }
         }
     }
     for sm in &lock.samples {
@@ -1070,6 +1110,10 @@ pub fn parse(path: &str, text: &str) -> Result<Lock> {
                     recorded_at: need("recorded_at")?,
                     bindings,
                     members,
+                    held: crate::reuse::Held::parse(
+                        getk(pairs, "held").as_deref(),
+                        pairs.iter().filter(|(k, _)| k == "held_input").map(|(_, v)| v.as_str()),
+                    ),
                 });
             }
             "waiver" => {

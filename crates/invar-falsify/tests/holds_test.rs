@@ -39,7 +39,7 @@ fn bin() -> &'static str {
 }
 
 fn invar(dir: &Path, args: &[&str]) -> (i32, String) {
-    let o = Command::new(bin()).args(args).current_dir(dir).output().unwrap();
+    let o = Command::new(bin()).args(no_reuse(args)).current_dir(dir).output().unwrap();
     let mut s = String::from_utf8_lossy(&o.stdout).to_string();
     s.push_str(&String::from_utf8_lossy(&o.stderr));
     (o.status.code().unwrap_or(-1), s)
@@ -287,4 +287,14 @@ fn h_m1_byte_identical_within_a_day() {
     let a = invar(&d, &["check"]);
     let b = invar(&d, &["check"]);
     assert_eq!(a, b);
+}
+
+/// CHECK-INCR-1 (K-2): these tests exercise evaluation, so `check` runs with
+/// `--no-reuse`; reuse is tested in check_incr1_test.rs.
+fn no_reuse<'a>(args: &[&'a str]) -> Vec<&'a str> {
+    let mut v = args.to_vec();
+    if v.first() == Some(&"check") && !v.contains(&"--no-reuse") {
+        v.push("--no-reuse");
+    }
+    v
 }

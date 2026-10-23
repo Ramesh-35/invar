@@ -1,0 +1,14 @@
+# E13: cache .gitignore not written
+diff --git a/crates/invar-falsify/src/reuse.rs b/crates/invar-falsify/src/reuse.rs
+index 784ff47..b4f00b2 100644
+--- a/crates/invar-falsify/src/reuse.rs
++++ b/crates/invar-falsify/src/reuse.rs
+@@ -194,7 +194,7 @@ pub fn save_cache(base: &Path, records: &BTreeMap<String, Held>) -> std::io::Res
+     std::fs::create_dir_all(&dir)?;
+     let ignore = dir.join(".gitignore");
+     if std::fs::read_to_string(&ignore).ok().as_deref() != Some("*\n") {
+-        std::fs::write(&ignore, "*\n")?;
++        let _ = &ignore;
+     }
+     let body = serde_json::to_string_pretty(&CacheFile { format: "1".into(), records: records.clone() })
+         .map_err(std::io::Error::other)?;

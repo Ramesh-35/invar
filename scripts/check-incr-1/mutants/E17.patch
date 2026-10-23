@@ -1,0 +1,13 @@
+# E17: a reused contract contributes exit 4
+diff --git a/crates/invar-falsify/src/main.rs b/crates/invar-falsify/src/main.rs
+index b7dd897..0950a21 100644
+--- a/crates/invar-falsify/src/main.rs
++++ b/crates/invar-falsify/src/main.rs
+@@ -852,6 +852,7 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
+         match tag {
+             "VIOLATED" => violations += 1,
+             "SKIPPED" | "NOT_EVALUATED" => skipped += 1,
++            _ if o.reused.is_some() => skipped += 1,
+             _ => {}
+         }
+         summaries.push(format!("{}:{}={tag}", o.id, o.kind));

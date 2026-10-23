@@ -1,0 +1,23 @@
+E01 CAUGHT       E01: last recorded input (the consumer) not compared
+E02 CAUGHT       E02: first recorded input (the producer) not compared
+E03 CAUGHT       E03: middle input of three (the companion) not compared
+E04 CAUGHT       E04: block hash not compared
+E05 CAUGHT       E05: entry hash not compared
+E06 CAUGHT       E06: engine not compared
+E07 CAUGHT       E07: waiver guard removed
+E08 CAUGHT       E08: sample guard removed
+E09 CAUGHT       E09: record written for any verdict
+E10 CAUGHT       E10: cache read under --ci
+E11 CAUGHT       E11: lock record trusted under --ci without a verified signature
+E12 CAUGHT       E12: malformed cache is an error
+E13 CAUGHT       E13: cache .gitignore not written
+E14 CAUGHT       E14: missing input treated as unchanged
+E15 CAUGHT       E15: only the first recorded input compared
+E16 CAUGHT       E16: reference compared instead of bytes
+E17 CAUGHT       E17: a reused contract contributes exit 4
+E18 CAUGHT       E18: held time refreshed on an unchanged re-lock
+E19 CAUGHT       E19: a receipt run reuses
+E20 CAUGHT       E20: a stale held record is LOCK_DRIFT
+E21 CAUGHT       E21: a --sample run reuses
+E22 CAUGHT       E22: --no-reuse ignored
+caught 22, survived 0

@@ -57,7 +57,7 @@ fn invar(dir: &Path, args: &[&str]) -> (i32, String) {
 
 fn invar_env(dir: &Path, args: &[&str], env: &[(&str, &str)]) -> (i32, String) {
     let mut c = Command::new(bin());
-    c.args(args).current_dir(dir);
+    c.args(no_reuse(args)).current_dir(dir);
     for (k, v) in env {
         c.env(k, v);
     }
@@ -705,4 +705,14 @@ fn prf_m6_foreign_fingerprint_is_a_note_never_a_verdict_change() {
     assert_eq!(c, 0, "a foreign fingerprint never changes the verdict: {out}");
     assert!(out.contains("[HOLDS]"), "{out}");
     assert!(out.contains("NOTE") && out.contains("rule_fingerprint"), "the mismatch is stated: {out}");
+}
+
+/// CHECK-INCR-1 (K-2): these tests exercise evaluation, so `check` runs with
+/// `--no-reuse`; reuse is tested in check_incr1_test.rs.
+fn no_reuse<'a>(args: &[&'a str]) -> Vec<&'a str> {
+    let mut v = args.to_vec();
+    if v.first() == Some(&"check") && !v.contains(&"--no-reuse") {
+        v.push("--no-reuse");
+    }
+    v
 }

@@ -38,5 +38,6 @@ pub mod receipt;
 pub mod yaml;
 pub mod report;
 pub mod resolver;
+pub mod reuse;
 pub mod surface;
 pub mod valuepairs;

@@ -40,6 +40,9 @@ pub struct ContractOutcome {
     /// outside a recognised read, or a field moved between types). With no
     /// residue, these make the contract NOT FULLY EVALUATED, never HOLDS.
     pub unevaluated: Vec<String>,
+    /// CHECK-INCR-1: set when this HOLDS was reused from a hold record
+    /// instead of evaluated: "lock <at>" or "last run".
+    pub reused: Option<String>,
 }
 
 impl ContractOutcome {
@@ -494,6 +497,7 @@ pub(crate) fn fetch_text(resolver: &Resolver, spec: &str, prov: &mut Vec<Fetched
 
 fn fetch(resolver: &Resolver, spec: &str, prov: &mut Vec<Fetched>) -> Result<String> {
     let r = resolver.resolve(spec).map_err(|e| anyhow!("{e}"))?;
+    crate::reuse::note_read(spec, &r.text);
     if let Some(p) = r.provenance {
         prov.push(p);
     }
@@ -588,7 +592,14 @@ pub fn outcome_lines(o: &ContractOutcome) -> (&'static str, String) {
         }
         "NOT_EVALUATED"
     } else if !o.violated() {
-        let _ = writeln!(s, "  [HOLDS]    {} ({})", o.id, o.kind);
+        match &o.reused {
+            Some(since) => {
+                let _ = writeln!(s, "  [HOLDS]    {} ({}) unchanged since {since}", o.id, o.kind);
+            }
+            None => {
+                let _ = writeln!(s, "  [HOLDS]    {} ({})", o.id, o.kind);
+            }
+        }
         "HOLDS"
     } else {
         let _ = writeln!(s, "  [VIOLATED] {} ({}): {:?}", o.id, o.kind, o.residue);
@@ -737,6 +748,23 @@ pub fn evaluate_with(
     lock: Option<&crate::lock::Lock>,
     today: i64,
 ) -> Result<Vec<ContractOutcome>> {
+    Ok(evaluate_reusing(sections, resolver, lock, today, None)?.0)
+}
+
+/// `evaluate_with`, plus CHECK-INCR-1. With a plan, a contract whose hold
+/// record matches (engine, block, lock entry, the bytes of every input) is
+/// reported HOLDS without evaluation, and every reusable HOLDS is returned as
+/// a record. Without a plan this is exactly `evaluate_with`.
+pub fn evaluate_reusing(
+    sections: &Sections,
+    resolver: &Resolver,
+    lock: Option<&crate::lock::Lock>,
+    today: i64,
+    plan: Option<&crate::reuse::Plan>,
+) -> Result<(Vec<ContractOutcome>, BTreeMap<String, crate::reuse::Held>)> {
+    use crate::reuse::{block_hash, entry_hash, inputs_unchanged, Capture, Held, ENGINE};
+    let mut records: BTreeMap<String, Held> = BTreeMap::new();
+    let now = crate::lock::now_rfc3339();
     let blocks = gather_blocks(sections)?;
     if let Some(l) = lock {
         let ids: Vec<String> = blocks.iter().filter_map(|b| getk(b, "id")).collect();
@@ -751,6 +779,34 @@ pub fn evaluate_with(
     for (idx, b) in blocks.iter().enumerate() {
         let kind = getk(b, "kind").unwrap_or_default();
         let id = getk(b, "id").unwrap_or_else(|| format!("inv-{idx}"));
+        // I-D2a: a waiver or a locked sample makes the outcome move with
+        // the date, so such a contract is never recorded or reused.
+        let dated = lock.is_some_and(|l| l.waivers.iter().any(|w| w.contract == id) || l.samples.iter().any(|s| s.contract == id));
+        let key = match plan {
+            Some(_) if !dated => {
+                let entry = lock.and_then(|l| l.contracts.iter().find(|c| c.id == id));
+                Some((block_hash(b), entry_hash(entry), entry.and_then(|c| c.held.as_ref())))
+            }
+            _ => None,
+        };
+        if let (Some(p), Some((block, entry, from_lock))) = (plan, &key) {
+            let candidates = [
+                from_lock.filter(|_| p.from_lock).map(|r| (r, format!("lock {}", r.at))),
+                p.cache.get(&id).map(|r| (r, "last run".to_string())),
+            ];
+            let hit = candidates.into_iter().flatten().find_map(|(r, since)| {
+                if r.engine != ENGINE || &r.block != block || &r.entry != entry {
+                    return None;
+                }
+                inputs_unchanged(r, resolver).map(|prov| (r.clone(), since, prov))
+            });
+            if let Some((r, since, provenance)) = hit {
+                out.push(ContractOutcome { id: id.clone(), kind, provenance, reused: Some(since), ..Default::default() });
+                records.insert(id, r);
+                continue;
+            }
+        }
+        let capture = key.as_ref().map(|_| Capture::start());
         let mut prov = Vec::new();
         if kind == "schema" || kind == "event" {
             let unsupported = [
@@ -928,9 +984,16 @@ pub fn evaluate_with(
             }
             apply_waivers(&mut o, &l.waivers, today);
         }
+        if let (Some(c), Some((block, entry, _))) = (capture, key) {
+            let inputs = c.take();
+            let holds = o.skipped.is_none() && !o.violated() && o.unevaluated.is_empty();
+            if holds && !inputs.is_empty() {
+                records.insert(o.id.clone(), Held { at: now.clone(), engine: ENGINE.to_string(), block, entry, inputs });
+            }
+        }
         out.push(o);
     }
-    Ok(out)
+    Ok((out, records))
 }
 
 /// Check one locked egress contract (INIT-DISCOVERY-SLICE2, K1) against the

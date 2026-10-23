@@ -1,0 +1,14 @@
+# E18: held time refreshed on an unchanged re-lock
+diff --git a/crates/invar-falsify/src/main.rs b/crates/invar-falsify/src/main.rs
+index b7dd897..77b31c2 100644
+--- a/crates/invar-falsify/src/main.rs
++++ b/crates/invar-falsify/src/main.rs
+@@ -1178,7 +1178,7 @@ fn cmd_lock(args: LockArgs) -> Result<i32> {
+             for c in &mut next.contracts {
+                 let old = prev.contracts.iter().find(|o| o.id == c.id).and_then(|o| o.held.as_ref());
+                 c.held = records.get(&c.id).map(|r| match old {
+-                    Some(o) if o.same_inputs(r) => o.clone(),
++                    Some(o) if o.same_inputs(r) => r.clone(),
+                     _ => r.clone(),
+                 });
+             }

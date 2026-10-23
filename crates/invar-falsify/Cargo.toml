@@ -23,6 +23,10 @@ rusqlite = { version = "0.32", features = ["bundled"] }
 thiserror = "1"
 anyhow = "1"
 
+[build-dependencies]
+# CHECK-INCR-1 engine identity (build.rs); the same crate as [dependencies].
+blake3 = "1"
+
 [dev-dependencies]
 # Used only by the ledger tamper test to edit a committed row out-of-band.
 rusqlite = { version = "0.32", features = ["bundled"] }

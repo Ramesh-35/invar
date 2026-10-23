@@ -1,0 +1,14 @@
+# E05: entry hash not compared
+diff --git a/crates/invar-falsify/src/check.rs b/crates/invar-falsify/src/check.rs
+index 6a2f6e7..c87fbd3 100644
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -795,7 +795,7 @@ pub fn evaluate_reusing(
+                 p.cache.get(&id).map(|r| (r, "last run".to_string())),
+             ];
+             let hit = candidates.into_iter().flatten().find_map(|(r, since)| {
+-                if r.engine != ENGINE || &r.block != block || &r.entry != entry {
++                if r.engine != ENGINE || &r.block != block {
+                     return None;
+                 }
+                 inputs_unchanged(r, resolver).map(|prov| (r.clone(), since, prov))

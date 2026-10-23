@@ -124,7 +124,7 @@ fn init(dir: &Path) -> Out {
 }
 
 fn invar(dir: &Path, args: &[&str]) -> (i32, String) {
-    let o = Command::new(bin()).args(args).current_dir(dir).output().unwrap();
+    let o = Command::new(bin()).args(no_reuse(args)).current_dir(dir).output().unwrap();
     let mut s = String::from_utf8_lossy(&o.stdout).to_string();
     s.push_str(&String::from_utf8_lossy(&o.stderr));
     (o.status.code().unwrap_or(-1), s)
@@ -418,4 +418,14 @@ fn k3_u5_display_column_list_is_proposed_and_labeled_residual_noise() {
     let b = only(&o);
     assert_eq!(b.keys["listat"], "prop:columns#1");
     assert!(b.evidence.iter().any(|e| e.starts_with("# S6 DISCLAIMER") && e.contains("display column lists")), "{:?}", b.evidence);
+}
+
+/// CHECK-INCR-1 (K-2): these tests exercise evaluation, so `check` runs with
+/// `--no-reuse`; reuse is tested in check_incr1_test.rs.
+fn no_reuse<'a>(args: &[&'a str]) -> Vec<&'a str> {
+    let mut v = args.to_vec();
+    if v.first() == Some(&"check") && !v.contains(&"--no-reuse") {
+        v.push("--no-reuse");
+    }
+    v
 }

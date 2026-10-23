@@ -1,0 +1,14 @@
+# E11: lock record trusted under --ci without a verified signature
+diff --git a/crates/invar-falsify/src/main.rs b/crates/invar-falsify/src/main.rs
+index b7dd897..0d7125c 100644
+--- a/crates/invar-falsify/src/main.rs
++++ b/crates/invar-falsify/src/main.rs
+@@ -738,7 +738,7 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
+         None
+     } else {
+         Some(invar_falsify::reuse::Plan {
+-            from_lock: !args.ci || args.lock_signers.is_some(),
++            from_lock: true,
+             cache: if args.ci {
+                 Default::default()
+             } else {

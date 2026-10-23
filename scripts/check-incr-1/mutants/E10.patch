@@ -1,0 +1,18 @@
+# E10: cache read under --ci
+diff --git a/crates/invar-falsify/src/main.rs b/crates/invar-falsify/src/main.rs
+index b7dd897..228aa15 100644
+--- a/crates/invar-falsify/src/main.rs
++++ b/crates/invar-falsify/src/main.rs
+@@ -739,11 +739,7 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
+     } else {
+         Some(invar_falsify::reuse::Plan {
+             from_lock: !args.ci || args.lock_signers.is_some(),
+-            cache: if args.ci {
+-                Default::default()
+-            } else {
+-                invar_falsify::reuse::load_cache(&base_dir_of(&args.config))
+-            },
++            cache: invar_falsify::reuse::load_cache(&base_dir_of(&args.config)),
+         })
+     };
+     let (mut outcomes, records) =

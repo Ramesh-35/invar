@@ -1,0 +1,14 @@
+# E12: malformed cache is an error
+diff --git a/crates/invar-falsify/src/reuse.rs b/crates/invar-falsify/src/reuse.rs
+index 784ff47..0aa5d89 100644
+--- a/crates/invar-falsify/src/reuse.rs
++++ b/crates/invar-falsify/src/reuse.rs
+@@ -180,7 +180,7 @@ struct CacheFile {
+ pub fn load_cache(base: &Path) -> BTreeMap<String, Held> {
+     std::fs::read_to_string(base.join(CACHE_FILE))
+         .ok()
+-        .and_then(|t| serde_json::from_str::<CacheFile>(&t).ok())
++        .map(|t| serde_json::from_str::<CacheFile>(&t).expect("verdict cache"))
+         .filter(|c| c.format == "1")
+         .map(|c| c.records)
+         .unwrap_or_default()

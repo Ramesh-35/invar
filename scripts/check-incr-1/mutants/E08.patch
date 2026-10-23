@@ -1,0 +1,14 @@
+# E08: sample guard removed
+diff --git a/crates/invar-falsify/src/check.rs b/crates/invar-falsify/src/check.rs
+index 6a2f6e7..3c84cfa 100644
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -781,7 +781,7 @@ pub fn evaluate_reusing(
+         let id = getk(b, "id").unwrap_or_else(|| format!("inv-{idx}"));
+         // I-D2a: a waiver or a locked sample makes the outcome move with
+         // the date, so such a contract is never recorded or reused.
+-        let dated = lock.is_some_and(|l| l.waivers.iter().any(|w| w.contract == id) || l.samples.iter().any(|s| s.contract == id));
++        let dated = lock.is_some_and(|l| l.waivers.iter().any(|w| w.contract == id));
+         let key = match plan {
+             Some(_) if !dated => {
+                 let entry = lock.and_then(|l| l.contracts.iter().find(|c| c.id == id));

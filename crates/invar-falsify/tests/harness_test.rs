@@ -2080,7 +2080,7 @@ fn mcp_dependents_and_coverage_match_cli() {
     w("locks/web/invar.lock", &rendered);
 
     let cli = |args: &[&str]| -> serde_json::Value {
-        let out = Command::new(bin).args(args).current_dir(&dir).output().unwrap();
+        let out = Command::new(bin).args(no_reuse(args)).current_dir(&dir).output().unwrap();
         assert!(out.status.code() == Some(0) || out.status.code() == Some(4), "{:?}", out);
         serde_json::from_slice(&out.stdout).unwrap()
     };
@@ -2157,7 +2157,7 @@ fn backtest_replays_git_history() {
     let l = invar_falsify::lock::compute(&sections, &r, &invar_falsify::lock::Lock::default(), day).unwrap();
     std::fs::write(dir.join("invar.lock"), invar_falsify::lock::render(&l).unwrap()).unwrap();
 
-    let run = |args: &[&str]| Command::new(bin).args(args).current_dir(&dir).output().unwrap();
+    let run = |args: &[&str]| Command::new(bin).args(no_reuse(args)).current_dir(&dir).output().unwrap();
     let a = run(&["backtest", "--format", "json"]);
     assert_eq!(a.status.code(), Some(0), "{}", String::from_utf8_lossy(&a.stderr));
     let b = run(&["backtest", "--format", "json"]);
@@ -2230,7 +2230,7 @@ fn a41_check_states_sibling_dependents() {
     let l_b = invar_falsify::lock::compute(&s_b, &Resolver::local(&root.join("b")), &invar_falsify::lock::Lock::default(), day).unwrap();
     w("b/invar.lock", &invar_falsify::lock::render(&l_b).unwrap());
 
-    let run = |dir: &str, args: &[&str]| Command::new(bin).args(args).current_dir(root.join(dir)).output().unwrap();
+    let run = |dir: &str, args: &[&str]| Command::new(bin).args(no_reuse(args)).current_dir(root.join(dir)).output().unwrap();
     let plain = run("a", &["check"]);
     let flagged = run("a", &["check", "--locks", ".."]);
     assert_eq!(plain.status.code(), flagged.status.code(), "sibling scan never changes the exit code");
@@ -2284,7 +2284,7 @@ fn init_ids_unique_across_same_basename_producers() {
         "app/src/client.ts",
         "import { Order } from 'a/types';\nimport { Invoice } from 'b/types';\nexport const f = (o: Order, i: Invoice) => [o.order_ref, o.total_cents, i.invoice_ref, i.currency_code];\n",
     );
-    let run = |args: &[&str]| Command::new(bin).args(args).current_dir(&dir).output().unwrap();
+    let run = |args: &[&str]| Command::new(bin).args(no_reuse(args)).current_dir(&dir).output().unwrap();
     let init = run(&["init"]);
     assert_eq!(init.status.code(), Some(0), "{}", String::from_utf8_lossy(&init.stderr));
     let toml = std::fs::read_to_string(dir.join("invar.toml")).unwrap();
@@ -2299,4 +2299,14 @@ fn init_ids_unique_across_same_basename_producers() {
     let check = run(&["check"]);
     assert_ne!(check.status.code(), Some(3), "first check must not error: {}{}", String::from_utf8_lossy(&check.stdout), String::from_utf8_lossy(&check.stderr));
     let _ = std::fs::remove_dir_all(&dir);
+}
+
+/// CHECK-INCR-1 (K-2): these tests exercise evaluation, so `check` runs with
+/// `--no-reuse`; reuse is tested in check_incr1_test.rs.
+fn no_reuse<'a>(args: &[&'a str]) -> Vec<&'a str> {
+    let mut v = args.to_vec();
+    if v.first() == Some(&"check") && !v.contains(&"--no-reuse") {
+        v.push("--no-reuse");
+    }
+    v
 }

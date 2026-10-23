@@ -175,6 +175,9 @@ struct CheckArgs {
     /// contract has a locked sample).
     #[arg(long)]
     contract: Option<String>,
+    /// CHECK-INCR-1: evaluate every contract; read and write no hold record.
+    #[arg(long, default_value_t = false)]
+    no_reuse: bool,
 }
 
 #[derive(Parser)]
@@ -727,13 +730,35 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
         None
     };
     let today = lock::today_utc();
-    let mut outcomes = match evaluate_with(&sections, &resolver, lock_file.as_ref(), today) {
-        Ok(o) => o,
-        Err(e) => {
-            eprintln!("ERROR (not a verdict): {e:#}");
-            return Ok(3);
-        }
+    // CHECK-INCR-1. No reuse for --no-reuse, for a receipt (evidence comes
+    // from a full evaluation) or for a --sample run (I-D2a). Under --ci the
+    // local cache is never read or written, and lock records are reused only
+    // when --lock-signers verified the lock above (I-D4).
+    let plan = if args.no_reuse || args.receipt.is_some() || args.sample.is_some() {
+        None
+    } else {
+        Some(invar_falsify::reuse::Plan {
+            from_lock: !args.ci || args.lock_signers.is_some(),
+            cache: if args.ci {
+                Default::default()
+            } else {
+                invar_falsify::reuse::load_cache(&base_dir_of(&args.config))
+            },
+        })
     };
+    let (mut outcomes, records) =
+        match invar_falsify::check::evaluate_reusing(&sections, &resolver, lock_file.as_ref(), today, plan.as_ref()) {
+            Ok(o) => o,
+            Err(e) => {
+                eprintln!("ERROR (not a verdict): {e:#}");
+                return Ok(3);
+            }
+        };
+    if plan.is_some() && !args.ci {
+        if let Err(e) = invar_falsify::reuse::save_cache(&base_dir_of(&args.config), &records) {
+            eprintln!("note: {} not written: {e} (stated; exit unchanged)", invar_falsify::reuse::CACHE_FILE);
+        }
+    }
     // Observed reality (docs/architecture/OBSERVED-REALITY.md): fresh sample
     // vs locked sample, and staleness. Drift is residue (waivers respected);
     // a stale sample is stated, never silent.
@@ -868,9 +893,11 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
     // Fixed summary, printed on every run whatever the counts (A1): "clean"
     // and "unexamined" are never shown the same way, and the measured record
     // travels with every verdict.
+    let reused = outcomes.iter().filter(|o| o.reused.is_some()).count();
     println!(
-        "summary: held {} | violated {violations} | skipped or not evaluated {skipped}",
-        outcomes.len() - violations - skipped
+        "summary: held {}{} | violated {violations} | skipped or not evaluated {skipped}",
+        outcomes.len() - violations - skipped,
+        if reused > 0 { format!(" ({reused} reused)") } else { String::new() }
     );
     println!("measured: {MEASURED_RECORD}");
 
@@ -1141,15 +1168,41 @@ fn cmd_lock(args: LockArgs) -> Result<i32> {
         record_local: false,
     };
     lock::validate_waivers(&prev.waivers, lock::today_utc())?;
-    let next = lock::compute(&sections, &resolver, &prev, lock::today_utc())?;
+    let mut next = lock::compute(&sections, &resolver, &prev, lock::today_utc())?;
+    // CHECK-INCR-1 (I-D6): evaluate against the new entries and record each
+    // reusable HOLDS. An unchanged record keeps its time, so an unchanged
+    // re-lock rewrites nothing. If evaluation fails, no record is written.
+    let plan = invar_falsify::reuse::Plan::default();
+    match invar_falsify::check::evaluate_reusing(&sections, &resolver, Some(&next), lock::today_utc(), Some(&plan)) {
+        Ok((_, records)) => {
+            for c in &mut next.contracts {
+                let old = prev.contracts.iter().find(|o| o.id == c.id).and_then(|o| o.held.as_ref());
+                c.held = records.get(&c.id).map(|r| match old {
+                    Some(o) if o.same_inputs(r) => o.clone(),
+                    _ => r.clone(),
+                });
+            }
+        }
+        Err(e) => println!("note: contracts not evaluated, so no held record is written: {e:#}"),
+    }
     let changes = lock::diff(&prev, &next);
+    let held_changes = lock::diff_held(&prev, &next);
     let exists = lock_path.exists();
-    if exists && changes.is_empty() {
+    if exists && changes.is_empty() && (held_changes.is_empty() || !args.update) {
         println!("invar.lock is current ({} contract(s))", next.contracts.len());
+        if !held_changes.is_empty() {
+            println!(
+                "note: {} held record(s) out of date (not drift); `invar lock --update` refreshes them",
+                held_changes.len()
+            );
+        }
         return Ok(0);
     }
     for c in &changes {
         println!("  {c}");
+    }
+    for h in &held_changes {
+        println!("  {h}");
     }
     if exists && !args.update {
         println!("LOCK_DRIFT: invar.lock would change; review the lines above, then run `invar lock --update`");

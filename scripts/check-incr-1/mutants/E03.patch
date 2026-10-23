@@ -1,0 +1,14 @@
+# E03: middle input of three (the companion) not compared
+diff --git a/crates/invar-falsify/src/reuse.rs b/crates/invar-falsify/src/reuse.rs
+index 784ff47..0de28af 100644
+--- a/crates/invar-falsify/src/reuse.rs
++++ b/crates/invar-falsify/src/reuse.rs
+@@ -142,7 +142,7 @@ pub(crate) fn inputs_unchanged(rec: &Held, resolver: &Resolver) -> Option<Vec<Fe
+             Some(p) => p.clone(),
+             None => {
+                 let r = resolver.resolve(reference).ok()?;
+-                if blake3::hash(r.text.as_bytes()).to_hex().as_str() != hash {
++                if blake3::hash(r.text.as_bytes()).to_hex().as_str() != hash && !(rec.inputs.len() == 3 && reference == &rec.inputs[1].1) {
+                     return None;
+                 }
+                 seen.insert(reference, r.provenance.clone());

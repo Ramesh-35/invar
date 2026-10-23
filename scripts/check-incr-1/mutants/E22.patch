@@ -1,0 +1,14 @@
+# E22: --no-reuse ignored
+diff --git a/crates/invar-falsify/src/main.rs b/crates/invar-falsify/src/main.rs
+index b7dd897..9196af5 100644
+--- a/crates/invar-falsify/src/main.rs
++++ b/crates/invar-falsify/src/main.rs
+@@ -734,7 +734,7 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
+     // from a full evaluation) or for a --sample run (I-D2a). Under --ci the
+     // local cache is never read or written, and lock records are reused only
+     // when --lock-signers verified the lock above (I-D4).
+-    let plan = if args.no_reuse || args.receipt.is_some() || args.sample.is_some() {
++    let plan = if args.receipt.is_some() || args.sample.is_some() {
+         None
+     } else {
+         Some(invar_falsify::reuse::Plan {

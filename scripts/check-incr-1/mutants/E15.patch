@@ -1,0 +1,14 @@
+# E15: only the first recorded input compared
+diff --git a/crates/invar-falsify/src/reuse.rs b/crates/invar-falsify/src/reuse.rs
+index 784ff47..5992a82 100644
+--- a/crates/invar-falsify/src/reuse.rs
++++ b/crates/invar-falsify/src/reuse.rs
+@@ -142,7 +142,7 @@ pub(crate) fn inputs_unchanged(rec: &Held, resolver: &Resolver) -> Option<Vec<Fe
+             Some(p) => p.clone(),
+             None => {
+                 let r = resolver.resolve(reference).ok()?;
+-                if blake3::hash(r.text.as_bytes()).to_hex().as_str() != hash {
++                if blake3::hash(r.text.as_bytes()).to_hex().as_str() != hash && reference == &rec.inputs[0].1 {
+                     return None;
+                 }
+                 seen.insert(reference, r.provenance.clone());

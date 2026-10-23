@@ -25,7 +25,7 @@ fn put(root: &Path, rel: &str, body: &str) {
 }
 
 fn invar(dir: &Path, args: &[&str]) -> (i32, String) {
-    let o = Command::new(env!("CARGO_BIN_EXE_invar")).args(args).current_dir(dir).output().unwrap();
+    let o = Command::new(env!("CARGO_BIN_EXE_invar")).args(no_reuse(args)).current_dir(dir).output().unwrap();
     let mut s = String::from_utf8_lossy(&o.stdout).to_string();
     s.push_str(&String::from_utf8_lossy(&o.stderr));
     (o.status.code().unwrap_or(-1), s)
@@ -156,6 +156,9 @@ fn l_n1_a_multi_line_interface_is_byte_identical() {
     let d = ws("n1", &[("lib/limits.ts", iface), ("src/use.ts", USE), ("invar.toml", TOML)]);
     let ((_, lock_out), (code, out)) = lock_check(&d);
     let lock = std::fs::read_to_string(d.join("invar.lock")).unwrap();
+    // CHECK-INCR-1 (K-2): the entry is compared without its hold record,
+    // which F1 of check_incr1_test.rs covers.
+    let lock: String = lock.lines().filter(|l| !l.starts_with("held = ") && !l.starts_with("held_input = ")).map(|l| format!("{l}\n")).collect();
     let lock = lock.replace(recorded(&lock).as_str(), "recorded_at = R");
     let today = invar_falsify::lock::format_date(invar_falsify::lock::today_utc());
     assert_eq!(lock.replace(&today, "D"), N1_LOCK);
@@ -192,3 +195,13 @@ const N1_CHECK: &str = r#"INVAR check (1 contract(s))
 result: ALL 1 contract(s) hold
 summary: held 1 | violated 0 | skipped or not evaluated 0
 measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)"#;
+
+/// CHECK-INCR-1 (K-2): these tests exercise evaluation, so `check` runs with
+/// `--no-reuse`; reuse is tested in check_incr1_test.rs.
+fn no_reuse<'a>(args: &[&'a str]) -> Vec<&'a str> {
+    let mut v = args.to_vec();
+    if v.first() == Some(&"check") && !v.contains(&"--no-reuse") {
+        v.push("--no-reuse");
+    }
+    v
+}

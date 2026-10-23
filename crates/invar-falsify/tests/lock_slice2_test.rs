@@ -27,7 +27,7 @@ fn put(root: &Path, rel: &str, body: &str) {
 }
 
 fn invar(dir: &Path, args: &[&str]) -> (i32, String) {
-    let o = Command::new(env!("CARGO_BIN_EXE_invar")).args(args).current_dir(dir).output().unwrap();
+    let o = Command::new(env!("CARGO_BIN_EXE_invar")).args(no_reuse(args)).current_dir(dir).output().unwrap();
     let mut s = String::from_utf8_lossy(&o.stdout).to_string();
     s.push_str(&String::from_utf8_lossy(&o.stderr));
     (o.status.code().unwrap_or(-1), s)
@@ -144,4 +144,14 @@ fn l2_n1_a_multi_line_readonly_type_is_unchanged() {
     assert!(lock_out.contains("(2 bindings)"), "{lock_out}");
     assert_eq!(binds(&d), vec!["P.x number".to_string(), "P.y number".to_string()]);
     assert_eq!(code, 0, "{out}");
+}
+
+/// CHECK-INCR-1 (K-2): these tests exercise evaluation, so `check` runs with
+/// `--no-reuse`; reuse is tested in check_incr1_test.rs.
+fn no_reuse<'a>(args: &[&'a str]) -> Vec<&'a str> {
+    let mut v = args.to_vec();
+    if v.first() == Some(&"check") && !v.contains(&"--no-reuse") {
+        v.push("--no-reuse");
+    }
+    v
 }

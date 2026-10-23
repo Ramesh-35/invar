@@ -1,0 +1,14 @@
+# E09: record written for any verdict
+diff --git a/crates/invar-falsify/src/check.rs b/crates/invar-falsify/src/check.rs
+index 6a2f6e7..8915bdd 100644
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -986,7 +986,7 @@ pub fn evaluate_reusing(
+         }
+         if let (Some(c), Some((block, entry, _))) = (capture, key) {
+             let inputs = c.take();
+-            let holds = o.skipped.is_none() && !o.violated() && o.unevaluated.is_empty();
++            let holds = true;
+             if holds && !inputs.is_empty() {
+                 records.insert(o.id.clone(), Held { at: now.clone(), engine: ENGINE.to_string(), block, entry, inputs });
+             }

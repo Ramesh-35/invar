@@ -1,0 +1,14 @@
+# E20: a stale held record is LOCK_DRIFT
+diff --git a/crates/invar-falsify/src/main.rs b/crates/invar-falsify/src/main.rs
+index b7dd897..9e87f42 100644
+--- a/crates/invar-falsify/src/main.rs
++++ b/crates/invar-falsify/src/main.rs
+@@ -1188,7 +1188,7 @@ fn cmd_lock(args: LockArgs) -> Result<i32> {
+     let changes = lock::diff(&prev, &next);
+     let held_changes = lock::diff_held(&prev, &next);
+     let exists = lock_path.exists();
+-    if exists && changes.is_empty() && (held_changes.is_empty() || !args.update) {
++    if exists && changes.is_empty() && held_changes.is_empty() {
+         println!("invar.lock is current ({} contract(s))", next.contracts.len());
+         if !held_changes.is_empty() {
+             println!(

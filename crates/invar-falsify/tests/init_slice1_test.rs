@@ -800,7 +800,7 @@ fn u10_pnpm_flow_list_abstains() {
 fn l01_lock_bindings_are_evidence_bounded() {
     let d = ws("l01", &[ROOT_AB, PKG_A, PKG_B, ("a/order.ts", CM_ORDER), ("b/src/x.ts", CM_USE)]);
     let bin = env!("CARGO_BIN_EXE_invar");
-    let run = |args: &[&str]| std::process::Command::new(bin).args(args).current_dir(&d).output().unwrap();
+    let run = |args: &[&str]| std::process::Command::new(bin).args(no_reuse(args)).current_dir(&d).output().unwrap();
     assert_eq!(run(&["init"]).status.code(), Some(0));
     let toml = std::fs::read_to_string(d.join("invar.toml")).unwrap();
     assert!(toml.contains("evidence = \"Order currency_code total_minor\""), "{toml}");
@@ -827,7 +827,7 @@ fn l01_lock_bindings_are_evidence_bounded() {
 fn b01_unlocked_check_is_not_evaluated() {
     let d = ws("b01", &[ROOT_AB, PKG_A, PKG_B, ("a/order.ts", ORDER), ("b/src/use.ts", USE_ORDER)]);
     let bin = env!("CARGO_BIN_EXE_invar");
-    let run = |args: &[&str]| std::process::Command::new(bin).args(args).current_dir(&d).output().unwrap();
+    let run = |args: &[&str]| std::process::Command::new(bin).args(no_reuse(args)).current_dir(&d).output().unwrap();
     assert_eq!(run(&["init"]).status.code(), Some(0));
     let check = run(&["check"]);
     let out = String::from_utf8_lossy(&check.stdout).to_string();
@@ -850,4 +850,14 @@ fn e01_run_error_keeps_existing_behavior() {
     assert_eq!(o.status.code(), Some(1));
     assert!(String::from_utf8_lossy(&o.stderr).starts_with("error: "));
     assert_eq!(std::fs::read_to_string(d.join("invar.toml")).unwrap(), "# mine\n", "no partial or replaced file");
+}
+
+/// CHECK-INCR-1 (K-2): these tests exercise evaluation, so `check` runs with
+/// `--no-reuse`; reuse is tested in check_incr1_test.rs.
+fn no_reuse<'a>(args: &[&'a str]) -> Vec<&'a str> {
+    let mut v = args.to_vec();
+    if v.first() == Some(&"check") && !v.contains(&"--no-reuse") {
+        v.push("--no-reuse");
+    }
+    v
 }
