@@ -16,25 +16,49 @@ fn bin() -> &'static str {
 }
 
 fn repo(tag: &str) -> PathBuf {
+    repo_cfg(tag, None)
+}
+
+fn repo_cfg(tag: &str, host_global: Option<&Path>) -> PathBuf {
     let d = std::env::temp_dir().join(format!("invar-bt2-{tag}-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&d);
     std::fs::create_dir_all(d.join("src")).unwrap();
-    git(&d, &["init", "-q"], 0);
-    git(&d, &["config", "user.email", "t@t"], 0);
-    git(&d, &["config", "user.name", "t"], 0);
+    git_cfg(&d, &["init", "-q"], 0, host_global);
+    git_cfg(&d, &["config", "user.email", "t@t"], 0, host_global);
+    git_cfg(&d, &["config", "user.name", "t"], 0, host_global);
     d
 }
 
 fn git(dir: &Path, args: &[&str], day: u32) {
+    git_cfg(dir, args, day, None)
+}
+
+/// `host_global` simulates a developer machine's global git configuration
+/// (HERM-1, bt_h1): the goldens must not depend on it, so every git call
+/// that BUILDS a test repository is isolated from the host's global and
+/// system configuration. The engine under test is never isolated: it reads
+/// real repositories and must honor their owners' configuration.
+fn git_cfg(dir: &Path, args: &[&str], day: u32, host_global: Option<&Path>) {
     let date = format!("2026-01-{:02}T12:00:00Z", day.max(1));
-    let out = Command::new("git")
-        .arg("-C")
+    let mut c = Command::new("git");
+    c.arg("-C")
         .arg(dir)
         .args(args)
         .env("GIT_AUTHOR_DATE", &date)
-        .env("GIT_COMMITTER_DATE", &date)
-        .output()
-        .unwrap();
+        .env("GIT_COMMITTER_DATE", &date);
+    if let Some(h) = host_global {
+        c.env("GIT_CONFIG_GLOBAL", h);
+        c.env("GIT_CONFIG_SYSTEM", h);
+    }
+    // HERM-1 fix: a test repository is built under NO host configuration,
+    // the injected one of bt_h1 included (a later env wins), so the golden
+    // SHAs depend only on what the test itself writes. Proven necessary on
+    // 2026-10-23: a host `init.defaultObjectFormat = sha256` reproduced the
+    // founder's bt_n1 failure byte-for-byte.
+    let none = dir.join(".no-host-git-config");
+    c.env("GIT_CONFIG_GLOBAL", &none);
+    c.env("GIT_CONFIG_SYSTEM", &none);
+    let out = c.output().unwrap();
     assert!(out.status.success(), "git {args:?}: {}", String::from_utf8_lossy(&out.stderr));
 }
 
@@ -244,16 +268,19 @@ fn schema_repo(tag: &str, id: &str) -> PathBuf {
     d
 }
 
-// Recorded at Gate 1 from the unchanged engine (b484d3d). Fixed commit
-// dates make every hash stable, so egress/schema replay is asserted
-// byte-for-byte (CM-B-7).
+// Recorded at Gate 1 from the unchanged engine (b484d3d); commit ids
+// re-recorded under HERM-1 isolation (2026-10-23): the original ids were
+// unknowingly signed by the recording environment's commit.gpgsign, so
+// they matched only machines with that exact signing setup. Fixed commit
+// dates plus config isolation make every hash machine-independent, so
+// egress/schema replay is asserted byte-for-byte (CM-B-7).
 const GOLDEN_TEXT: &str = r#"invar backtest (invar.toml, 1 contract(s), depth 50)
 
 orders: order.go (3 commit(s) replayed)
   Order.amount_cents
-    2026-01-01 26438df29f75 present
-    2026-01-02 0342ee67679d absent
-    2026-01-03 c890901e6e44 present
+    2026-01-01 efbd0dde150d present
+    2026-01-02 2764fcd34d03 absent
+    2026-01-03 2328747e28c2 present
     1 absence window(s) after introduction
 
 Timelines replay today's extraction over past file contents. They are
@@ -271,17 +298,17 @@ const GOLDEN_JSON: &str = r#"{
           "blind_spot_commits": 0,
           "events": [
             {
-              "commit": "26438df29f75",
+              "commit": "efbd0dde150d",
               "date": "2026-01-01",
               "state": "present"
             },
             {
-              "commit": "0342ee67679d",
+              "commit": "2764fcd34d03",
               "date": "2026-01-02",
               "state": "absent"
             },
             {
-              "commit": "c890901e6e44",
+              "commit": "2328747e28c2",
               "date": "2026-01-03",
               "state": "present"
             }
@@ -365,3 +392,40 @@ fn bt_m1_two_runs_are_byte_identical() {
     let b = invar(&full, &["backtest"]);
     assert_eq!(a, b);
 }
+
+// ---------------------------------------------------------------------------
+// HERM-1 (bt_h1): the goldens must not depend on the machine's git
+// configuration. A host whose global config changes the object format or
+// line endings must get the same replay bytes, or the suite is green on one
+// machine and red on another (observed: bt_n1 on the founder's machine,
+// 2026-10-23, while the sandbox passed).
+// ---------------------------------------------------------------------------
+#[test]
+fn bt_h1_goldens_survive_a_hostile_host_git_config() {
+    let hostile = std::env::temp_dir().join(format!("invar-bt2-hostile-{}", std::process::id()));
+    std::fs::write(&hostile, "[init]
+	defaultObjectFormat = sha256
+[core]
+	autocrlf = true
+").unwrap();
+    let d = repo_cfg("h1", Some(&hostile));
+    commit_cfg(&d, "order.go", ORDER_WITH, 1, &hostile);
+    commit_cfg(&d, "order.go", ORDER_WITHOUT, 2, &hostile);
+    commit_cfg(&d, "order.go", ORDER_WITH, 3, &hostile);
+    put(&d, "client.js", "const a = order.amount_cents;\n");
+    put(&d, "invar.toml", "[[invariant]]\nkind = \"schema\"\nid = \"orders\"\nproducer = \"order.go\"\nconsumer = \"client.js\"\n");
+    let (c, out) = invar(&d, &["lock"]);
+    assert_eq!(c, 0, "{out}");
+    let (c, text) = invar(&d, &["backtest"]);
+    assert_eq!(c, 0, "{text}");
+    assert_eq!(text, GOLDEN_TEXT, "a hostile host git config changed the replay bytes");
+    let _ = std::fs::remove_file(&hostile);
+    let _ = std::fs::remove_dir_all(&d);
+}
+
+fn commit_cfg(dir: &Path, rel: &str, body: &str, day: u32, host_global: &Path) {
+    put(dir, rel, body);
+    git_cfg(dir, &["add", rel], day, Some(host_global));
+    git_cfg(dir, &["commit", "-qm", &format!("day {day}")], day, Some(host_global));
+}
+
