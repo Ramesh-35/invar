@@ -1,0 +1,13 @@
+# mutation: a file's fields memoized by its bytes alone
+# catch: p_f2_the_same_bytes_under_two_artifact_names_are_read_twice
+--- a/crates/invar-falsify/src/lock.rs
++++ b/crates/invar-falsify/src/lock.rs
+@@ -351,7 +351,7 @@
+ /// A code artifact's fields, memoized by its name and bytes (shared by every
+ /// contract on the same file, whatever shapes they name).
+ fn fields_of(id: &str, name: &str, text: &str) -> Result<std::rc::Rc<Fields>> {
+-    memo(&FIELDS, name, text, || code_fields(name, text).ok_or_else(|| anyhow!("{id}: cannot read fields from {name}")))
++    memo(&FIELDS, "", text, || code_fields(name, text).ok_or_else(|| anyhow!("{id}: cannot read fields from {name}")))
+ }
+ 
+ /// The zod objects of a text, (name, direct keys), memoized.

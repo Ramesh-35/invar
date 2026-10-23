@@ -1683,3 +1683,19 @@ mutations caught. Not claimed: scope analysis, inferred or narrowed types,
 three or more hops, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
 docs/evidence/stage3/eval008.
+
+## 2026-10-22: CHECK-PERF-1 implemented (memoized check analyses)
+
+`invar check` and the `check` tool of `invar mcp` remember their pure
+text analyses for the life of the process, keyed by each file's artifact
+name and BLAKE3, so an edited file is always re-read; `broad_reads`
+searches its keys once per text. No verdict, exit code, output byte or
+file format changes: lock, check and backtest are byte-identical on every
+EVAL-007 and EVAL-008 round-trip set. Measured (sandbox, Linux x86_64, pi's
+18 contracts): a running `invar mcp` answers check in 18 M instructions
+instead of 161 M, about 3 to 4.4 ms; a fresh `invar check` in 85 M instead
+of 160 M, about 20 to 26 ms. Memory-mapping the lock was measured and
+rejected (file I/O is under 1 ms). 404 of 404 tests, zero warnings; 9 of 9
+mutations caught. Not claimed: any latency on other machines or
+workspaces; scripts/perf/bench.py measures it there. Record:
+docs/architecture/CHECK-PERF-1.md; docs/evidence/perf.

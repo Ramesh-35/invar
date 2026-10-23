@@ -325,6 +325,76 @@ fn norm_ty(t: &Option<String>) -> Option<String> {
         .filter(|s| !s.is_empty())
 }
 
+// CHECK-PERF-1: the pure text analyses of check and lock, memoized for the
+// life of the process. Every key is (artifact name, BLAKE3 of the text):
+// an edited file is a new key, so a long-running `invar mcp` sees edits at
+// once; nothing is kept across processes or written to disk.
+type Memo<T> = std::cell::RefCell<std::collections::HashMap<(String, [u8; 32]), std::rc::Rc<T>>>;
+thread_local! {
+    static SURFACES: Memo<Live> = Default::default();
+    static FIELDS: Memo<Fields> = Default::default();
+    static ZOD: Memo<Vec<(String, Vec<String>)>> = Default::default();
+    static READS: Memo<BTreeMap<String, Vec<(String, usize)>>> = Default::default();
+}
+
+/// The memoized value for (`name`, BLAKE3 of `text`), computed by `f` once.
+fn memo<T>(table: &'static std::thread::LocalKey<Memo<T>>, name: &str, text: &str, f: impl FnOnce() -> Result<T>) -> Result<std::rc::Rc<T>> {
+    let key = (name.to_string(), *blake3::hash(text.as_bytes()).as_bytes());
+    if let Some(v) = table.with(|m| m.borrow().get(&key).cloned()) {
+        return Ok(v);
+    }
+    let v = std::rc::Rc::new(f()?);
+    table.with(|m| m.borrow_mut().insert(key, v.clone()));
+    Ok(v)
+}
+
+/// A code artifact's fields, memoized by its name and bytes (shared by every
+/// contract on the same file, whatever shapes they name).
+fn fields_of(id: &str, name: &str, text: &str) -> Result<std::rc::Rc<Fields>> {
+    memo(&FIELDS, name, text, || code_fields(name, text).ok_or_else(|| anyhow!("{id}: cannot read fields from {name}")))
+}
+
+/// The zod objects of a text, (name, direct keys), memoized.
+fn zod_of(name: &str, text: &str) -> std::rc::Rc<Vec<(String, Vec<String>)>> {
+    let all = memo(&ZOD, name, text, || {
+        Ok(crate::valuepairs::scan_zod(text)
+            .into_iter()
+            .filter_map(|d| match d.body {
+                crate::valuepairs::ShapeBody::Fields(f) => Some((d.name, f.into_iter().map(|(k, _)| k).collect())),
+                crate::valuepairs::ShapeBody::Dynamic(_) => None,
+            })
+            .collect())
+    });
+    all.expect("scanning zod cannot fail")
+}
+
+/// The live surface of a contract's producer, memoized. The key holds
+/// everything the surface depends on: the producer's name and bytes, the
+/// pointer, the code companion's name and bytes, and the zod shapes the
+/// contract names.
+fn live_surface(
+    id: &str,
+    producer: &str,
+    pointer: Option<&str>,
+    code: Option<&str>,
+    resolver: &Resolver,
+    prov: &mut Vec<Fetched>,
+    zod_shapes: &[String],
+) -> Result<std::rc::Rc<Live>> {
+    let text = fetch_text(resolver, producer, prov)?;
+    let companion = match code {
+        Some(c) => Some((c, fetch_text(resolver, c, prov)?)),
+        None => None,
+    };
+    let mut name = format!("{}\u{0}{pointer:?}\u{0}{}", artifact_name(producer), zod_shapes.join(","));
+    if let Some((c, t)) = &companion {
+        name.push_str(&format!("\u{0}{}\u{0}{}", artifact_name(c), blake3::hash(t.as_bytes()).to_hex()));
+    }
+    memo(&SURFACES, &name, &text, || {
+        producer_surface_from(id, producer, &text, pointer, companion.as_ref().map(|(c, t)| (*c, t.as_str())), zod_shapes)
+    })
+}
+
 /// The producer surface: (source, scope, field) -> type.
 type Surface = BTreeMap<(String, String, String), Option<String>>;
 
@@ -343,35 +413,52 @@ fn producer_surface(
     prov: &mut Vec<Fetched>,
     zod_shapes: &[String],
 ) -> Result<Live> {
+    let text = fetch_text(resolver, producer, prov)?;
+    let companion = match code {
+        Some(c) => Some((c, fetch_text(resolver, c, prov)?)),
+        None => None,
+    };
+    producer_surface_from(id, producer, &text, pointer, companion.as_ref().map(|(c, t)| (*c, t.as_str())), zod_shapes)
+}
+
+/// The producer surface from texts already fetched (pure).
+fn producer_surface_from(
+    id: &str,
+    producer: &str,
+    text: &str,
+    pointer: Option<&str>,
+    code: Option<(&str, &str)>,
+    zod_shapes: &[String],
+) -> Result<Live> {
     let mut s = Surface::new();
-    let mut put = |source: &str, fields: Fields, scope_override: Option<&str>| {
+    let mut put = |source: &str, fields: &Fields, scope_override: Option<&str>| {
         for ((scope, name), ty) in fields {
-            let scope = scope_override.map(str::to_string).unwrap_or(scope);
-            s.insert((source.into(), scope, name), norm_ty(&ty));
+            let scope = scope_override.map(str::to_string).unwrap_or_else(|| scope.clone());
+            s.insert((source.into(), scope, name.clone()), norm_ty(ty));
         }
     };
-    let text = fetch_text(resolver, producer, prov)?;
     let blake3 = blake3::hash(text.as_bytes()).to_hex().to_string();
     let mut zod_extra: Vec<(String, String)> = Vec::new();
     if is_code(producer) {
-        let f = code_fields(&artifact_name(producer), &text)
-            .ok_or_else(|| anyhow!("{id}: cannot read fields from {}", artifact_name(producer)))?;
-        put("code", f, None);
+        let f = fields_of(id, &artifact_name(producer), text)?;
+        put("code", &f, None);
         // Slice 2 (INIT-DISCOVERY-SLICE2, K2): shape-attributed zod entries
         // for the named shapes only, never replacing a typed entry. With no
         // zod shape named (every slice 1 contract) this adds nothing.
-        zod_extra = crate::valuepairs::zod_surface(&text, zod_shapes);
+        for (n, keys) in zod_of(&artifact_name(producer), text).iter() {
+            if zod_shapes.contains(n) {
+                zod_extra.extend(keys.iter().map(|k| (n.clone(), k.clone())));
+            }
+        }
     } else {
-        let obj = load_object(id, producer, &text, pointer)?;
-        put("spec", spec_fields(&obj), Some(&pointer_scope(pointer)));
+        let obj = load_object(id, producer, text, pointer)?;
+        put("spec", &spec_fields(&obj), Some(&pointer_scope(pointer)));
     }
     let mut blake3_code = None;
-    if let Some(c) = code {
-        let t = fetch_text(resolver, c, prov)?;
+    if let Some((c, t)) = code {
         blake3_code = Some(blake3::hash(t.as_bytes()).to_hex().to_string());
-        let f = code_fields(&artifact_name(c), &t)
-            .ok_or_else(|| anyhow!("{id}: cannot read fields from {}", artifact_name(c)))?;
-        put("code", f, None);
+        let f = fields_of(id, &artifact_name(c), t)?;
+        put("code", &f, None);
     }
     for (scope, field) in zod_extra {
         s.entry(("code".into(), scope, field)).or_insert(None);
@@ -384,13 +471,15 @@ fn producer_surface(
 }
 
 /// Consumer reads, by naming-form key -> sites.
-fn consumer_reads(consumer: &str, text: &str) -> BTreeMap<String, Vec<(String, usize)>> {
-    let mut out: BTreeMap<String, Vec<(String, usize)>> = BTreeMap::new();
-    for (f, l) in broad_reads(text) {
-        out.entry(name_key(&f)).or_default().push((f, l));
-    }
-    let _ = consumer;
-    out
+fn consumer_reads(consumer: &str, text: &str) -> std::rc::Rc<BTreeMap<String, Vec<(String, usize)>>> {
+    let reads = memo(&READS, &artifact_name(consumer), text, || {
+        let mut out: BTreeMap<String, Vec<(String, usize)>> = BTreeMap::new();
+        for (f, l) in broad_reads(text) {
+            out.entry(name_key(&f)).or_default().push((f, l));
+        }
+        Ok(out)
+    });
+    reads.expect("reading a consumer cannot fail")
 }
 
 struct Declared {
@@ -1130,7 +1219,7 @@ pub fn check_contract(
         .collect::<BTreeSet<_>>()
         .into_iter()
         .collect();
-    let live = producer_surface(&entry.id, producer, pointer, code, resolver, prov, &zod_shapes)?;
+    let live = live_surface(&entry.id, producer, pointer, code, resolver, prov, &zod_shapes)?;
     let consumer_text = fetch_text(resolver, consumer, prov)?;
     let reads = consumer_reads(consumer, &consumer_text);
     let cname = artifact_name(consumer);

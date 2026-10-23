@@ -1,0 +1,14 @@
+# mutation: only the first match of a key on each line replayed
+# catch: p_f3_key_reads_across_lines_and_crlf
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -572,6 +572,9 @@
+                     push(v.split(',').next().unwrap_or(""));
+                 }
+                 next[k] += 1;
++                while next[k] < hits[k].len() && hits[k][next[k]] + key.len() <= end {
++                    next[k] += 1;
++                }
+             }
+         }
+         if let Some((name, _)) = decl_name_type(line.trim().trim_start_matches("pub ")) {

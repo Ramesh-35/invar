@@ -1,0 +1,13 @@
+# mutation: a memo key without the artifact name
+# catch: p_f2_the_same_bytes_under_two_artifact_names_are_read_twice
+--- a/crates/invar-falsify/src/lock.rs
++++ b/crates/invar-falsify/src/lock.rs
+@@ -339,7 +339,7 @@
+ 
+ /// The memoized value for (`name`, BLAKE3 of `text`), computed by `f` once.
+ fn memo<T>(table: &'static std::thread::LocalKey<Memo<T>>, name: &str, text: &str, f: impl FnOnce() -> Result<T>) -> Result<std::rc::Rc<T>> {
+-    let key = (name.to_string(), *blake3::hash(text.as_bytes()).as_bytes());
++    let key = (String::new(), *blake3::hash(text.as_bytes()).as_bytes());
+     if let Some(v) = table.with(|m| m.borrow().get(&key).cloned()) {
+         return Ok(v);
+     }

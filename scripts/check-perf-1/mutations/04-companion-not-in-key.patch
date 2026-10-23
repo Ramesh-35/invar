@@ -1,0 +1,13 @@
+# mutation: the surface key without the code companion's bytes
+# catch: p_f5_a_warm_server_sees_a_code_companion_edit
+--- a/crates/invar-falsify/src/lock.rs
++++ b/crates/invar-falsify/src/lock.rs
+@@ -388,7 +388,7 @@
+     };
+     let mut name = format!("{}\u{0}{pointer:?}\u{0}{}", artifact_name(producer), zod_shapes.join(","));
+     if let Some((c, t)) = &companion {
+-        name.push_str(&format!("\u{0}{}\u{0}{}", artifact_name(c), blake3::hash(t.as_bytes()).to_hex()));
++        name.push_str(&format!("\u{0}{}", artifact_name(c)));
+     }
+     memo(&SURFACES, &name, &text, || {
+         producer_surface_from(id, producer, &text, pointer, companion.as_ref().map(|(c, t)| (*c, t.as_str())), zod_shapes)

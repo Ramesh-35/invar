@@ -1,0 +1,13 @@
+# mutation: the single-pass scan forgets one key (json:)
+# catch: p_f3_key_reads_across_lines_and_crlf
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -528,7 +528,7 @@
+     // CHECK-PERF-1: each key is searched once over the whole text, then its
+     // matches are replayed line by line in the original order. A key holds
+     // no newline, so every match lies inside one line.
+-    const KEYS: [&str; 4] = [".get(", "json:", "rename", "alias"];
++    const KEYS: [&str; 4] = [".get(", "json-", "rename", "alias"];
+     let hits: Vec<Vec<usize>> = KEYS.iter().map(|k| source.match_indices(k).map(|(i, _)| i).collect()).collect();
+     let mut next = [0usize; 4];
+     let base = source.as_ptr() as usize;

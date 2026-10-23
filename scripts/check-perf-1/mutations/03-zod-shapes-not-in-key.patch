@@ -1,0 +1,13 @@
+# mutation: the surface key without the contract's zod shapes
+# catch: p_f4_each_contract_keeps_its_own_zod_shapes
+--- a/crates/invar-falsify/src/lock.rs
++++ b/crates/invar-falsify/src/lock.rs
+@@ -386,7 +386,7 @@
+         Some(c) => Some((c, fetch_text(resolver, c, prov)?)),
+         None => None,
+     };
+-    let mut name = format!("{}\u{0}{pointer:?}\u{0}{}", artifact_name(producer), zod_shapes.join(","));
++    let mut name = format!("{}\u{0}{pointer:?}\u{0}", artifact_name(producer));
+     if let Some((c, t)) = &companion {
+         name.push_str(&format!("\u{0}{}\u{0}{}", artifact_name(c), blake3::hash(t.as_bytes()).to_hex()));
+     }

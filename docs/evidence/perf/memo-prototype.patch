@@ -1,0 +1,164 @@
+diff --git a/crates/invar-falsify/src/lock.rs b/crates/invar-falsify/src/lock.rs
+index 3cfb4be..2dc0a49 100644
+--- a/crates/invar-falsify/src/lock.rs
++++ b/crates/invar-falsify/src/lock.rs
+@@ -325,6 +325,46 @@ fn norm_ty(t: &Option<String>) -> Option<String> {
+         .filter(|s| !s.is_empty())
+ }
+ 
++// PERF prototype: per-process memo of pure text analyses, keyed by the
++// text's BLAKE3 (and the artifact name where the analysis depends on it).
++thread_local! {
++    static CODE_FIELDS: std::cell::RefCell<std::collections::HashMap<(String, String), Option<Fields>>> = Default::default();
++    static ZOD: std::cell::RefCell<std::collections::HashMap<String, Vec<(String, Vec<String>)>>> = Default::default();
++    static READS: std::cell::RefCell<std::collections::HashMap<String, std::rc::Rc<BTreeMap<String, Vec<(String, usize)>>>>> = Default::default();
++    static LIVE: std::cell::RefCell<std::collections::HashMap<String, std::rc::Rc<Live>>> = Default::default();
++}
++
++fn code_fields_memo(name: &str, text: &str, h: &str) -> Option<Fields> {
++    let key = (name.to_string(), h.to_string());
++    if let Some(v) = CODE_FIELDS.with(|c| c.borrow().get(&key).cloned()) {
++        return v;
++    }
++    let v = code_fields(name, text);
++    CODE_FIELDS.with(|c| c.borrow_mut().insert(key, v.clone()));
++    v
++}
++
++fn zod_memo(text: &str, h: &str, names: &[String]) -> Vec<(String, String)> {
++    let all = ZOD.with(|c| c.borrow().get(h).cloned()).unwrap_or_else(|| {
++        let v: Vec<(String, Vec<String>)> = crate::valuepairs::scan_zod(text)
++            .into_iter()
++            .filter_map(|d| match d.body {
++                crate::valuepairs::ShapeBody::Fields(f) => Some((d.name, f.into_iter().map(|(k, _)| k).collect())),
++                _ => None,
++            })
++            .collect();
++        ZOD.with(|c| c.borrow_mut().insert(h.to_string(), v.clone()));
++        v
++    });
++    let mut out = Vec::new();
++    for (n, ks) in all {
++        if names.contains(&n) {
++            out.extend(ks.into_iter().map(|k| (n.clone(), k)));
++        }
++    }
++    out
++}
++
+ /// The producer surface: (source, scope, field) -> type.
+ type Surface = BTreeMap<(String, String, String), Option<String>>;
+ 
+@@ -354,13 +394,13 @@ fn producer_surface(
+     let blake3 = blake3::hash(text.as_bytes()).to_hex().to_string();
+     let mut zod_extra: Vec<(String, String)> = Vec::new();
+     if is_code(producer) {
+-        let f = code_fields(&artifact_name(producer), &text)
++        let f = code_fields_memo(&artifact_name(producer), &text, &blake3)
+             .ok_or_else(|| anyhow!("{id}: cannot read fields from {}", artifact_name(producer)))?;
+         put("code", f, None);
+         // Slice 2 (INIT-DISCOVERY-SLICE2, K2): shape-attributed zod entries
+         // for the named shapes only, never replacing a typed entry. With no
+         // zod shape named (every slice 1 contract) this adds nothing.
+-        zod_extra = crate::valuepairs::zod_surface(&text, zod_shapes);
++        zod_extra = zod_memo(&text, &blake3, zod_shapes);
+     } else {
+         let obj = load_object(id, producer, &text, pointer)?;
+         put("spec", spec_fields(&obj), Some(&pointer_scope(pointer)));
+@@ -383,8 +423,43 @@ fn producer_surface(
+     })
+ }
+ 
++/// PERF prototype: the whole live surface, memoized by the producer's (and
++/// code companion's) content hash, pointer and the named zod shapes.
++fn producer_surface_memo(
++    id: &str,
++    producer: &str,
++    pointer: Option<&str>,
++    code: Option<&str>,
++    resolver: &Resolver,
++    prov: &mut Vec<Fetched>,
++    zod_shapes: &[String],
++) -> Result<std::rc::Rc<Live>> {
++    let text = fetch_text(resolver, producer, prov)?;
++    let mut key = format!("{}|{}|{:?}|{}", artifact_name(producer), blake3::hash(text.as_bytes()).to_hex(), pointer, zod_shapes.join(","));
++    if let Some(c) = code {
++        let t = fetch_text(resolver, c, prov)?;
++        key.push_str(&format!("|{}|{}", artifact_name(c), blake3::hash(t.as_bytes()).to_hex()));
++    }
++    if let Some(v) = LIVE.with(|c| c.borrow().get(&key).cloned()) {
++        return Ok(v);
++    }
++    let v = std::rc::Rc::new(producer_surface(id, producer, pointer, code, resolver, &mut Vec::new(), zod_shapes)?);
++    LIVE.with(|c| c.borrow_mut().insert(key, v.clone()));
++    Ok(v)
++}
++
+ /// Consumer reads, by naming-form key -> sites.
+-fn consumer_reads(consumer: &str, text: &str) -> BTreeMap<String, Vec<(String, usize)>> {
++fn consumer_reads(consumer: &str, text: &str) -> std::rc::Rc<BTreeMap<String, Vec<(String, usize)>>> {
++    let h = blake3::hash(text.as_bytes()).to_hex().to_string();
++    if let Some(v) = READS.with(|c| c.borrow().get(&h).cloned()) {
++        return v;
++    }
++    let v = std::rc::Rc::new(consumer_reads_raw(consumer, text));
++    READS.with(|c| c.borrow_mut().insert(h, v.clone()));
++    v
++}
++
++fn consumer_reads_raw(consumer: &str, text: &str) -> BTreeMap<String, Vec<(String, usize)>> {
+     let mut out: BTreeMap<String, Vec<(String, usize)>> = BTreeMap::new();
+     for (f, l) in broad_reads(text) {
+         out.entry(name_key(&f)).or_default().push((f, l));
+@@ -1130,7 +1205,7 @@ pub fn check_contract(
+         .collect::<BTreeSet<_>>()
+         .into_iter()
+         .collect();
+-    let live = producer_surface(&entry.id, producer, pointer, code, resolver, prov, &zod_shapes)?;
++    let live = producer_surface_memo(&entry.id, producer, pointer, code, resolver, prov, &zod_shapes)?;
+     let consumer_text = fetch_text(resolver, consumer, prov)?;
+     let reads = consumer_reads(consumer, &consumer_text);
+     let cname = artifact_name(consumer);
+diff --git a/crates/invar-falsify/src/surface.rs b/crates/invar-falsify/src/surface.rs
+index c9a6662..9d1b9f3 100644
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -525,7 +525,16 @@ fn rs_fields(text: &str) -> Fields {
+ /// Every field-like name a consumer source reads, with 1-based line numbers.
+ pub fn broad_reads(source: &str) -> Vec<(String, usize)> {
+     let mut out = Vec::new();
++    // PERF prototype: each key searched once over the whole text (keys hold
++    // no newline, so every match lies inside one line), then replayed per
++    // line in the original order.
++    const KEYS: [&str; 4] = [".get(", "json:", "rename", "alias"];
++    let hits: Vec<Vec<usize>> = KEYS.iter().map(|k| source.match_indices(k).map(|(i, _)| i).collect()).collect();
++    let mut cursor = [0usize; 4];
++    let base = source.as_ptr() as usize;
+     for (ln, line) in source.lines().enumerate() {
++        let start = line.as_ptr() as usize - base;
++        let end = start + line.len();
+         let line_no = ln + 1;
+         let b = line.as_bytes();
+         let mut push = |s: &str| {
+@@ -556,14 +565,16 @@ pub fn broad_reads(source: &str) -> Vec<(String, usize)> {
+                 _ => {}
+             }
+         }
+-        for key in [".get(", "json:", "rename", "alias"] {
+-            let mut from = 0;
+-            while let Some(pos) = line[from..].find(key) {
+-                let at = from + pos;
++        for (k, key) in KEYS.iter().enumerate() {
++            while cursor[k] < hits[k].len() && hits[k][cursor[k]] < start {
++                cursor[k] += 1;
++            }
++            while cursor[k] < hits[k].len() && hits[k][cursor[k]] + key.len() <= end {
++                let at = hits[k][cursor[k]] - start;
+                 if let Some(v) = quoted_after(&line[at..], key) {
+                     push(v.split(',').next().unwrap_or(""));
+                 }
+-                from = at + key.len();
++                cursor[k] += 1;
+             }
+         }
+         if let Some((name, _)) = decl_name_type(line.trim().trim_start_matches("pub ")) {

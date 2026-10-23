@@ -1,0 +1,13 @@
+# mutation: a consumer's reads memoized by its name alone (an edit served stale)
+# catch: p_f1_a_warm_server_sees_every_edit
+--- a/crates/invar-falsify/src/lock.rs
++++ b/crates/invar-falsify/src/lock.rs
+@@ -472,7 +472,7 @@
+ 
+ /// Consumer reads, by naming-form key -> sites.
+ fn consumer_reads(consumer: &str, text: &str) -> std::rc::Rc<BTreeMap<String, Vec<(String, usize)>>> {
+-    let reads = memo(&READS, &artifact_name(consumer), text, || {
++    let reads = memo(&READS, &artifact_name(consumer), "", || {
+         let mut out: BTreeMap<String, Vec<(String, usize)>> = BTreeMap::new();
+         for (f, l) in broad_reads(text) {
+             out.entry(name_key(&f)).or_default().push((f, l));

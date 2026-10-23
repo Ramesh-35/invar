@@ -525,7 +525,16 @@ fn rs_fields(text: &str) -> Fields {
 /// Every field-like name a consumer source reads, with 1-based line numbers.
 pub fn broad_reads(source: &str) -> Vec<(String, usize)> {
     let mut out = Vec::new();
+    // CHECK-PERF-1: each key is searched once over the whole text, then its
+    // matches are replayed line by line in the original order. A key holds
+    // no newline, so every match lies inside one line.
+    const KEYS: [&str; 4] = [".get(", "json:", "rename", "alias"];
+    let hits: Vec<Vec<usize>> = KEYS.iter().map(|k| source.match_indices(k).map(|(i, _)| i).collect()).collect();
+    let mut next = [0usize; 4];
+    let base = source.as_ptr() as usize;
     for (ln, line) in source.lines().enumerate() {
+        let start = line.as_ptr() as usize - base;
+        let end = start + line.len();
         let line_no = ln + 1;
         let b = line.as_bytes();
         let mut push = |s: &str| {
@@ -556,14 +565,13 @@ pub fn broad_reads(source: &str) -> Vec<(String, usize)> {
                 _ => {}
             }
         }
-        for key in [".get(", "json:", "rename", "alias"] {
-            let mut from = 0;
-            while let Some(pos) = line[from..].find(key) {
-                let at = from + pos;
+        for (k, key) in KEYS.iter().enumerate() {
+            while next[k] < hits[k].len() && hits[k][next[k]] + key.len() <= end {
+                let at = hits[k][next[k]] - start;
                 if let Some(v) = quoted_after(&line[at..], key) {
                     push(v.split(',').next().unwrap_or(""));
                 }
-                from = at + key.len();
+                next[k] += 1;
             }
         }
         if let Some((name, _)) = decl_name_type(line.trim().trim_start_matches("pub ")) {
