@@ -1,0 +1,25 @@
+# G2-SPEC r0 measurement: every one-way rename candidate in the corpus, from an
+# instrumented throwaway build of the 9e89f33 engine (its own field extraction).
+# Columns: case, producer, scope.removed -> added (type), back = removed fields of
+# that scope with that type (the two-way rule keeps back=1).
+r1-005-cometbft-finalize-block-cosmjs	G2CAND	rpc/core/types/responses.go	ResultBlockResults.begin_block_events -> finalize_block_events (Some("[]abci.Event")) back=2
+r1-005-cometbft-finalize-block-cosmjs	G2CAND	rpc/core/types/responses.go	ResultBlockResults.end_block_events -> finalize_block_events (Some("[]abci.Event")) back=2
+r1-010-romm-filesize-homepage	G2CAND	backend/endpoints/responses/stats.py	StatsReturn.FILESIZE -> TOTAL_FILESIZE_BYTES (Some("int")) back=1
+r1-027-gitea-pr-branch-drone	G2CAND	pull.go	PullRequest.base_branch -> merge_base (Some("string")) back=2
+r1-027-gitea-pr-branch-drone	G2CAND	pull.go	PullRequest.head_branch -> merge_base (Some("string")) back=2
+r1-038-headscale-tags-headplane	G2CAND	gen/openapiv2/headscale/v1/headscale.swagger.json /definitions/v1Node	.forcedTags -> tags (Some("array<string>")) back=3
+r1-038-headscale-tags-headplane	G2CAND	gen/openapiv2/headscale/v1/headscale.swagger.json /definitions/v1Node	.invalidTags -> tags (Some("array<string>")) back=3
+r1-038-headscale-tags-headplane	G2CAND	gen/openapiv2/headscale/v1/headscale.swagger.json /definitions/v1Node	.validTags -> tags (Some("array<string>")) back=3
+r1-057-turbo2-pipeline-tasks-vercel	G2CAND	crates/turborepo-lib/src/turbo_json/mod.rs	RawTaskDefinition.output_mode -> output_logs (Some("OutputLogsMode::Full")) back=1
+r1-057-turbo2-pipeline-tasks-vercel	G2CAND	crates/turborepo-lib/src/turbo_json/mod.rs	TurboJson.pipeline -> tasks (Some("Pipeline")) back=1
+r1-061-nuclei-kebab-keys-faraday	G2CAND	v2/pkg/output/output.go	ResultEvent.extracted_results -> extracted-results (Some("[]string")) back=1
+r1-070-vikunja-list-id-project-id-frontend	G2CAND	pkg/models/tasks.go	Task.list_id -> project_id (Some("int64")) back=1
+r1-072-klipper-max-accel-to-decel-screen	G2CAND	klippy/toolhead.py	get_status.max_accel_to_decel -> minimum_cruise_ratio (None) back=1
+r1-076-woodpecker-link-url-terraform	G2CAND	server/model/repo.go	Repo.link_url -> forge_url (Some("string")) back=1
+r1-098-kiali-health-errorratio-ui	G2CAND	models/health.go	RequestHealth.requestCount -> errorRatio (Some("float64")) back=2
+r1-098-kiali-health-errorratio-ui	G2CAND	models/health.go	RequestHealth.requestErrorCount -> errorRatio (Some("float64")) back=2
+r1-104-pnpm-lockfile-v9-turbo	G2CAND	lockfile/lockfile-types/src/index.ts	Lockfile.neverBuiltDependencies -> ignoredOptionalDependencies (Some("string[]")) back=2
+r1-104-pnpm-lockfile-v9-turbo	G2CAND	lockfile/lockfile-types/src/index.ts	Lockfile.onlyBuiltDependencies -> ignoredOptionalDependencies (Some("string[]")) back=2
+r1-106-dispatcharr-streamname-homepage	G2CAND	apps/proxy/ts_proxy/channel_status.py	get_basic_channel_info.m3u_profile_name -> channel_name (None) back=1
+r1-112-headscale-machines-nodes-ui	G2CAND	gen/go/headscale/v1/node.pb.go	SetTagsRequest.machine_id -> node_id (Some("uint64")) back=1
+r1-115-moonraker-channelupdate-mainsail	G2CAND	moonraker/components/update_manager/app_deploy.py	get_update_status.need_channel_update -> channel_invalid (None) back=1

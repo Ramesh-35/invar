@@ -1,0 +1,11 @@
+G2-M1 CAUGHT  DECLARED-KILLER-FAILED (g2_f01)  incidental=[none]  G2-M1 declared-killer=g2_f01: G2-A disabled (Go name never added)
+G2-M2 CAUGHT  DECLARED-KILLER-FAILED (g2_f02)  incidental=[none]  G2-M2 declared-killer=g2_f02: Go-consumer requirement removed
+G2-M3 CAUGHT  DECLARED-KILLER-FAILED (g2_f03)  incidental=[none]  G2-M3 declared-killer=g2_f03: exported-type requirement removed
+G2-M4 CAUGHT  DECLARED-KILLER-FAILED (g2_f04)  incidental=[none]  G2-M4 declared-killer=g2_f04: Go-name survival check removed
+G2-M5 CAUGHT  DECLARED-KILLER-FAILED (g2_f05)  incidental=[none]  G2-M5 declared-killer=g2_f05: Go name matched by name_key
+G2-M6 CAUGHT  DECLARED-KILLER-FAILED (g2_f07)  incidental=[g2_f01]  G2-M6 declared-killer=g2_f07: candidate annotation dropped
+G2-M7 CAUGHT  DECLARED-KILLER-FAILED (g2_f08)  incidental=[none]  G2-M7 declared-killer=g2_f08: reverse uniqueness removed
+G2-M8 CAUGHT  DECLARED-KILLER-FAILED (g2_f09)  incidental=[none]  G2-M8 declared-killer=g2_f09: forward uniqueness removed
+G2-M9 CAUGHT  DECLARED-KILLER-FAILED (g2_f10)  incidental=[none]  G2-M9 declared-killer=g2_f10: type equality removed
+G2-M10 CAUGHT  DECLARED-KILLER-FAILED (g2_f11)  incidental=[g2_f07,g2_f10,g2_f12]  G2-M10 declared-killer=g2_f11: known-type requirement removed (untyped fields pair)
+G2-M11 CAUGHT  DECLARED-KILLER-FAILED (g2_f12)  incidental=[none]  G2-M11 declared-killer=g2_f12: scope equality removed

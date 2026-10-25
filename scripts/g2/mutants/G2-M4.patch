@@ -1,0 +1,12 @@
+# G2-M4 declared-killer=g2_f04: Go-name survival check removed
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -339,7 +339,7 @@
+     let mut out = BTreeMap::new();
+     for (scope, key, name, _) in go_decls(base) {
+         let exported = scope.starts_with(|c: char| c.is_ascii_uppercase());
+-        let gone = !head_d.iter().any(|(_, _, n, _)| *n == name);
++        let gone = true;
+         if exported && gone && name != key && !head_keys.contains(&(scope.as_str(), key.as_str())) {
+             out.insert(key, name);
+         }

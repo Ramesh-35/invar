@@ -13,8 +13,8 @@ use std::collections::BTreeMap;
 use crate::invariant::{check_contract, payload_read_sites, ContractInput, Step};
 use crate::resolver::{is_remote, Fetched, Resolver};
 use crate::surface::{
-    broad_reads, changed_fields, code_fields, consumer_writes, emissions, field_names, has_string_literal,
-    inbound_reads, mention_lines, moved_fields, name_key, opaque_payload, relocated_keys,
+    broad_reads, changed_fields, code_fields, consumer_writes, emissions, field_names, go_removed_names, has_string_literal,
+    inbound_reads, mention_lines, moved_fields, name_key, opaque_payload, relocated_keys, rename_candidates,
     selector_switches, serializer_fields, spec_fields, ts_omissions, word_lines, Fields, EMISSION_FORMS,
 };
 
@@ -256,7 +256,14 @@ fn schema_outcome(
     // still counts for RS-1 conditions 2 and 3.
     let mut rs_heads: Vec<String> = vec![pr.clone()];
     let mut rs_pairs: Vec<(String, String, String, String)> = Vec::new();
+    // G2-R candidates and G2-A Go names, over every bound producer pair. A
+    // key with two different candidates across pairs gets none.
+    let mut cands: BTreeMap<String, Option<(String, String)>> = BTreeMap::new();
+    let mut go_names: BTreeMap<String, String> = BTreeMap::new();
     let mut add = |head_spec: &str, head: &Fields, base: &Fields, where_: String| {
+        for (k, c) in rename_candidates(base, head) {
+            cands.entry(k).and_modify(|e| if e.as_ref() != Some(&c) { *e = None }).or_insert(Some(c));
+        }
         for (name, tc) in changed_fields(base, head) {
             changed.entry(name).or_insert((tc, where_.clone()));
         }
@@ -279,6 +286,9 @@ fn schema_outcome(
             switches.push((n, old, new, artifact_name(&p), note));
         }
         rs_pairs.push((artifact_name(bs), br.clone(), artifact_name(&p), pr.clone()));
+        if p.ends_with(".go") {
+            go_names.extend(go_removed_names(&br, &pr));
+        }
     }
     if let (Some(cs), Some(cbs)) = (&code, &code_base) {
         let cr_head = fetch(resolver, cs, prov)?;
@@ -293,6 +303,9 @@ fn schema_outcome(
         }
         rs_heads.push(cr_head.clone());
         rs_pairs.push((artifact_name(cbs), cr_base.clone(), artifact_name(cs), cr_head.clone()));
+        if cs.ends_with(".go") {
+            go_names.extend(go_removed_names(&cr_base, &cr_head));
+        }
     }
     for (name, where_) in omitted {
         changed.entry(name).or_insert((None, where_));
@@ -314,8 +327,12 @@ fn schema_outcome(
     let mut witnesses = Vec::new();
     for (name, (tc, where_)) in &changed {
         let key = name_key(name);
-        let matched: Vec<&(String, usize)> =
-            reads.iter().filter(|(f, _)| name_key(f) == key).collect();
+        // G2-A: a Go consumer may read a removed Go field by its Go name.
+        let go_name = go_names.get(name).filter(|_| c.ends_with(".go") && tc.is_none());
+        let matched: Vec<&(String, usize)> = reads
+            .iter()
+            .filter(|(f, _)| name_key(f) == key || go_name == Some(f))
+            .collect();
         if matched.is_empty() {
             continue;
         }
@@ -336,7 +353,12 @@ fn schema_outcome(
             residue: name.clone(),
             sites: dedup,
             missing_from: if tc.is_none() {
-                Some(where_.clone())
+                Some(match cands.get(name) {
+                    Some(Some((to, ty))) => format!(
+                        "{where_} · candidate rename: {to} (same scope, same type {ty}), not evaluated"
+                    ),
+                    _ => where_.clone(),
+                })
             } else {
                 None
             },
@@ -656,7 +678,21 @@ pub fn witness_text(w: &Witness, kind: &str, code: fn(&str) -> String) -> String
         s.push_str(&format!(" {verb} {}", shown.join(", ")));
     }
     if let Some(m) = &w.missing_from {
-        s.push_str(&format!(" · not in {}", code(m)));
+        // G2-R: a candidate rename travels in missing_from; each repo-derived
+        // value in it gets its own code span.
+        let cand = m.split_once(" · candidate rename: ").and_then(|(at, c)| {
+            let (to, rest) = c.split_once(" (same scope, same type ")?;
+            Some((at, to, rest.strip_suffix("), not evaluated")?))
+        });
+        match cand {
+            Some((at, to, ty)) => s.push_str(&format!(
+                " · not in {} · candidate rename: {} (same scope, same type {}), not evaluated",
+                code(at),
+                code(to),
+                code(ty)
+            )),
+            None => s.push_str(&format!(" · not in {}", code(m))),
+        }
     }
     if !w.read_as.is_empty() {
         let forms: Vec<String> = w.read_as.iter().map(|x| code(x)).collect();

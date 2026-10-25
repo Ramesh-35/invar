@@ -1,0 +1,10 @@
+--- g1e-engine
++++ g2-engine
+@@ -1,6 +1,6 @@
+ INVAR check (1 contract(s), --ci)
+   [VIOLATED] r1-010 (schema): ["FILESIZE"]
+-      FILESIZE read at src/widgets/romm/component.jsx:46 · not in backend/endpoints/responses/stats.py
++      FILESIZE read at src/widgets/romm/component.jsx:46 · not in backend/endpoints/responses/stats.py · candidate rename: TOTAL_FILESIZE_BYTES (same scope, same type int), not evaluated
+       fetched github:rommapp/romm@fa833c3f41e9e20c34e204ddf3ba9a40a7ece58a:backend/endpoints/responses/stats.py (176 bytes, blake3 ddde207f9698e87643960accb97f7d387a4bf6b37667cf74738ed8ba36bed021)
+       fetched github:rommapp/romm@48818d68046e587d8c6e967f7f3b29615173c0f0:backend/endpoints/responses/stats.py (164 bytes, blake3 fdc8b2da445080a1e1f775ff859833cf8cefa289ce692eb6d4c50bb7a6340133)
+       fetched github:gethomepage/homepage@d581d70d1a81aedac041b53f4fd406d9ce1ab6e7:src/widgets/romm/component.jsx (1849 bytes, blake3 9a8106cd957cc290543bf2c49068eaec0765ed7647517c0d9ed7f3c1e5f0d61e)

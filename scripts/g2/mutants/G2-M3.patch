@@ -1,0 +1,12 @@
+# G2-M3 declared-killer=g2_f03: exported-type requirement removed
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -338,7 +338,7 @@
+     let head_keys: BTreeSet<(&str, &str)> = head_d.iter().map(|(s, k, _, _)| (s.as_str(), k.as_str())).collect();
+     let mut out = BTreeMap::new();
+     for (scope, key, name, _) in go_decls(base) {
+-        let exported = scope.starts_with(|c: char| c.is_ascii_uppercase());
++        let exported = true;
+         let gone = !head_d.iter().any(|(_, _, n, _)| *n == name);
+         if exported && gone && name != key && !head_keys.contains(&(scope.as_str(), key.as_str())) {
+             out.insert(key, name);

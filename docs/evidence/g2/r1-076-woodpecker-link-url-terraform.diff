@@ -1,0 +1,17 @@
+--- g1e-engine
++++ g2-engine
+@@ -1,9 +1,10 @@
+ INVAR check (1 contract(s), --ci)
+-  [HOLDS]    r1-076 (schema)
++  [VIOLATED] r1-076 (schema): ["link_url"]
++      link_url read at internal/models.go:131 · not in server/model/repo.go · candidate rename: forge_url (same scope, same type string), not evaluated · naming differs, read as Link
+       fetched github:woodpecker-ci/woodpecker@342b25826c93f76ec72ecf7d0d5b6e1e05485f50:server/model/repo.go (5643 bytes, blake3 b27057d222597597f9edc9fcc08955985553b5e7d89be27e0b76cd67c24ddda5)
+       fetched github:woodpecker-ci/woodpecker@451b71dcd43c7f8c615c0e958e1177a83b6b4fbd:server/model/repo.go (5630 bytes, blake3 99abe79eb5a0453dd8be1692d3a2eb47e3fa3ce828cd61c11a7f11a30f48444e)
+       fetched github:Kichiyaki/terraform-provider-woodpecker@1763f24888e11751e73c2293b942af8a31d4bfc2:internal/models.go (10638 bytes, blake3 f918f6cdfad7d7898c809a43fe1ba3dded3083da08766201a3ded18d7b3f733f)
+-result: ALL 1 contract(s) hold
+-summary: held 1 | violated 0 | skipped or not evaluated 0
++result: 1 of 1 contract(s) VIOLATED
++summary: held 0 | violated 1 | skipped or not evaluated 0
+ measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)
+-exit 0
++exit 1

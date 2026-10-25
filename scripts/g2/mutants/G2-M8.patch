@@ -1,0 +1,12 @@
+# G2-M8 declared-killer=g2_f09: forward uniqueness removed
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -366,7 +366,7 @@
+             .iter()
+             .filter(|((s, k), t)| s == scope && t.as_ref() == Some(ty) && !head.contains_key(&(s.clone(), k.clone())))
+             .count();
+-        if added.len() == 1 && rivals == 1 {
++        if !added.is_empty() && rivals == 1 {
+             out.entry(key.clone()).or_insert_with(Vec::new).push((added[0].clone(), ty.clone()));
+         }
+     }

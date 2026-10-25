@@ -274,7 +274,16 @@ fn quoted_after<'a>(s: &'a str, key: &str) -> Option<&'a str> {
 }
 
 fn go_fields(text: &str) -> Fields {
-    let mut out = Fields::new();
+    go_decls(text)
+        .into_iter()
+        .map(|(scope, key, _, ty)| ((scope, key), Some(ty)))
+        .collect()
+}
+
+/// Exported Go struct fields as (struct type, key, Go name, type): the key
+/// is the JSON tag, or the Go name when there is no tag.
+fn go_decls(text: &str) -> Vec<(String, String, String, String)> {
+    let mut out = Vec::new();
     let mut in_struct = 0usize;
     let mut scope = String::new();
     for line in text.lines() {
@@ -316,9 +325,53 @@ fn go_fields(text: &str) -> Fields {
             Some("") | None => name.to_string(),
             Some(k) => k.to_string(),
         };
-        out.insert((scope.clone(), key), Some(ty.to_string()));
+        out.push((scope.clone(), key, name.to_string(), ty.to_string()));
     }
     out
+}
+
+/// G2-A: for a Go producer pair, each removed field's key mapped to its Go
+/// name, when the struct type is exported and no head struct still declares
+/// that Go name (G2-SPEC r0, section B, conditions 2 and 4).
+pub fn go_removed_names(base: &str, head: &str) -> BTreeMap<String, String> {
+    let head_d = go_decls(head);
+    let head_keys: BTreeSet<(&str, &str)> = head_d.iter().map(|(s, k, _, _)| (s.as_str(), k.as_str())).collect();
+    let mut out = BTreeMap::new();
+    for (scope, key, name, _) in go_decls(base) {
+        let exported = scope.starts_with(|c: char| c.is_ascii_uppercase());
+        let gone = !head_d.iter().any(|(_, _, n, _)| *n == name);
+        if exported && gone && name != key && !head_keys.contains(&(scope.as_str(), key.as_str())) {
+            out.insert(key, name);
+        }
+    }
+    out
+}
+
+/// G2-R: removed key -> (added key, type) when, in one scope, the removed
+/// field has exactly one added field of the same known type and no other
+/// removed field of that scope has that type (G2-SPEC r0, section C).
+pub fn rename_candidates(base: &Fields, head: &Fields) -> BTreeMap<String, (String, String)> {
+    let mut out: BTreeMap<String, Vec<(String, String)>> = BTreeMap::new();
+    for ((scope, key), ty) in base {
+        let Some(ty) = ty else { continue };
+        if head.contains_key(&(scope.clone(), key.clone())) {
+            continue;
+        }
+        let added: Vec<&String> = head
+            .iter()
+            .filter(|((s, k), t)| s == scope && t.as_ref() == Some(ty) && !base.contains_key(&(s.clone(), k.clone())))
+            .map(|((_, k), _)| k)
+            .collect();
+        let rivals = base
+            .iter()
+            .filter(|((s, k), t)| s == scope && t.as_ref() == Some(ty) && !head.contains_key(&(s.clone(), k.clone())))
+            .count();
+        if added.len() == 1 && rivals == 1 {
+            out.entry(key.clone()).or_insert_with(Vec::new).push((added[0].clone(), ty.clone()));
+        }
+    }
+    // A key removed from two scopes with candidates is ambiguous: no pairing.
+    out.into_iter().filter(|(_, v)| v.len() == 1).map(|(k, mut v)| (k, v.remove(0))).collect()
 }
 
 /// The member texts after a declaration line's opening brace (the first `{`

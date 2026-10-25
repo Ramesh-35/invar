@@ -1,0 +1,12 @@
+# G2-M6 declared-killer=g2_f07: candidate annotation dropped
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -353,7 +353,7 @@
+             residue: name.clone(),
+             sites: dedup,
+             missing_from: if tc.is_none() {
+-                Some(match cands.get(name) {
++                Some(match cands.get(name).filter(|_| false) {
+                     Some(Some((to, ty))) => format!(
+                         "{where_} · candidate rename: {to} (same scope, same type {ty}), not evaluated"
+                     ),

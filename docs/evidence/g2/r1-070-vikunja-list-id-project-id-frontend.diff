@@ -1,0 +1,10 @@
+--- g1e-engine
++++ g2-engine
+@@ -1,6 +1,6 @@
+ INVAR check (1 contract(s), --ci)
+   [VIOLATED] r1-070 (schema): ["list_id"]
+-      list_id read at src/models/task.ts:96, src/models/task.ts:158 · not in pkg/models/tasks.go · naming differs, read as listId
++      list_id read at src/models/task.ts:96, src/models/task.ts:158 · not in pkg/models/tasks.go · candidate rename: project_id (same scope, same type int64), not evaluated · naming differs, read as listId
+       fetched github:go-vikunja/vikunja@869d4a336cb122df894acf040e02b6b2ba786fdb:pkg/models/tasks.go (48414 bytes, blake3 217c9fa84e859fd3c79d598f8596203db93debe444197bc89a38658ddac0a07a)
+       fetched github:go-vikunja/vikunja@80266d138380ca79895600076e906e446e102be1:pkg/models/tasks.go (48041 bytes, blake3 1b54cf9fe0f15f2c77166a1033bdafd1f03bb2bc683f8a5e4c58a988bb46bfe4)
+       fetched github:go-vikunja/frontend@ee732684bc149b2d388eb1c344f08e1c921a368e:src/models/task.ts (7565 bytes, blake3 abc9f5cc117e18650d06079fcc2b9ad2b5fb32d6ed895ac384e0067bb790575e)

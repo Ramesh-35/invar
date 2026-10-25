@@ -1,0 +1,12 @@
+# G2-M11 declared-killer=g2_f12: scope equality removed
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -359,7 +359,7 @@
+         }
+         let added: Vec<&String> = head
+             .iter()
+-            .filter(|((s, k), t)| s == scope && t.as_ref() == Some(ty) && !base.contains_key(&(s.clone(), k.clone())))
++            .filter(|((s, k), t)| t.as_ref() == Some(ty) && !base.contains_key(&(s.clone(), k.clone())))
+             .map(|((_, k), _)| k)
+             .collect();
+         let rivals = base

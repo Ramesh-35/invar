@@ -1,0 +1,12 @@
+# G2-M5 declared-killer=g2_f05: Go name matched by name_key
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -331,7 +331,7 @@
+         let go_name = go_names.get(name).filter(|_| c.ends_with(".go") && tc.is_none());
+         let matched: Vec<&(String, usize)> = reads
+             .iter()
+-            .filter(|(f, _)| name_key(f) == key || go_name == Some(f))
++            .filter(|(f, _)| name_key(f) == key || go_name.is_some_and(|g| name_key(g) == name_key(f)))
+             .collect();
+         if matched.is_empty() {
+             continue;

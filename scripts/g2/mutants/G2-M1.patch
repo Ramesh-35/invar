@@ -1,0 +1,12 @@
+# G2-M1 declared-killer=g2_f01: G2-A disabled (Go name never added)
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -328,7 +328,7 @@
+     for (name, (tc, where_)) in &changed {
+         let key = name_key(name);
+         // G2-A: a Go consumer may read a removed Go field by its Go name.
+-        let go_name = go_names.get(name).filter(|_| c.ends_with(".go") && tc.is_none());
++        let go_name: Option<&String> = None;
+         let matched: Vec<&(String, usize)> = reads
+             .iter()
+             .filter(|(f, _)| name_key(f) == key || go_name == Some(f))

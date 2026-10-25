@@ -1,0 +1,24 @@
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -257,6 +257,21 @@
+     let mut rs_heads: Vec<String> = vec![pr.clone()];
+     let mut rs_pairs: Vec<(String, String, String, String)> = Vec::new();
+     let mut add = |head_spec: &str, head: &Fields, base: &Fields, where_: String| {
++        {
++            use std::collections::BTreeSet;
++            let scopes: BTreeSet<&String> = base.keys().map(|(s, _)| s).collect();
++            for sc in scopes {
++                let rem: Vec<_> = base.iter().filter(|((s, k), _)| s == sc && !head.contains_key(&(s.clone(), k.clone()))).collect();
++                let addd: Vec<_> = head.iter().filter(|((s, k), _)| s == sc && !base.contains_key(&(s.clone(), k.clone()))).collect();
++                for ((_, rk), rt) in &rem {
++                    let c: Vec<_> = addd.iter().filter(|(_, at)| at == rt).collect();
++                    if c.len() != 1 { continue; }
++                    let ((_, ak), at) = c[0];
++                    let back = rem.iter().filter(|(_, t)| *t == *at).count();
++                    eprintln!("G2CAND\t{}\t{}.{} -> {} ({:?}) back={}", where_, sc, rk, ak, rt, back);
++                }
++            }
++        }
+         for (name, tc) in changed_fields(base, head) {
+             changed.entry(name).or_insert((tc, where_.clone()));
+         }

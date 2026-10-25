@@ -1684,6 +1684,25 @@ three or more hops, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
 docs/evidence/stage3/eval008.
 
+## 2026-10-25: G2 implemented (RECALL-ATTACK-1 phase 4: renames)
+
+Two parts. G2-A: a Go consumer that imports a producer's types reads a
+field by its Go name (`repo.Link`) while the engine keys Go fields by
+their JSON tag (`link_url`); a removed exported Go field read by its exact
+Go name, absent at head under both names, is now convicted through the
+existing rule (`naming differs, read as Link`). G2-R: when a convicted
+removed field has exactly one same-scope, same-known-type replacement at
+head, one-to-one, the witness states it as `candidate rename: <name> ...,
+not evaluated`; a candidate never changes a verdict. Measured: of all 122
+corpus cases, r1-076 moved from a silent HOLDS to VIOLATED, and r1-010 and
+r1-070 gained a candidate with their verdicts unchanged; 119 are
+byte-identical. Every printed candidate matches its case's recorded
+rename. r0 pre-registered a fourth (r1-057), a measurement error corrected
+in G2-SPEC r1. Tuning rung only: the sealed recall record stays 38 of 70.
+501 of 501 tests natively on macOS and in the sandbox, zero warnings; 11
+of 11 mutation operators killed by their declared fixtures. Record:
+docs/falsification/G2-SPEC.md; docs/evidence/g2.
+
 ## 2026-10-25: G1-E implemented (RECALL-ATTACK-1 phase 3: opaque emission)
 
 A producer whose literal emissions of one frozen call form fell while its

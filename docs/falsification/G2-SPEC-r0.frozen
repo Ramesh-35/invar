@@ -1,0 +1,12 @@
+# G2 freeze record (r0), written before any implementation.
+# Baseline under test: 9e89f33 (G1-E landed).
+blake3(docs/falsification/G2-SPEC.md) = 79837d235ef1a45d7c8f0d372ef649eb9adfa7aa18eae7659d72039c55aa5b24
+sha256(docs/falsification/G2-SPEC.md) = 3a479d502343515877dc6d6e11d89a5eb656b7c24cada0bc34926e3a21d4f378
+blake3(crates/invar-falsify/tests/g2_test.rs) = b34cca37f1b423d2d0b18797ba5ba620a7e9c2b5c63561afa9a786c89ddd52b0
+sha256(crates/invar-falsify/tests/g2_test.rs) = 1e5162fb022c70d5dfb11c9cc3a66daf70b114d1e1d7f496b75d1dac490423a8
+blake3(docs/evidence/g2/candidates.tsv) = 848f15d86100863c26454113cf18418c6780ec4eb85f181630555be0eb9c9b3b
+sha256(docs/evidence/g2/candidates.tsv) = d27f156c7bc4e293e4e7b9ece6568000de8b75089c808a66fd0818f6ebdf4548
+blake3(scripts/g2/measure.py) = 8f1c6c439ee1f0fd6d1b85996754ee89b0a2a6394b154f3fe43ccb3ca425d039
+sha256(scripts/g2/measure.py) = a8dd79815eef479b338b7874f93678af6c5ffa967a6ea1f3ef4d8976da8047f1
+blake3(scripts/g2/candidate-probe.patch) = 7f97365c19849b21df356dda830fcf3f315d40c6daa5c35bb17d136b6c413f15
+sha256(scripts/g2/candidate-probe.patch) = 5673ab90d0b81636b4114a108ea0aacee7ac6ed5880bd8c6f6f9c98aaecbc612
