@@ -1,0 +1,11 @@
+# RS-M8 declared-killer=rs_f17: code companion head not consulted
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -291,7 +291,6 @@
+         for (n, old, new, note) in selector_switches(&cr_base, &cr_head) {
+             switches.push((n, old, new, artifact_name(cs), note));
+         }
+-        rs_heads.push(cr_head.clone());
+         rs_pairs.push((artifact_name(cbs), cr_base.clone(), artifact_name(cs), cr_head.clone()));
+     }
+     for (name, where_) in omitted {

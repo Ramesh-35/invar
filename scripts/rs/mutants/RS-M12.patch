@@ -1,0 +1,12 @@
+# RS-M12 declared-killer=rs_f13: RS-2 base requirement dropped
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -422,7 +422,7 @@
+         for (_, btext, hname, htext) in &rs_pairs {
+             let base_f = serializer_fields(btext);
+             for (f, (ro, hline)) in serializer_fields(htext) {
+-                if !ro || base_f.get(&f).is_none_or(|(bro, _)| *bro) {
++                if !ro || base_f.get(&f).is_some_and(|(bro, _)| *bro) {
+                     continue;
+                 }
+                 if let Some(cl) = word_lines(&cr, &f).first() {

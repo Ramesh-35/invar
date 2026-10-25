@@ -1,0 +1,17 @@
+--- g3-corpus-after/r1-118-gotenberg-pdfformat-paperless.out	2026-10-23 09:23:40.130052544 +0000
++++ rs-corpus-after/r1-118-gotenberg-pdfformat-paperless.out	2026-10-25 08:58:00.513262431 +0000
+@@ -1,9 +1,10 @@
+ INVAR check (1 contract(s), --ci)
+-  [HOLDS]    r1-118 (schema)
++  [VIOLATED] r1-118 (schema): ["pdfFormat"]
++      pdfFormat · not in pkg/modules/chromium/routes.go at head: no inbound read and no literal of pdfFormat remain (inbound read at pkg/modules/chromium/routes.go:142 at base); written at src/paperless_mail/parsers.py:329, 331, 333
+       fetched github:gotenberg/gotenberg@21c47f60f225e5ae9a85bb1c91675c1b53f1c855:pkg/modules/chromium/routes.go (12547 bytes, blake3 a05287ae9fa59df3d095acf085e84ace680bb6b78f7ec3406af9226936936bbf)
+       fetched github:gotenberg/gotenberg@66142b1dd8e83265d9cb16ceed348647f9ee48db:pkg/modules/chromium/routes.go (13280 bytes, blake3 ca73cc220a208326fa274fe11397710941b1b1abbfda34033edc5ff7486bf44a)
+       fetched github:paperless-ngx/paperless-ngx@5f0eba694c24c634f55bd67adea98aebdf5c995f:src/paperless_mail/parsers.py (15403 bytes, blake3 2a555692a2e4500ef7b263568f25884ae6cf8360d65a66999409e86399c42ebb)
+-result: ALL 1 contract(s) hold
+-summary: held 1 | violated 0 | skipped or not evaluated 0
++result: 1 of 1 contract(s) VIOLATED
++summary: held 0 | violated 1 | skipped or not evaluated 0
+ measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)
+-exit 0
++exit 1

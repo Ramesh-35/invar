@@ -1,0 +1,12 @@
+# RS-M16 declared-killer=rs_f01: RS-1 witness omits the base read line
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -373,7 +373,7 @@
+             residue: k.clone(),
+             sites: Vec::new(),
+             missing_from: Some(format!(
+-                "{head_name} at head: no inbound read and no literal of {k} remain (inbound read at {bname}:{bline} at base); written at {cname}:{}",
++                "{head_name} at head: no inbound read and no literal of {k} remain (inbound read at {bname} at base); written at {cname}:{}",
+                 at.join(", ")
+             )),
+             type_change: None,

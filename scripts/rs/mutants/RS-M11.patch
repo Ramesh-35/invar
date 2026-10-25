@@ -1,0 +1,11 @@
+# RS-M11 declared-killer=rs_f12: RS-2 convicts instead of stating
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -426,6 +426,7 @@
+                     continue;
+                 }
+                 if let Some(cl) = word_lines(&cr, &f).first() {
++                    residue.push(f.clone());
+                     unevaluated.push(format!(
+                         "'{f}' became read_only in {hname} ({hname}:{hline}); consumer mentions it at {cname}:{cl}; whether it writes it is not evaluated [not-evaluated:read-only-field]"
+                     ));

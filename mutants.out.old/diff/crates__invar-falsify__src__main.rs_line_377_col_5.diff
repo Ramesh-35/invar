@@ -1,0 +1,56 @@
+--- crates/invar-falsify/src/main.rs
++++ replace main with ()
+@@ -369,52 +369,17 @@
+     #[arg(long)]
+     as_of_tr: i64,
+     /// Valid-time bound (default: open).
+     #[arg(long)]
+     as_of_tv: Option<i64>,
+ }
+ 
+ fn main() {
+-    let cli = Cli::parse();
+-    let Some(command) = cli.command else {
+-        // A bare `invar` renders orientation, never a verdict: no contract
+-        // was evaluated, so none of the frozen verdict exits apply, and the
+-        // orientation itself cannot fail. clap's own bare-invocation exit
+-        // of 2 would collide with "ledger break" in the frozen map.
+-        print!("{}", ORIENTATION);
+-        std::process::exit(0);
+-    };
+-    let code = match command {
+-        Command::Run(a) => dispatch(cmd_run(a)),
+-        Command::Validate(a) => dispatch(cmd_validate(a)),
+-        Command::Report(a) => dispatch(cmd_report(a)),
+-        Command::Verify(a) => dispatch(cmd_verify(a)),
+-        Command::Check(a) => dispatch(cmd_check(a)),
+-        Command::Lock(a) => dispatch_r2(cmd_lock(a)),
+-        Command::Mcp(a) => dispatch_r2(cmd_mcp(a)),
+-        Command::Fix(a) => dispatch_r2(cmd_fix(a)),
+-        Command::Explain(a) => {
+-            let (out, code) = invar_falsify::explain::explain(a.code.as_deref());
+-            print!("{out}");
+-            code
+-        }
+-        Command::Gate(a) => invar_falsify::gate::run(&a.config, a.proof, &a.command),
+-        Command::VerifyReceipt(a) => dispatch_r2(cmd_verify_receipt(a)),
+-        Command::Receipt(a) => dispatch_r2(cmd_receipt(a)),
+-        Command::Dependents(a) => dispatch_r2(cmd_dependents(a)),
+-        Command::Backtest(a) => dispatch_r2(cmd_backtest(a)),
+-        Command::Demo => dispatch_r2(cmd_demo()),
+-        Command::Coverage(a) => dispatch_r2(cmd_coverage(a)),
+-        Command::Completions(a) => dispatch_r2(cmd_completions(a)),
+-        Command::Init(a) => dispatch(cmd_init(a)),
+-        Command::Audit(a) => dispatch(cmd_audit(a)),
+-        Command::Replay(a) => dispatch(cmd_replay(a)),
+-    };
+-    std::process::exit(code);
++    () /* ~ changed by cargo-mutants ~ */
+ }
+ 
+ /// INVAR-GATE-001 R-L-1: one trailing pointer line, printed only when at
+ /// least one ABSTAIN line went out, so no one meets a code without its exit.
+ fn print_code_pointer(lines: &[String]) {
+     if lines.iter().any(|l| l.starts_with("ABSTAIN ")) {
+         println!("codes: run `invar explain <CODE>` for any ABSTAIN code above");
+     }

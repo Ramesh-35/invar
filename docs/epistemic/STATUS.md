@@ -1684,6 +1684,27 @@ three or more hops, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
 docs/evidence/stage3/eval008.
 
+## 2026-10-25: request side implemented (RECALL-ATTACK-1 phase 2)
+
+INVAR now checks what a consumer SENDS against what a producer ACCEPTS,
+in change-scoped mode only. RS-1 convicts (VIOLATED) when a recognized
+inbound read of a literal key at base (Go form accessors, Python
+`request.*`, Express `req.*`) is gone from every head producer source, no
+head string literal of the key survives, and the consumer writes it as a
+literal; the witness names the base read line, the absence at head and
+the consumer write lines. RS-2 states (exit 4) a DRF serializer field
+that became read_only while the consumer mentions it. RS-0 states (exit
+4) a removed read when the consumer's payload is opaque. Measured: of all
+122 corpus cases exactly two moved, r1-118 from a silent HOLDS to VIOLATED
+on `pdfFormat`, and r1-060 from a silent HOLDS to a stated NOT EVALUATED;
+the other 120 are byte-identical. RS-0 fires on no corpus case (synthetic
+fixtures only). Tuning rung only: the sealed recall record stays 38 of
+70. 472 of 472 tests natively on macOS and in the sandbox, zero warnings;
+16 of 16 mutation operators killed by their declared fixtures. The r1
+fixture set had a non-equivalent survivor (RS-M2, the JavaScript member
+form read); the r2 repair added one fixture, with both ledgers kept.
+Record: docs/falsification/REQUEST-SIDE-SPEC.md; docs/evidence/request-side.
+
 ## 2026-10-25: G3 implemented (RECALL-ATTACK-1 phase 1: selector variants and default sites)
 
 F1's default-switch rule now also recognizes enum-variant selector values

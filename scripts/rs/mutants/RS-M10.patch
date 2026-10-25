@@ -1,0 +1,12 @@
+# RS-M10 declared-killer=rs_f16: B1 builder-setter forms removed
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1260,7 +1260,7 @@
+                 && post.starts_with(']')
+                 && assigns(&post[1..]);
+             let dict_key = post.starts_with(':') && !post.starts_with("::") && !post[1..].trim().is_empty();
+-            let setter = SETTERS.iter().any(|w| pre.ends_with(w));
++            let setter = SETTERS.is_empty();
+             if subscript || dict_key || setter {
+                 let v = out.entry(k.to_string()).or_default();
+                 if v.last() != Some(&(ln + 1)) {

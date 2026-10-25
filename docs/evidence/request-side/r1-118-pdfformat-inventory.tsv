@@ -1,0 +1,25 @@
+# r1-118 head producer (gotenberg pkg/modules/chromium/routes.go @21c47f60f2): every case-insensitive
+# occurrence of 'pdfformat', classified by context. B2 = the frozen inbound-read grammar of REQUEST-SIDE-SPEC.
+line	token	context	string_literal_pdfFormat	B2_inbound_read
+119	FormDataChromiumPdfFormats	comment	no	no
+119	PdfFormats	comment	no	no
+121	FormDataChromiumPdfFormats	function declaration name	no	no
+121	PdfFormats	qualified type or constant (gotenberg package)	no	no
+131	PdfFormats	qualified type or constant (gotenberg package)	no	no
+146	pdfFormats	local variable or parameter identifier	no	no
+146	FormDataChromiumPdfFormats	function call identifier	no	no
+156	pdfFormats	local variable or parameter identifier	no	no
+176	pdfFormats	local variable or parameter identifier	no	no
+176	FormDataChromiumPdfFormats	function call identifier	no	no
+187	pdfFormats	local variable or parameter identifier	no	no
+207	pdfFormats	local variable or parameter identifier	no	no
+207	FormDataChromiumPdfFormats	function call identifier	no	no
+295	pdfFormats	local variable or parameter identifier	no	no
+306	pdfFormats	local variable or parameter identifier	no	no
+306	PdfFormats	qualified type or constant (gotenberg package)	no	no
+385	PdfFormats	qualified type or constant (gotenberg package)	no	no
+386	pdfFormats	local variable or parameter identifier	no	no
+390	pdfFormats	local variable or parameter identifier	no	no
+393	ErrPdfFormatNotSupported	qualified type or constant (gotenberg package)	no	no
+398	pdfFormats	local variable or parameter identifier	no	no
+# total occurrences: 21; string literals "pdfFormat": 0; B2 inbound reads of pdfFormat: 0

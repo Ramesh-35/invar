@@ -1,0 +1,11 @@
+# RS-M15 declared-killer=rs_f08c: data/json whole-word requirement dropped
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1407,7 +1407,6 @@
+             let spread = rest.starts_with("...") && after_ident(3);
+             let kw = ["json", "data"].iter().any(|w| {
+                 rest.starts_with(w)
+-                    && !matches!(prev, Some(c) if is_ident_byte(c))
+                     && assigns(&rest[w.len()..])
+                     && {
+                         let r = rest[w.len()..].trim_start()[1..].trim_start();

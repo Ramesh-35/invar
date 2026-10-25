@@ -1,0 +1,13 @@
+# RS-M4 declared-killer=rs_f04: comment skip removed from B2
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1292,9 +1292,6 @@
+         }
+     };
+     for (ln, line) in text.lines().enumerate() {
+-        if is_comment_line(line) {
+-            continue;
+-        }
+         for (s, _, k) in string_literals(line) {
+             if !is_request_key(k) {
+                 continue;

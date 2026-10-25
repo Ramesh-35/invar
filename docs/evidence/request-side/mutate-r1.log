@@ -1,0 +1,16 @@
+RS-M1 CAUGHT  DECLARED-KILLER-FAILED (rs_f01)  incidental=[rs_f06,rs_f07,rs_f08,rs_f08b,rs_f16,rs_f20]  RS-M1 declared-killer=rs_f01: B2 builder-word readers removed
+RS-M2 SURVIVED  RS-M2 declared-killer=rs_f02: RS-1 condition 2 removed (head B2 reads ignored)
+RS-M3 CAUGHT  DECLARED-KILLER-FAILED (rs_f09b)  incidental=[none]  RS-M3 declared-killer=rs_f09b: RS-1 condition 3 removed (literal guard)
+RS-M4 CAUGHT  DECLARED-KILLER-FAILED (rs_f04)  incidental=[none]  RS-M4 declared-killer=rs_f04: comment skip removed from B2
+RS-M5 CAUGHT  DECLARED-KILLER-FAILED (rs_f05)  incidental=[none]  RS-M5 declared-killer=rs_f05: comment skip removed from B1
+RS-M6 CAUGHT  DECLARED-KILLER-FAILED (rs_f03)  incidental=[none]  RS-M6 declared-killer=rs_f03: B1 subscript form no longer requires =
+RS-M7 CAUGHT  DECLARED-KILLER-FAILED (rs_f10)  incidental=[rs_f03,rs_f05,rs_f06,rs_f07,rs_f08,rs_f08b,rs_f08c]  RS-M7 declared-killer=rs_f10: RS-1 condition 4 removed (consumer write)
+RS-M8 CAUGHT  DECLARED-KILLER-FAILED (rs_f17)  incidental=[none]  RS-M8 declared-killer=rs_f17: code companion head not consulted
+RS-M9 CAUGHT  DECLARED-KILLER-FAILED (rs_f15)  incidental=[none]  RS-M9 declared-killer=rs_f15: B2 JavaScript member form removed
+RS-M10 CAUGHT  DECLARED-KILLER-FAILED (rs_f16)  incidental=[none]  RS-M10 declared-killer=rs_f16: B1 builder-setter forms removed
+RS-M11 CAUGHT  DECLARED-KILLER-FAILED (rs_f12)  incidental=[none]  RS-M11 declared-killer=rs_f12: RS-2 convicts instead of stating
+RS-M12 CAUGHT  DECLARED-KILLER-FAILED (rs_f13)  incidental=[none]  RS-M12 declared-killer=rs_f13: RS-2 base requirement dropped
+RS-M13 CAUGHT  DECLARED-KILLER-FAILED (rs_f11)  incidental=[none]  RS-M13 declared-killer=rs_f11: RS-2 and RS-0 added despite residue
+RS-M14 CAUGHT  DECLARED-KILLER-FAILED (rs_f06)  incidental=[rs_f07,rs_f08,rs_f08b]  RS-M14 declared-killer=rs_f06: RS-0 opaque detection removed
+RS-M15 CAUGHT  DECLARED-KILLER-FAILED (rs_f08c)  incidental=[none]  RS-M15 declared-killer=rs_f08c: data/json whole-word requirement dropped
+RS-M16 CAUGHT  DECLARED-KILLER-FAILED (rs_f01)  incidental=[rs_f15]  RS-M16 declared-killer=rs_f01: RS-1 witness omits the base read line

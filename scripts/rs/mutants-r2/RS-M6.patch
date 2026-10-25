@@ -1,0 +1,12 @@
+# RS-M6 declared-killer=rs_f03: B1 subscript form no longer requires =
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1258,7 +1258,7 @@
+                 && pre.len() >= 2
+                 && matches!(pre.as_bytes()[pre.len() - 2], c if is_ident_byte(c) || c == b']' || c == b')')
+                 && post.starts_with(']')
+-                && assigns(&post[1..]);
++                && !post.is_empty();
+             let dict_key = post.starts_with(':') && !post.starts_with("::") && !post[1..].trim().is_empty();
+             let setter = SETTERS.iter().any(|w| pre.ends_with(w));
+             if subscript || dict_key || setter {

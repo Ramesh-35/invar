@@ -1,0 +1,13 @@
+# RS-M5 declared-killer=rs_f05: comment skip removed from B1
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1246,9 +1246,6 @@
+     const SETTERS: [&str; 5] = [".Add(", ".Set(", ".WriteField(", ".SetFormData(", ".SetQueryParam("];
+     let mut out: BTreeMap<String, Vec<usize>> = BTreeMap::new();
+     for (ln, line) in text.lines().enumerate() {
+-        if is_comment_line(line) {
+-            continue;
+-        }
+         for (s, e, k) in string_literals(line) {
+             if !is_request_key(k) {
+                 continue;

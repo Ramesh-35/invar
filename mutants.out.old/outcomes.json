@@ -1,0 +1,807 @@
+{
+  "outcomes": [
+    {
+      "scenario": "Baseline",
+      "summary": "Success",
+      "log_path": "log/baseline.log",
+      "diff_path": null,
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 8.737787959,
+          "process_status": "Success",
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 7.07619875,
+          "process_status": "Success",
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "crates/invar-falsify/src/main.rs:377:5: replace main with ()",
+          "package": "invar-falsify",
+          "file": "crates/invar-falsify/src/main.rs",
+          "function": {
+            "function_name": "main",
+            "return_type": "",
+            "span": {
+              "start": {
+                "line": 376,
+                "column": 1
+              },
+              "end": {
+                "line": 413,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 377,
+              "column": 5
+            },
+            "end": {
+              "line": 412,
+              "column": 30
+            }
+          },
+          "replacement": "()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/crates__invar-falsify__src__main.rs_line_377_col_5.log",
+      "diff_path": "diff/crates__invar-falsify__src__main.rs_line_377_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.385480583,
+          "process_status": "Success",
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.648583292,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "crates/invar-falsify/src/main.rs:418:5: replace print_code_pointer with ()",
+          "package": "invar-falsify",
+          "file": "crates/invar-falsify/src/main.rs",
+          "function": {
+            "function_name": "print_code_pointer",
+            "return_type": "",
+            "span": {
+              "start": {
+                "line": 415,
+                "column": 1
+              },
+              "end": {
+                "line": 421,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 418,
+              "column": 5
+            },
+            "end": {
+              "line": 420,
+              "column": 6
+            }
+          },
+          "replacement": "()",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/crates__invar-falsify__src__main.rs_line_418_col_5.log",
+      "diff_path": "diff/crates__invar-falsify__src__main.rs_line_418_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.768826875,
+          "process_status": "Success",
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 1.021410541,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "crates/invar-falsify/src/main.rs:428:5: replace dispatch_r2 -> i32 with 0",
+          "package": "invar-falsify",
+          "file": "crates/invar-falsify/src/main.rs",
+          "function": {
+            "function_name": "dispatch_r2",
+            "return_type": "-> i32",
+            "span": {
+              "start": {
+                "line": 423,
+                "column": 1
+              },
+              "end": {
+                "line": 435,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 428,
+              "column": 5
+            },
+            "end": {
+              "line": 434,
+              "column": 6
+            }
+          },
+          "replacement": "0",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/crates__invar-falsify__src__main.rs_line_428_col_5.log",
+      "diff_path": "diff/crates__invar-falsify__src__main.rs_line_428_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.602763083,
+          "process_status": "Success",
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 1.1812985,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "crates/invar-falsify/src/main.rs:428:5: replace dispatch_r2 -> i32 with 1",
+          "package": "invar-falsify",
+          "file": "crates/invar-falsify/src/main.rs",
+          "function": {
+            "function_name": "dispatch_r2",
+            "return_type": "-> i32",
+            "span": {
+              "start": {
+                "line": 423,
+                "column": 1
+              },
+              "end": {
+                "line": 435,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 428,
+              "column": 5
+            },
+            "end": {
+              "line": 434,
+              "column": 6
+            }
+          },
+          "replacement": "1",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/crates__invar-falsify__src__main.rs_line_428_col_5_001.log",
+      "diff_path": "diff/crates__invar-falsify__src__main.rs_line_428_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.494591792,
+          "process_status": "Success",
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.916801958,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "crates/invar-falsify/src/main.rs:428:5: replace dispatch_r2 -> i32 with -1",
+          "package": "invar-falsify",
+          "file": "crates/invar-falsify/src/main.rs",
+          "function": {
+            "function_name": "dispatch_r2",
+            "return_type": "-> i32",
+            "span": {
+              "start": {
+                "line": 423,
+                "column": 1
+              },
+              "end": {
+                "line": 435,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 428,
+              "column": 5
+            },
+            "end": {
+              "line": 434,
+              "column": 6
+            }
+          },
+          "replacement": "-1",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/crates__invar-falsify__src__main.rs_line_428_col_5_002.log",
+      "diff_path": "diff/crates__invar-falsify__src__main.rs_line_428_col_5_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.49675675,
+          "process_status": "Success",
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.959313792,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "crates/invar-falsify/src/main.rs:438:5: replace dispatch -> i32 with 0",
+          "package": "invar-falsify",
+          "file": "crates/invar-falsify/src/main.rs",
+          "function": {
+            "function_name": "dispatch",
+            "return_type": "-> i32",
+            "span": {
+              "start": {
+                "line": 437,
+                "column": 1
+              },
+              "end": {
+                "line": 445,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 438,
+              "column": 5
+            },
+            "end": {
+              "line": 444,
+              "column": 6
+            }
+          },
+          "replacement": "0",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/crates__invar-falsify__src__main.rs_line_438_col_5.log",
+      "diff_path": "diff/crates__invar-falsify__src__main.rs_line_438_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.496006792,
+          "process_status": "Success",
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 1.0768405,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "crates/invar-falsify/src/main.rs:438:5: replace dispatch -> i32 with 1",
+          "package": "invar-falsify",
+          "file": "crates/invar-falsify/src/main.rs",
+          "function": {
+            "function_name": "dispatch",
+            "return_type": "-> i32",
+            "span": {
+              "start": {
+                "line": 437,
+                "column": 1
+              },
+              "end": {
+                "line": 445,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 438,
+              "column": 5
+            },
+            "end": {
+              "line": 444,
+              "column": 6
+            }
+          },
+          "replacement": "1",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/crates__invar-falsify__src__main.rs_line_438_col_5_001.log",
+      "diff_path": "diff/crates__invar-falsify__src__main.rs_line_438_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.549512042,
+          "process_status": "Success",
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.968459209,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "crates/invar-falsify/src/main.rs:438:5: replace dispatch -> i32 with -1",
+          "package": "invar-falsify",
+          "file": "crates/invar-falsify/src/main.rs",
+          "function": {
+            "function_name": "dispatch",
+            "return_type": "-> i32",
+            "span": {
+              "start": {
+                "line": 437,
+                "column": 1
+              },
+              "end": {
+                "line": 445,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 438,
+              "column": 5
+            },
+            "end": {
+              "line": 444,
+              "column": 6
+            }
+          },
+          "replacement": "-1",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "CaughtMutant",
+      "log_path": "log/crates__invar-falsify__src__main.rs_line_438_col_5_002.log",
+      "diff_path": "diff/crates__invar-falsify__src__main.rs_line_438_col_5_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.542230375,
+          "process_status": "Success",
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 0.901362834,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "crates/invar-falsify/src/main.rs:448:5: replace now_us -> i64 with 0",
+          "package": "invar-falsify",
+          "file": "crates/invar-falsify/src/main.rs",
+          "function": {
+            "function_name": "now_us",
+            "return_type": "-> i64",
+            "span": {
+              "start": {
+                "line": 447,
+                "column": 1
+              },
+              "end": {
+                "line": 453,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 448,
+              "column": 5
+            },
+            "end": {
+              "line": 452,
+              "column": 22
+            }
+          },
+          "replacement": "0",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "MissedMutant",
+      "log_path": "log/crates__invar-falsify__src__main.rs_line_448_col_5.log",
+      "diff_path": "diff/crates__invar-falsify__src__main.rs_line_448_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.599811,
+          "process_status": "Success",
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 3.755655208,
+          "process_status": "Success",
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "crates/invar-falsify/src/main.rs:448:5: replace now_us -> i64 with 1",
+          "package": "invar-falsify",
+          "file": "crates/invar-falsify/src/main.rs",
+          "function": {
+            "function_name": "now_us",
+            "return_type": "-> i64",
+            "span": {
+              "start": {
+                "line": 447,
+                "column": 1
+              },
+              "end": {
+                "line": 453,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 448,
+              "column": 5
+            },
+            "end": {
+              "line": 452,
+              "column": 22
+            }
+          },
+          "replacement": "1",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "MissedMutant",
+      "log_path": "log/crates__invar-falsify__src__main.rs_line_448_col_5_001.log",
+      "diff_path": "diff/crates__invar-falsify__src__main.rs_line_448_col_5_001.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.539666,
+          "process_status": "Success",
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 4.018590291,
+          "process_status": "Success",
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "crates/invar-falsify/src/main.rs:448:5: replace now_us -> i64 with -1",
+          "package": "invar-falsify",
+          "file": "crates/invar-falsify/src/main.rs",
+          "function": {
+            "function_name": "now_us",
+            "return_type": "-> i64",
+            "span": {
+              "start": {
+                "line": 447,
+                "column": 1
+              },
+              "end": {
+                "line": 453,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 448,
+              "column": 5
+            },
+            "end": {
+              "line": 452,
+              "column": 22
+            }
+          },
+          "replacement": "-1",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "MissedMutant",
+      "log_path": "log/crates__invar-falsify__src__main.rs_line_448_col_5_002.log",
+      "diff_path": "diff/crates__invar-falsify__src__main.rs_line_448_col_5_002.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.548840708,
+          "process_status": "Success",
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        },
+        {
+          "phase": "Test",
+          "duration": 3.691770167,
+          "process_status": "Success",
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": {
+        "Mutant": {
+          "name": "crates/invar-falsify/src/main.rs:456:5: replace build_report -> Result<RunReport> with Ok(Default::default())",
+          "package": "invar-falsify",
+          "file": "crates/invar-falsify/src/main.rs",
+          "function": {
+            "function_name": "build_report",
+            "return_type": "-> Result<RunReport>",
+            "span": {
+              "start": {
+                "line": 455,
+                "column": 1
+              },
+              "end": {
+                "line": 486,
+                "column": 2
+              }
+            }
+          },
+          "span": {
+            "start": {
+              "line": 456,
+              "column": 5
+            },
+            "end": {
+              "line": 485,
+              "column": 7
+            }
+          },
+          "replacement": "Ok(Default::default())",
+          "genre": "FnValue"
+        }
+      },
+      "summary": "Unviable",
+      "log_path": "log/crates__invar-falsify__src__main.rs_line_456_col_5.log",
+      "diff_path": "diff/crates__invar-falsify__src__main.rs_line_456_col_5.diff",
+      "phase_results": [
+        {
+          "phase": "Build",
+          "duration": 0.276637708,
+          "process_status": {
+            "Failure": 101
+          },
+          "argv": [
+            "/Users/nikhilramesh/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo",
+            "test",
+            "--no-run",
+            "--verbose",
+            "--package=invar-falsify@0.1.0-alpha.29"
+          ]
+        }
+      ]
+    }
+  ],
+  "total_mutants": 12,
+  "missed": 3,
+  "caught": 8,
+  "timeout": 0,
+  "unviable": 1,
+  "success": 0,
+  "start_time": "2026-10-18T15:58:00.058453Z",
+  "end_time": null,
+  "cargo_mutants_version": "27.1.0"
+}

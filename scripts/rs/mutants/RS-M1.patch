@@ -1,0 +1,13 @@
+# RS-M1 declared-killer=rs_f01: B2 builder-word readers removed
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1300,8 +1300,7 @@
+                 continue;
+             }
+             let pre = &line[..s];
+-            let go = GO_ACCESSORS.iter().any(|w| pre.ends_with(w))
+-                || GO_BUILDERS.iter().any(|w| ends_with_word(pre, w));
++            let go = GO_ACCESSORS.iter().any(|w| pre.ends_with(w)) || GO_BUILDERS.is_empty();
+             let py = PY_ATTRS.iter().any(|a| {
+                 ends_with_word(pre, &format!("request.{a}["))
+                     || ends_with_word(pre, &format!("request.{a}.get("))

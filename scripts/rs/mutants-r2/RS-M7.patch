@@ -1,0 +1,13 @@
+# RS-M7 declared-killer=rs_f10: RS-1 condition 4 removed (consumer write)
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -363,7 +363,8 @@
+     }
+     let head_name = artifact_name(&p);
+     for (k, (bname, bline)) in &removed {
+-        let Some(wl) = writes.get(k) else { continue };
++        let empty = Vec::new();
++        let wl = writes.get(k).unwrap_or(&empty);
+         if residue.contains(k) {
+             continue;
+         }

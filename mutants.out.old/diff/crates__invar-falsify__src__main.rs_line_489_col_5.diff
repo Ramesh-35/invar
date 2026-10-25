@@ -1,0 +1,33 @@
+--- crates/invar-falsify/src/main.rs
++++ replace cmd_validate -> Result<i32> with Ok(0)
+@@ -481,29 +481,17 @@
+         manifest_path: manifest_path.to_string(),
+         manifest_hash,
+         composite_path: composite_path.to_string(),
+         cases,
+     })
+ }
+ 
+ fn cmd_validate(args: ValidateArgs) -> Result<i32> {
+-    let manifest = Manifest::load(&args.manifest)
+-        .with_context(|| format!("validating manifest {}", args.manifest))?;
+-    println!(
+-        "manifest OK: {} case(s), corpus_version {}",
+-        manifest.cases.len(),
+-        manifest.corpus_version
+-    );
+-    if let Some(composite) = args.composite {
+-        CompositeConfig::load(&composite)
+-            .with_context(|| format!("validating composite config {composite}"))?;
+-        println!("composite config OK: {composite}");
+-    }
+-    Ok(0)
++    Ok(0) /* ~ changed by cargo-mutants ~ */
+ }
+ 
+ fn cmd_report(args: ReportArgs) -> Result<i32> {
+     let report = build_report(
+         &args.manifest,
+         &args.composite,
+         Duration::from_secs(args.timeout),
+     )?;

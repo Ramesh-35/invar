@@ -1,0 +1,35 @@
+# RS-M2 non-equivalence demonstration (throwaway workspace, not a fixture)
+## base.js
+app.post("/c", (req, res) => {
+  const fmt = req.body.pdfFormat;
+});
+## head.js
+app.post("/c", (req, res) => {
+  const fmt = req.body.pdfFormat;
+  log(fmt);
+});
+## c.py
+body = {}
+body["pdfFormat"] = "A"
+## invar.toml
+[[invariant]]
+kind = "schema"
+id = "rs"
+producer = "head.js"
+producer_base = "base.js"
+consumer = "c.py"
+## RS engine (sha256 4852d4438957)
+INVAR check (1 contract(s))
+  [HOLDS]    rs (schema)
+result: ALL 1 contract(s) hold
+summary: held 1 | violated 0 | skipped or not evaluated 0
+measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)
+exit 0
+## RS-M2 mutant
+INVAR check (1 contract(s))
+  [VIOLATED] rs (schema): ["pdfFormat"]
+      pdfFormat · not in head.js at head: no inbound read and no literal of pdfFormat remain (inbound read at base.js:2 at base); written at c.py:2
+result: 1 of 1 contract(s) VIOLATED
+summary: held 0 | violated 1 | skipped or not evaluated 0
+measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)
+exit 1

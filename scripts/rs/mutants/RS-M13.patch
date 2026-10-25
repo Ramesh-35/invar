@@ -1,0 +1,12 @@
+# RS-M13 declared-killer=rs_f11: RS-2 and RS-0 added despite residue
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -418,7 +418,7 @@
+     }
+     // RS-2 (became read_only) and RS-0 (opaque payload): statements only,
+     // and nothing is added to a contract that already has residue.
+-    if residue.is_empty() {
++    if true {
+         for (_, btext, hname, htext) in &rs_pairs {
+             let base_f = serializer_fields(btext);
+             for (f, (ro, hline)) in serializer_fields(htext) {

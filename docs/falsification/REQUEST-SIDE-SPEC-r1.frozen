@@ -1,0 +1,10 @@
+# REQUEST-SIDE freeze record (r1), written before any implementation.
+# Baseline under test: 201d193 (G3 landed).
+blake3(docs/falsification/REQUEST-SIDE-SPEC.md) = 9b65117c655ba196d3a2fdeeb593eb7852029a68ec4d8016566586f311e446c2
+sha256(docs/falsification/REQUEST-SIDE-SPEC.md) = 95f3af59f3453f047fcfeace9e49d72ee55b9b9ab23d2d3e1fcb5b8086ae783f
+blake3(docs/falsification/REQUEST-SIDE-SPEC-r0.md) = c8918c0146aecbfefd70a9ba024847ff6fd32df8be74b80d5a49e017c2337976
+sha256(docs/falsification/REQUEST-SIDE-SPEC-r0.md) = 5698802d238b9edabef1fd715fdc79a21b453c93b6fb53606a10e9a4986c8e39
+blake3(crates/invar-falsify/tests/rs_test.rs) = 0d2e3356cb1c088000deb44c79794d7fa4ffe5aaea6e6f8585482ba92028c822
+sha256(crates/invar-falsify/tests/rs_test.rs) = 980d356fb28435233a34fa14b1ef8afd059e1c6b4d780b82d740106a1f8d4a82
+blake3(docs/evidence/request-side/r1-118-pdfformat-inventory.tsv) = a304177ea76525135377b266c5670d398a398e662d7561f67a6193a063150eaf
+sha256(docs/evidence/request-side/r1-118-pdfformat-inventory.tsv) = 1c98bd3bd1999ed0d73f87d2919871f19d88b52fe0c5e4c0c7543059e3107d98

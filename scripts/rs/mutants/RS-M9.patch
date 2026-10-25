@@ -1,0 +1,12 @@
+# RS-M9 declared-killer=rs_f15: B2 JavaScript member form removed
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1313,7 +1313,7 @@
+                 add(k, ln + 1);
+             }
+         }
+-        for o in JS_OBJS {
++        for o in JS_OBJS.iter().take(0) {
+             let pat = format!("{o}.");
+             let mut from = 0;
+             while let Some(p) = line[from..].find(&pat) {

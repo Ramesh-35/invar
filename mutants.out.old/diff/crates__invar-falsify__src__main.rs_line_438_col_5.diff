@@ -1,0 +1,27 @@
+--- crates/invar-falsify/src/main.rs
++++ replace dispatch -> i32 with 0
+@@ -430,23 +430,17 @@
+         Err(e) => {
+             eprintln!("ERROR (not a verdict): {e:#}");
+             3
+         }
+     }
+ }
+ 
+ fn dispatch(result: Result<i32>) -> i32 {
+-    match result {
+-        Ok(code) => code,
+-        Err(e) => {
+-            eprintln!("error: {e:#}");
+-            1
+-        }
+-    }
++    0 /* ~ changed by cargo-mutants ~ */
+ }
+ 
+ fn now_us() -> i64 {
+     use std::time::{SystemTime, UNIX_EPOCH};
+     SystemTime::now()
+         .duration_since(UNIX_EPOCH)
+         .map(|d| d.as_micros() as i64)
+         .unwrap_or(0)

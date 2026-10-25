@@ -13,8 +13,9 @@ use std::collections::BTreeMap;
 use crate::invariant::{check_contract, payload_read_sites, ContractInput, Step};
 use crate::resolver::{is_remote, Fetched, Resolver};
 use crate::surface::{
-    broad_reads, changed_fields, code_fields, field_names, mention_lines, moved_fields, name_key,
-    relocated_keys, selector_switches, spec_fields, ts_omissions, Fields,
+    broad_reads, changed_fields, code_fields, consumer_writes, field_names, has_string_literal,
+    inbound_reads, mention_lines, moved_fields, name_key, opaque_payload, relocated_keys,
+    selector_switches, serializer_fields, spec_fields, ts_omissions, word_lines, Fields,
 };
 
 pub type Sections = Vec<(String, Vec<(String, String)>)>;
@@ -250,6 +251,11 @@ fn schema_outcome(
     let mut omitted: Vec<(String, String)> = Vec::new();
     let mut relocs: Vec<(String, String, Vec<String>)> = Vec::new();
     let mut switches: Vec<(String, String, String, String, String)> = Vec::new();
+    // Request side (REQUEST-SIDE-SPEC r1): every bound producer source, as
+    // (base name, base text, head name, head text). A head with no base
+    // still counts for RS-1 conditions 2 and 3.
+    let mut rs_heads: Vec<String> = vec![pr.clone()];
+    let mut rs_pairs: Vec<(String, String, String, String)> = Vec::new();
     let mut add = |head_spec: &str, head: &Fields, base: &Fields, where_: String| {
         for (name, tc) in changed_fields(base, head) {
             changed.entry(name).or_insert((tc, where_.clone()));
@@ -272,6 +278,7 @@ fn schema_outcome(
         for (n, old, new, note) in selector_switches(&br, &pr) {
             switches.push((n, old, new, artifact_name(&p), note));
         }
+        rs_pairs.push((artifact_name(bs), br.clone(), artifact_name(&p), pr.clone()));
     }
     if let (Some(cs), Some(cbs)) = (&code, &code_base) {
         let cr_head = fetch(resolver, cs, prov)?;
@@ -284,6 +291,8 @@ fn schema_outcome(
         for (n, old, new, note) in selector_switches(&cr_base, &cr_head) {
             switches.push((n, old, new, artifact_name(cs), note));
         }
+        rs_heads.push(cr_head.clone());
+        rs_pairs.push((artifact_name(cbs), cr_base.clone(), artifact_name(cs), cr_head.clone()));
     }
     for (name, where_) in omitted {
         changed.entry(name).or_insert((None, where_));
@@ -335,6 +344,42 @@ fn schema_outcome(
             read_as,
         });
     }
+    // RS-1: a recognized base inbound read of K is gone from every head
+    // producer source, no head literal of K survives, and the consumer writes
+    // K. RS-0 candidates are the removed keys the consumer does not write.
+    let writes = consumer_writes(&cr);
+    let head_reads: Vec<BTreeMap<String, Vec<usize>>> = rs_heads.iter().map(|t| inbound_reads(t)).collect();
+    let mut removed: BTreeMap<String, (String, usize)> = BTreeMap::new();
+    for (bname, btext, _, _) in &rs_pairs {
+        for (k, lines) in inbound_reads(btext) {
+            if removed.contains_key(&k)
+                || head_reads.iter().any(|r| r.contains_key(&k))
+                || rs_heads.iter().any(|t| has_string_literal(t, &k))
+            {
+                continue;
+            }
+            removed.insert(k, (bname.clone(), lines[0]));
+        }
+    }
+    let head_name = artifact_name(&p);
+    for (k, (bname, bline)) in &removed {
+        let Some(wl) = writes.get(k) else { continue };
+        if residue.contains(k) {
+            continue;
+        }
+        let at: Vec<String> = wl.iter().map(|l| l.to_string()).collect();
+        residue.push(k.clone());
+        witnesses.push(Witness {
+            residue: k.clone(),
+            sites: Vec::new(),
+            missing_from: Some(format!(
+                "{head_name} at head: no inbound read and no literal of {k} remain (inbound read at {bname}:{bline} at base); written at {cname}:{}",
+                at.join(", ")
+            )),
+            type_change: None,
+            read_as: Vec::new(),
+        });
+    }
     // A1 rule 1: a changed field the consumer mentions but INVAR did not
     // count as a read. A1 rule 2: a field that moved between types and that
     // the consumer reads or mentions. Both are stated, never silent.
@@ -369,6 +414,30 @@ fn schema_outcome(
             unevaluated.push(format!(
                 "default selector '{name}' changed {old} -> {new} in {where_}; emission of the fields read in {cname} not evaluated{note} [not-evaluated:default-switch]"
             ));
+        }
+    }
+    // RS-2 (became read_only) and RS-0 (opaque payload): statements only,
+    // and nothing is added to a contract that already has residue.
+    if residue.is_empty() {
+        for (_, btext, hname, htext) in &rs_pairs {
+            let base_f = serializer_fields(btext);
+            for (f, (ro, hline)) in serializer_fields(htext) {
+                if !ro || base_f.get(&f).is_none_or(|(bro, _)| *bro) {
+                    continue;
+                }
+                if let Some(cl) = word_lines(&cr, &f).first() {
+                    unevaluated.push(format!(
+                        "'{f}' became read_only in {hname} ({hname}:{hline}); consumer mentions it at {cname}:{cl}; whether it writes it is not evaluated [not-evaluated:read-only-field]"
+                    ));
+                }
+            }
+        }
+        if let Some(ol) = opaque_payload(&cr) {
+            for (k, (bname, bline)) in removed.iter().filter(|(k, _)| !writes.contains_key(*k)) {
+                unevaluated.push(format!(
+                    "inbound read of '{k}' removed from {head_name} (read at {bname}:{bline} at base); consumer payload is opaque at {cname}:{ol}, so whether it sends '{k}' is not evaluated [not-evaluated:opaque-payload]"
+                ));
+            }
         }
     }
     Ok((residue, witnesses, unevaluated, None))

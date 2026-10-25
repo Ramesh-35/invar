@@ -4,7 +4,7 @@ Status: RULED (founder, 2026-10-23): R-D1 ratified with a witness
 requirement, R-D2 modified (conviction of absence, rename only as a
 stated candidate), R-D3 specification only, R-D4 order G3 then G1 then G2
 then S4 with phase isolation, R-D5 founder-sourced batch 9 with audit
-before sealing. Phase 1 (G3) landed 2026-10-25 (docs/evidence/g3). Draft
+before sealing. Phase 1 (G3) landed 2026-10-25 (docs/evidence/g3). Phase 2 (request side) landed 2026-10-25 (docs/evidence/request-side). Draft
 r1 text follows unchanged. Parent: the founder's mandate of 2026-10-23
 (attack the missed held-out breaks; preserve precision; pre-registered
 gates). Engine measured: the aed8988 release binary (bca55be8506e) on the

@@ -1,0 +1,12 @@
+# RS-M2 declared-killer=rs_f02: RS-1 condition 2 removed (head B2 reads ignored)
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -353,7 +353,7 @@
+     for (bname, btext, _, _) in &rs_pairs {
+         for (k, lines) in inbound_reads(btext) {
+             if removed.contains_key(&k)
+-                || head_reads.iter().any(|r| r.contains_key(&k))
++                || head_reads.is_empty()
+                 || rs_heads.iter().any(|t| has_string_literal(t, &k))
+             {
+                 continue;

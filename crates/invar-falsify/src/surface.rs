@@ -1185,3 +1185,242 @@ pub fn selector_switches(base: &str, head: &str) -> Vec<(String, String, String,
     }
     out
 }
+
+// ---------------------------------------------------------------- request side
+// REQUEST-SIDE-SPEC r1, sections B1, B2, B3. Hand-written grammars; every key
+// is a whole string literal (or, for the B2 JavaScript member form, a whole
+// identifier), never a substring. Comment lines are skipped (shared rule).
+
+/// String literals on one line, left to right: (open quote index, index after
+/// the close quote, content). A quote opens a literal that closes at the next
+/// unescaped matching quote; an unterminated literal ends the scan.
+fn string_literals(line: &str) -> Vec<(usize, usize, &str)> {
+    let b = line.as_bytes();
+    let mut out = Vec::new();
+    let mut i = 0;
+    while i < b.len() {
+        let q = b[i];
+        if q == b'"' || q == b'\'' || q == b'`' {
+            let mut j = i + 1;
+            while j < b.len() && b[j] != q {
+                j += if b[j] == b'\\' { 2 } else { 1 };
+            }
+            if j >= b.len() {
+                break;
+            }
+            out.push((i, j + 1, &line[i + 1..j]));
+            i = j + 1;
+        } else {
+            i += 1;
+        }
+    }
+    out
+}
+
+/// B1 key shape: `[A-Za-z_][A-Za-z0-9_-]*`.
+fn is_request_key(s: &str) -> bool {
+    let b = s.as_bytes();
+    !b.is_empty()
+        && (b[0].is_ascii_alphabetic() || b[0] == b'_')
+        && b.iter().all(|&c| is_ident_byte(c) || c == b'-')
+}
+
+/// `=` at the start of `rest` (after optional spaces) that is not `==`.
+fn assigns(rest: &str) -> bool {
+    let r = rest.trim_start();
+    r.starts_with('=') && !r.starts_with("==")
+}
+
+/// `word` ends `prefix` as a whole word (the byte before it is not an
+/// identifier byte).
+fn ends_with_word(prefix: &str, word: &str) -> bool {
+    prefix.ends_with(word) && {
+        let k = prefix.len() - word.len();
+        let lead = word.as_bytes()[0];
+        k == 0 || !is_ident_byte(lead) || !is_ident_byte(prefix.as_bytes()[k - 1])
+    }
+}
+
+/// B1: consumer writes, key -> 1-based lines.
+pub fn consumer_writes(text: &str) -> BTreeMap<String, Vec<usize>> {
+    const SETTERS: [&str; 5] = [".Add(", ".Set(", ".WriteField(", ".SetFormData(", ".SetQueryParam("];
+    let mut out: BTreeMap<String, Vec<usize>> = BTreeMap::new();
+    for (ln, line) in text.lines().enumerate() {
+        if is_comment_line(line) {
+            continue;
+        }
+        for (s, e, k) in string_literals(line) {
+            if !is_request_key(k) {
+                continue;
+            }
+            let (pre, post) = (&line[..s], &line[e..]);
+            let subscript = pre.ends_with('[')
+                && pre.len() >= 2
+                && matches!(pre.as_bytes()[pre.len() - 2], c if is_ident_byte(c) || c == b']' || c == b')')
+                && post.starts_with(']')
+                && assigns(&post[1..]);
+            let dict_key = post.starts_with(':') && !post.starts_with("::") && !post[1..].trim().is_empty();
+            let setter = SETTERS.iter().any(|w| pre.ends_with(w));
+            if subscript || dict_key || setter {
+                let v = out.entry(k.to_string()).or_default();
+                if v.last() != Some(&(ln + 1)) {
+                    v.push(ln + 1);
+                }
+            }
+        }
+    }
+    out
+}
+
+/// B2: producer inbound reads, key -> 1-based lines.
+pub fn inbound_reads(text: &str) -> BTreeMap<String, Vec<usize>> {
+    const GO_ACCESSORS: [&str; 8] = [
+        ".FormValue(", ".PostFormValue(", ".PostForm(", ".Query(", ".QueryParam(", ".FormFile(",
+        ".DefaultPostForm(", ".DefaultQuery(",
+    ];
+    const GO_BUILDERS: [&str; 11] = [
+        "String(", "Bool(", "Int(", "Int64(", "Float64(", "Duration(", "Strings(", "Content(",
+        "MandatoryString(", "MandatoryContent(", "Custom(",
+    ];
+    const PY_ATTRS: [&str; 7] = ["data", "POST", "GET", "args", "form", "json", "query_params"];
+    const JS_OBJS: [&str; 3] = ["req.body", "req.query", "req.params"];
+    let mut out: BTreeMap<String, Vec<usize>> = BTreeMap::new();
+    let mut add = |k: &str, ln: usize| {
+        let v = out.entry(k.to_string()).or_default();
+        if v.last() != Some(&ln) {
+            v.push(ln);
+        }
+    };
+    for (ln, line) in text.lines().enumerate() {
+        if is_comment_line(line) {
+            continue;
+        }
+        for (s, _, k) in string_literals(line) {
+            if !is_request_key(k) {
+                continue;
+            }
+            let pre = &line[..s];
+            let go = GO_ACCESSORS.iter().any(|w| pre.ends_with(w))
+                || GO_BUILDERS.iter().any(|w| ends_with_word(pre, w));
+            let py = PY_ATTRS.iter().any(|a| {
+                ends_with_word(pre, &format!("request.{a}["))
+                    || ends_with_word(pre, &format!("request.{a}.get("))
+            });
+            let js = JS_OBJS
+                .iter()
+                .any(|o| ends_with_word(pre, &format!("{o}[")) || ends_with_word(pre, &format!("{o}(")));
+            if go || py || js {
+                add(k, ln + 1);
+            }
+        }
+        for o in JS_OBJS {
+            let pat = format!("{o}.");
+            let mut from = 0;
+            while let Some(p) = line[from..].find(&pat) {
+                let at = from + p;
+                if at == 0 || !is_ident_byte(line.as_bytes()[at - 1]) {
+                    if let Some(k) = ident_at(line, at + pat.len()) {
+                        add(k, ln + 1);
+                    }
+                }
+                from = at + pat.len();
+            }
+        }
+    }
+    out
+}
+
+/// RS-1 condition 3: `k` is a whole string literal on a non-comment line.
+pub fn has_string_literal(text: &str, k: &str) -> bool {
+    text.lines()
+        .filter(|l| !is_comment_line(l))
+        .any(|l| string_literals(l).iter().any(|(_, _, c)| *c == k))
+}
+
+/// B3: serializer fields `name = BareIdent(args)`, name -> (read_only, line).
+pub fn serializer_fields(text: &str) -> BTreeMap<String, (bool, usize)> {
+    let mut out = BTreeMap::new();
+    for (ln, line) in text.lines().enumerate() {
+        if is_comment_line(line) {
+            continue;
+        }
+        let t = line.trim_start();
+        let Some(name) = ident_at(t, 0) else { continue };
+        let rest = &t[name.len()..];
+        if !assigns(rest) {
+            continue;
+        }
+        let rhs = rest.trim_start()[1..].trim_start();
+        let Some(callee) = ident_at(rhs, 0) else { continue };
+        let Some(args) = rhs[callee.len()..].strip_prefix('(') else { continue };
+        let args: String = args[..args.find(')').unwrap_or(args.len())].chars().filter(|c| *c != ' ').collect();
+        out.entry(name.to_string()).or_insert((args.contains("read_only=True"), ln + 1));
+    }
+    out
+}
+
+/// RS-2: 1-based non-comment lines where `name` occurs as a whole word.
+pub fn word_lines(text: &str, name: &str) -> Vec<usize> {
+    let mut out = Vec::new();
+    for (ln, line) in text.lines().enumerate() {
+        if is_comment_line(line) {
+            continue;
+        }
+        let b = line.as_bytes();
+        let hit = line.match_indices(name).any(|(at, _)| {
+            let end = at + name.len();
+            (at == 0 || !is_ident_byte(b[at - 1])) && (end >= b.len() || !is_ident_byte(b[end]))
+        });
+        if hit {
+            out.push(ln + 1);
+        }
+    }
+    out
+}
+
+/// RS-0: the first non-comment line holding an opaque payload construct:
+/// `x[k] =`, `**name`, `...name`, whole-word `json=name` or `data=name`,
+/// `SetBody(name` or `SetBody(&name`.
+pub fn opaque_payload(text: &str) -> Option<usize> {
+    for (ln, line) in text.lines().enumerate() {
+        if is_comment_line(line) {
+            continue;
+        }
+        let b = line.as_bytes();
+        let mut i = 0;
+        while i < b.len() {
+            if !line.is_char_boundary(i) {
+                i += 1;
+                continue;
+            }
+            let rest = &line[i..];
+            let prev = if i == 0 { None } else { Some(b[i - 1]) };
+            let after_ident = |off: usize| ident_at(line, i + off).is_some();
+            let subscript = b[i] == b'['
+                && matches!(prev, Some(c) if is_ident_byte(c) || c == b']' || c == b')')
+                && ident_at(line, i + 1).is_some_and(|k| {
+                    line[i + 1 + k.len()..].starts_with(']') && assigns(&line[i + 2 + k.len()..])
+                });
+            let kwargs = rest.starts_with("**")
+                && !matches!(prev, Some(c) if is_ident_byte(c) || c == b')' || c == b']' || c == b'*')
+                && after_ident(2);
+            let spread = rest.starts_with("...") && after_ident(3);
+            let kw = ["json", "data"].iter().any(|w| {
+                rest.starts_with(w)
+                    && !matches!(prev, Some(c) if is_ident_byte(c))
+                    && assigns(&rest[w.len()..])
+                    && {
+                        let r = rest[w.len()..].trim_start()[1..].trim_start();
+                        ident_at(r, 0).is_some()
+                    }
+            });
+            let set_body = rest.starts_with("SetBody(")
+                && (after_ident(8) || (rest[8..].starts_with('&') && after_ident(9)));
+            if subscript || kwargs || spread || kw || set_body {
+                return Some(ln + 1);
+            }
+            i += 1;
+        }
+    }
+    None
+}

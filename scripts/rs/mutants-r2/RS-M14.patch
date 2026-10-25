@@ -1,0 +1,12 @@
+# RS-M14 declared-killer=rs_f06: RS-0 opaque detection removed
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -432,7 +432,7 @@
+                 }
+             }
+         }
+-        if let Some(ol) = opaque_payload(&cr) {
++        if let Some(ol) = opaque_payload(&cr).filter(|_| false) {
+             for (k, (bname, bline)) in removed.iter().filter(|(k, _)| !writes.contains_key(*k)) {
+                 unevaluated.push(format!(
+                     "inbound read of '{k}' removed from {head_name} (read at {bname}:{bline} at base); consumer payload is opaque at {cname}:{ol}, so whether it sends '{k}' is not evaluated [not-evaluated:opaque-payload]"

@@ -1,0 +1,12 @@
+# RS-M3 declared-killer=rs_f09b: RS-1 condition 3 removed (literal guard)
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -354,7 +354,7 @@
+         for (k, lines) in inbound_reads(btext) {
+             if removed.contains_key(&k)
+                 || head_reads.iter().any(|r| r.contains_key(&k))
+-                || rs_heads.iter().any(|t| has_string_literal(t, &k))
++                || rs_heads.is_empty()
+             {
+                 continue;
+             }

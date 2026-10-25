@@ -1,0 +1,17 @@
+--- g3-corpus-after/r1-060-netbox-device-role-ansible.out	2026-10-23 09:22:57.010263265 +0000
++++ rs-corpus-after/r1-060-netbox-device-role-ansible.out	2026-10-25 08:57:25.993260379 +0000
+@@ -1,9 +1,10 @@
+ INVAR check (1 contract(s), --ci)
+-  [HOLDS]    r1-060 (schema)
++  [NOT EVALUATED] r1-060 (schema): 1 site(s)
++      'device_role' became read_only in netbox/dcim/api/serializers.py (netbox/dcim/api/serializers.py:669); consumer mentions it at plugins/modules/netbox_device.py:43; whether it writes it is not evaluated [not-evaluated:read-only-field]
+       fetched github:netbox-community/netbox@0bb86f1e7d4e0c48dce5ccb40f529ce656cfa5c4:netbox/dcim/api/serializers.py (50147 bytes, blake3 fa82305780bd051d774da4335ccc31a18fc0321ade5ca0d70d82e04bd172a918)
+       fetched github:netbox-community/netbox@79030ecab2be4ad83a5a60834fc11b0b4e164b99:netbox/dcim/api/serializers.py (49967 bytes, blake3 92ebfa86b8c6c8bff2cb82999bfe6ac93c3c20a06b7608c86afa21fc65ef4f65)
+       fetched github:netbox-community/ansible_modules@4211b713c07d45c69f14c94dc1894cbb813589a5:plugins/modules/netbox_device.py (10043 bytes, blake3 f9f3ca8798b3526943126ff6057af4296ed391b656a85a88b26782c33879f3f7)
+-result: ALL 1 contract(s) hold
+-summary: held 1 | violated 0 | skipped or not evaluated 0
++result: NOT FULLY EVALUATED, 1 of 1 contract(s) skipped or not evaluated, the rest hold
++summary: held 0 | violated 0 | skipped or not evaluated 1
+ measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)
+-exit 0
++exit 4
