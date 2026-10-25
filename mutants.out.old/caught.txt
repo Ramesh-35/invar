@@ -1,8 +1,0 @@
-crates/invar-falsify/src/main.rs:377:5: replace main with ()
-crates/invar-falsify/src/main.rs:418:5: replace print_code_pointer with ()
-crates/invar-falsify/src/main.rs:428:5: replace dispatch_r2 -> i32 with 0
-crates/invar-falsify/src/main.rs:428:5: replace dispatch_r2 -> i32 with 1
-crates/invar-falsify/src/main.rs:428:5: replace dispatch_r2 -> i32 with -1
-crates/invar-falsify/src/main.rs:438:5: replace dispatch -> i32 with 0
-crates/invar-falsify/src/main.rs:438:5: replace dispatch -> i32 with 1
-crates/invar-falsify/src/main.rs:438:5: replace dispatch -> i32 with -1
