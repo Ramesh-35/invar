@@ -1,0 +1,12 @@
+# M15 declared-killer=g3_f24: blank lines skipped like comments (window crosses a blank line)
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1115,7 +1115,7 @@
+         let mut prev = *raw;
+         let mut j = idx + 1;
+         while window.len() < 3 && ends_cont(prev) {
+-            while j < lines.len() && is_comment_line(lines[j]) {
++            while j < lines.len() && (is_comment_line(lines[j]) || lines[j].trim().is_empty()) {
+                 j += 1;
+             }
+             if j >= lines.len() {

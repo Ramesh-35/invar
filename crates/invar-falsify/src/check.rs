@@ -249,7 +249,7 @@ fn schema_outcome(
     let mut moved: Vec<(String, String, Vec<String>, String)> = Vec::new();
     let mut omitted: Vec<(String, String)> = Vec::new();
     let mut relocs: Vec<(String, String, Vec<String>)> = Vec::new();
-    let mut switches: Vec<(String, String, String, String)> = Vec::new();
+    let mut switches: Vec<(String, String, String, String, String)> = Vec::new();
     let mut add = |head_spec: &str, head: &Fields, base: &Fields, where_: String| {
         for (name, tc) in changed_fields(base, head) {
             changed.entry(name).or_insert((tc, where_.clone()));
@@ -269,8 +269,8 @@ fn schema_outcome(
         add(&p, &head_f, &base_f, where_);
         omitted.extend(new_omissions(&p, &pr, &br, &base_f));
         relocs.extend(relocations(&p, &pr, &br));
-        for (n, old, new) in selector_switches(&br, &pr) {
-            switches.push((n, old, new, artifact_name(&p)));
+        for (n, old, new, note) in selector_switches(&br, &pr) {
+            switches.push((n, old, new, artifact_name(&p), note));
         }
     }
     if let (Some(cs), Some(cbs)) = (&code, &code_base) {
@@ -281,8 +281,8 @@ fn schema_outcome(
         add(cs, &head_f, &base_f, artifact_name(cs));
         omitted.extend(new_omissions(cs, &cr_head, &cr_base, &base_f));
         relocs.extend(relocations(cs, &cr_head, &cr_base));
-        for (n, old, new) in selector_switches(&cr_base, &cr_head) {
-            switches.push((n, old, new, artifact_name(cs)));
+        for (n, old, new, note) in selector_switches(&cr_base, &cr_head) {
+            switches.push((n, old, new, artifact_name(cs), note));
         }
     }
     for (name, where_) in omitted {
@@ -365,9 +365,9 @@ fn schema_outcome(
     // consumer now receives, so the honest verdict is "not evaluated",
     // never HOLDS and never VIOLATED. With residue, F1 adds nothing.
     if residue.is_empty() && !reads.is_empty() {
-        for (name, old, new, where_) in &switches {
+        for (name, old, new, where_, note) in &switches {
             unevaluated.push(format!(
-                "default selector '{name}' changed {old} -> {new} in {where_}; emission of the fields read in {cname} not evaluated [not-evaluated:default-switch]"
+                "default selector '{name}' changed {old} -> {new} in {where_}; emission of the fields read in {cname} not evaluated{note} [not-evaluated:default-switch]"
             ));
         }
     }

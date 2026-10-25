@@ -1,0 +1,12 @@
+# M12 declared-killer=g3_f17: continuation gate removed (window crosses a closed statement)
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1114,7 +1114,7 @@
+         let mut window = vec![*raw];
+         let mut prev = *raw;
+         let mut j = idx + 1;
+-        while window.len() < 3 && ends_cont(prev) {
++        while window.len() < 3 { let _ = ends_cont(prev);
+             while j < lines.len() && is_comment_line(lines[j]) {
+                 j += 1;
+             }

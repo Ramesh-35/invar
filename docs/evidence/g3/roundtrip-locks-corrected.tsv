@@ -1,0 +1,12 @@
+# CORRECTED whole-lock comparison (separate from the original, which is preserved unchanged).
+# Method: each held line's 4th token (entry hash) is first VERIFIED to equal blake3 of its own
+# rendered entry (the [[contract]] lines without held/held_input), then replaced by ENTRYHASH;
+# then RFC 3339 times -> TIME and engine ids -> ENGINE, as in the original; then whole files compared.
+lock	entries_verified	entry_hash_self_check	whole_lock_after_corrected_normalization
+eval007.Egonex-AI__Understand-Anything	1/1	PASS (every entry hash recomputes)	IDENTICAL
+eval007.earendil-works__pi	36/36	PASS (every entry hash recomputes)	IDENTICAL
+eval007.excalidraw__excalidraw	2/2	PASS (every entry hash recomputes)	IDENTICAL
+eval008.Egonex-AI__Understand-Anything	6/6	PASS (every entry hash recomputes)	IDENTICAL
+eval008.earendil-works__pi	18/18	PASS (every entry hash recomputes)	IDENTICAL
+eval008.excalidraw__excalidraw	1/1	PASS (every entry hash recomputes)	IDENTICAL
+# SUMMARY: all 6 locks IDENTICAL under the corrected normalization

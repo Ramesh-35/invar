@@ -61,6 +61,7 @@ not listed as Class 1 items.
 | Memoized analyses are byte-identical to unmemoized (CHECK-PERF-1) | 2 | P-F1 to P-F6, P-N1; 9/9 mutants; byte-identical check on 3 repos | |
 | Lock formats 1 to 4 read forever; unknown formats fail closed | 3 | parse fixtures | |
 | held/held_input records: only HOLDS, never under waiver/sample/receipt/--sample | 2 | CHECK-INCR-1 F8 to F10, F19; E07 to E09, E19, E21 | |
+| Default-switch statements (F1 plus G3): a selector value or default-site variant that changes between base and head makes a residue-free contract stated NOT EVALUATED, never VIOLATED | 4 (textual grammar, stated in G3-SPEC r2/r3), outcome Class 2 | F1 tuning record; G3: 24 fixtures, 18 operators (17 killed by declared fixtures, 1 argued equivalent), 122-case corpus byte comparison (one movement, r1-113), native 449/449 | Which output path the consumer actually receives; values defined in other files; ownership of a value inside an open window beyond the stated grammar; held-out recall effect (tuning rung only) |
 
 ## 4. Evidence and trust boundary
 

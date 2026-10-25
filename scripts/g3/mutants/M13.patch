@@ -1,0 +1,12 @@
+# M13 declared-killer=g3_f14: same-key multiplicity not disclosed
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1175,7 +1175,7 @@
+         if !new.is_empty() {
+             let old: Vec<String> = bv.iter().cloned().collect();
+             let k = bc.get(name).copied().unwrap_or(0).max(hc.get(name).copied().unwrap_or(0));
+-            let note = if k >= 2 {
++            let note = if k >= usize::MAX {
+                 format!(" ({k} same-named default sites; site attribution not established)")
+             } else {
+                 String::new()

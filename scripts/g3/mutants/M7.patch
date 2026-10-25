@@ -1,0 +1,12 @@
+# M7 declared-killer=g3_f07: switch fires on value removal
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1171,7 +1171,7 @@
+     let mut out = Vec::new();
+     for (name, hv) in &h {
+         let Some(bv) = b.get(name) else { continue };
+-        let new: Vec<String> = hv.difference(bv).cloned().collect();
++        let new: Vec<String> = hv.symmetric_difference(bv).cloned().collect();
+         if !new.is_empty() {
+             let old: Vec<String> = bv.iter().cloned().collect();
+             let k = bc.get(name).copied().unwrap_or(0).max(hc.get(name).copied().unwrap_or(0));

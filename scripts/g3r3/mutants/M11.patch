@@ -1,0 +1,12 @@
+# M11 declared-killer=g3_f13: site-key collision: P6 key drops the trigger identifier (type-only merge)
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1126,7 +1126,7 @@
+             j += 1;
+         }
+         if let Some((ty, v)) = window.iter().find_map(|l| variant_literals(l).into_iter().next()) {
+-            let key = format!("{} {ty}", trigger.to_ascii_lowercase());
++            let key = format!("default {ty}"); let _ = trigger;
+             *count.entry(key.clone()).or_default() += 1;
+             occ.push((key, v));
+         }

@@ -1,0 +1,15 @@
+2c2,3
+<   [HOLDS]    r1-113 (schema)
+---
+>   [NOT EVALUATED] r1-113 (schema): 1 site(s)
+>       default selector 'default resolveversion' changed 3 -> 4 in src/cargo/core/resolver/resolve.rs; emission of the fields read in cargo-lock/src/lockfile/version.rs not evaluated [not-evaluated:default-switch]
+6,7c7,8
+< result: ALL 1 contract(s) hold
+< summary: held 1 | violated 0 | skipped or not evaluated 0
+---
+> result: NOT FULLY EVALUATED, 1 of 1 contract(s) skipped or not evaluated, the rest hold
+> summary: held 0 | violated 0 | skipped or not evaluated 1
+9c10
+< exit 0
+---
+> exit 4

@@ -1,0 +1,12 @@
+# M6 declared-killer=g3_f08: P6 key omits the type identifier
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1126,7 +1126,7 @@
+             j += 1;
+         }
+         if let Some((ty, v)) = window.iter().find_map(|l| variant_literals(l).into_iter().next()) {
+-            let key = format!("{} {ty}", trigger.to_ascii_lowercase());
++            let key = format!("{}", trigger.to_ascii_lowercase()); let _ = &ty;
+             *count.entry(key.clone()).or_default() += 1;
+             occ.push((key, v));
+         }

@@ -1,0 +1,12 @@
+# M1 declared-killer=g3_f02: V5 extraction removed
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1045,7 +1045,7 @@
+ /// (case-insensitive), Variant exactly `V`/`v` + digits or digits alone.
+ /// Comment lines yield nothing.
+ fn variant_literals(line: &str) -> Vec<(String, String)> {
+-    if is_comment_line(line) {
++    if true {
+         return Vec::new();
+     }
+     let b = line.as_bytes();

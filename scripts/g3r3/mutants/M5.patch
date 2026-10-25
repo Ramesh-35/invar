@@ -1,0 +1,14 @@
+# M5 declared-killer=g3_f03: non-numeric variants accepted as values
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1079,8 +1079,8 @@
+                 }
+                 let var = &line[k..m];
+                 let digits = var.strip_prefix(['V', 'v']).unwrap_or(var);
+-                if !digits.is_empty() && digits.bytes().all(|c| c.is_ascii_digit()) {
+-                    out.push((l, digits.to_string()));
++                if !var.is_empty() {
++                    out.push((l, var.to_ascii_lowercase()));
+                 }
+             }
+         }

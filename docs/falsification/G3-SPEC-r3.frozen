@@ -1,0 +1,12 @@
+# G3 r3 freeze record. r2's record (G3-SPEC.frozen) is preserved unchanged.
+# tests/g3_test.rs is r2's fixture file, byte-identical to its r2 freeze.
+blake3(docs/falsification/G3-SPEC-r3.md) = 0603886a2febd2b4be3bdb1fdb1ff27a335250ae78a6c71d154b7e6f6d3123d4
+sha256(docs/falsification/G3-SPEC-r3.md) = 6c982a99919c33c6ebd395e862f20abee0e42ca3a666ac4656dbc1caf27978dc
+blake3(crates/invar-falsify/tests/g3_test.rs) = 618d572e9e462ec2dbee585a865436f620c8260beb513e413b70c1a1d8cf7747
+sha256(crates/invar-falsify/tests/g3_test.rs) = 2c6166c654133eda607e7fd4c2fdaa8bec1e1dd5e7eda8c1995797e4dab845a6
+blake3(crates/invar-falsify/tests/g3r3_test.rs) = eb80e3e9dedcb2bba878fefca27dc2cdd0973926148adc1cc5467baa54260388
+sha256(crates/invar-falsify/tests/g3r3_test.rs) = 4002db57acf144b87b2e96841896502811d026758f960b04ed50a7caa7ce3653
+blake3(scripts/g3r3/mkmutants.py) = 591f3a2855c2c2e327b08b815e14a95d5aee097b7c796f0c3cff35de087d55a5
+sha256(scripts/g3r3/mkmutants.py) = 57016de8b6f22f270287fe455a4df471fe7ebb956e863a44cccbbfb6ed80e80d
+blake3(scripts/g3r3/mutate.sh) = f6c720814e72ee52ae83c72b4da13443f62d93099001016be47f755ab59dcea2
+sha256(scripts/g3r3/mutate.sh) = 7f313bfc6a378d03971a6f2d19dd9990d37b54f1bb276fb215fadd019530985f

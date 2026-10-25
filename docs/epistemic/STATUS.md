@@ -1684,6 +1684,27 @@ three or more hops, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
 docs/evidence/stage3/eval008.
 
+## 2026-10-25: G3 implemented (RECALL-ATTACK-1 phase 1: selector variants and default sites)
+
+F1's default-switch rule now also recognizes enum-variant selector values
+(`ResolveVersion::V4`, `FormatVersion.V2`: whole identifiers, numeric
+variants only, type name containing version or format) and default-site
+occurrences keyed by the default identifier and the type, with a two-line
+window gated by statement continuation. Outcome unchanged from F1: a
+detected switch is stated NOT FULLY EVALUATED (exit 4), never VIOLATED,
+and nothing is added when residue exists. Indistinguishable same-named
+sites are disclosed in the witness, never silently merged. Measured: of
+all 122 corpus cases, exactly one moved, r1-113 (Cargo lockfile v4
+default), from a silent HOLDS to a stated NOT EVALUATED; the other 121 are
+byte-identical. Tuning rung only: the corpus is not held out, so the
+sealed recall record stays 38 of 70. 449 of 449 tests natively on macOS
+and in the sandbox, zero warnings; 17 of 17 non-equivalent mutation
+operators killed by their declared fixtures, one argued equivalent. The r2
+spec's mutation suite had a non-equivalent survivor (M4) and two
+mis-declared kills (M3, M6); the r3 repair added seven fixtures and
+corrected them, with both ledgers kept. Record: docs/falsification/
+G3-SPEC.md, G3-SPEC-r3.md; docs/evidence/g3.
+
 ## 2026-10-23: CHECK-INCR-1 implemented (reuse a HOLDS on unchanged inputs)
 
 `invar check` reuses a HOLDS verdict when the engine, the contract's

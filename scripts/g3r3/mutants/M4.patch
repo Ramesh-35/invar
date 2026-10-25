@@ -1,0 +1,12 @@
+# M4 declared-killer=g3_f18: TypeIdent selector requirement dropped
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1063,7 +1063,7 @@
+         }
+         let ty = &line[i..j];
+         let l = ty.to_ascii_lowercase();
+-        if l.contains("version") || l.contains("format") {
++        if true {
+             let sep = if line[j..].starts_with("::") {
+                 2
+             } else if line[j..].starts_with('.') {

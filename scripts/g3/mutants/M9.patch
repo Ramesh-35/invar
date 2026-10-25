@@ -1,0 +1,12 @@
+# M9 declared-killer=g3_f09: G3 occurrences fire despite residue
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -364,7 +364,7 @@
+     // literal survived. Textual analysis cannot tell which output path the
+     // consumer now receives, so the honest verdict is "not evaluated",
+     // never HOLDS and never VIOLATED. With residue, F1 adds nothing.
+-    if residue.is_empty() && !reads.is_empty() {
++    if !reads.is_empty() {
+         for (name, old, new, where_, note) in &switches {
+             unevaluated.push(format!(
+                 "default selector '{name}' changed {old} -> {new} in {where_}; emission of the fields read in {cname} not evaluated{note} [not-evaluated:default-switch]"

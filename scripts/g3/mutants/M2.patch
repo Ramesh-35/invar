@@ -1,0 +1,12 @@
+# M2 declared-killer=g3_f01: P6 window set to same-line only
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1114,7 +1114,7 @@
+         let mut window = vec![*raw];
+         let mut prev = *raw;
+         let mut j = idx + 1;
+-        while window.len() < 3 && ends_cont(prev) {
++        while window.len() < 1 && ends_cont(prev) {
+             while j < lines.len() && is_comment_line(lines[j]) {
+                 j += 1;
+             }

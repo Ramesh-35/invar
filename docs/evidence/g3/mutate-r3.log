@@ -1,0 +1,19 @@
+M1 CAUGHT  DECLARED-KILLER-FAILED (g3_f02)  incidental=[g3_f01,g3_f08,g3_f12,g3_f13,g3_f14,g3_f15,g3_f20,g3_f23]  M1 declared-killer=g3_f02: V5 extraction removed
+M10 CAUGHT  DECLARED-KILLER-FAILED (g3_f12)  incidental=[g3_f08,g3_f10,g3_f13,g3_f14,g3_f15,g3_f20,g3_f23]  M10 declared-killer=g3_f12: witness renders NEW -> OLD
+M11 CAUGHT  DECLARED-KILLER-FAILED (g3_f13)  incidental=[g3_f15]  M11 declared-killer=g3_f13: site-key collision: P6 key drops the trigger identifier (type-only merge)
+M12 CAUGHT  DECLARED-KILLER-FAILED (g3_f17)  incidental=[g3_f24]  M12 declared-killer=g3_f17: continuation gate removed (window crosses a closed statement)
+M13 CAUGHT  DECLARED-KILLER-FAILED (g3_f14)  incidental=[none]  M13 declared-killer=g3_f14: same-key multiplicity not disclosed
+M14 CAUGHT  DECLARED-KILLER-FAILED (g3_f16)  incidental=[none]  M14 declared-killer=g3_f16: V5 dot-path matched by substring instead of whole identifiers
+M15 CAUGHT  DECLARED-KILLER-FAILED (g3_f24)  incidental=[none]  M15 declared-killer=g3_f24: blank lines skipped like comments (window crosses a blank line)
+M2 CAUGHT  DECLARED-KILLER-FAILED (g3_f01)  incidental=[g3_f12,g3_f13,g3_f14,g3_f15,g3_f20,g3_f23]  M2 declared-killer=g3_f01: P6 window set to same-line only
+M3 CAUGHT  DECLARED-KILLER-FAILED (g3_f19)  incidental=[g3_f12,g3_f13,g3_f14,g3_f15,g3_f20,g3_f23,g3_f24]  M3 declared-killer=g3_f19: P6 fires without the default-word requirement
+M4 CAUGHT  DECLARED-KILLER-FAILED (g3_f18)  incidental=[none]  M4 declared-killer=g3_f18: TypeIdent selector requirement dropped
+M5 CAUGHT  DECLARED-KILLER-FAILED (g3_f03)  incidental=[g3_f08,g3_f12,g3_f13,g3_f14,g3_f15,g3_f16,g3_f20,g3_f23]  M5 declared-killer=g3_f03: non-numeric variants accepted as values
+M6 CAUGHT  DECLARED-KILLER-FAILED (g3_f20)  incidental=[g3_f12,g3_f13,g3_f14,g3_f15,g3_f23]  M6 declared-killer=g3_f20: P6 key omits the type identifier
+M7 CAUGHT  DECLARED-KILLER-FAILED (g3_f07)  incidental=[g3_f08,g3_f10,g3_f12,g3_f13,g3_f15,g3_f17,g3_f19,g3_f20,g3_f22,g3_f23,g3_f24]  M7 declared-killer=g3_f07: switch fires on value removal
+M8 SURVIVED  M8 declared-killer=g3_f06: comment-line skip removed from variant scanning
+M8a CAUGHT  DECLARED-KILLER-FAILED (g3_f21)  incidental=[none]  M8a declared-killer=g3_f21: guard A removed: default_selectors no longer skips comment lines (shared with F1)
+M8b CAUGHT  DECLARED-KILLER-FAILED (g3_f22)  incidental=[none]  M8b declared-killer=g3_f22: guard B removed: a comment line can be a P6 trigger
+M8c CAUGHT  DECLARED-KILLER-FAILED (g3_f23)  incidental=[none]  M8c declared-killer=g3_f23: guard C removed: comment lines enter the P6 window instead of being stepped over
+M9 CAUGHT  DECLARED-KILLER-FAILED (g3_f09)  incidental=[none]  M9 declared-killer=g3_f09: G3 occurrences fire despite residue
+harness done

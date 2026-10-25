@@ -1,0 +1,15 @@
+M1 CAUGHT by g3_f01,g3_f02,g3_f08,g3_f12,g3_f13,g3_f14,g3_f15 (declared killer g3_f02: declared)  M1 declared-killer=g3_f02: V5 extraction removed
+M10 CAUGHT by g3_f08,g3_f10,g3_f12,g3_f13,g3_f14,g3_f15 (declared killer g3_f12: declared)  M10 declared-killer=g3_f12: witness renders NEW -> OLD
+M11 CAUGHT by g3_f13,g3_f15 (declared killer g3_f13: declared)  M11 declared-killer=g3_f13: site-key collision: P6 key drops the trigger identifier (type-only merge)
+M12 CAUGHT by g3_f17 (declared killer g3_f17: declared)  M12 declared-killer=g3_f17: continuation gate removed (window crosses a closed statement)
+M13 CAUGHT by g3_f14 (declared killer g3_f14: declared)  M13 declared-killer=g3_f14: same-key multiplicity not disclosed
+M14 CAUGHT by g3_f16 (declared killer g3_f16: declared)  M14 declared-killer=g3_f16: V5 dot-path matched by substring instead of whole identifiers
+M2 CAUGHT by g3_f01,g3_f12,g3_f13,g3_f14,g3_f15 (declared killer g3_f01: declared)  M2 declared-killer=g3_f01: P6 window set to same-line only
+M3 CAUGHT by g3_f12,g3_f13,g3_f14,g3_f15 (declared killer g3_f04: undeclared)  M3 declared-killer=g3_f04: P6 fires without the default-word requirement
+M4 SURVIVED  M4 declared-killer=g3_f05: TypeIdent selector requirement dropped
+M5 CAUGHT by g3_f03,g3_f08,g3_f12,g3_f13,g3_f14,g3_f15,g3_f16 (declared killer g3_f03: declared)  M5 declared-killer=g3_f03: non-numeric variants accepted as values
+M6 CAUGHT by g3_f12,g3_f13,g3_f14,g3_f15 (declared killer g3_f08: undeclared)  M6 declared-killer=g3_f08: P6 key omits the type identifier
+M7 CAUGHT by g3_f07,g3_f08,g3_f10,g3_f12,g3_f13,g3_f15,g3_f17 (declared killer g3_f07: declared)  M7 declared-killer=g3_f07: switch fires on value removal
+M8 SURVIVED  M8 declared-killer=g3_f06: comment-line skip removed from variant scanning
+M9 CAUGHT by g3_f09 (declared killer g3_f09: declared)  M9 declared-killer=g3_f09: G3 occurrences fire despite residue
+harness done

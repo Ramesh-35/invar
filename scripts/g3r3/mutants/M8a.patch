@@ -1,0 +1,12 @@
+# M8a declared-killer=g3_f21: guard A removed: default_selectors no longer skips comment lines (shared with F1)
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -940,7 +940,7 @@
+         let t = raw.trim_start();
+         if t.starts_with("//") || t.starts_with('#') || t.starts_with('*') || t.starts_with("/*")
+         {
+-            continue;
++            let _ = t;
+         }
+         let b = raw.as_bytes();
+         let ident = |c: u8| c.is_ascii_alphanumeric() || c == b'_';

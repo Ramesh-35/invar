@@ -926,7 +926,9 @@ fn selector_value(s: &str) -> Option<String> {
 /// (case-insensitive), by four textual patterns: assignment (`name = v`,
 /// `name: v`, `name: Type = v`), `defaultValue` on the same line, a call
 /// argument (`name(v`, version names only), and a quoted key (`"name", v` or
-/// `"name": v`). Lines opening as comments are ignored. Returns
+/// `"name": v`). G3 (docs/falsification/G3-SPEC.md) adds P5, variant
+/// literals keyed by their type, and P6, default-site occurrences keyed by
+/// trigger and type. Lines opening as comments are ignored. Returns
 /// lowercased name -> set of normalized values.
 pub fn default_selectors(text: &str) -> BTreeMap<String, BTreeSet<String>> {
     let is_sel = |n: &str| {
@@ -1013,22 +1015,172 @@ pub fn default_selectors(text: &str) -> BTreeMap<String, BTreeSet<String>> {
             }
             i += 1;
         }
+        // G3 P5 (docs/falsification/G3-SPEC.md): every V5 variant literal
+        // on a non-comment line is an occurrence of its type.
+        for (ty, v) in variant_literals(raw) {
+            push(&ty, Some(v));
+        }
+    }
+    // G3 P6: default-site occurrences, keyed by the trigger identifier and
+    // the type (A-1); the second map counts trigger lines per key so that
+    // indistinguishable same-named sites are disclosed, never silently merged.
+    let (sites, _) = default_sites(text);
+    for (key, v) in sites {
+        out.entry(key).or_default().insert(v);
     }
     out
 }
 
+/// A line opening as a comment (`//`, `#`, `*`, `/*`): F1's skip rule, which
+/// G3 shares unchanged.
+fn is_comment_line(raw: &str) -> bool {
+    let t = raw.trim_start();
+    t.starts_with("//") || t.starts_with('#') || t.starts_with('*') || t.starts_with("/*")
+}
+
+/// G3 V5: every variant literal on `line`, in order, as (lowercased type
+/// identifier, digits). A variant literal is `TypeIdent::Variant` or
+/// `TypeIdent.Variant` (A-2), both whole identifiers recognized token by
+/// token (never by substring), TypeIdent containing `version` or `format`
+/// (case-insensitive), Variant exactly `V`/`v` + digits or digits alone.
+/// Comment lines yield nothing.
+fn variant_literals(line: &str) -> Vec<(String, String)> {
+    if is_comment_line(line) {
+        return Vec::new();
+    }
+    let b = line.as_bytes();
+    let ident = |c: u8| c.is_ascii_alphanumeric() || c == b'_';
+    let mut out = Vec::new();
+    let mut i = 0;
+    while i < b.len() {
+        if !(ident(b[i]) && !b[i].is_ascii_digit() && (i == 0 || !ident(b[i - 1]))) {
+            i += 1;
+            continue;
+        }
+        let mut j = i;
+        while j < b.len() && ident(b[j]) {
+            j += 1;
+        }
+        let ty = &line[i..j];
+        let l = ty.to_ascii_lowercase();
+        if l.contains("version") || l.contains("format") {
+            let sep = if line[j..].starts_with("::") {
+                2
+            } else if line[j..].starts_with('.') {
+                1
+            } else {
+                0
+            };
+            if sep > 0 {
+                let k = j + sep;
+                let mut m = k;
+                while m < b.len() && ident(b[m]) {
+                    m += 1;
+                }
+                let var = &line[k..m];
+                let digits = var.strip_prefix(['V', 'v']).unwrap_or(var);
+                if !digits.is_empty() && digits.bytes().all(|c| c.is_ascii_digit()) {
+                    out.push((l, digits.to_string()));
+                }
+            }
+        }
+        i = j;
+    }
+    out
+}
+
+/// G3 P6: (key, value) per default-site occurrence, and the number of
+/// trigger lines per key. A trigger is a non-comment line holding a whole
+/// identifier containing `default`; the first such identifier names the
+/// site. Its window is the trigger line plus up to two following
+/// non-comment lines, extended one line at a time only while the previous
+/// line of the chain ends with a continuation token, so a completed
+/// statement never lends its neighbor a value. The first V5 literal in the
+/// window is the occurrence; key = "<trigger> <type>", both lowercased.
+fn default_sites(text: &str) -> (Vec<(String, String)>, BTreeMap<String, usize>) {
+    const CONT: [&str; 7] = ["{", "(", ":", "=", ",", "->", "=>"];
+    let lines: Vec<&str> = text.lines().collect();
+    let ends_cont = |l: &str| {
+        let t = l.trim_end();
+        CONT.iter().any(|c| t.ends_with(c))
+    };
+    let mut occ = Vec::new();
+    let mut count: BTreeMap<String, usize> = BTreeMap::new();
+    for (idx, raw) in lines.iter().enumerate() {
+        if is_comment_line(raw) {
+            continue;
+        }
+        let Some(trigger) = default_identifier(raw) else { continue };
+        let mut window = vec![*raw];
+        let mut prev = *raw;
+        let mut j = idx + 1;
+        while window.len() < 3 && ends_cont(prev) {
+            while j < lines.len() && is_comment_line(lines[j]) {
+                j += 1;
+            }
+            if j >= lines.len() {
+                break;
+            }
+            window.push(lines[j]);
+            prev = lines[j];
+            j += 1;
+        }
+        if let Some((ty, v)) = window.iter().find_map(|l| variant_literals(l).into_iter().next()) {
+            let key = format!("{} {ty}", trigger.to_ascii_lowercase());
+            *count.entry(key.clone()).or_default() += 1;
+            occ.push((key, v));
+        }
+    }
+    (occ, count)
+}
+
+/// The first whole identifier on the line containing `default`
+/// (case-insensitive).
+fn default_identifier(line: &str) -> Option<&str> {
+    let b = line.as_bytes();
+    let ident = |c: u8| c.is_ascii_alphanumeric() || c == b'_';
+    let mut i = 0;
+    while i < b.len() {
+        if ident(b[i]) && (i == 0 || !ident(b[i - 1])) {
+            let mut j = i;
+            while j < b.len() && ident(b[j]) {
+                j += 1;
+            }
+            let w = &line[i..j];
+            if !b[i].is_ascii_digit() && w.to_ascii_lowercase().contains("default") {
+                return Some(w);
+            }
+            i = j;
+            continue;
+        }
+        i += 1;
+    }
+    None
+}
+
 /// F1: selectors whose head value set gained a value absent at base:
-/// (name, base values, new values). Names on only one side never count.
-pub fn selector_switches(base: &str, head: &str) -> Vec<(String, String, String)> {
+/// (name, base values, new values, disclosure). Names on only one side never
+/// count. The disclosure is empty except for a G3 P6 key that two or more
+/// trigger lines share on either side: those sites cannot be told apart, so
+/// the merge is stated (G3-SPEC r2, A-1), with k the larger side's count.
+pub fn selector_switches(base: &str, head: &str) -> Vec<(String, String, String, String)> {
     let b = default_selectors(base);
     let h = default_selectors(head);
+    let (_, bc) = default_sites(base);
+    let (_, hc) = default_sites(head);
     let mut out = Vec::new();
     for (name, hv) in &h {
         let Some(bv) = b.get(name) else { continue };
         let new: Vec<String> = hv.difference(bv).cloned().collect();
         if !new.is_empty() {
             let old: Vec<String> = bv.iter().cloned().collect();
-            out.push((name.clone(), old.join("|"), new.join("|")));
+            let k = bc.get(name).copied().unwrap_or(0).max(hc.get(name).copied().unwrap_or(0));
+            let note = if k >= 2 {
+                format!(" ({k} same-named default sites; site attribution not established)")
+            } else {
+                String::new()
+            };
+            out.push((name.clone(), old.join("|"), new.join("|"), note));
         }
     }
     out

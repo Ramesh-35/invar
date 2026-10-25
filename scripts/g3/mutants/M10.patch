@@ -1,0 +1,17 @@
+# M10 declared-killer=g3_f12: witness renders NEW -> OLD
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1180,8 +1180,8 @@
+             } else {
+                 String::new()
+             };
+-            out.push((name.clone(), old.join("|"), new.join("|"), note));
+-        }
+-    }
+-    out
+-}
++            out.push((name.clone(), new.join("|"), old.join("|"), note));
++        }
++    }
++    out
++}

@@ -1,0 +1,7 @@
+# G3 freeze record (r2): hashes of the spec and its fixtures at freeze time.
+# Any implementation whose spec or fixture bytes differ from these is post-hoc.
+# r1 hashes are superseded by the founder's conditional-approval revisions of 2026-10-23.
+blake3(G3-SPEC.md) = 250425178d3704f42f6080dcf801dad1eca892c49dd2a9a6610e65c17709fb28
+sha256(G3-SPEC.md) = 44e2e4673be71399e7de909a0848eb33310574c6f4a3de4817477526f43fc8ae
+blake3(tests/g3_test.rs) = 618d572e9e462ec2dbee585a865436f620c8260beb513e413b70c1a1d8cf7747
+sha256(tests/g3_test.rs) = 2c6166c654133eda607e7fd4c2fdaa8bec1e1dd5e7eda8c1995797e4dab845a6

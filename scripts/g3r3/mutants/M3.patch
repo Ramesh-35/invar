@@ -1,0 +1,12 @@
+# M3 declared-killer=g3_f19: P6 fires without the default-word requirement
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1147,7 +1147,7 @@
+                 j += 1;
+             }
+             let w = &line[i..j];
+-            if !b[i].is_ascii_digit() && w.to_ascii_lowercase().contains("default") {
++            if !b[i].is_ascii_digit() {
+                 return Some(w);
+             }
+             i = j;

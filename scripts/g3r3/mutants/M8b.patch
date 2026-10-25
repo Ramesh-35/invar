@@ -1,0 +1,13 @@
+# M8b declared-killer=g3_f22: guard B removed: a comment line can be a P6 trigger
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1107,9 +1107,6 @@
+     let mut occ = Vec::new();
+     let mut count: BTreeMap<String, usize> = BTreeMap::new();
+     for (idx, raw) in lines.iter().enumerate() {
+-        if is_comment_line(raw) {
+-            continue;
+-        }
+         let Some(trigger) = default_identifier(raw) else { continue };
+         let mut window = vec![*raw];
+         let mut prev = *raw;

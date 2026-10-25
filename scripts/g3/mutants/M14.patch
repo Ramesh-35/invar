@@ -1,0 +1,13 @@
+# M14 declared-killer=g3_f16: V5 dot-path matched by substring instead of whole identifiers
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1078,7 +1078,8 @@
+                     m += 1;
+                 }
+                 let var = &line[k..m];
+-                let digits = var.strip_prefix(['V', 'v']).unwrap_or(var);
++                let s = var.strip_prefix(['V', 'v']).unwrap_or(var);
++                let digits = &s[..s.bytes().take_while(|c| c.is_ascii_digit()).count()];
+                 if !digits.is_empty() && digits.bytes().all(|c| c.is_ascii_digit()) {
+                     out.push((l, digits.to_string()));
+                 }
