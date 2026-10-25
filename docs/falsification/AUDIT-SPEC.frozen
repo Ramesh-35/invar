@@ -1,0 +1,12 @@
+# AUDIT freeze record (r1, bounded repair), written before the r1 gate runs.
+# r0 record preserved as AUDIT-SPEC-r0.frozen; tests/audit_test.rs unchanged from r0.
+blake3(docs/falsification/AUDIT-SPEC.md) = c6485945c2308e7f5652e1a135ebd5b59dfe27b668ad9657b8d3f4e9e4b907b5
+sha256(docs/falsification/AUDIT-SPEC.md) = 76c105f19f256cabf5a30095d75eca113cc7335da93bc4cad842306ad35328a9
+blake3(docs/falsification/AUDIT-SPEC-r0.md) = 69ebbdb5237ddeda4a9954a1eea67de02283ced17f062238d5b59ff7c10237af
+sha256(docs/falsification/AUDIT-SPEC-r0.md) = 60655c5e06dfdfb51d095aeeac2934e8632c2b7c7d6f32026f63243fdc389ed7
+blake3(crates/invar-falsify/tests/audit_test.rs) = 4f9154827d67645c1263a821bcdbafe9b0a7de7165894ce5d28516c2684d777a
+sha256(crates/invar-falsify/tests/audit_test.rs) = 7ea72f87a54124bd7645001b1bafcfb65dbe40e75546c23268a5583f136b2ef8
+blake3(crates/invar-falsify/tests/audit_r1_test.rs) = d7302b9e2c8217337b120ff5e0b92dc32ef963ffa0f8dca7fcb908ea10f073de
+sha256(crates/invar-falsify/tests/audit_r1_test.rs) = 1c046f4596d9e57c31dc7a3e302d78cddb7690bdfb28b79a6ea1635ed46896a4
+blake3(scripts/audit/measure.py) = e454b77c13b8ea4adc5f1cd5b26142726b1b0bdf44e7471021405283e177d460
+sha256(scripts/audit/measure.py) = 098332783578951ab4f06be6b5f5afc00acfa816cd0304dc82a221b1fbd7b4c0

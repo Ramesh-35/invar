@@ -1684,6 +1684,28 @@ three or more hops, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
 docs/evidence/stage3/eval008.
 
+## 2026-10-25: self-audit implemented (AGENT-1 P2)
+
+Before INVAR reports VIOLATED for a schema contract (strict, change-scoped
+and lock mode), it re-checks every witness against the bytes it evaluated
+in that run: each cited consumer line exists and holds the field, or a
+form the witness declares under `read as`, as a whole token (identifiers
+and string-literal contents, never a substring); the named producer is
+one the contract binds; an RS-1 witness's write lines hold the key. A
+witness that fails its own check is an engine defect: `ERROR (not a
+verdict): self-audit failed: ...`, exit 3, never a VIOLATED. Measured: all
+65 corpus convictions pass (242 cited lines), so all 122 corpus cases are
+byte-identical. Proven wired, not only correct: two injected witness
+defects (lines off by one; wrong file names) turn 65 of 65 corpus
+convictions into exit-3 self-audit failures, with none still printed. 514
+of 514 tests natively on macOS and in the sandbox, zero warnings; 9 of 9
+mutation operators killed by their declared fixtures. r0 had a
+non-equivalent survivor (AU-M5) and a lock-mode gap found by the existing
+suite; the r1 repair added one fixture and audited the bound field, both
+ledgers kept. The audit checks INVAR against its own evidence; it does
+not decide that a read is semantically a read of that field. Record:
+docs/falsification/AUDIT-SPEC.md; docs/evidence/audit.
+
 ## 2026-10-25: G2 implemented (RECALL-ATTACK-1 phase 4: renames)
 
 Two parts. G2-A: a Go consumer that imports a producer's types reads a

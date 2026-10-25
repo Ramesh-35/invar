@@ -1,0 +1,12 @@
+# AU-M6 declared-killer=au_f08: missing_from producer not checked
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -717,7 +717,7 @@
+         holds(site, &forms)?;
+     }
+     if let Some(m) = &w.missing_from {
+-        if !names_producer(m, producers) {
++        if false {
+             return Err(format!("AU-2 {m} names no bound producer"));
+         }
+         // AU-3: an RS-1 witness carries its consumer lines in the message.

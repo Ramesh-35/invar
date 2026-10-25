@@ -1247,7 +1247,7 @@ pub fn selector_switches(base: &str, head: &str) -> Vec<(String, String, String,
 /// String literals on one line, left to right: (open quote index, index after
 /// the close quote, content). A quote opens a literal that closes at the next
 /// unescaped matching quote; an unterminated literal ends the scan.
-fn string_literals(line: &str) -> Vec<(usize, usize, &str)> {
+pub(crate) fn string_literals(line: &str) -> Vec<(usize, usize, &str)> {
     let b = line.as_bytes();
     let mut out = Vec::new();
     let mut i = 0;

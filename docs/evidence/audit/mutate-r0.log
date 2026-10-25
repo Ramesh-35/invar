@@ -1,0 +1,9 @@
+AU-M1 CAUGHT  DECLARED-KILLER-FAILED (au_f02)  incidental=[au_f06]  AU-M1 declared-killer=au_f02: a missing line passes
+AU-M2 CAUGHT  DECLARED-KILLER-FAILED (au_f05)  incidental=[none]  AU-M2 declared-killer=au_f05: token match replaced by substring match
+AU-M3 CAUGHT  DECLARED-KILLER-FAILED (au_f04)  incidental=[none]  AU-M3 declared-killer=au_f04: read as forms ignored
+AU-M4 CAUGHT  DECLARED-KILLER-FAILED (au_f06)  incidental=[none]  AU-M4 declared-killer=au_f06: site file name not checked
+AU-M5 SURVIVED  AU-M5 declared-killer=au_f07: string-literal contents not tokenized
+AU-M6 CAUGHT  DECLARED-KILLER-FAILED (au_f08)  incidental=[none]  AU-M6 declared-killer=au_f08: missing_from producer not checked
+AU-M7 CAUGHT  DECLARED-KILLER-FAILED (au_f09)  incidental=[none]  AU-M7 declared-killer=au_f09: type-change place not checked
+AU-M8 CAUGHT  DECLARED-KILLER-FAILED (au_f11)  incidental=[none]  AU-M8 declared-killer=au_f11: RS-1 write lines not checked
+AU-M9 CAUGHT  DECLARED-KILLER-FAILED (au_f03)  incidental=[au_f05,au_f11]  AU-M9 declared-killer=au_f03: line-content check removed

@@ -1,0 +1,4 @@
+# AU-M5 non-equivalence demonstration (throwaway test, not a fixture)
+# witness: field template-id, site c.py:1, line: t = row["template-id"]
+clean engine (14e0dce4e181 tree): audit_witness -> Ok(())
+AU-M5 mutant: audit_witness -> Err("AU-1 c.py:1 does not hold template-id")

@@ -1,0 +1,12 @@
+# AU-M8 declared-killer=au_f11: RS-1 write lines not checked
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -728,7 +728,7 @@
+             }
+             let at = written.strip_prefix(consumer).and_then(|r| r.strip_prefix(':')).unwrap_or("");
+             for n in at.split(", ").filter(|n| !n.is_empty()) {
+-                holds(&format!("{consumer}:{n}"), &[field])?;
++                let _ = n;
+             }
+             if at.is_empty() {
+                 return Err(format!("AU-3 {m} names no write line in {consumer}"));

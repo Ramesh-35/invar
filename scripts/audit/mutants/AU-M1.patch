@@ -1,0 +1,12 @@
+# AU-M1 declared-killer=au_f02: a missing line passes
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -708,7 +708,7 @@
+         match line {
+             Some(l) if line_tokens(l).iter().any(|t| forms.contains(t)) => Ok(()),
+             Some(_) => Err(format!("AU-1 {site} does not hold {}", forms.join(" or "))),
+-            None => Err(format!("AU-1 {site} is not a line of {consumer}")),
++            None => Ok(()),
+         }
+     };
+     let mut forms: Vec<&str> = vec![field];

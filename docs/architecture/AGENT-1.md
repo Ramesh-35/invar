@@ -1,6 +1,6 @@
 # AGENT-1: what an AI coding agent can rely on, made true and tested
 
-Status: r0, DRAFT for founder ruling. No code. Parent: the founder's
+Status: r0, RULED 2026-10-25 (AG-D1 to AG-D4 as recommended). P2 (self-audit) landed 2026-10-25: docs/falsification/AUDIT-SPEC.md, docs/evidence/audit. P1, P4, P3 follow in that order. Parent: the founder's
 directive of 2026-10-25 (build the three agent incentives with first-class
 quality) and the standing ruling that agent integration is a proposal, not
 a product claim, until it is built and measured. Baseline: 9e89f33.

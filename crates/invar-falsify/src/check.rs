@@ -242,7 +242,9 @@ fn schema_outcome(
             artifact_name(&p),
             ptr.unwrap_or_default()
         );
-        return Ok((r.clone(), read_witnesses(&r, &c, &cr, &missing), Vec::new(), None));
+        let ws = read_witnesses(&r, &c, &cr, &missing);
+        audit_all(id, &ws, &artifact_name(&c), &cr, &[artifact_name(&p)])?;
+        return Ok((r.clone(), ws, Vec::new(), None));
     }
 
     // Change-scoped: collect what changed in each producer source.
@@ -501,6 +503,9 @@ fn schema_outcome(
             }
         }
     }
+    let mut bound = vec![artifact_name(&p)];
+    bound.extend([&base, &code, &code_base].into_iter().flatten().map(|x| artifact_name(x)));
+    audit_all(id, &witnesses, &cname, &cr, &bound)?;
     Ok((residue, witnesses, unevaluated, None))
 }
 
@@ -651,6 +656,100 @@ fn md_code(s: &str) -> String {
         })
         .collect();
     format!("`{}`", cleaned.replace('|', "\\|"))
+}
+
+/// AUDIT AU-1: the tokens of one line, identifiers and string-literal
+/// contents, left to right (AUDIT-SPEC r0, section B).
+fn line_tokens(line: &str) -> Vec<&str> {
+    let mut out: Vec<&str> = crate::surface::string_literals(line).into_iter().map(|(_, _, c)| c).collect();
+    let b = line.as_bytes();
+    let mut i = 0;
+    while i < b.len() {
+        if b[i].is_ascii_alphabetic() || b[i] == b'_' {
+            let start = i;
+            while i < b.len() && (b[i].is_ascii_alphanumeric() || b[i] == b'_') {
+                i += 1;
+            }
+            out.push(&line[start..i]);
+        } else {
+            i += 1;
+        }
+    }
+    out
+}
+
+/// True when `text` starts with one of `names` followed by its end, a space
+/// or a colon.
+fn names_producer(text: &str, names: &[String]) -> bool {
+    names.iter().any(|p| {
+        text.strip_prefix(p.as_str())
+            .is_some_and(|r| r.is_empty() || r.starts_with(' ') || r.starts_with(':'))
+    })
+}
+
+/// AUDIT-SPEC r0: re-check one schema witness against the consumer bytes
+/// evaluated in this run and the bound producer names. `Err` names the rule
+/// and the site; the caller turns it into an evaluation error (exit 3).
+pub fn audit_witness(w: &Witness, consumer: &str, text: &str, producers: &[String]) -> Result<(), String> {
+    audit_field(w, &w.residue, consumer, text, producers)
+}
+
+/// `audit_witness` with the field the engine matched given explicitly: lock
+/// mode shows its residue as `Type.field` while the consumer reads `field`.
+pub(crate) fn audit_field(w: &Witness, field: &str, consumer: &str, text: &str, producers: &[String]) -> Result<(), String> {
+    let lines: Vec<&str> = text.lines().collect();
+    let holds = |site: &str, forms: &[&str]| -> Result<(), String> {
+        let line = site
+            .rsplit_once(':')
+            .filter(|(file, _)| *file == consumer)
+            .and_then(|(_, n)| n.parse::<usize>().ok())
+            .and_then(|n| n.checked_sub(1))
+            .and_then(|n| lines.get(n));
+        match line {
+            Some(l) if line_tokens(l).iter().any(|t| forms.contains(t)) => Ok(()),
+            Some(_) => Err(format!("AU-1 {site} does not hold {}", forms.join(" or "))),
+            None => Err(format!("AU-1 {site} is not a line of {consumer}")),
+        }
+    };
+    let mut forms: Vec<&str> = vec![field];
+    forms.extend(w.read_as.iter().map(String::as_str));
+    for site in &w.sites {
+        holds(site, &forms)?;
+    }
+    if let Some(m) = &w.missing_from {
+        if !names_producer(m, producers) {
+            return Err(format!("AU-2 {m} names no bound producer"));
+        }
+        // AU-3: an RS-1 witness carries its consumer lines in the message.
+        if let Some((_, rest)) = m.split_once(" (inbound read at ") {
+            let (base, written) = rest.split_once(" at base); written at ").unwrap_or((rest, ""));
+            if !names_producer(base, producers) {
+                return Err(format!("AU-3 {base} names no bound producer"));
+            }
+            let at = written.strip_prefix(consumer).and_then(|r| r.strip_prefix(':')).unwrap_or("");
+            for n in at.split(", ").filter(|n| !n.is_empty()) {
+                holds(&format!("{consumer}:{n}"), &[field])?;
+            }
+            if at.is_empty() {
+                return Err(format!("AU-3 {m} names no write line in {consumer}"));
+            }
+        }
+    }
+    if let Some((_, _, place)) = &w.type_change {
+        if !names_producer(place, producers) {
+            return Err(format!("AU-2 type change in {place} names no bound producer"));
+        }
+    }
+    Ok(())
+}
+
+/// Every witness of one schema contract through `audit_witness`.
+fn audit_all(id: &str, ws: &[Witness], consumer: &str, text: &str, producers: &[String]) -> Result<()> {
+    for w in ws {
+        audit_witness(w, consumer, text, producers)
+            .map_err(|e| anyhow!("self-audit failed: contract {id}, field {}: {e}", w.residue))?;
+    }
+    Ok(())
 }
 
 const MAX_RESIDUE_SHOWN: usize = 20;

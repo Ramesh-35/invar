@@ -1286,6 +1286,7 @@ pub fn check_contract(
     let mut residue = Vec::new();
     let mut unevaluated: Vec<String> = Vec::new();
     let mut witnesses = Vec::new();
+    let mut fields: Vec<String> = Vec::new();
     let mut seen = BTreeSet::new();
     for b in &entry.bindings {
         let live_ty = live
@@ -1387,6 +1388,7 @@ pub fn check_contract(
         let mut s: Vec<String> = sites.iter().map(|(_, l)| format!("{cname}:{l}")).collect();
         s.dedup();
         residue.push(shown.clone());
+        fields.push(b.field.clone());
         witnesses.push(Witness {
             residue: shown,
             sites: s,
@@ -1412,6 +1414,11 @@ pub fn check_contract(
     }
     unevaluated.sort();
     unevaluated.dedup();
+    let bound: Vec<String> = std::iter::once(producer).chain(code).map(artifact_name).collect();
+    for (w, field) in witnesses.iter().zip(&fields) {
+        crate::check::audit_field(w, field, &cname, &consumer_text, &bound)
+            .map_err(|e| anyhow!("self-audit failed: contract {}, field {}: {e}", entry.id, w.residue))?;
+    }
     Ok(LockedResult {
         unevaluated,
         live_members: members_of(&live.surface, &entry.bindings),

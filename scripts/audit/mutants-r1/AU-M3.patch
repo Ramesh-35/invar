@@ -1,0 +1,12 @@
+# AU-M3 declared-killer=au_f04: read as forms ignored
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -712,7 +712,7 @@
+         }
+     };
+     let mut forms: Vec<&str> = vec![field];
+-    forms.extend(w.read_as.iter().map(String::as_str));
++    let _ = &w.read_as;
+     for site in &w.sites {
+         holds(site, &forms)?;
+     }

@@ -1,0 +1,12 @@
+# AU-M5 declared-killer=au_f07: string-literal contents not tokenized
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -661,7 +661,7 @@
+ /// AUDIT AU-1: the tokens of one line, identifiers and string-literal
+ /// contents, left to right (AUDIT-SPEC r0, section B).
+ fn line_tokens(line: &str) -> Vec<&str> {
+-    let mut out: Vec<&str> = crate::surface::string_literals(line).into_iter().map(|(_, _, c)| c).collect();
++    let mut out: Vec<&str> = Vec::new();
+     let b = line.as_bytes();
+     let mut i = 0;
+     while i < b.len() {

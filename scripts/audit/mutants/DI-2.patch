@@ -1,0 +1,41 @@
+# DI-2 declared-killer=suite: every witness site and RS-1 write list names the wrong file
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -119,7 +119,7 @@
+             sites: sites
+                 .iter()
+                 .filter(|(f, _)| f == r)
+-                .map(|(_, l)| format!("{name}:{l}"))
++                .map(|(_, l)| format!("wrong.file:{l}"))
+                 .collect(),
+             missing_from: Some(missing_from.to_string()),
+             type_change: None,
+@@ -340,7 +340,7 @@
+         }
+         let mut dedup: Vec<String> = matched
+             .iter()
+-            .map(|(_, l)| format!("{cname}:{l}"))
++            .map(|(_, l)| format!("wrong.file:{l}"))
+             .collect();
+         dedup.dedup();
+         let mut read_as: Vec<String> = matched
+@@ -397,7 +397,7 @@
+             residue: k.clone(),
+             sites: Vec::new(),
+             missing_from: Some(format!(
+-                "{head_name} at head: no inbound read and no literal of {k} remain (inbound read at {bname}:{bline} at base); written at {cname}:{}",
++                "{head_name} at head: no inbound read and no literal of {k} remain (inbound read at {bname}:{bline} at base); written at wrong.file:{}",
+                 at.join(", ")
+             )),
+             type_change: None,
+--- a/crates/invar-falsify/src/lock.rs
++++ b/crates/invar-falsify/src/lock.rs
+@@ -1385,7 +1385,7 @@
+             .collect();
+         read_as.sort();
+         read_as.dedup();
+-        let mut s: Vec<String> = sites.iter().map(|(_, l)| format!("{cname}:{l}")).collect();
++        let mut s: Vec<String> = sites.iter().map(|(_, l)| format!("wrong.file:{l}")).collect();
+         s.dedup();
+         residue.push(shown.clone());
+         fields.push(b.field.clone());

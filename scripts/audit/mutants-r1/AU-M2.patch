@@ -1,0 +1,12 @@
+# AU-M2 declared-killer=au_f05: token match replaced by substring match
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -706,7 +706,7 @@
+             .and_then(|n| n.checked_sub(1))
+             .and_then(|n| lines.get(n));
+         match line {
+-            Some(l) if line_tokens(l).iter().any(|t| forms.contains(t)) => Ok(()),
++            Some(l) if forms.iter().any(|f| l.contains(f)) => Ok(()),
+             Some(_) => Err(format!("AU-1 {site} does not hold {}", forms.join(" or "))),
+             None => Err(format!("AU-1 {site} is not a line of {consumer}")),
+         }

@@ -1,0 +1,12 @@
+# AU-M9 declared-killer=au_f03: line-content check removed
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -707,7 +707,7 @@
+             .and_then(|n| lines.get(n));
+         match line {
+             Some(l) if line_tokens(l).iter().any(|t| forms.contains(t)) => Ok(()),
+-            Some(_) => Err(format!("AU-1 {site} does not hold {}", forms.join(" or "))),
++            Some(_) => Ok(()),
+             None => Err(format!("AU-1 {site} is not a line of {consumer}")),
+         }
+     };

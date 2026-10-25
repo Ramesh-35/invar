@@ -1,0 +1,41 @@
+# DI-1 declared-killer=suite: every witness site line and RS-1 write line off by one
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -119,7 +119,7 @@
+             sites: sites
+                 .iter()
+                 .filter(|(f, _)| f == r)
+-                .map(|(_, l)| format!("{name}:{l}"))
++                .map(|(_, l)| format!("{name}:{}", l + 1))
+                 .collect(),
+             missing_from: Some(missing_from.to_string()),
+             type_change: None,
+@@ -340,7 +340,7 @@
+         }
+         let mut dedup: Vec<String> = matched
+             .iter()
+-            .map(|(_, l)| format!("{cname}:{l}"))
++            .map(|(_, l)| format!("{cname}:{}", l + 1))
+             .collect();
+         dedup.dedup();
+         let mut read_as: Vec<String> = matched
+@@ -391,7 +391,7 @@
+         if residue.contains(k) {
+             continue;
+         }
+-        let at: Vec<String> = wl.iter().map(|l| l.to_string()).collect();
++        let at: Vec<String> = wl.iter().map(|l| (l + 1).to_string()).collect();
+         residue.push(k.clone());
+         witnesses.push(Witness {
+             residue: k.clone(),
+--- a/crates/invar-falsify/src/lock.rs
++++ b/crates/invar-falsify/src/lock.rs
+@@ -1385,7 +1385,7 @@
+             .collect();
+         read_as.sort();
+         read_as.dedup();
+-        let mut s: Vec<String> = sites.iter().map(|(_, l)| format!("{cname}:{l}")).collect();
++        let mut s: Vec<String> = sites.iter().map(|(_, l)| format!("{cname}:{}", l + 1)).collect();
+         s.dedup();
+         residue.push(shown.clone());
+         fields.push(b.field.clone());

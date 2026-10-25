@@ -1,0 +1,12 @@
+# AU-M4 declared-killer=au_f06: site file name not checked
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -701,7 +701,7 @@
+     let holds = |site: &str, forms: &[&str]| -> Result<(), String> {
+         let line = site
+             .rsplit_once(':')
+-            .filter(|(file, _)| *file == consumer)
++            .filter(|_| true)
+             .and_then(|(_, n)| n.parse::<usize>().ok())
+             .and_then(|n| n.checked_sub(1))
+             .and_then(|n| lines.get(n));

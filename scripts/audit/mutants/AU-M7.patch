@@ -1,0 +1,12 @@
+# AU-M7 declared-killer=au_f09: type-change place not checked
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -736,7 +736,7 @@
+         }
+     }
+     if let Some((_, _, place)) = &w.type_change {
+-        if !names_producer(place, producers) {
++        if false {
+             return Err(format!("AU-2 type change in {place} names no bound producer"));
+         }
+     }
