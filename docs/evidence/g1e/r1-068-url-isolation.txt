@@ -1,0 +1,15 @@
+# r1-068 `url` isolation (G1-E-SPEC r0, section D). Fetched 2026-10-25 from
+# home-assistant/frontend@ef3758da5545fec9a776d3cea6ee4dd265a373ac (the case's pinned consumer commit).
+
+## src/panels/config/integrations/integration-panels/thread/thread-config-panel.ts (bound consumer (the contract's consumer)); 22879 bytes, blake3 b02c98bfb266d916bf0a5c2fccdc7b9deeedd1c42a27f23a6412982b39a8b7fb
+22: import { extractSearchParam } from "../../../../../common/url/search-params";
+27: import { getConfigEntryDiagnosticsDownloadUrl } from "../../../../../data/diagnostics";
+55: import { brandsUrl } from "../../../../../util/brands-url";
+57: import { documentationUrl } from "../../../../../util/documentation-url";
+340:     showThreadDatasetDialog(this, { network, otbrInfo: this._otbrInfo });
+
+## src/data/otbr.ts (consumer-side type); 776 bytes, blake3 f8af34d69ac374632e549679675956a5f9cbd594e1c156f65f2d081e49a51de5
+8:   url: string;
+
+## src/panels/config/integrations/integration-panels/thread/dialog-thread-dataset.ts (dialog the panel passes the whole object to); 1992 bytes, blake3 6e32ff4c84d91c4c472851e6044c0b24b6e607326c5439dc14257ba6bfc71c1e
+52:           ? html`OTBR URL: ${otbrInfo.url}<br />

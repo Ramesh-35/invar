@@ -1424,3 +1424,141 @@ pub fn opaque_payload(text: &str) -> Option<usize> {
     }
     None
 }
+
+// ----------------------------------------------------------- G1-E emissions
+// G1-E-SPEC r0, section B. An emission site is one of the seven frozen call
+// forms on a non-comment line; its payload is classified as a literal object
+// (with its depth-one keys) or a single opaque identifier, else not counted.
+
+/// One emission site: the form, its 1-based line, and the payload class.
+pub struct Emission {
+    pub form: &'static str,
+    pub line: usize,
+    /// `Ok(keys)` for a literal object, `Err(ident)` for an opaque payload.
+    pub payload: Result<Vec<String>, String>,
+}
+
+pub const EMISSION_FORMS: [&str; 7] =
+    [".json(", ".send(", "jsonify(", "JsonResponse(", "json.dumps(", "Response(", "send_result("];
+
+/// The quoted literal starting at `b[i]` (a quote): index after its close
+/// quote, or None when unterminated.
+fn skip_quoted(b: &[u8], i: usize) -> Option<usize> {
+    let q = b[i];
+    let mut j = i + 1;
+    while j < b.len() && b[j] != q {
+        j += if b[j] == b'\\' { 2 } else { 1 };
+    }
+    (j < b.len()).then_some(j + 1)
+}
+
+/// E2: the top-level arguments of a call whose `(` ends just before
+/// `text[start..]`, scanned to the matching `)` across lines.
+fn call_args(text: &str, start: usize) -> Option<Vec<&str>> {
+    let b = text.as_bytes();
+    let (mut depth, mut from, mut j) = (0usize, start, start);
+    let mut out = Vec::new();
+    while j < b.len() {
+        match b[j] {
+            b'"' | b'\'' | b'`' => {
+                j = skip_quoted(b, j)?;
+                continue;
+            }
+            b'(' | b'[' | b'{' => depth += 1,
+            b')' | b']' | b'}' if depth == 0 => {
+                out.push(&text[from..j]);
+                return Some(out);
+            }
+            b')' | b']' | b'}' => depth -= 1,
+            b',' if depth == 0 => {
+                out.push(&text[from..j]);
+                from = j + 1;
+            }
+            _ => {}
+        }
+        j += 1;
+    }
+    None
+}
+
+/// E3: depth-one keys of an object literal `{...}`.
+fn literal_keys(obj: &str) -> Vec<String> {
+    let body = &obj[1..];
+    let b = body.as_bytes();
+    let (mut depth, mut entry_start, mut j) = (0usize, true, 0usize);
+    let mut keys = Vec::new();
+    let colon_after = |k: usize| {
+        let r = body[k..].trim_start();
+        r.starts_with(':') && !r.starts_with("::")
+    };
+    while j < b.len() {
+        let c = b[j];
+        if c == b'"' || c == b'\'' || c == b'`' {
+            let Some(end) = skip_quoted(b, j) else { break };
+            if depth == 0 && entry_start && colon_after(end) {
+                keys.push(body[j + 1..end - 1].to_string());
+            }
+            entry_start = false;
+            j = end;
+            continue;
+        }
+        if depth == 0 && entry_start && (c.is_ascii_alphabetic() || c == b'_') {
+            let id = ident_at(body, j).unwrap_or_default();
+            if colon_after(j + id.len()) {
+                keys.push(id.to_string());
+            }
+            entry_start = false;
+            j += id.len();
+            continue;
+        }
+        match c {
+            b'(' | b'[' | b'{' => depth += 1,
+            b')' | b']' | b'}' => depth = depth.saturating_sub(1),
+            b',' if depth == 0 => {
+                entry_start = true;
+                j += 1;
+                continue;
+            }
+            _ => {}
+        }
+        if !c.is_ascii_whitespace() {
+            entry_start = false;
+        }
+        j += 1;
+    }
+    keys
+}
+
+/// E1 to E3: every classified emission site in `text`, in order.
+pub fn emissions(text: &str) -> Vec<Emission> {
+    const KEYWORDS: [&str; 7] = ["null", "None", "true", "false", "True", "False", "undefined"];
+    let mut out = Vec::new();
+    let mut offset = 0;
+    for (ln, line) in text.split('\n').enumerate() {
+        let here = offset;
+        offset += line.len() + 1;
+        if is_comment_line(line) {
+            continue;
+        }
+        for form in EMISSION_FORMS {
+            for (at, _) in line.match_indices(form) {
+                let whole = form.starts_with('.') || at == 0 || !is_ident_byte(line.as_bytes()[at - 1]);
+                if !whole {
+                    continue;
+                }
+                let Some(args) = call_args(text, here + at + form.len()) else { continue };
+                let idx = usize::from(form == "send_result(");
+                let Some(arg) = args.get(idx).map(|a| a.trim()) else { continue };
+                let payload = if arg.starts_with('{') {
+                    Ok(literal_keys(arg))
+                } else if ident_at(arg, 0).is_some_and(|id| id.len() == arg.len()) && !KEYWORDS.contains(&arg) {
+                    Err(arg.to_string())
+                } else {
+                    continue;
+                };
+                out.push(Emission { form, line: ln + 1, payload });
+            }
+        }
+    }
+    out
+}

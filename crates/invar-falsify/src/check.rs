@@ -13,9 +13,9 @@ use std::collections::BTreeMap;
 use crate::invariant::{check_contract, payload_read_sites, ContractInput, Step};
 use crate::resolver::{is_remote, Fetched, Resolver};
 use crate::surface::{
-    broad_reads, changed_fields, code_fields, consumer_writes, field_names, has_string_literal,
+    broad_reads, changed_fields, code_fields, consumer_writes, emissions, field_names, has_string_literal,
     inbound_reads, mention_lines, moved_fields, name_key, opaque_payload, relocated_keys,
-    selector_switches, serializer_fields, spec_fields, ts_omissions, word_lines, Fields,
+    selector_switches, serializer_fields, spec_fields, ts_omissions, word_lines, Fields, EMISSION_FORMS,
 };
 
 pub type Sections = Vec<(String, Vec<(String, String)>)>;
@@ -436,6 +436,45 @@ fn schema_outcome(
             for (k, (bname, bline)) in removed.iter().filter(|(k, _)| !writes.contains_key(*k)) {
                 unevaluated.push(format!(
                     "inbound read of '{k}' removed from {head_name} (read at {bname}:{bline} at base); consumer payload is opaque at {cname}:{ol}, so whether it sends '{k}' is not evaluated [not-evaluated:opaque-payload]"
+                ));
+            }
+        }
+        // G1-E: per bound pair and form, a literal emission was lost and an
+        // opaque one gained, and a base literal key is read by the consumer.
+        let read_keys: Vec<String> = reads.iter().map(|(f, _)| name_key(f)).collect();
+        for (bname, btext, hname, htext) in &rs_pairs {
+            let (be, he) = (emissions(btext), emissions(htext));
+            for form in EMISSION_FORMS {
+                let lits = |e: &[crate::surface::Emission]| e.iter().filter(|x| x.form == form && x.payload.is_ok()).count();
+                let opq: Vec<&crate::surface::Emission> = he.iter().filter(|x| x.form == form && x.payload.is_err()).collect();
+                let (lb, lh) = (lits(&be), lits(&he));
+                let ob = be.iter().filter(|x| x.form == form && x.payload.is_err()).count();
+                if lh >= lb || opq.len() <= ob {
+                    continue;
+                }
+                let mut keys: Vec<&String> = Vec::new();
+                let mut first_base = None;
+                for x in be.iter().filter(|x| x.form == form) {
+                    let Ok(ks) = &x.payload else { continue };
+                    let hit: Vec<&String> = ks.iter().filter(|k| read_keys.contains(&name_key(k))).collect();
+                    if !hit.is_empty() && first_base.is_none() {
+                        first_base = Some(x.line);
+                    }
+                    keys.extend(hit);
+                }
+                let Some(bline) = first_base else { continue };
+                keys.sort();
+                keys.dedup();
+                let (oline, oid) = opq
+                    .first()
+                    .map(|x| (x.line, x.payload.as_ref().err().cloned().unwrap_or_default()))
+                    .unwrap_or_default();
+                let named: Vec<String> = keys.iter().map(|k| format!("'{k}'")).collect();
+                let pron = if keys.len() == 1 { "it" } else { "them" };
+                unevaluated.push(format!(
+                    "'{form}' emission became opaque in {hname}: literal {lb} -> {lh}, opaque {ob} -> {} (first opaque at {hname}:{oline}, '{oid}'); base stated {} literally ({bname}:{bline}), read in {cname}; whether head still emits {pron} is not evaluated [not-evaluated:opaque-emission]",
+                    opq.len(),
+                    named.join(", ")
                 ));
             }
         }

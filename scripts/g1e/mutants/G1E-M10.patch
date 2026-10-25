@@ -1,0 +1,12 @@
+# G1E-M10 declared-killer=g1e_f11: argument scan limited to the call line
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1546,7 +1546,7 @@
+                 if !whole {
+                     continue;
+                 }
+-                let Some(args) = call_args(text, here + at + form.len()) else { continue };
++                let Some(args) = call_args(line, at + form.len()) else { continue };
+                 let idx = usize::from(form == "send_result(");
+                 let Some(arg) = args.get(idx).map(|a| a.trim()) else { continue };
+                 let payload = if arg.starts_with('{') {

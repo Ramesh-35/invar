@@ -1,0 +1,12 @@
+# G1E-M11 declared-killer=g1e_f12: keys taken at any depth
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1502,7 +1502,7 @@
+             j = end;
+             continue;
+         }
+-        if depth == 0 && entry_start && (c.is_ascii_alphabetic() || c == b'_') {
++        if c.is_ascii_alphabetic() || c == b'_' {
+             let id = ident_at(body, j).unwrap_or_default();
+             if colon_after(j + id.len()) {
+                 keys.push(id.to_string());

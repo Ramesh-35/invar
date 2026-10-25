@@ -1684,6 +1684,25 @@ three or more hops, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
 docs/evidence/stage3/eval008.
 
+## 2026-10-25: G1-E implemented (RECALL-ATTACK-1 phase 3: opaque emission)
+
+A producer whose literal emissions of one frozen call form fell while its
+opaque emissions of that form rose (`.json({ response })` became
+`.json(data)`), when the consumer reads a key the base literal stated and
+the contract has no residue, is stated NOT FULLY EVALUATED (exit 4),
+never VIOLATED: the head file no longer states what that site emits. The
+seven call forms are frozen. Measured: of all 122 corpus cases exactly one
+moved, r1-107, from a silent HOLDS to a stated NOT EVALUATED; the other
+121 are byte-identical. Tuning rung only: the sealed recall record stays
+38 of 70. r1-068's missing `url` was isolated: the bound consumer never
+reads it (a second file does, through a passed object), so it is a
+binding limitation, not an E1 defect; the case stays PARTIAL. 487 of 487
+tests natively on macOS and in the sandbox, zero warnings; 12 of 12
+mutation operators killed by their declared fixtures (the first run's one
+INVALID result, an engine panic on an unguarded index, is kept in the
+ledger; the index was made total). Record: docs/falsification/
+G1-E-SPEC.md; docs/evidence/g1e.
+
 ## 2026-10-25: request side implemented (RECALL-ATTACK-1 phase 2)
 
 INVAR now checks what a consumer SENDS against what a producer ACCEPTS,

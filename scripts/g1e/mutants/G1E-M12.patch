@@ -1,0 +1,12 @@
+# G1E-M12 declared-killer=g1e_f15: code companion pair not scanned
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -442,7 +442,7 @@
+         // G1-E: per bound pair and form, a literal emission was lost and an
+         // opaque one gained, and a base literal key is read by the consumer.
+         let read_keys: Vec<String> = reads.iter().map(|(f, _)| name_key(f)).collect();
+-        for (bname, btext, hname, htext) in &rs_pairs {
++        for (bname, btext, hname, htext) in rs_pairs.iter().take(1) {
+             let (be, he) = (emissions(btext), emissions(htext));
+             for form in EMISSION_FORMS {
+                 let lits = |e: &[crate::surface::Emission]| e.iter().filter(|x| x.form == form && x.payload.is_ok()).count();

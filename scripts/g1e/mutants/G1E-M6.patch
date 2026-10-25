@@ -1,0 +1,12 @@
+# G1E-M6 declared-killer=g1e_f07: payload always the first argument
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1547,7 +1547,7 @@
+                     continue;
+                 }
+                 let Some(args) = call_args(text, here + at + form.len()) else { continue };
+-                let idx = usize::from(form == "send_result(");
++                let idx = 0;
+                 let Some(arg) = args.get(idx).map(|a| a.trim()) else { continue };
+                 let payload = if arg.starts_with('{') {
+                     Ok(literal_keys(arg))

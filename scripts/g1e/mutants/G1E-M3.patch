@@ -1,0 +1,12 @@
+# G1E-M3 declared-killer=g1e_f04: condition 3 removed (consumer read)
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -456,7 +456,7 @@
+                 let mut first_base = None;
+                 for x in be.iter().filter(|x| x.form == form) {
+                     let Ok(ks) = &x.payload else { continue };
+-                    let hit: Vec<&String> = ks.iter().filter(|k| read_keys.contains(&name_key(k))).collect();
++                    let hit: Vec<&String> = ks.iter().collect();
+                     if !hit.is_empty() && first_base.is_none() {
+                         first_base = Some(x.line);
+                     }

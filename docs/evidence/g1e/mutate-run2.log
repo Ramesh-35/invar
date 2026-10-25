@@ -1,0 +1,12 @@
+G1E-M1 CAUGHT  DECLARED-KILLER-FAILED (g1e_f02)  incidental=[none]  G1E-M1 declared-killer=g1e_f02: condition 1 removed (literal loss)
+G1E-M2 CAUGHT  DECLARED-KILLER-FAILED (g1e_f03)  incidental=[g1e_f05,g1e_f08,g1e_f09]  G1E-M2 declared-killer=g1e_f03: condition 2 removed (opaque gain)
+G1E-M3 CAUGHT  DECLARED-KILLER-FAILED (g1e_f04)  incidental=[g1e_f07,g1e_f12]  G1E-M3 declared-killer=g1e_f04: condition 3 removed (consumer read)
+G1E-M4 CAUGHT  DECLARED-KILLER-FAILED (g1e_f05)  incidental=[none]  G1E-M4 declared-killer=g1e_f05: comment skip removed from E1
+G1E-M5 CAUGHT  DECLARED-KILLER-FAILED (g1e_f06)  incidental=[none]  G1E-M5 declared-killer=g1e_f06: statement added despite residue (the residue gate G1-E shares with RS-2 and RS-0)
+G1E-M6 CAUGHT  DECLARED-KILLER-FAILED (g1e_f07)  incidental=[none]  G1E-M6 declared-killer=g1e_f07: payload always the first argument
+G1E-M7 CAUGHT  DECLARED-KILLER-FAILED (g1e_f08)  incidental=[g1e_f03]  G1E-M7 declared-killer=g1e_f08: OPAQUE accepts any non-literal expression
+G1E-M8 CAUGHT  DECLARED-KILLER-FAILED (g1e_f09)  incidental=[none]  G1E-M8 declared-killer=g1e_f09: keyword exclusion removed
+G1E-M9 CAUGHT  DECLARED-KILLER-FAILED (g1e_f10)  incidental=[none]  G1E-M9 declared-killer=g1e_f10: whole-name boundary removed
+G1E-M10 CAUGHT  DECLARED-KILLER-FAILED (g1e_f11)  incidental=[none]  G1E-M10 declared-killer=g1e_f11: argument scan limited to the call line
+G1E-M11 CAUGHT  DECLARED-KILLER-FAILED (g1e_f12)  incidental=[none]  G1E-M11 declared-killer=g1e_f12: keys taken at any depth
+G1E-M12 CAUGHT  DECLARED-KILLER-FAILED (g1e_f15)  incidental=[none]  G1E-M12 declared-killer=g1e_f15: code companion pair not scanned

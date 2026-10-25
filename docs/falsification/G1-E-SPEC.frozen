@@ -1,0 +1,8 @@
+# G1-E freeze record (r0), written before any implementation.
+# Baseline under test: fb85ae9 (request side landed).
+blake3(docs/falsification/G1-E-SPEC.md) = b053250a1fe0baabb5b083f38f6c76881d6ed6ea736462cf885bb7b718a398a1
+sha256(docs/falsification/G1-E-SPEC.md) = ddd0f98b246c57073fbb5a7abea5ab97fdaaab6f13dc22c24fbae84e4c540a39
+blake3(crates/invar-falsify/tests/g1e_test.rs) = e275d357d575a5a8ebdd8154eabe316cae0e5762c39cec245eeab524f5937004
+sha256(crates/invar-falsify/tests/g1e_test.rs) = af19be4144889a041a82f0e5ba5d39dc08e5bffc30b29da22f1feded5dc7e0ff
+blake3(docs/evidence/g1e/r1-068-url-isolation.txt) = 12b6321d87de9b2005b7f0e6f3d5c39ec08fddf3fb71ece01e27c2ed9ebd0874
+sha256(docs/evidence/g1e/r1-068-url-isolation.txt) = a331fbe13b2c35889a2c1a0c71ed948174a249f633922b6a073e467335ed97a7

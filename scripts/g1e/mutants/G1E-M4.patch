@@ -1,0 +1,13 @@
+# G1E-M4 declared-killer=g1e_f05: comment skip removed from E1
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1537,9 +1537,6 @@
+     for (ln, line) in text.split('\n').enumerate() {
+         let here = offset;
+         offset += line.len() + 1;
+-        if is_comment_line(line) {
+-            continue;
+-        }
+         for form in EMISSION_FORMS {
+             for (at, _) in line.match_indices(form) {
+                 let whole = form.starts_with('.') || at == 0 || !is_ident_byte(line.as_bytes()[at - 1]);

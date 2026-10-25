@@ -1,0 +1,12 @@
+# G1E-M7 declared-killer=g1e_f08: OPAQUE accepts any non-literal expression
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1551,7 +1551,7 @@
+                 let Some(arg) = args.get(idx).map(|a| a.trim()) else { continue };
+                 let payload = if arg.starts_with('{') {
+                     Ok(literal_keys(arg))
+-                } else if ident_at(arg, 0).is_some_and(|id| id.len() == arg.len()) && !KEYWORDS.contains(&arg) {
++                } else if !arg.is_empty() && !KEYWORDS.contains(&arg) {
+                     Err(arg.to_string())
+                 } else {
+                     continue;

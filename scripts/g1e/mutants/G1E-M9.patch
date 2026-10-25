@@ -1,0 +1,12 @@
+# G1E-M9 declared-killer=g1e_f10: whole-name boundary removed
+--- a/crates/invar-falsify/src/surface.rs
++++ b/crates/invar-falsify/src/surface.rs
+@@ -1542,7 +1542,7 @@
+         }
+         for form in EMISSION_FORMS {
+             for (at, _) in line.match_indices(form) {
+-                let whole = form.starts_with('.') || at == 0 || !is_ident_byte(line.as_bytes()[at - 1]);
++                let whole = true;
+                 if !whole {
+                     continue;
+                 }

@@ -1,0 +1,17 @@
+--- rs-engine
++++ g1e-engine
+@@ -1,9 +1,10 @@
+ INVAR check (1 contract(s), --ci)
+-  [HOLDS]    r1-107 (schema)
++  [NOT EVALUATED] r1-107 (schema): 1 site(s)
++      '.json(' emission became opaque in apps/web/pages/api/v1/tags/index.ts: literal 6 -> 5, opaque 0 -> 1 (first opaque at apps/web/pages/api/v1/tags/index.ts:26, 'data'); base stated 'response' literally (apps/web/pages/api/v1/tags/index.ts:17), read in src/widgets/linkwarden/component.jsx; whether head still emits it is not evaluated [not-evaluated:opaque-emission]
+       fetched github:linkwarden/linkwarden@82f97b10956d17fc7d18b5ec8bc0239c9d6ac1cb:apps/web/pages/api/v1/tags/index.ts (2090 bytes, blake3 f274f20356aed36f6cf256f0894a6a01865fa904e34d35b374bdcaad98aff6f9)
+       fetched github:linkwarden/linkwarden@c4f8985be9a438a229aeb8f77b09d95b69eb4463:apps/web/pages/api/v1/tags/index.ts (1783 bytes, blake3 6eebec3aed91a3fd1c939b87ac518cc01a34a7981783316fe3b58898a0aaec98)
+       fetched github:gethomepage/homepage@9cabb46bb7803a7de7a7eeefef76ecc946330978:src/widgets/linkwarden/component.jsx (1633 bytes, blake3 affbb8dd9f44760f57bc5af3df7b5bf802d59c0568a4c06e318f83950b4150b5)
+-result: ALL 1 contract(s) hold
+-summary: held 1 | violated 0 | skipped or not evaluated 0
++result: NOT FULLY EVALUATED, 1 of 1 contract(s) skipped or not evaluated, the rest hold
++summary: held 0 | violated 0 | skipped or not evaluated 1
+ measured: 38 of 70 held-out real cross-repository breaks caught (batches 4-8; docs/epistemic/STATUS.md)
+-exit 0
++exit 4

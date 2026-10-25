@@ -1,0 +1,12 @@
+# G1E-M1 declared-killer=g1e_f02: condition 1 removed (literal loss)
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -449,7 +449,7 @@
+                 let opq: Vec<&crate::surface::Emission> = he.iter().filter(|x| x.form == form && x.payload.is_err()).collect();
+                 let (lb, lh) = (lits(&be), lits(&he));
+                 let ob = be.iter().filter(|x| x.form == form && x.payload.is_err()).count();
+-                if lh >= lb || opq.len() <= ob {
++                if opq.len() <= ob {
+                     continue;
+                 }
+                 let mut keys: Vec<&String> = Vec::new();
