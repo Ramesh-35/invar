@@ -1,0 +1,2 @@
+invar run	exit 0	bin_path from composite.toml	no
+invar report	exit 0	bin_path from composite.toml	no

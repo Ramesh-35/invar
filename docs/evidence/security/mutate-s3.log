@@ -1,0 +1,23 @@
+S3-M1 KILLED ['s3_f01', 's3_f02']
+S3-M2 KILLED ['s3_f02']
+S3-M3 KILLED ['s3_f04']
+S3-M4 KILLED ['s3_f03']
+S3-M5 KILLED ['s3_f06']
+S3-M6 KILLED ['s3_f07']
+S3-M7 KILLED ['s3_f08']
+S3-M8 KILLED ['s3_f09']
+S3-M9 KILLED ['s3_f10']
+S3-M10 KILLED ['s3_f11']
+S3-M1	s3_f01	KILLED	s3_f01,s3_f02
+S3-M2	s3_f02	KILLED	s3_f02
+S3-M3	s3_f04	KILLED	s3_f04
+S3-M4	s3_f03	KILLED	s3_f03
+S3-M5	s3_f06	KILLED	s3_f06
+S3-M6	s3_f07	KILLED	s3_f07
+S3-M7	s3_f08	KILLED	s3_f08
+S3-M8	s3_f09	KILLED	s3_f09
+S3-M9	s3_f10	KILLED	s3_f10
+S3-M10	s3_f11	KILLED	s3_f11
+
+S3-M10 rerun after ci.yml runs repro-check.sh through bash (2026-10-26):
+S3-M10	s3_f11	KILLED	s3_f11

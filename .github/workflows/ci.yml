@@ -23,6 +23,30 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - run: bash scripts/check-pins.sh
 
+  dependency-audit:
+    # SECURITY-SPEC S3-3: every dependency against the RustSec advisory
+    # database. An advisory is ignored only by an entry in .cargo/audit.toml
+    # that carries its id and a written reason.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
+        with:
+          toolchain: stable
+      - run: cargo install cargo-audit --locked --version 0.22.2
+      - run: cargo audit --deny warnings
+
+  reproducible-build:
+    # SECURITY-SPEC S3-4: two clean release builds from two checkout paths,
+    # and their packed archives, must be identical byte for byte.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
+        with:
+          toolchain: stable
+      - run: bash scripts/release/repro-check.sh "$RUNNER_TEMP/repro"
+
   falsify:
     runs-on: ubuntu-latest
     steps:

@@ -124,6 +124,11 @@ struct RunArgs {
     strict: bool,
     #[arg(long, default_value_t = 60)]
     timeout: u64,
+    /// SECURITY-SPEC S3-1: the semgrep program to run. Required when
+    /// composite.toml names a bin_path other than `semgrep`, and must name
+    /// the same program.
+    #[arg(long)]
+    semgrep_bin: Option<String>,
 }
 
 #[derive(Parser)]
@@ -144,6 +149,11 @@ struct ReportArgs {
     format: String,
     #[arg(long, default_value_t = 60)]
     timeout: u64,
+    /// SECURITY-SPEC S3-1: the semgrep program to run. Required when
+    /// composite.toml names a bin_path other than `semgrep`, and must name
+    /// the same program.
+    #[arg(long)]
+    semgrep_bin: Option<String>,
 }
 
 #[derive(Parser)]
@@ -477,11 +487,12 @@ fn now_us() -> i64 {
         .unwrap_or(0)
 }
 
-fn build_report(manifest_path: &str, composite_path: &str, timeout: Duration) -> Result<RunReport> {
+fn build_report(manifest_path: &str, composite_path: &str, timeout: Duration, semgrep_bin: Option<String>) -> Result<RunReport> {
     let manifest = Manifest::load(manifest_path)
         .with_context(|| format!("loading manifest {manifest_path}"))?;
-    let composite = CompositeConfig::load(composite_path)
+    let mut composite = CompositeConfig::load(composite_path)
         .with_context(|| format!("loading composite config {composite_path}"))?;
+    composite.semgrep.operator_bin = semgrep_bin;
 
     let manifest_bytes = std::fs::read(manifest_path)
         .with_context(|| format!("re-reading manifest {manifest_path} for hashing"))?;
@@ -531,6 +542,7 @@ fn cmd_report(args: ReportArgs) -> Result<i32> {
         &args.manifest,
         &args.composite,
         Duration::from_secs(args.timeout),
+        args.semgrep_bin.clone(),
     )?;
     let results_json = report
         .to_results_json()
@@ -549,6 +561,7 @@ fn cmd_run(args: RunArgs) -> Result<i32> {
         &args.manifest,
         &args.composite,
         Duration::from_secs(args.timeout),
+        args.semgrep_bin.clone(),
     )?;
     let out_dir = PathBuf::from(&args.output);
     std::fs::create_dir_all(&out_dir)

@@ -1,0 +1,65 @@
+git 2.54.0
+vector	invocation	result
+core.fsmonitor	backtest log	no
+core.fsmonitor	backtest show	no
+core.fsmonitor	backtest rev-parse prefix	no
+core.fsmonitor	backtest rev-parse shallow	no
+core.fsmonitor	proof rev-parse HEAD	no
+core.fsmonitor	proof rev-parse blob	no
+core.fsmonitor	proof hash-object	no
+filter.clean+smudge	backtest log	no
+filter.clean+smudge	backtest show	no
+filter.clean+smudge	backtest rev-parse prefix	no
+filter.clean+smudge	backtest rev-parse shallow	no
+filter.clean+smudge	proof rev-parse HEAD	no
+filter.clean+smudge	proof rev-parse blob	no
+filter.clean+smudge	proof hash-object	EXECUTED
+filter.process	backtest log	no
+filter.process	backtest show	no
+filter.process	backtest rev-parse prefix	no
+filter.process	backtest rev-parse shallow	no
+filter.process	proof rev-parse HEAD	no
+filter.process	proof rev-parse blob	no
+filter.process	proof hash-object	EXECUTED
+diff.external	backtest log	no
+diff.external	backtest show	no
+diff.external	backtest rev-parse prefix	no
+diff.external	backtest rev-parse shallow	no
+diff.external	proof rev-parse HEAD	no
+diff.external	proof rev-parse blob	no
+diff.external	proof hash-object	no
+diff.textconv	backtest log	no
+diff.textconv	backtest show	no
+diff.textconv	backtest rev-parse prefix	no
+diff.textconv	backtest rev-parse shallow	no
+diff.textconv	proof rev-parse HEAD	no
+diff.textconv	proof rev-parse blob	no
+diff.textconv	proof hash-object	no
+core.pager	backtest log	no
+core.pager	backtest show	no
+core.pager	backtest rev-parse prefix	no
+core.pager	backtest rev-parse shallow	no
+core.pager	proof rev-parse HEAD	no
+core.pager	proof rev-parse blob	no
+core.pager	proof hash-object	no
+core.hooksPath	backtest log	no
+core.hooksPath	backtest show	no
+core.hooksPath	backtest rev-parse prefix	no
+core.hooksPath	backtest rev-parse shallow	no
+core.hooksPath	proof rev-parse HEAD	no
+core.hooksPath	proof rev-parse blob	no
+core.hooksPath	proof hash-object	no
+log.showSignature	backtest log	no
+log.showSignature	backtest show	no
+log.showSignature	backtest rev-parse prefix	no
+log.showSignature	backtest rev-parse shallow	no
+log.showSignature	proof rev-parse HEAD	no
+log.showSignature	proof rev-parse blob	no
+log.showSignature	proof hash-object	no
+core.fsmonitor	control: git status	FIRES
+filter.clean+smudge	control: git add p.ts	FIRES
+diff.external	control: git diff HEAD~1 HEAD	FIRES
+diff.textconv	control: git log -p -n 1	FIRES
+core.pager	control: git log on a terminal	FIRES
+core.hooksPath	control: git commit -qam hook	FIRES
+log.showSignature	control: git log -n 1	FIRES

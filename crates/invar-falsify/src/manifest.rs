@@ -81,6 +81,9 @@ pub struct ToolConfig {
     pub enabled: bool,
     pub bin_path: Option<String>,
     pub rules: Option<String>,
+    /// SECURITY-SPEC S3-1: the program the operator named on the command
+    /// line (`--semgrep-bin`). Never read from a configuration file.
+    pub operator_bin: Option<String>,
 }
 
 impl Default for ToolConfig {
@@ -89,6 +92,7 @@ impl Default for ToolConfig {
             enabled: true,
             bin_path: None,
             rules: None,
+            operator_bin: None,
         }
     }
 }

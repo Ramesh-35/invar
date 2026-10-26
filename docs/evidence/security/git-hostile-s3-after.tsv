@@ -1,0 +1,2 @@
+filter.filter	proof hash-object --no-filters	no
+filter.process	proof hash-object --no-filters	no

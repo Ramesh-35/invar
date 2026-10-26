@@ -1,12 +1,12 @@
-# SECURITY-SPEC freeze record (r2: S2), written BEFORE any S2 code.
-# r1 record preserved as SECURITY-SPEC-r1.frozen, r0 as SECURITY-SPEC-r0.frozen. Baseline: S1 engine 01f9ae96b7d2.
-blake3(docs/falsification/SECURITY-SPEC.md) = 2fb3a44bc1fb825fbbfc9aeb3b3409d2f039942f546b5f3efebc31475ce078be
-sha256(docs/falsification/SECURITY-SPEC.md) = 8db5ef6d4d5598da89478ed5ff510ec7cdb481e5a834e09d340d7ddac0ae139d
-blake3(docs/falsification/SECURITY-SPEC-r1.md) = 14c2d6c3001bda606c334c0f2e2b89ed28140406b02009f8bc0a49087d545bbe
-sha256(docs/falsification/SECURITY-SPEC-r1.md) = 7336df8092e6dd8fc18891001c606dea461b9aabef3acd5a2fc6162e90867a5f
-blake3(docs/falsification/SECURITY-SPEC-r0.md) = e3cc6a2a98378cc631757e88b274c9c8ee63f8c2bc0352ee1984f7f0908ff2fc
-sha256(docs/falsification/SECURITY-SPEC-r0.md) = 2dd27393714d7b5cdad8c377ce9327180e71525ace58fc5b96181b07d84da784
-blake3(crates/invar-falsify/tests/security_s2_test.rs) = ad627d1dcede6eb0c991f80f85ad1d1ffd222c4c8ae4634d72271e122411211d
-sha256(crates/invar-falsify/tests/security_s2_test.rs) = b117990558168e1a00d5f3a100f0c2402cb1ee94a9df1a6e6b187bf52c8ed664
-blake3(crates/invar-falsify/tests/security_test.rs) = 5504ba235341ed2b697b1a0683cc22e57c54c7fb7bbb5e210b6afd9e5236ef86
-sha256(crates/invar-falsify/tests/security_test.rs) = 24ce789e5ae29e46903978148a8e01df0b83ade55e6e7c591e5d7058691ec747
+# SECURITY S3 freeze record (r3), written before any S3 code.
+# r2 record preserved as SECURITY-SPEC-r2.frozen; tests/security_test.rs and tests/security_s2_test.rs unchanged.
+blake3(docs/falsification/SECURITY-SPEC.md) = a92d554a4461891281b9be788b440706c3c764ad04f1ec23d360f936ee8d9210
+sha256(docs/falsification/SECURITY-SPEC.md) = 5ef383ed2a351bf80f3cc16ef0d9cefdce6c6639af3257cc578b7042d99ac649
+blake3(docs/falsification/SECURITY-SPEC-r2.md) = 2fb3a44bc1fb825fbbfc9aeb3b3409d2f039942f546b5f3efebc31475ce078be
+sha256(docs/falsification/SECURITY-SPEC-r2.md) = 8db5ef6d4d5598da89478ed5ff510ec7cdb481e5a834e09d340d7ddac0ae139d
+blake3(crates/invar-falsify/tests/security_s3_test.rs) = 88f962c5720e7be22767415d645981a446c60cfe736b4836c69d5d7de23fad86
+sha256(crates/invar-falsify/tests/security_s3_test.rs) = 38c99564fe7bce06af2c3c0da042e0bbfc28f6c2b94f6324d7afba7dd1ca77c1
+blake3(scripts/security/git-hostile.sh) = 0ba4de0b60bd55a8f8680c114e56435e7ac77aa3d1107bac4c0a3c4bbcafb58e
+sha256(scripts/security/git-hostile.sh) = 57591e90e80cbd67bc13ebc19196be85ed5b760ad3b959c91c5fc35fb64ccad3
+blake3(scripts/security/run-binpath.sh) = 658ac4f19f75000f8bb2622ff1f835944bf163da5cea7c82bf9dd305c45f2a71
+sha256(scripts/security/run-binpath.sh) = d7eaf3ff1c6573d93e846c31bb1e88fe88f3f4d0fb893a23bdf38d039fd6c650

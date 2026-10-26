@@ -1,0 +1,5 @@
+rustc rustc 1.97.0 (2d8144b78 2026-07-07)
+build 1 (scratchpad/incr/repro/a): d2c449b14aa1d5f5281ea7e0d856bd30cdf23ce360f16aff66dc0d486db3a21e
+build 2 (scratchpad/incr/repro/second-path-b): d2c449b14aa1d5f5281ea7e0d856bd30cdf23ce360f16aff66dc0d486db3a21e
+S2 sandbox binary (scratchpad/incr/s2-invar, earlier build): d2c449b14aa1
+current release packaging, same binary, 2 s apart: 6642091fa7048b7cce98003f4c511bfba72c557f4456964e718fb6e959197c7e ee061c2260ae193da6b6b9ef19722edc12b4bfcdb7f980150288ff4f24702aff

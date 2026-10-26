@@ -1,0 +1,12 @@
+# SECURITY-SPEC freeze record (r2: S2), written BEFORE any S2 code.
+# r1 record preserved as SECURITY-SPEC-r1.frozen, r0 as SECURITY-SPEC-r0.frozen. Baseline: S1 engine 01f9ae96b7d2.
+blake3(docs/falsification/SECURITY-SPEC.md) = 2fb3a44bc1fb825fbbfc9aeb3b3409d2f039942f546b5f3efebc31475ce078be
+sha256(docs/falsification/SECURITY-SPEC.md) = 8db5ef6d4d5598da89478ed5ff510ec7cdb481e5a834e09d340d7ddac0ae139d
+blake3(docs/falsification/SECURITY-SPEC-r1.md) = 14c2d6c3001bda606c334c0f2e2b89ed28140406b02009f8bc0a49087d545bbe
+sha256(docs/falsification/SECURITY-SPEC-r1.md) = 7336df8092e6dd8fc18891001c606dea461b9aabef3acd5a2fc6162e90867a5f
+blake3(docs/falsification/SECURITY-SPEC-r0.md) = e3cc6a2a98378cc631757e88b274c9c8ee63f8c2bc0352ee1984f7f0908ff2fc
+sha256(docs/falsification/SECURITY-SPEC-r0.md) = 2dd27393714d7b5cdad8c377ce9327180e71525ace58fc5b96181b07d84da784
+blake3(crates/invar-falsify/tests/security_s2_test.rs) = ad627d1dcede6eb0c991f80f85ad1d1ffd222c4c8ae4634d72271e122411211d
+sha256(crates/invar-falsify/tests/security_s2_test.rs) = b117990558168e1a00d5f3a100f0c2402cb1ee94a9df1a6e6b187bf52c8ed664
+blake3(crates/invar-falsify/tests/security_test.rs) = 5504ba235341ed2b697b1a0683cc22e57c54c7fb7bbb5e210b6afd9e5236ef86
+sha256(crates/invar-falsify/tests/security_test.rs) = 24ce789e5ae29e46903978148a8e01df0b83ade55e6e7c591e5d7058691ec747

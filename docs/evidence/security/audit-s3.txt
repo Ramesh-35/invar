@@ -1,0 +1,3 @@
+      Loaded 1352 security advisories (from /root/.cargo/advisory-db)
+    Scanning Cargo.lock for vulnerabilities (57 crate dependencies)
+cargo-audit 0.22.2, rustc 1.97.0

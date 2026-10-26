@@ -64,7 +64,8 @@ jobs:
       - name: Package with checksum
         run: |
           asset="invar-${GITHUB_REF_NAME}-${TARGET}.tar.gz"
-          tar -czf "$asset" -C "target/$TARGET/release" invar
+          # SECURITY-SPEC S3-4: byte-reproducible archive (time 0, owner 0).
+          python3 scripts/release/pack.py "target/$TARGET/release/invar" "$asset"
           if command -v sha256sum >/dev/null; then sha256sum "$asset" > "$asset.sha256"
           else shasum -a 256 "$asset" > "$asset.sha256"; fi
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

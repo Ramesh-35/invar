@@ -377,6 +377,24 @@ fn exec_with_timeout(bin: &str, args: Vec<String>, timeout: Duration) -> ExecOut
     }
 }
 
+/// SECURITY-SPEC S3-1: the program the semgrep leg may run. A program the
+/// repository's composite.toml names runs only when the operator names the
+/// same program on the command line; the tool's own name, resolved through
+/// the operator's PATH, needs no flag. Otherwise nothing runs.
+fn semgrep_program(config: Option<&str>, flag: Option<&str>) -> Result<String, String> {
+    match (config, flag) {
+        (Some(b), Some(f)) if b != f && b != "semgrep" => Err(refusal(b)),
+        (_, Some(f)) => Ok(f.to_string()),
+        (None | Some("semgrep"), None) => Ok("semgrep".to_string()),
+        (Some(b), None) => Err(refusal(b)),
+    }
+}
+
+fn refusal(b: &str) -> String {
+    let b = crate::term::escape_value(b);
+    format!("composite.toml names bin_path {b}; a program named by the repository runs only when the command line names it too: --semgrep-bin {b}")
+}
+
 /// Static-analysis leg. Invokes Semgrep via an argument vector (never a shell
 /// string), always against the LOCAL ruleset (never `--config auto`).
 pub fn run_semgrep(cfg: &ToolConfig, tc: &TestCase, timeout: Duration) -> LegVerdict {
@@ -384,7 +402,10 @@ pub fn run_semgrep(cfg: &ToolConfig, tc: &TestCase, timeout: Duration) -> LegVer
     if !cfg.enabled {
         return LegVerdict::skipped(TOOL, "semgrep disabled in composite.toml");
     }
-    let bin = cfg.bin_path.as_deref().unwrap_or("semgrep");
+    let bin = match semgrep_program(cfg.bin_path.as_deref(), cfg.operator_bin.as_deref()) {
+        Ok(b) => b,
+        Err(why) => return LegVerdict::error(TOOL, &why),
+    };
     let rules = match cfg.rules.as_deref() {
         Some(r) => r,
         None => {
@@ -401,7 +422,7 @@ pub fn run_semgrep(cfg: &ToolConfig, tc: &TestCase, timeout: Duration) -> LegVer
         "--no-git-ignore".into(),
     ];
 
-    let output = match exec_with_timeout(bin, args, timeout) {
+    let output = match exec_with_timeout(&bin, args, timeout) {
         ExecOutcome::Completed(o) => o,
         ExecOutcome::NotFound => {
             return LegVerdict::skipped(TOOL, "semgrep binary not found on PATH")

@@ -1684,6 +1684,28 @@ three or more hops, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
 docs/evidence/stage3/eval008.
 
+## 2026-10-26: SECURITY-1 S3 implemented (programs INVAR runs, supply chain)
+
+Two ways a repository could make INVAR run its own program are closed,
+both measured first. `invar run` and `invar report` executed whatever
+program composite.toml named in `bin_path`; now such a program runs only
+when the operator names the same program with `--semgrep-bin`, the tool's
+own name from the operator's PATH needs no flag, and otherwise the leg is
+ERROR, never PASS. `lock --emit-proof` hashed the working tree with
+`git hash-object`, which runs filter programs named by the repository's
+.git/config; it now hashes with `--no-filters`, so the proof binds the
+exact committed bytes (INVAR's six other git invocations were measured
+against seven hostile vectors, each with a firing positive control, and
+run nothing). Supply chain: CI audits every dependency against RustSec
+(today 0 vulnerabilities, 0 warnings over 57 crates) and rebuilds the
+release binary from a second path to compare it byte for byte; release
+archives are now packed reproducibly (they were time-stamped). Corpus and
+round trips unchanged; 548 of 548 tests in the sandbox, zero warnings; 10
+of 10 operators killed. Fixtures frozen before code. Not claimed: macOS
+reproducibility or macOS git behavior until the native run records them;
+a repository with a filter on the proof's producer is now refused rather
+than emitted. Record: SECURITY-SPEC.md r3; docs/evidence/security.
+
 ## 2026-10-25: SECURITY-1 S2 implemented (terminal neutralization, bounded walk)
 
 Two vulnerabilities measured in S0 are closed. Terminal injection: a

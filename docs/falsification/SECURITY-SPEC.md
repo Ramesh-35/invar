@@ -1,7 +1,11 @@
 # SECURITY-1: INVAR's threat model, measured (S0), and reuse authenticity (S1)
 
-Status: r2 (written before any S2 code: one fixture added, one declared
-killer corrected; section J). r1 is preserved as SECURITY-SPEC-r1.md with
+Status: r3 (S3, sections K to N, frozen with tests/security_s3_test.rs
+BEFORE any S3 code, under the ruling of 2026-10-26 authorizing SEC-D6 and
+SEC-D7 spec and fixtures). r2 is preserved as SECURITY-SPEC-r2.md with
+SECURITY-SPEC-r2.frozen. r2 header follows.
+r2: written before any S2 code: one fixture added, one declared
+killer corrected; section J. r1 is preserved as SECURITY-SPEC-r1.md with
 SECURITY-SPEC-r1.frozen. r1 header follows.
 r1: r0 (S0 measured, S1 implemented) is preserved as
 SECURITY-SPEC-r0.md with SECURITY-SPEC-r0.frozen. r1 adds S2 (sections H
@@ -236,3 +240,140 @@ stays as the guard of `dependents` output through main.rs. Fixtures: 14.
 `gate.rs` is also covered by S2-2; it prints the child check's lines, which
 are already neutralized, and watched paths in its drift line; it has no
 separate fixture or operator in r2, stated.
+
+## K. S3 measured (paths 6 and 7, 2026-10-26, sandbox, git 2.43.0)
+
+Path 6, git (scripts/security/git-hostile.sh). Every git invocation INVAR
+makes, with its exact arguments (backtest: `log -n N --format=%H %cs --
+<path>`, `show <hash>:<path>`, `rev-parse --show-prefix`, `rev-parse
+--is-shallow-repository`; proof: `rev-parse HEAD`, `rev-parse
+HEAD:<path>`, `hash-object <path>`), was run in a repository whose
+`.git/config` names a program through seven vectors: core.fsmonitor,
+filter clean and smudge (with a committed `.gitattributes`), filter
+process, diff.external, diff textconv, core.pager, core.hooksPath, and
+log.showSignature with gpg.program on a signed commit. Each vector has a
+positive control, a git command known to honour it; all seven controls
+fire, so a "no" below is evidence.
+
+| Invocation | Programs executed |
+|---|---|
+| backtest: log, show, rev-parse (2) | none, under all seven vectors |
+| proof: rev-parse (2) | none, under all seven vectors |
+| proof: `hash-object <path>` | EXECUTED: the filter `clean` program and the filter `process` program |
+
+`invar lock --emit-proof` therefore runs a program named by the
+repository's `.git/config`, by way of `.gitattributes`. Scope, stated: a
+clone does not carry `.git/config`; the vector needs a repository whose
+`.git` directory came from someone else (an archive with `.git`, a shared
+machine, a cached CI workspace). Git 2.35.2 and later refuse a repository
+owned by another user (`safe.directory`), which narrows it further. The
+measurement is version-specific and is rerun on the founder's Mac.
+
+Path 6, bin_path (scripts/security/run-binpath.sh). A composite.toml whose
+`[semgrep] bin_path` names a script: `invar run` and `invar report` both
+EXECUTE it (exit 0). The semgrep leg is the only leg that runs a program;
+`[opa] bin_path` is declared but never executed.
+
+Path 7, dependencies. `cargo audit` (cargo-audit 0.22.2, RustSec database
+of 2026-10-26, 1,352 advisories) over Cargo.lock: 57 crates, 0
+vulnerabilities, 0 warnings, exit 0 with `--deny warnings`.
+
+Path 7, reproducibility. The release binary, built clean three times from
+three different checkout paths with separate target directories (rustc
+1.97.0, `cargo build --release --locked -p invar-falsify`): identical
+bytes, sha256 d2c449b14aa1 each time. Same machine and toolchain; another
+machine or a macOS build is not measured here. The release archive is
+NOT reproducible today: the same binary packed by the release workflow's
+`tar -czf` two seconds apart gives two different archives (6642091fa704,
+ee061c2260ae), because tar and gzip record times.
+
+## L. S3 rules (SEC-D6, SEC-D7)
+
+- S3-1, a program the repository names. `invar run` and `invar report`
+  take `--semgrep-bin <program>`. The semgrep leg runs:
+  - with the flag: that program, unless composite.toml names a different
+    `bin_path` other than `semgrep`;
+  - without the flag: `semgrep`, resolved through the operator's PATH,
+    when composite.toml names no `bin_path` or exactly `semgrep`.
+  Otherwise nothing runs: the leg is ERROR (never PASS, never SKIPPED),
+  its summary `composite.toml names bin_path <B>; a program named by the
+  repository runs only when the command line names it too: --semgrep-bin
+  <B>`, with <B> escaped (S2-1). The repository's shipped composite.toml
+  (`bin_path = "semgrep"`) and CI's harness run are unchanged.
+- S3-2, git filters. The proof's working-tree hash is `git hash-object
+  --no-filters <path>`: no filter program runs, and the proof binds the
+  exact committed bytes. A producer whose working-tree bytes differ from
+  its committed blob only because a filter applies (line-ending
+  conversion, LFS) is refused like an uncommitted edit, its message
+  naming both causes. The other six invocations are unchanged (measured:
+  they run nothing).
+- S3-3, dependency audit. A CI job installs cargo-audit at a pinned
+  version (`cargo install cargo-audit --locked --version 0.22.2`) and runs
+  `cargo audit --deny warnings` on every push and pull request. An
+  advisory that cannot be acted on is ignored only by an entry in
+  `.cargo/audit.toml` carrying its id and a written reason.
+- S3-4, reproducible releases. Every release archive is packed by
+  `scripts/release/pack.py`: one member `invar`, mode 0755, owner and
+  group 0 with empty names, time 0, gzip header without name or time. A
+  CI job, `reproducible-build`, runs `scripts/release/repro-check.sh`:
+  two clean builds from two checkout paths and their packed archives must
+  match byte for byte.
+
+Unchanged: verdicts, exit codes, every text output except the new ERROR
+summary and the proof's refusal message on the path S3-2 creates.
+
+## M. S3 fixtures and operators (frozen before code)
+
+tests/security_s3_test.rs, 11 fixtures. On the S2 engine: 9 FAIL, each at
+its own assertion (f01, f02: the repository's script ran; f03, f04: the
+flag does not exist; f07: the filter ran; f08 to f11: the packer, the
+workflow steps and the check script do not exist), and the 2 guards pass
+(f05, f06).
+
+| Fixture | Asserts |
+|---|---|
+| s3_f01 | `run` with composite `bin_path = "./evil.sh"`, no flag: not executed; every semgrep leg ERROR naming `--semgrep-bin` |
+| s3_f02 | `report`, same: not executed |
+| s3_f03 | `--semgrep-bin` naming the same program: it runs |
+| s3_f04 | `--semgrep-bin` naming a different program: neither runs; ERROR |
+| s3_f05 | guard: no `bin_path`, `semgrep` from PATH runs |
+| s3_f06 | guard: the shipped composite.toml (`bin_path = "semgrep"`) runs PATH semgrep |
+| s3_f07 | `lock --emit-proof` in a repository whose .git/config names clean, smudge and process filters: none runs; the proof is emitted |
+| s3_f08 | `pack.py`: the same bytes from two paths and times give one archive; one member `invar`, 0755; contents unchanged |
+| s3_f09 | release.yml packs with `python3 scripts/release/pack.py`, no `tar -czf` |
+| s3_f10 | ci.yml installs cargo-audit at a pinned version and runs `cargo audit` |
+| s3_f11 | ci.yml has a `reproducible-build` job running `scripts/release/repro-check.sh` |
+
+| Operator | Change | Declared killer |
+|---|---|---|
+| S3-M1 | composite `bin_path` honoured without the flag (pre-S3 rule) | s3_f01 |
+| S3-M2 | `report` bypasses S3-1 | s3_f02 |
+| S3-M3 | any flag value admits the composite program | s3_f04 |
+| S3-M4 | the flag ignored (a named program always refused) | s3_f03 |
+| S3-M5 | `bin_path = "semgrep"` refused | s3_f06 |
+| S3-M6 | `--no-filters` removed from the proof's hash-object | s3_f07 |
+| S3-M7 | pack.py keeps the file's time | s3_f08 |
+| S3-M8 | release.yml back to `tar -czf` | s3_f09 |
+| S3-M9 | the audit job removed | s3_f10 |
+| S3-M10 | the reproducible-build job removed | s3_f11 |
+
+s3_f09 to s3_f11 read workflow files: they prove the step exists, not that
+GitHub runs it. The CI run itself is the evidence that it does, recorded
+on the first push.
+
+## N. S3 decision points
+
+- S3-D1 (S3-1 form). A `--semgrep-bin` flag that must match a
+  non-default composite `bin_path` (recommended: an attacker's
+  composite.toml alone never runs anything, and the operator who wants a
+  custom path names it once), or ignore composite `bin_path` entirely.
+- S3-D2 (S3-2). `--no-filters`, refusing filtered producers (recommended:
+  the proof binds exact committed bytes; zero filter programs), or keep
+  filters for LFS-style producers and accept the stated vector.
+- S3-D3 (S3-3 policy). `--deny warnings`, ignores only with a written
+  reason (recommended: measured clean today, so the gate starts green),
+  or fail on vulnerabilities only.
+- S3-D4 (macOS). Run git-hostile.sh and repro-check.sh natively on the
+  Mac as part of S3's native verification, recording git and rustc
+  versions (recommended: both measurements are platform-specific).
+

@@ -263,9 +263,11 @@ pub fn emit(base: &Path, sections: &Sections, contract_id: &str, out: Option<&st
     let commit = git_out(base, &["rev-parse", "HEAD"])?;
     let blob = git_out(base, &["rev-parse", &format!("HEAD:{producer}")])
         .with_context(|| format!("{producer} is not committed; the proof binds the committed blob (R-P-2)"))?;
-    let worktree = git_out(base, &["hash-object", &producer])?;
+    // SECURITY-SPEC S3-2: no filter program named by the repository runs;
+    // the proof binds the exact committed bytes.
+    let worktree = git_out(base, &["hash-object", "--no-filters", &producer])?;
     if worktree != blob {
-        bail!("{producer} has uncommitted edits; commit the shape file before emitting (the proof binds the committed blob, not the working tree)");
+        bail!("{producer} differs from its committed blob (uncommitted edits, or a git filter such as line-ending conversion applies to it); commit the shape file before emitting (the proof binds the exact committed bytes, not the working tree)");
     }
 
     // Layout (R-P-2a), then chain (R-P-4).

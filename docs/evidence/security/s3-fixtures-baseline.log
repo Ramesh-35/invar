@@ -1,0 +1,21 @@
+test s3_f02_report_does_not_execute_a_repository_named_binary ... FAILED
+test s3_f01_run_does_not_execute_a_repository_named_binary ... FAILED
+test s3_f03_the_operator_naming_the_same_program_runs_it ... FAILED
+test s3_f04_a_flag_naming_a_different_program_runs_neither ... FAILED
+test s3_f06_the_shipped_composite_still_runs_semgrep ... ok
+test s3_f05_no_bin_path_runs_semgrep_from_the_operators_path ... ok
+test s3_f08_release_archives_are_byte_reproducible ... FAILED
+test s3_f09_release_packages_through_the_reproducible_packer ... FAILED
+test s3_f10_ci_audits_the_dependency_tree_with_a_pinned_auditor ... FAILED
+test s3_f11_ci_rebuilds_from_a_second_path_and_compares ... FAILED
+test s3_f07_emit_proof_runs_no_repository_named_git_filter ... FAILED
+thread 's3_f02_report_does_not_execute_a_repository_named_binary' panicked at crates/invar-falsify/tests/security_s3_test.rs:128:5:
+thread 's3_f01_run_does_not_execute_a_repository_named_binary' panicked at crates/invar-falsify/tests/security_s3_test.rs:114:5:
+thread 's3_f03_the_operator_naming_the_same_program_runs_it' panicked at crates/invar-falsify/tests/security_s3_test.rs:138:5:
+thread 's3_f04_a_flag_naming_a_different_program_runs_neither' panicked at crates/invar-falsify/tests/security_s3_test.rs:148:5:
+thread 's3_f08_release_archives_are_byte_reproducible' panicked at crates/invar-falsify/tests/security_s3_test.rs:220:5:
+thread 's3_f09_release_packages_through_the_reproducible_packer' panicked at crates/invar-falsify/tests/security_s3_test.rs:243:5:
+thread 's3_f10_ci_audits_the_dependency_tree_with_a_pinned_auditor' panicked at crates/invar-falsify/tests/security_s3_test.rs:250:5:
+thread 's3_f11_ci_rebuilds_from_a_second_path_and_compares' panicked at crates/invar-falsify/tests/security_s3_test.rs:257:5:
+thread 's3_f07_emit_proof_runs_no_repository_named_git_filter' panicked at crates/invar-falsify/tests/security_s3_test.rs:205:5:
+test result: FAILED. 2 passed; 9 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s

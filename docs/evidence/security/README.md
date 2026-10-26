@@ -32,3 +32,36 @@ before any S2 code (r1, then r2 still before code: one killer corrected).
 | corpus-s2.tsv | f75fa99a85dad2f1 | all 122 corpus cases, S1 vs S2: 122 identical |
 | roundtrip-s2.tsv | e7f954b215b4892e | round trips S1 vs S2: every check output identical; 5 locks differ in time-derived fields only |
 | roundtrip-s2-locks-verified.tsv | 91862f14d6cebd26 | those 5 locks, identical after recorded_at substitution |
+
+## S3 (SEC-D6 programs INVAR runs, SEC-D7 supply chain), SECURITY-SPEC r3
+
+S3 binary: 60866e1afd13 (built clean twice by repro-check.sh from two
+paths: identical). Fixtures: tests/security_s3_test.rs (11), frozen before
+any S3 code. Ruling of 2026-10-26: S3-D1 to S3-D4 as recommended.
+
+| File | sha256 (16) | What it is |
+|---|---|---|
+| git-hostile-s3.tsv | dbde8e7bba43febd | before: INVAR's 7 git invocations against 7 hostile .git/config vectors, each with a firing positive control; only `hash-object` runs a program (filter clean, filter process) |
+| git-hostile-s3-after.tsv | 0b6b60777be8e000 | after: `hash-object --no-filters` runs neither filter |
+| git-hostile-s3-macos.tsv | 0539d2f2542c4997 | native run on the founder's Mac (git 2.54.0): every row identical to the sandbox (git 2.43.0); only `hash-object` runs the filters, all 7 controls fire |
+| run-binpath-s3.tsv | e558fa8a1340651b | before: `run` and `report` execute composite.toml's bin_path |
+| run-binpath-s3-after.tsv | 1d536514bfe07eab | after: neither executes it |
+| audit-s3.txt | 2a0e6032d6c2aa97 | cargo audit 0.22.2: 57 crates, 1,352 advisories, 0 vulnerabilities, 0 warnings |
+| repro-s3.txt | faee9bcd6c4b3280 | before: the S2 binary built from two paths is identical; the release tar.gz of one binary differs between two runs |
+| repro-check-s3.txt | edc1778bd02d70f7 | after: scripts/release/repro-check.sh, binary and packed archive identical from two paths |
+| s3-fixtures-baseline.log | f8e54fc4010f8457 | the 11 fixtures on the S2 engine: 9 FAIL at their own assertion, 2 guards pass |
+| mutate-s3.log | f411ed8ccce2d902 | 10 S3 operators, all killed by their declared killer |
+| corpus-s3.tsv | d774514800b32353 | all 122 corpus cases, S2 vs S3: 122 identical |
+| roundtrip-s3.tsv | 02c5b8b8055e8856 | round trips S2 vs S3: every check and backtest output identical; 6 locks differ in time-derived fields only |
+| roundtrip-s3-locks-verified.tsv | 47a975b6ab045887 | those 6 locks, identical after recorded_at substitution (scripts/rs/locks-verify.py) |
+
+Method note, stated: the sandbox's network now refuses raw GitHub fetches
+(403), so the corpus was captured with the 395 pinned texts measured on
+2026-10-25 served locally in place of `curl`. Validation before use: the S2
+binary run that way reproduced the recorded S2 capture byte for byte on all
+122 cases, fetched-text BLAKE3 lines included.
+
+Native (S3-D4): 548 of 548 tests on macOS; the git probe on macOS git
+2.54.0 matches the sandbox row for row. Not yet measured: a macOS
+reproducible build (repro-check.sh on the Mac, run after this commit);
+GitHub running the two new CI jobs (the first push).
