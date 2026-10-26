@@ -1,0 +1,37 @@
+eval007	Egonex-AI__Understand-Anything	lock.out	IDENTICAL	exit 0
+eval007	Egonex-AI__Understand-Anything	invar.lock	IDENTICAL-AFTER-NORMALIZATION	held_input = "689e9de43d8a8ad73e1166678c04db649945bf231d204ec43d974169e5949466 understand-anything-plugin/packages/dashboard/src/App.tsx"
+eval007	Egonex-AI__Understand-Anything	check1.out	DIFFERENT	exit 0
+eval007	Egonex-AI__Understand-Anything	backtest1.out	IDENTICAL	exit 0
+eval007	Egonex-AI__Understand-Anything	check2.out	DIFFERENT	exit 0
+eval007	Egonex-AI__Understand-Anything	backtest2.out	IDENTICAL	exit 0
+eval007	earendil-works__pi	lock.out	IDENTICAL	exit 0
+eval007	earendil-works__pi	invar.lock	DIFFERENT	held_input = "4efb2002486e89e2adba65b2a8aae80a259d32142439459a6f10c5d876869693 packages/coding-agent/examples/extensions/gondolin/index.ts"
+eval007	earendil-works__pi	check1.out	DIFFERENT	exit 0
+eval007	earendil-works__pi	backtest1.out	IDENTICAL	exit 0
+eval007	earendil-works__pi	check2.out	DIFFERENT	exit 0
+eval007	earendil-works__pi	backtest2.out	IDENTICAL	exit 0
+eval007	excalidraw__excalidraw	lock.out	IDENTICAL	exit 0
+eval007	excalidraw__excalidraw	invar.lock	IDENTICAL-AFTER-NORMALIZATION	held_input = "8abf5aab9e27a52b348e86b396f98a1fde208b5c331f497d33ef76319c1f47a8 packages/excalidraw/tests/stickyNotes.test.tsx"
+eval007	excalidraw__excalidraw	check1.out	DIFFERENT	exit 0
+eval007	excalidraw__excalidraw	backtest1.out	IDENTICAL	exit 0
+eval007	excalidraw__excalidraw	check2.out	DIFFERENT	exit 0
+eval007	excalidraw__excalidraw	backtest2.out	IDENTICAL	exit 0
+eval008	Egonex-AI__Understand-Anything	lock.out	IDENTICAL	exit 0
+eval008	Egonex-AI__Understand-Anything	invar.lock	DIFFERENT	held_input = "bc9a198b90d03e7ff9a65f4964108cdd35bca834dd2db2d233cfc21131c4a41d understand-anything-plugin/src/diff-analyzer.ts"
+eval008	Egonex-AI__Understand-Anything	check1.out	DIFFERENT	exit 0
+eval008	Egonex-AI__Understand-Anything	backtest1.out	IDENTICAL	exit 0
+eval008	Egonex-AI__Understand-Anything	check2.out	DIFFERENT	exit 0
+eval008	Egonex-AI__Understand-Anything	backtest2.out	IDENTICAL	exit 0
+eval008	earendil-works__pi	lock.out	IDENTICAL	exit 0
+eval008	earendil-works__pi	invar.lock	DIFFERENT	held_input = "0649eed0d7c5b0e4440d6204141153d73658c517085f918e71512c805ee144c0 packages/coding-agent/test/suite/virtual-models.test.ts"
+eval008	earendil-works__pi	check1.out	DIFFERENT	exit 0
+eval008	earendil-works__pi	backtest1.out	IDENTICAL	exit 0
+eval008	earendil-works__pi	check2.out	DIFFERENT	exit 0
+eval008	earendil-works__pi	backtest2.out	IDENTICAL	exit 0
+eval008	excalidraw__excalidraw	lock.out	IDENTICAL	exit 0
+eval008	excalidraw__excalidraw	invar.lock	IDENTICAL-AFTER-NORMALIZATION	held_input = "7b360b69feb1f017f7e1c675f4f8a08d76fe5765dc093271cbb42f9f06ed8508 packages/excalidraw/renderer/staticScene.ts"
+eval008	excalidraw__excalidraw	check1.out	DIFFERENT	exit 0
+eval008	excalidraw__excalidraw	backtest1.out	IDENTICAL	exit 0
+eval008	excalidraw__excalidraw	check2.out	DIFFERENT	exit 0
+eval008	excalidraw__excalidraw	backtest2.out	IDENTICAL	exit 0
+SUMMARY: 36 artifacts compared, 15 different after normalization

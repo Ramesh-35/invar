@@ -169,20 +169,74 @@ pub struct Plan {
 pub const CACHE_DIR: &str = ".invar/cache";
 pub const CACHE_FILE: &str = ".invar/cache/verdicts.json";
 
+/// SECURITY-SPEC S1: each cache record carries a keyed BLAKE3 MAC over the
+/// contract id and the record, under a per-user key outside the repository
+/// (`$HOME/.invar/key`). A record that does not verify is no record: the
+/// contract is evaluated. Format 1 caches (unkeyed) are never read.
 #[derive(Serialize, Deserialize)]
 struct CacheFile {
     format: String,
-    records: BTreeMap<String, Held>,
+    records: BTreeMap<String, Keyed>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct Keyed {
+    held: Held,
+    mac: String,
+}
+
+pub const KEY_FILE: &str = ".invar/key";
+
+/// The per-user cache key: read `$HOME/.invar/key` (exactly 32 bytes), or
+/// create it from the operating system's random source with owner-only
+/// permissions. None when there is no home, no random source, or the file
+/// is malformed: then nothing is reused and nothing is cached.
+pub fn user_key() -> Option<[u8; 32]> {
+    let home = std::env::var_os("HOME").filter(|h| !h.is_empty())?;
+    let path = Path::new(&home).join(KEY_FILE);
+    if let Ok(bytes) = std::fs::read(&path) {
+        return bytes.try_into().ok();
+    }
+    let mut key = [0u8; 32];
+    {
+        use std::io::Read;
+        std::fs::File::open("/dev/urandom").ok()?.read_exact(&mut key).ok()?;
+    }
+    std::fs::create_dir_all(path.parent()?).ok()?;
+    let mut opts = std::fs::OpenOptions::new();
+    opts.write(true).create_new(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        opts.mode(0o600);
+    }
+    {
+        use std::io::Write;
+        opts.open(&path).ok()?.write_all(&key).ok()?;
+    }
+    Some(key)
+}
+
+fn record_mac(key: &[u8; 32], id: &str, held: &Held) -> String {
+    let body = serde_json::to_string(&(id, held)).unwrap_or_default();
+    blake3::keyed_hash(key, body.as_bytes()).to_hex().to_string()
 }
 
 /// The local cache under `base`. Missing, unreadable or malformed: empty,
 /// never an error (it is not authoritative; the run evaluates instead).
 pub fn load_cache(base: &Path) -> BTreeMap<String, Held> {
+    let Some(key) = user_key() else { return BTreeMap::new() };
     std::fs::read_to_string(base.join(CACHE_FILE))
         .ok()
         .and_then(|t| serde_json::from_str::<CacheFile>(&t).ok())
-        .filter(|c| c.format == "1")
-        .map(|c| c.records)
+        .filter(|c| c.format == "2")
+        .map(|c| {
+            c.records
+                .into_iter()
+                .filter(|(id, k)| record_mac(&key, id, &k.held) == k.mac)
+                .map(|(id, k)| (id, k.held))
+                .collect()
+        })
         .unwrap_or_default()
 }
 
@@ -196,7 +250,12 @@ pub fn save_cache(base: &Path, records: &BTreeMap<String, Held>) -> std::io::Res
     if std::fs::read_to_string(&ignore).ok().as_deref() != Some("*\n") {
         std::fs::write(&ignore, "*\n")?;
     }
-    let body = serde_json::to_string_pretty(&CacheFile { format: "1".into(), records: records.clone() })
+    let key = user_key().ok_or_else(|| std::io::Error::other("no per-user key ($HOME/.invar/key)"))?;
+    let records = records
+        .iter()
+        .map(|(id, h)| (id.clone(), Keyed { held: h.clone(), mac: record_mac(&key, id, h) }))
+        .collect();
+    let body = serde_json::to_string_pretty(&CacheFile { format: "2".into(), records })
         .map_err(std::io::Error::other)?;
     let tmp = dir.join(format!("verdicts.json.{}.tmp", std::process::id()));
     std::fs::write(&tmp, body + "\n")?;

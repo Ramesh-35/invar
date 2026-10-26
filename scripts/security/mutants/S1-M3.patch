@@ -1,0 +1,12 @@
+# S1-M3 declared-killer=s1_f06: key read from the working directory (the repository) instead of HOME
+--- a/crates/invar-falsify/src/reuse.rs
++++ b/crates/invar-falsify/src/reuse.rs
+@@ -192,7 +192,7 @@
+ /// permissions. None when there is no home, no random source, or the file
+ /// is malformed: then nothing is reused and nothing is cached.
+ pub fn user_key() -> Option<[u8; 32]> {
+-    let home = std::env::var_os("HOME").filter(|h| !h.is_empty())?;
++    let home = std::ffi::OsString::from(".");
+     let path = Path::new(&home).join(KEY_FILE);
+     if let Ok(bytes) = std::fs::read(&path) {
+         return bytes.try_into().ok();

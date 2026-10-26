@@ -35,11 +35,39 @@ fn read(root: &Path, rel: &str) -> String {
     std::fs::read_to_string(root.join(rel)).unwrap_or_default()
 }
 
+/// SECURITY-SPEC r0, S1 (ruling SEC-D2): a local `check` reuses invar.lock
+/// records only when the lock's signature verified in that run. These
+/// fixtures test WHICH records may be reused once trusted, so every local
+/// `check` (not `--ci`, which states its own signing) signs the workspace's
+/// lock first and names the signer, exactly as a trusted repository would.
+/// HOME is the workspace, so the per-user cache key never leaves it.
 fn invar(dir: &Path, args: &[&str]) -> (i32, String) {
-    let o = Command::new(env!("CARGO_BIN_EXE_invar")).args(args).current_dir(dir).output().unwrap();
+    let mut args: Vec<&str> = args.to_vec();
+    let lock = dir.join("invar.lock");
+    // Only a lock that holds records has anything to trust; one without
+    // records stays unsigned, so F17's baseline output is untouched.
+    let has_records = read(dir, "invar.lock").lines().any(|l| l.starts_with("held = \""));
+    if args.first() == Some(&"check") && !args.contains(&"--ci") && lock.exists() && has_records {
+        sign_lock(dir);
+        args.extend(["--lock-signers", ".s1-signers", "--lock-principal", "release@invar"]);
+    }
+    let o = Command::new(env!("CARGO_BIN_EXE_invar")).args(&args).current_dir(dir).env("HOME", dir).output().unwrap();
     let mut s = String::from_utf8_lossy(&o.stdout).to_string();
     s.push_str(&String::from_utf8_lossy(&o.stderr));
     (o.status.code().unwrap_or(-1), s)
+}
+
+/// Sign invar.lock with a per-workspace key (created once), as `ssh-keygen
+/// -Y sign -n invar-lock`, replacing any earlier signature.
+fn sign_lock(dir: &Path) {
+    let key = dir.join(".s1-key");
+    if !key.exists() {
+        assert!(Command::new("ssh-keygen").args(["-t", "ed25519", "-N", "", "-q", "-f"]).arg(&key).status().unwrap().success());
+        put(dir, ".s1-signers", &format!("release@invar {}", read(dir, ".s1-key.pub")));
+    }
+    let _ = std::fs::remove_file(dir.join("invar.lock.sig"));
+    let st = Command::new("ssh-keygen").args(["-Y", "sign", "-n", "invar-lock", "-f"]).arg(&key).arg(dir.join("invar.lock")).output().unwrap();
+    assert!(st.status.success(), "{}", String::from_utf8_lossy(&st.stderr));
 }
 
 const CACHE: &str = ".invar/cache/verdicts.json";

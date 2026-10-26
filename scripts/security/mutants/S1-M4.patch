@@ -1,0 +1,12 @@
+# S1-M4 declared-killer=s1_f07: key file created readable by others
+--- a/crates/invar-falsify/src/reuse.rs
++++ b/crates/invar-falsify/src/reuse.rs
+@@ -208,7 +208,7 @@
+     #[cfg(unix)]
+     {
+         use std::os::unix::fs::OpenOptionsExt;
+-        opts.mode(0o600);
++        opts.mode(0o644);
+     }
+     {
+         use std::io::Write;

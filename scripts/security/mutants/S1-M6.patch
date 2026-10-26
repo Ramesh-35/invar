@@ -1,0 +1,13 @@
+# S1-M6 declared-killer=s1_f09: MAC computed with a fixed key, not the user's
+--- a/crates/invar-falsify/src/reuse.rs
++++ b/crates/invar-falsify/src/reuse.rs
+@@ -219,7 +219,8 @@
+ 
+ fn record_mac(key: &[u8; 32], id: &str, held: &Held) -> String {
+     let body = serde_json::to_string(&(id, held)).unwrap_or_default();
+-    blake3::keyed_hash(key, body.as_bytes()).to_hex().to_string()
++    let _ = key;
++    blake3::keyed_hash(&[7u8; 32], body.as_bytes()).to_hex().to_string()
+ }
+ 
+ /// The local cache under `base`. Missing, unreadable or malformed: empty,

@@ -213,6 +213,10 @@ fn g_n1_missing_manifest_refuses_like_check() {
 #[test]
 fn g_m1_gate_stderr_is_deterministic() {
     let d = holding("gm1");
+    // SECURITY-SPEC r0, S1: an unsigned lock is no longer reused locally, so
+    // the first run evaluates and warms the keyed cache. Determinism is
+    // compared on the two runs after that.
+    let _ = gate(&d, &[], &[bin(), "explain", "0"]);
     let (c1, _o1, e1) = gate(&d, &[], &[bin(), "explain", "0"]);
     let (c2, _o2, e2) = gate(&d, &[], &[bin(), "explain", "0"]);
     assert_eq!((c1, e1), (c2, e2), "the gate's own lines must be byte-identical across runs");

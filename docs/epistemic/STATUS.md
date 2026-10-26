@@ -1684,6 +1684,28 @@ three or more hops, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
 docs/evidence/stage3/eval008.
 
+## 2026-10-25: SECURITY-1 S0 measured and S1 implemented (reuse authenticity)
+
+A measured threat model (seven paths, each with a runnable probe in
+scripts/security/) found that a forged reuse record turned a real
+VIOLATED into HOLDS on a local run: rewriting the recorded input hashes in
+the verdict cache or in an unsigned invar.lock was enough (`--ci` was
+safe). S1 closes it: invar.lock records are reused only when the lock's
+signature verified in that run, locally as under `--ci`; the local cache
+is keyed per user (a BLAKE3 MAC under `$HOME/.invar/key`, never in a
+repository), and a record that does not verify is no record. Every forged
+line of the probe now exits 1. Corpus byte-identical; every round-trip
+verdict identical; the first local check after `lock` now evaluates
+(9.5 to 63.2 ms) and later checks reuse the keyed cache (4.5 to 13.3 ms).
+523 of 523 tests in the sandbox, zero warnings; 6 of 6 operators killed.
+Eleven CHECK-INCR-1 fixtures and one gate fixture encoded the overturned
+local-lock rule (I-D4); they now sign their lock in the shared helper, no
+fixture body changed, prior files kept. Two further findings are confirmed
+and open for ruling: terminal control-byte injection through the witness
+line, and an exponential directory walk over symbolic-link loops reachable
+from a repository's own invar.toml. Record: docs/falsification/
+SECURITY-SPEC.md; docs/evidence/security.
+
 ## 2026-10-25: self-audit implemented (AGENT-1 P2)
 
 Before INVAR reports VIOLATED for a schema contract (strict, change-scoped

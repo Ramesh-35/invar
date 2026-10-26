@@ -1,0 +1,12 @@
+# S1-M1 declared-killer=s1_f02: unsigned lock records reused locally again (the pre-S1 rule)
+--- a/crates/invar-falsify/src/main.rs
++++ b/crates/invar-falsify/src/main.rs
+@@ -740,7 +740,7 @@
+         None
+     } else {
+         Some(invar_falsify::reuse::Plan {
+-            from_lock: args.lock_signers.is_some(),
++            from_lock: !args.ci || args.lock_signers.is_some(),
+             cache: if args.ci {
+                 Default::default()
+             } else {

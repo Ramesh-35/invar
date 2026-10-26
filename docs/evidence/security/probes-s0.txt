@@ -1,0 +1,23 @@
+# S0 probe outputs, sandbox (Linux x86_64), 2026-10-25
+## reuse-forgery.sh, pre-S1 engine (14e0dce4e181)
+true verdict (evaluated): exit 1
+forged cache, local check: exit 0
+forged cache, check --ci: exit 1
+forged unsigned lock, local check: exit 0
+forged unsigned lock, check --ci: exit 1
+## reuse-forgery.sh, S1 engine (01f9ae96b7d2)
+true verdict (evaluated): exit 1
+forged cache, local check: exit 1
+forged cache, check --ci: exit 1
+forged unsigned lock, local check: exit 1
+forged unsigned lock, check --ci: exit 1
+## robustness.py, S1 engine
+cases 300; crashes 0; over 2 s 0; slowest 0.01 s; exit codes {0: 97, 1: 1, 3: 199, 4: 3}
+## token-redirect.py
+curl 8.5.0 (x86_64-pc-linux-gnu) libcurl/8.5.0 OpenSSL/3.0.13 zlib/1.3 brotli/1.1.0 zstd/1.5.5 libidn2/2.3.7 libpsl/0.21.2 (+libidn2/2.3.7) libssh/0.10.6/openssl/zlib nghttp2/1.59.0 librtmp/2.3 OpenLDAP/2.6.10
+curl exit 0; host A saw token: True; redirect host B saw token: False
+## terminal-injection.py, S1 engine
+check: exit 1; raw control bytes from the repository in the output: ['ESC', 'CR', 'BEL']
+  carried by: b'      x\x1b]0;pwned\x07\x1b[2J\rfake read at c.js:2 \xc2\xb7 not in head.json'
+## walk-loop.sh, S1 engine
+dependents over a self-referencing link: exit 124 after 20.0 s

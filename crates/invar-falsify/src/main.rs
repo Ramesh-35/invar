@@ -732,13 +732,15 @@ fn cmd_check(args: CheckArgs) -> Result<i32> {
     let today = lock::today_utc();
     // CHECK-INCR-1. No reuse for --no-reuse, for a receipt (evidence comes
     // from a full evaluation) or for a --sample run (I-D2a). Under --ci the
-    // local cache is never read or written, and lock records are reused only
-    // when --lock-signers verified the lock above (I-D4).
+    // local cache is never read or written (I-D4). Lock records are reused
+    // only when --lock-signers verified the lock above, locally as under
+    // --ci (SECURITY-SPEC S1, ruling SEC-D2: an unsigned lock is editable by
+    // anyone who can edit the repository, so its records are not evidence).
     let plan = if args.no_reuse || args.receipt.is_some() || args.sample.is_some() {
         None
     } else {
         Some(invar_falsify::reuse::Plan {
-            from_lock: !args.ci || args.lock_signers.is_some(),
+            from_lock: args.lock_signers.is_some(),
             cache: if args.ci {
                 Default::default()
             } else {

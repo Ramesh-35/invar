@@ -1,0 +1,6 @@
+S1-M1 CAUGHT  DECLARED-KILLER-FAILED (s1_f02)  incidental=[s1_f03]  S1-M1 declared-killer=s1_f02: unsigned lock records reused locally again (the pre-S1 rule)
+S1-M2 CAUGHT  DECLARED-KILLER-FAILED (s1_f01)  incidental=[s1_f09]  S1-M2 declared-killer=s1_f01: cache MAC not verified on load
+S1-M3 CAUGHT  DECLARED-KILLER-FAILED (s1_f06)  incidental=[s1_f07,s1_f08,s1_f09]  S1-M3 declared-killer=s1_f06: key read from the working directory (the repository) instead of HOME
+S1-M4 CAUGHT  DECLARED-KILLER-FAILED (s1_f07)  incidental=[none]  S1-M4 declared-killer=s1_f07: key file created readable by others
+S1-M5 CAUGHT  DECLARED-KILLER-FAILED (s1_f08)  incidental=[none]  S1-M5 declared-killer=s1_f08: without a key, cache records are read unverified
+S1-M6 CAUGHT  DECLARED-KILLER-FAILED (s1_f09)  incidental=[none]  S1-M6 declared-killer=s1_f09: MAC computed with a fixed key, not the user's

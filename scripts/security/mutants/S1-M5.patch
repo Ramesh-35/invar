@@ -1,0 +1,14 @@
+# S1-M5 declared-killer=s1_f08: without a key, cache records are read unverified
+--- a/crates/invar-falsify/src/reuse.rs
++++ b/crates/invar-falsify/src/reuse.rs
+@@ -225,7 +225,9 @@
+ /// The local cache under `base`. Missing, unreadable or malformed: empty,
+ /// never an error (it is not authoritative; the run evaluates instead).
+ pub fn load_cache(base: &Path) -> BTreeMap<String, Held> {
+-    let Some(key) = user_key() else { return BTreeMap::new() };
++    let Some(key) = user_key() else {
++        return std::fs::read_to_string(base.join(CACHE_FILE)).ok().and_then(|t| serde_json::from_str::<CacheFile>(&t).ok()).map(|c| c.records.into_iter().map(|(id, k)| (id, k.held)).collect()).unwrap_or_default();
++    };
+     std::fs::read_to_string(base.join(CACHE_FILE))
+         .ok()
+         .and_then(|t| serde_json::from_str::<CacheFile>(&t).ok())

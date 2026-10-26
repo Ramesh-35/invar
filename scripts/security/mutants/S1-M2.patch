@@ -1,0 +1,12 @@
+# S1-M2 declared-killer=s1_f01: cache MAC not verified on load
+--- a/crates/invar-falsify/src/reuse.rs
++++ b/crates/invar-falsify/src/reuse.rs
+@@ -233,7 +233,7 @@
+         .map(|c| {
+             c.records
+                 .into_iter()
+-                .filter(|(id, k)| record_mac(&key, id, &k.held) == k.mac)
++                .filter(|(id, k)| { let _ = (&key, id, k); true })
+                 .map(|(id, k)| (id, k.held))
+                 .collect()
+         })
