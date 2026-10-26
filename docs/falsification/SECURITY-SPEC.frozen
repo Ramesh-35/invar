@@ -1,20 +1,12 @@
-# SECURITY-SPEC freeze record (r0), written after the S1 gate runs (see the spec's process note).
-# Baseline: the self-audit tree (release binary 14e0dce4e181).
-blake3(docs/falsification/SECURITY-SPEC.md) = e3cc6a2a98378cc631757e88b274c9c8ee63f8c2bc0352ee1984f7f0908ff2fc
-sha256(docs/falsification/SECURITY-SPEC.md) = 2dd27393714d7b5cdad8c377ce9327180e71525ace58fc5b96181b07d84da784
+# SECURITY-SPEC freeze record (r2: S2), written BEFORE any S2 code.
+# r1 record preserved as SECURITY-SPEC-r1.frozen, r0 as SECURITY-SPEC-r0.frozen. Baseline: S1 engine 01f9ae96b7d2.
+blake3(docs/falsification/SECURITY-SPEC.md) = 2fb3a44bc1fb825fbbfc9aeb3b3409d2f039942f546b5f3efebc31475ce078be
+sha256(docs/falsification/SECURITY-SPEC.md) = 8db5ef6d4d5598da89478ed5ff510ec7cdb481e5a834e09d340d7ddac0ae139d
+blake3(docs/falsification/SECURITY-SPEC-r1.md) = 14c2d6c3001bda606c334c0f2e2b89ed28140406b02009f8bc0a49087d545bbe
+sha256(docs/falsification/SECURITY-SPEC-r1.md) = 7336df8092e6dd8fc18891001c606dea461b9aabef3acd5a2fc6162e90867a5f
+blake3(docs/falsification/SECURITY-SPEC-r0.md) = e3cc6a2a98378cc631757e88b274c9c8ee63f8c2bc0352ee1984f7f0908ff2fc
+sha256(docs/falsification/SECURITY-SPEC-r0.md) = 2dd27393714d7b5cdad8c377ce9327180e71525ace58fc5b96181b07d84da784
+blake3(crates/invar-falsify/tests/security_s2_test.rs) = ad627d1dcede6eb0c991f80f85ad1d1ffd222c4c8ae4634d72271e122411211d
+sha256(crates/invar-falsify/tests/security_s2_test.rs) = b117990558168e1a00d5f3a100f0c2402cb1ee94a9df1a6e6b187bf52c8ed664
 blake3(crates/invar-falsify/tests/security_test.rs) = 5504ba235341ed2b697b1a0683cc22e57c54c7fb7bbb5e210b6afd9e5236ef86
 sha256(crates/invar-falsify/tests/security_test.rs) = 24ce789e5ae29e46903978148a8e01df0b83ade55e6e7c591e5d7058691ec747
-blake3(crates/invar-falsify/tests/check_incr1_test.rs) = 988426d760d0edda1ff62aa1a143c3e8e3c919933d8e2af66aefd8381b2f5f45
-sha256(crates/invar-falsify/tests/check_incr1_test.rs) = c39c583aa35b66794f05ab08e7e354a64c18781f567b51f7e662431d9f519f63
-blake3(crates/invar-falsify/tests/gate_test.rs) = 72bd5a326e40813660f43cf491fc9f2d25cd8dc461055cec8030e235830f7ade
-sha256(crates/invar-falsify/tests/gate_test.rs) = 6babc17bbce07323db50bd5b8b94500aba8040fe1b847c74b89c9d7d2c0cacb5
-blake3(scripts/security/reuse-forgery.sh) = e3ceca59c5baf36f7ab7f51d4cfc15802fd93636834f29bc54fcb2a8416c4da3
-sha256(scripts/security/reuse-forgery.sh) = fd4b0b8b798afec94b16f5c1f7898a5fd1739ff42b25fe0cea8a7880da23cf14
-blake3(scripts/security/robustness.py) = 86934fa4cf67f386e870d9acffde91094834e2b9db8dfffd882a103674242991
-sha256(scripts/security/robustness.py) = dc640fc73866683e0cf8be62da5e04c96bcee8a4be11357f3abec1d2b7fccced
-blake3(scripts/security/token-redirect.py) = adfd8d632797231008e733857ae87eec47c1426a185f2d0c9d0847798d2ca86d
-sha256(scripts/security/token-redirect.py) = b51d2e0dbdfa66fbd2a9d164cc0ee0c612674429ab318b0e242bf76212d1a366
-blake3(scripts/security/terminal-injection.py) = 4239826f371cdcddeab9ac5be50431403818a3aca712394e3e22391148e8b035
-sha256(scripts/security/terminal-injection.py) = 65b7b3c4a21725bdfc83d6be4d149cf3132afd702bf4c0612c076bde4ea1f276
-blake3(scripts/security/walk-loop.sh) = 1c8f2e9b14d3fe1b11225e2ac5b98c40f8c2a5492814ed4bb2837832144796e2
-sha256(scripts/security/walk-loop.sh) = cd1088aba7612ce3c2287964b4c20cbfb38b47029133e5d74843afb184b7a82f

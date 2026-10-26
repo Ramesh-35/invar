@@ -40,4 +40,5 @@ pub mod report;
 pub mod resolver;
 pub mod reuse;
 pub mod surface;
+pub mod term;
 pub mod valuepairs;

@@ -10,6 +10,28 @@
 //! line goes to stderr with the `GATE` prefix; the wrapped command's stdio
 //! is inherited untouched (G-D2).
 
+// SECURITY-SPEC S2 (SEC-D4) sink: every terminal print in this file passes
+// through `crate::term::neutralize`. These four definitions are identical in main.rs,
+// gate.rs and dependents.rs.
+#[allow(unused_macros)]
+macro_rules! println {
+    () => { std::println!() };
+    ($($t:tt)*) => { std::println!("{}", crate::term::neutralize(&format!($($t)*))) };
+}
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($t:tt)*) => { std::print!("{}", crate::term::neutralize(&format!($($t)*))) };
+}
+#[allow(unused_macros)]
+macro_rules! eprintln {
+    () => { std::eprintln!() };
+    ($($t:tt)*) => { std::eprintln!("{}", crate::term::neutralize(&format!($($t)*))) };
+}
+#[allow(unused_macros)]
+macro_rules! eprint {
+    ($($t:tt)*) => { std::eprint!("{}", crate::term::neutralize(&format!($($t)*))) };
+}
+
 use std::path::{Path, PathBuf};
 use std::process::Command;
 

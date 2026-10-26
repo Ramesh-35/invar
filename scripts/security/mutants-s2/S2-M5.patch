@@ -1,0 +1,12 @@
+# S2-M5 declared-killer=s2_f11: the walk follows symbolic links
+--- a/crates/invar-falsify/src/dependents.rs
++++ b/crates/invar-falsify/src/dependents.rs
+@@ -84,7 +84,7 @@
+             if seen > max_entries {
+                 return Err(format!("walk stopped: more than {max_entries} entries under {}", root.display()));
+             }
+-            let Ok(ft) = e.file_type() else { continue };
++            let Ok(ft) = std::fs::metadata(e.path()).map(|m| m.file_type()) else { continue };
+             let p = e.path();
+             if ft.is_dir() {
+                 stack.push((p, depth + 1));

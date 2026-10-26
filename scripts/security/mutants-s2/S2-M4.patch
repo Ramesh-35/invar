@@ -1,0 +1,12 @@
+# S2-M4 declared-killer=s2_f08: markdown code spans not escaped
+--- a/crates/invar-falsify/src/check.rs
++++ b/crates/invar-falsify/src/check.rs
+@@ -656,7 +656,7 @@
+         })
+         .collect();
+     // SECURITY-SPEC S2-3: no terminal-active character in a code span.
+-    let cleaned = crate::term::escape_value(&cleaned);
++    let cleaned = cleaned;
+     format!("`{}`", cleaned.replace('|', "\\|"))
+ }
+ 

@@ -1,0 +1,12 @@
+# S2-M3 declared-killer=s2_f04: bidirectional characters left out of the escape set
+--- a/crates/invar-falsify/src/term.rs
++++ b/crates/invar-falsify/src/term.rs
+@@ -10,7 +10,7 @@
+ //! is returned unchanged, byte for byte.
+ 
+ fn active(c: char) -> bool {
+-    c.is_control() || matches!(c, '\u{202a}'..='\u{202e}' | '\u{2066}'..='\u{2069}')
++    c.is_control()
+ }
+ 
+ fn escape(s: &str, keep_layout: bool) -> String {

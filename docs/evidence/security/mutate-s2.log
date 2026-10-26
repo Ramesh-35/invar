@@ -1,0 +1,9 @@
+S2-M1 CAUGHT  DECLARED-KILLER-FAILED (s2_f05)  incidental=[s2_f06]  S2-M1 declared-killer=s2_f05: main.rs sink macros removed
+S2-M2 CAUGHT  DECLARED-KILLER-FAILED (s2_f02)  incidental=[none]  S2-M2 declared-killer=s2_f02: renderer value escaping removed
+S2-M3 CAUGHT  DECLARED-KILLER-FAILED (s2_f04)  incidental=[s2_f08,s2_f14]  S2-M3 declared-killer=s2_f04: bidirectional characters left out of the escape set
+S2-M4 CAUGHT  DECLARED-KILLER-FAILED (s2_f08)  incidental=[none]  S2-M4 declared-killer=s2_f08: markdown code spans not escaped
+S2-M5 CAUGHT  DECLARED-KILLER-FAILED (s2_f11)  incidental=[none]  S2-M5 declared-killer=s2_f11: the walk follows symbolic links
+S2-M6 CAUGHT  DECLARED-KILLER-FAILED (s2_f12)  incidental=[none]  S2-M6 declared-killer=s2_f12: depth bound removed
+S2-M7 CAUGHT  DECLARED-KILLER-FAILED (s2_f12)  incidental=[none]  S2-M7 declared-killer=s2_f12: entry bound removed
+S2-M8 CAUGHT  DECLARED-KILLER-FAILED (s2_f13)  incidental=[none]  S2-M8 declared-killer=s2_f13: MCP path restriction removed
+S2-M9 CAUGHT  DECLARED-KILLER-FAILED (s2_f14)  incidental=[none]  S2-M9 declared-killer=s2_f14: dependents.rs sink macros removed

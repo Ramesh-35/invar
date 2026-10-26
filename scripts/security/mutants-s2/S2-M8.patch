@@ -1,0 +1,12 @@
+# S2-M8 declared-killer=s2_f13: MCP path restriction removed
+--- a/crates/invar-falsify/src/mcp.rs
++++ b/crates/invar-falsify/src/mcp.rs
+@@ -183,7 +183,7 @@
+             .ok()
+             .zip(std::fs::canonicalize(base_dir(&self.config)).ok())
+             .is_some_and(|(l, b)| l.starts_with(b));
+-        if !inside {
++        if false && !inside {
+             return Err(anyhow!("locks path is outside the configuration directory: {locks}"));
+         }
+         let a = crate::dependents::find(&locks_path, query, producer)?;

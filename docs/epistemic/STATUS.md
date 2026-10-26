@@ -1684,6 +1684,25 @@ three or more hops, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
 docs/evidence/stage3/eval008.
 
+## 2026-10-25: SECURITY-1 S2 implemented (terminal neutralization, bounded walk)
+
+Two vulnerabilities measured in S0 are closed. Terminal injection: a
+repository value carrying ESC, BEL, CR or a bidirectional override reached
+the terminal raw through the witness line, `lock`, `coverage` and
+`dependents`; now the verdict renderer escapes every repository value
+(newline included, so no value can forge an output line) and every
+terminal print in main.rs, gate.rs and dependents.rs neutralizes the same
+characters, as does the markdown report. Walk: three self-referencing
+links made the lock walk run without end, reachable from a repository's
+own invar.toml in a plain `check`; the walk now never follows a symbolic
+link and stops, stated, past depth 64 or 200,000 entries (real
+repositories measured at most 29,919 and 12), and the MCP `dependents`
+tool reads only inside the configuration's directory. Corpus and round
+trips unchanged; 537 of 537 tests in the sandbox, zero warnings; 9 of 9
+operators killed. Fixtures frozen before code (one declared killer
+corrected in r2, still before code). Record: SECURITY-SPEC.md r2;
+docs/evidence/security.
+
 ## 2026-10-25: SECURITY-1 S0 measured and S1 implemented (reuse authenticity)
 
 A measured threat model (seven paths, each with a runnable probe in

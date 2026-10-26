@@ -1,0 +1,12 @@
+# S2-M7 declared-killer=s2_f12: entry bound removed
+--- a/crates/invar-falsify/src/dependents.rs
++++ b/crates/invar-falsify/src/dependents.rs
+@@ -81,7 +81,7 @@
+         let Ok(entries) = std::fs::read_dir(&dir) else { continue };
+         for e in entries.flatten() {
+             seen += 1;
+-            if seen > max_entries {
++            if false && seen > max_entries {
+                 return Err(format!("walk stopped: more than {max_entries} entries under {}", root.display()));
+             }
+             let Ok(ft) = e.file_type() else { continue };

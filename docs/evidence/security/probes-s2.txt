@@ -1,0 +1,12 @@
+# S2 probe outputs, sandbox (Linux x86_64), 2026-10-25, S2 engine (d2c449b14aa1)
+## terminal-injection.py
+check: exit 1; raw control bytes from the repository in the output: none
+## walk-loop.sh
+dependents over a self-referencing link: exit 3 after 0.0 s
+ERROR (not a verdict): no invar.lock found under /tmp/tmp.l7MBpnU87L/locks
+## reuse-forgery.sh
+true verdict (evaluated): exit 1
+forged cache, local check: exit 1
+forged cache, check --ci: exit 1
+forged unsigned lock, local check: exit 1
+forged unsigned lock, check --ci: exit 1

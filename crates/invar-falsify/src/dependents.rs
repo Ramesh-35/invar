@@ -6,6 +6,28 @@
 //! and answers "who depends on this field". Zero matches is an answer, not
 //! an error, and the command holds no verdict.
 
+// SECURITY-SPEC S2 (SEC-D4) sink: every terminal print in this file passes
+// through `crate::term::neutralize`. These four definitions are identical in main.rs,
+// gate.rs and dependents.rs.
+#[allow(unused_macros)]
+macro_rules! println {
+    () => { std::println!() };
+    ($($t:tt)*) => { std::println!("{}", crate::term::neutralize(&format!($($t)*))) };
+}
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($t:tt)*) => { std::print!("{}", crate::term::neutralize(&format!($($t)*))) };
+}
+#[allow(unused_macros)]
+macro_rules! eprintln {
+    () => { std::eprintln!() };
+    ($($t:tt)*) => { std::eprintln!("{}", crate::term::neutralize(&format!($($t)*))) };
+}
+#[allow(unused_macros)]
+macro_rules! eprint {
+    ($($t:tt)*) => { std::eprint!("{}", crate::term::neutralize(&format!($($t)*))) };
+}
+
 use std::path::{Path, PathBuf};
 
 use anyhow::{bail, Result};
@@ -40,18 +62,43 @@ pub struct Answer {
     pub unscoped_field_matches: usize,
 }
 
-fn walk(dir: &Path, out: &mut Vec<PathBuf>) {
-    let Ok(entries) = std::fs::read_dir(dir) else {
-        return;
-    };
-    for e in entries.flatten() {
-        let p = e.path();
-        if p.is_dir() {
-            walk(&p, out);
-        } else if p.file_name().is_some_and(|n| n == "invar.lock") {
-            out.push(p);
+/// SECURITY-SPEC S2-4: the walk bounds (measured: six real repositories
+/// reach at most 29,919 entries and depth 12).
+pub const MAX_WALK_DEPTH: usize = 64;
+pub const MAX_WALK_ENTRIES: usize = 200_000;
+
+/// Every `invar.lock` under `root`, never following a symbolic link (a
+/// link to a directory or to a file is skipped), stopping with an error
+/// past `max_depth` directory levels or past `max_entries` entries visited.
+pub fn locks_under(root: &Path, max_depth: usize, max_entries: usize) -> Result<Vec<PathBuf>, String> {
+    let mut out = Vec::new();
+    let mut seen = 0usize;
+    let mut stack = vec![(root.to_path_buf(), 0usize)];
+    while let Some((dir, depth)) = stack.pop() {
+        if depth > max_depth {
+            return Err(format!("walk stopped: deeper than depth {max_depth} under {}", root.display()));
+        }
+        let Ok(entries) = std::fs::read_dir(&dir) else { continue };
+        for e in entries.flatten() {
+            seen += 1;
+            if seen > max_entries {
+                return Err(format!("walk stopped: more than {max_entries} entries under {}", root.display()));
+            }
+            let Ok(ft) = e.file_type() else { continue };
+            let p = e.path();
+            if ft.is_dir() {
+                stack.push((p, depth + 1));
+            } else if ft.is_file() && p.file_name().is_some_and(|n| n == "invar.lock") {
+                out.push(p);
+            }
         }
     }
+    Ok(out)
+}
+
+fn walk(dir: &Path, out: &mut Vec<PathBuf>) -> Result<()> {
+    out.extend(locks_under(dir, MAX_WALK_DEPTH, MAX_WALK_ENTRIES).map_err(|e| anyhow::anyhow!(e))?);
+    Ok(())
 }
 
 /// Does `query` (`Type.field` or bare `field`) match a binding with this
@@ -70,7 +117,7 @@ pub fn find(root: &Path, query: &str, producer_filter: Option<&str>) -> Result<A
         bail!("--locks {}: not a directory", root.display());
     }
     let mut files = Vec::new();
-    walk(root, &mut files);
+    walk(root, &mut files)?;
     files.sort();
     if files.is_empty() {
         bail!("no invar.lock found under {}", root.display());
@@ -239,7 +286,7 @@ pub fn siblings(base_dir: &Path, locks_dir: &Path) -> Result<Siblings> {
         .map_err(|e| anyhow::anyhow!("resolving {}: {e}", base_dir.display()))?;
     let own_lock = std::fs::canonicalize(base_dir.join("invar.lock")).ok();
     let mut files = Vec::new();
-    walk(locks_dir, &mut files);
+    walk(locks_dir, &mut files)?;
     files.sort();
     let mut rows: std::collections::BTreeMap<(String, String), usize> = Default::default();
     let mut parse_errors = Vec::new();

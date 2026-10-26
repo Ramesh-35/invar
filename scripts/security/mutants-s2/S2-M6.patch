@@ -1,0 +1,12 @@
+# S2-M6 declared-killer=s2_f12: depth bound removed
+--- a/crates/invar-falsify/src/dependents.rs
++++ b/crates/invar-falsify/src/dependents.rs
+@@ -75,7 +75,7 @@
+     let mut seen = 0usize;
+     let mut stack = vec![(root.to_path_buf(), 0usize)];
+     while let Some((dir, depth)) = stack.pop() {
+-        if depth > max_depth {
++        if false && depth > max_depth {
+             return Err(format!("walk stopped: deeper than depth {max_depth} under {}", root.display()));
+         }
+         let Ok(entries) = std::fs::read_dir(&dir) else { continue };

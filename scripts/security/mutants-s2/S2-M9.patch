@@ -1,0 +1,28 @@
+# S2-M9 declared-killer=s2_f14: dependents.rs sink macros removed
+--- a/crates/invar-falsify/src/dependents.rs
++++ b/crates/invar-falsify/src/dependents.rs
+@@ -12,20 +12,20 @@
+ #[allow(unused_macros)]
+ macro_rules! println {
+     () => { std::println!() };
+-    ($($t:tt)*) => { std::println!("{}", crate::term::neutralize(&format!($($t)*))) };
++    ($($t:tt)*) => { std::println!("{}", std::convert::identity(&format!($($t)*))) };
+ }
+ #[allow(unused_macros)]
+ macro_rules! print {
+-    ($($t:tt)*) => { std::print!("{}", crate::term::neutralize(&format!($($t)*))) };
++    ($($t:tt)*) => { std::print!("{}", std::convert::identity(&format!($($t)*))) };
+ }
+ #[allow(unused_macros)]
+ macro_rules! eprintln {
+     () => { std::eprintln!() };
+-    ($($t:tt)*) => { std::eprintln!("{}", crate::term::neutralize(&format!($($t)*))) };
++    ($($t:tt)*) => { std::eprintln!("{}", std::convert::identity(&format!($($t)*))) };
+ }
+ #[allow(unused_macros)]
+ macro_rules! eprint {
+-    ($($t:tt)*) => { std::eprint!("{}", crate::term::neutralize(&format!($($t)*))) };
++    ($($t:tt)*) => { std::eprint!("{}", std::convert::identity(&format!($($t)*))) };
+ }
+ 
+ use std::path::{Path, PathBuf};

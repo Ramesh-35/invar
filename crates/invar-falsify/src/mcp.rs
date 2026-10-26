@@ -177,6 +177,15 @@ impl Server<'_> {
                 base_dir(&self.config).join(p)
             }
         };
+        // SECURITY-SPEC S2-5: only a path inside the configuration's
+        // directory, symbolic links resolved.
+        let inside = std::fs::canonicalize(&locks_path)
+            .ok()
+            .zip(std::fs::canonicalize(base_dir(&self.config)).ok())
+            .is_some_and(|(l, b)| l.starts_with(b));
+        if !inside {
+            return Err(anyhow!("locks path is outside the configuration directory: {locks}"));
+        }
         let a = crate::dependents::find(&locks_path, query, producer)?;
         Ok(serde_json::from_str(&crate::dependents::render_json(
             query, producer, &a,

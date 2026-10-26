@@ -10,6 +10,28 @@
 //!      `mcp` and `fix` never use 1, which means VIOLATED
 //!   4  `check`: nothing violated, but some contracts were SKIPPED
 
+// SECURITY-SPEC S2 (SEC-D4) sink: every terminal print in this file passes
+// through `invar_falsify::term::neutralize`. These four definitions are identical in main.rs,
+// gate.rs and dependents.rs.
+#[allow(unused_macros)]
+macro_rules! println {
+    () => { std::println!() };
+    ($($t:tt)*) => { std::println!("{}", invar_falsify::term::neutralize(&format!($($t)*))) };
+}
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($t:tt)*) => { std::print!("{}", invar_falsify::term::neutralize(&format!($($t)*))) };
+}
+#[allow(unused_macros)]
+macro_rules! eprintln {
+    () => { std::eprintln!() };
+    ($($t:tt)*) => { std::eprintln!("{}", invar_falsify::term::neutralize(&format!($($t)*))) };
+}
+#[allow(unused_macros)]
+macro_rules! eprint {
+    ($($t:tt)*) => { std::eprint!("{}", invar_falsify::term::neutralize(&format!($($t)*))) };
+}
+
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 

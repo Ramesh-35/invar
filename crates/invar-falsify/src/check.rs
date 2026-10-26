@@ -655,6 +655,8 @@ fn md_code(s: &str) -> String {
             c => c,
         })
         .collect();
+    // SECURITY-SPEC S2-3: no terminal-active character in a code span.
+    let cleaned = crate::term::escape_value(&cleaned);
     format!("`{}`", cleaned.replace('|', "\\|"))
 }
 
@@ -818,64 +820,73 @@ fn witness_md(w: &Witness, kind: &str) -> String {
 /// by construction, not by imitation.
 pub fn outcome_lines(o: &ContractOutcome) -> (&'static str, String) {
     use std::fmt::Write;
+    // SECURITY-SPEC S2-1: every repository-derived value is escaped.
+    let v = crate::term::escape_value;
     let mut s = String::new();
     let tag = if let Some(why) = &o.skipped {
-        let _ = writeln!(s, "  [SKIPPED]  {} ({}): {why}", o.id, o.kind);
+        let _ = writeln!(s, "  [SKIPPED]  {} ({}): {}", v(&o.id), v(&o.kind), v(why));
         "SKIPPED"
     } else if !o.violated() && !o.unevaluated.is_empty() {
         let _ = writeln!(
             s,
             "  [NOT EVALUATED] {} ({}): {} site(s)",
-            o.id,
-            o.kind,
+            v(&o.id),
+            v(&o.kind),
             o.unevaluated.len()
         );
         for u in &o.unevaluated {
-            let _ = writeln!(s, "      {u}");
+            let _ = writeln!(s, "      {}", v(u));
         }
         "NOT_EVALUATED"
     } else if !o.violated() {
         match &o.reused {
             Some(since) => {
-                let _ = writeln!(s, "  [HOLDS]    {} ({}) unchanged since {since}", o.id, o.kind);
+                let _ = writeln!(s, "  [HOLDS]    {} ({}) unchanged since {}", v(&o.id), v(&o.kind), v(since));
             }
             None => {
-                let _ = writeln!(s, "  [HOLDS]    {} ({})", o.id, o.kind);
+                let _ = writeln!(s, "  [HOLDS]    {} ({})", v(&o.id), v(&o.kind));
             }
         }
         "HOLDS"
     } else {
-        let _ = writeln!(s, "  [VIOLATED] {} ({}): {:?}", o.id, o.kind, o.residue);
+        let _ = writeln!(s, "  [VIOLATED] {} ({}): {:?}", v(&o.id), v(&o.kind), o.residue);
         for (f, owner) in &o.expired {
             let _ = writeln!(
                 s,
-                "      waiver EXPIRED: {f} (owner {owner}); renew or remove it in invar.lock"
+                "      waiver EXPIRED: {} (owner {}); renew or remove it in invar.lock",
+                v(f),
+                v(owner)
             );
         }
         for w in &o.witnesses {
-            let _ = writeln!(s, "      {}{}", w.residue, witness_text(w, &o.kind, |x| x.to_string()));
+            let _ = writeln!(s, "      {}{}", v(&w.residue), witness_text(w, &o.kind, crate::term::escape_value));
         }
         // Stated non-evaluation prints alongside a violation too: a verdict
         // never swallows a blind spot.
         for u in &o.unevaluated {
-            let _ = writeln!(s, "      {u}");
+            let _ = writeln!(s, "      {}", v(u));
         }
         "VIOLATED"
     };
     for (f, owner, reason, left) in &o.waived {
         let _ = writeln!(
             s,
-            "      WAIVED {f} ({left} day(s) remaining, owner {owner}): {reason}"
+            "      WAIVED {} ({left} day(s) remaining, owner {}): {}",
+            v(f),
+            v(owner),
+            v(reason)
         );
     }
     for n in &o.notes {
-        let _ = writeln!(s, "      note: {n}");
+        let _ = writeln!(s, "      note: {}", v(n));
     }
     for f in &o.provenance {
         let _ = writeln!(
             s,
             "      fetched {} ({} bytes, blake3 {})",
-            f.reference, f.bytes, f.blake3_hex
+            v(&f.reference),
+            f.bytes,
+            f.blake3_hex
         );
     }
     (tag, s)

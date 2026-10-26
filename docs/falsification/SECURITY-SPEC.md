@@ -1,6 +1,13 @@
 # SECURITY-1: INVAR's threat model, measured (S0), and reuse authenticity (S1)
 
-Status: r0. S0 (threat model) for founder ruling on S2 onward. S1
+Status: r2 (written before any S2 code: one fixture added, one declared
+killer corrected; section J). r1 is preserved as SECURITY-SPEC-r1.md with
+SECURITY-SPEC-r1.frozen. r1 header follows.
+r1: r0 (S0 measured, S1 implemented) is preserved as
+SECURITY-SPEC-r0.md with SECURITY-SPEC-r0.frozen. r1 adds S2 (sections H
+and I) under the ruling of 2026-10-25 (SEC-D4 to SEC-D8 ratified), frozen
+with tests/security_s2_test.rs BEFORE any S2 code. r0 header follows.
+r0: S0 (threat model) for founder ruling on S2 onward. S1
 implemented under the ruling of 2026-10-25 (SEC-D1 S1 first, SEC-D2 an
 unsigned lock is not reused locally, SEC-D3 claims re-anchored). Baseline:
 the self-audit tree (a4aa356 plus AGENT-1 P2, release binary 14e0dce4e181;
@@ -134,3 +141,98 @@ Revised under SEC-D2, prior files kept as docs/evidence/security/*.pre-s1.rs:
   check of release archives.
 - SEC-D8 (path 3). Run the token probe on the founder's Mac and record the
   curl version; refuse `--ci` fetches with a curl older than 7.58.
+
+## H. S2 rules (SEC-D4, SEC-D5)
+
+SEC-D4, terminal neutralization, two layers:
+- S2-1, values. The verdict renderer (`outcome_lines`, shared by `check`
+  and `demo`) escapes every repository-derived value it prints (contract
+  id and kind, residue, witness fields, statements, notes, waiver text,
+  fetched references): each control character (newline, tab and CR
+  included) and each bidirectional override or isolate (U+202A to U+202E,
+  U+2066 to U+2069) becomes its Rust escape (`\n`, `\r`, `\u{1b}`,
+  `\u{202e}`). Nothing else changes, so a value with nothing to escape
+  prints byte-identically. A value cannot forge an output line.
+- S2-2, sinks. Every terminal print in `main.rs`, `gate.rs` and
+  `dependents.rs` (`println!`, `print!`, `eprintln!`, `eprint!`, shadowed by
+  crate-local macros) neutralizes the same characters except newline and
+  tab, which the engine's own layout uses. This covers every command
+  (`lock`, `coverage`, `dependents`, errors), not only the verdict block.
+- S2-3, markdown. The PR report's code spans escape the same characters
+  (they already replaced newline, CR and tab with a space).
+- Not covered: JSON and SARIF output (JSON escapes control characters;
+  they are read by programs, not terminals); a newline inside a value in
+  non-verdict output is neutralized as a line break, not escaped (it can
+  start a new line but cannot carry a terminal escape).
+
+SEC-D5, walk and path:
+- S2-4. The lock walk (`dependents::locks_under`, used by `dependents
+  --locks`, the MCP `dependents` tool and `check`'s `[dependents] locks`
+  section) never follows a symbolic link (directory or file), stops with an
+  error past depth 64 or past 200,000 entries visited, and states the
+  bound it hit. Measured on six real repositories: at most 29,919 entries,
+  depth 12; 7 symbolic links (claude-mem) are no longer followed.
+- S2-5. The MCP `dependents` tool resolves `locks` (absolute or
+  relative, symbolic links resolved) and refuses a path outside the
+  configuration's directory: `locks path is outside the configuration
+  directory`.
+- `check`'s `[dependents]` section stays informational: a bound hit is a
+  stated note, never a change of verdict or exit code.
+
+SEC-D6 to SEC-D8 are separate slices after S2 (run restriction and git
+measurement; dependency audit and reproducible build in CI; curl version
+floor after the Mac token probe).
+
+## I. S2 fixtures and operators (frozen before code)
+
+tests/security_s2_test.rs, 13 fixtures. On the S1 engine (with a
+throwaway stub of `locks_under` keeping today's walk, so the file builds)
+12 FAIL, each on raw terminal-active bytes, an unbounded walk or the path
+check, and 1 passes, the guard s2_f07 (ordinary output byte-identical).
+Construction notes: the consumer's literal carries the raw characters
+(INVAR does not decode escapes in literals or in invar.toml strings); a raw
+newline cannot reach a witness through a source read, so s2_f02 drives the
+renderer directly with a constructed outcome.
+
+| Fixture | Asserts |
+|---|---|
+| s2_f01 | ESC, BEL, CR in a witness are escaped (`x\u{1b}]0;...\rfake read at c.js:1`) |
+| s2_f02 | a newline in id, residue, witness, note or statement forges no line |
+| s2_f03 | a raw ESC in a contract id on a HOLDS run is neutralized |
+| s2_f04 | a bidirectional override is escaped (`\u{202e}`) |
+| s2_f05 | `lock` output is neutralized (sink) |
+| s2_f06 | `dependents` output (query and bound field) is neutralized (sink) |
+| s2_f07 | guard: ordinary output byte-identical |
+| s2_f08 | the markdown report carries no terminal-active character |
+| s2_f09 | `dependents` over a symbolic-link loop returns within 5 s |
+| s2_f10 | a repository's `[dependents] locks` over a loop cannot hang `check`; verdict unchanged |
+| s2_f11 | a lock reachable only through a link is not read |
+| s2_f12 | the walk errors past its depth bound and past its entry bound, and finds within bounds |
+| s2_f13 | MCP `dependents` refuses an absolute path and a `../` escape outside the configuration directory, and allows one inside |
+
+| Operator | Change | Declared killer |
+|---|---|---|
+| S2-M1 | `main.rs` sink macros removed | s2_f05 |
+| S2-M2 | renderer value escaping removed (identity) | s2_f02 |
+| S2-M3 | bidirectional characters left out of the escape set | s2_f04 |
+| S2-M4 | markdown code spans not escaped | s2_f08 |
+| S2-M5 | the walk follows symbolic links | s2_f11 |
+| S2-M6 | depth bound removed | s2_f12 |
+| S2-M7 | entry bound removed | s2_f12 |
+| S2-M8 | MCP path restriction removed | s2_f13 |
+| S2-M9 | `dependents.rs` sink macros removed | s2_f14 (r2; r1 declared s2_f06, see J) |
+
+## J. r2 (before any S2 code)
+
+Checking the operator table against the print sites, before writing code:
+`dependents` output reaches the terminal through `main.rs` (`print!` of
+`render_text`), so s2_f06 exercises the main.rs sink, not `dependents.rs`.
+`dependents.rs` prints only `skipping <path>: <error>` for a lock it cannot
+read, and that path is repository-controlled. r1's declared killer for
+S2-M9 could therefore never kill it. Added s2_f14 (a lock that cannot be
+read, under a directory whose name carries ESC, BEL and U+202E); it fails
+on the S1 engine with raw bytes and is S2-M9's declared killer. s2_f06
+stays as the guard of `dependents` output through main.rs. Fixtures: 14.
+`gate.rs` is also covered by S2-2; it prints the child check's lines, which
+are already neutralized, and watched paths in its drift line; it has no
+separate fixture or operator in r2, stated.

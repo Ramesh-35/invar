@@ -19,3 +19,16 @@ Confirmed and NOT yet fixed (S0, for ruling): terminal control-byte
 injection through the witness line (path 4); exponential directory walk
 over symbolic-link loops, reachable from a repository's own invar.toml
 (path 5). Probes: scripts/security/.
+
+## S2 (SEC-D4 terminal neutralization, SEC-D5 walk and path), SECURITY-SPEC r2
+
+S2 binary: d2c449b14aa1. Fixtures: tests/security_s2_test.rs (14), frozen
+before any S2 code (r1, then r2 still before code: one killer corrected).
+
+| File | sha256 (16) | What it is |
+|---|---|---|
+| probes-s2.txt | b85625cf10bf37a4 | terminal injection: no raw control byte; link loop: returns at once; forgery: all exit 1 |
+| mutate-s2.log | fd2b26dcf1234d60 | 9 S2 operators, all killed by their declared killer |
+| corpus-s2.tsv | f75fa99a85dad2f1 | all 122 corpus cases, S1 vs S2: 122 identical |
+| roundtrip-s2.tsv | e7f954b215b4892e | round trips S1 vs S2: every check output identical; 5 locks differ in time-derived fields only |
+| roundtrip-s2-locks-verified.tsv | 91862f14d6cebd26 | those 5 locks, identical after recorded_at substitution |
