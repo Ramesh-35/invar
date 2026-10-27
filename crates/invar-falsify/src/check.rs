@@ -759,6 +759,15 @@ const MAX_SITES_SHOWN: usize = 3;
 
 /// One-line location suffix, e.g. " read at `client.js:6` · not in
 /// `schema.json /properties`". Every repo-derived value is escaped code.
+/// G2-R: the place, candidate key and type a `missing_from` carries in its
+/// frozen candidate form (`<at> · candidate rename: <to> (same scope, same
+/// type <ty>), not evaluated`). One reader for the text renderer and JSON-1.
+pub(crate) fn rename_candidate(m: &str) -> Option<(&str, &str, &str)> {
+    let (at, c) = m.split_once(" · candidate rename: ")?;
+    let (to, rest) = c.split_once(" (same scope, same type ")?;
+    Some((at, to, rest.strip_suffix("), not evaluated")?))
+}
+
 pub fn witness_text(w: &Witness, kind: &str, code: fn(&str) -> String) -> String {
     let mut s = String::new();
     if !w.sites.is_empty() {
@@ -781,11 +790,7 @@ pub fn witness_text(w: &Witness, kind: &str, code: fn(&str) -> String) -> String
     if let Some(m) = &w.missing_from {
         // G2-R: a candidate rename travels in missing_from; each repo-derived
         // value in it gets its own code span.
-        let cand = m.split_once(" · candidate rename: ").and_then(|(at, c)| {
-            let (to, rest) = c.split_once(" (same scope, same type ")?;
-            Some((at, to, rest.strip_suffix("), not evaluated")?))
-        });
-        match cand {
+        match rename_candidate(m) {
             Some((at, to, ty)) => s.push_str(&format!(
                 " · not in {} · candidate rename: {} (same scope, same type {}), not evaluated",
                 code(at),

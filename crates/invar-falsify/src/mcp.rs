@@ -24,7 +24,7 @@ use std::path::{Path, PathBuf};
 use anyhow::{anyhow, Result};
 use serde_json::{json, Value};
 
-use crate::check::{evaluate_with, ContractOutcome};
+use crate::check::{evaluate_with, ContractOutcome, Witness};
 use crate::lock::{self, Lock};
 use crate::resolver::{Resolver, Transport};
 
@@ -58,7 +58,147 @@ pub fn load_lock(config: &Path) -> Result<Option<Lock>> {
     Ok(Some(lock::parse(&p.display().to_string(), &text)?))
 }
 
+// ------------------------------------------------------------- JSON-1
+// docs/falsification/JSON-SPEC.md (AGENT-1 P1, ruling JSON-D1): the
+// structured fields are derived from the outcome the engine already built;
+// nothing here changes a verdict or a line of text output.
+
+/// R-1: the rule a witness convicts under.
+fn rule_of(w: &Witness, kind: &str) -> &'static str {
+    if kind == "lock_order" {
+        "lock-order"
+    } else if w.missing_from.as_deref().is_some_and(|m| rs1_writes(m).is_some()) {
+        "request-side"
+    } else if w.missing_from.is_some() {
+        "absent"
+    } else {
+        "retyped"
+    }
+}
+
+/// The written lines of the RS-1 form (`... at head: no inbound read and no
+/// literal of K remain (...); written at N:L1, L2`), as (N, [L1, L2]).
+fn rs1_writes(m: &str) -> Option<(&str, Vec<u64>)> {
+    if !m.contains(" at head: no inbound read and no literal of ") {
+        return None;
+    }
+    let (_, at) = m.rsplit_once("; written at ")?;
+    let (name, lines) = at.rsplit_once(':')?;
+    let lines: Vec<u64> = lines.split(", ").map(|l| l.trim().parse().ok()).collect::<Option<_>>()?;
+    Some((name, lines))
+}
+
+/// R-2: consumer sites as {file, line, access}.
+fn consumer_sites(w: &Witness, kind: &str) -> Vec<Value> {
+    let access = if kind == "lock_order" { "trace" } else { "read" };
+    let mut out: Vec<Value> = w
+        .sites
+        .iter()
+        .filter_map(|s| s.rsplit_once(':'))
+        .filter_map(|(f, l)| l.parse::<u64>().ok().map(|l| json!({"file": f, "line": l, "access": access})))
+        .collect();
+    if let Some((name, lines)) = w.missing_from.as_deref().and_then(rs1_writes) {
+        out.extend(lines.into_iter().map(|l| json!({"file": name, "line": l, "access": "write"})));
+    }
+    out
+}
+
+/// R-3: the bound producers the witness places the field in: for each place,
+/// the longest bound name it equals or starts with, followed by a space or a
+/// colon. Never a guess: no match contributes nothing.
+fn producers_of(w: &Witness, bound: &[String]) -> Vec<String> {
+    let mut places: Vec<&str> = Vec::new();
+    if let Some(m) = &w.missing_from {
+        let head = m.split(" · ").next().unwrap_or(m);
+        places.extend(head.split(", "));
+    }
+    if let Some((_, _, at)) = &w.type_change {
+        places.push(at);
+    }
+    let mut out: Vec<String> = Vec::new();
+    for p in places {
+        let hit = bound
+            .iter()
+            .filter(|n| p == n.as_str() || p.strip_prefix(n.as_str()).is_some_and(|r| r.starts_with(' ') || r.starts_with(':')))
+            .max_by_key(|n| n.len());
+        if let Some(n) = hit {
+            if !out.contains(n) {
+                out.push(n.clone());
+            }
+        }
+    }
+    out
+}
+
+/// A-1, S-1: the stable reason code of a not-evaluated statement or a skip.
+/// The text's own `[not-evaluated:CODE]` tag first; then the engine's fixed
+/// untagged sentences, enumerated in JSON-SPEC B; else `unclassified`.
+pub fn reason_code(text: &str) -> String {
+    if let Some(code) = text.rsplit_once("[not-evaluated:").and_then(|(_, t)| t.strip_suffix(']')) {
+        return code.to_string();
+    }
+    let code = if text.ends_with(", not evaluated (pattern not read)") {
+        "pattern-not-read"
+    } else if text.contains(" moved to ") && text.contains("; consumer read at ") && text.ends_with(" not evaluated") {
+        "field-moved"
+    } else if text.starts_with("the lock binds no field of this contract (0 bindings)") {
+        "no-bindings"
+    } else if text.starts_with("language not supported (") {
+        "unsupported-language"
+    } else if text.starts_with("not evaluated: no invar.lock entry") {
+        "no-lock-entry"
+    } else if text.starts_with("not evaluated: inline list ") {
+        "list-unrecognizable"
+    } else if text.starts_with("not evaluated: list ") && text.contains(" is no longer statically extractable") {
+        "list-not-extractable"
+    } else if text.starts_with("not evaluated: list ") && text.contains(" no longer found in ") {
+        "list-not-found"
+    } else if text.starts_with("not evaluated: no shape ") {
+        "shape-not-found"
+    } else if text.starts_with("not evaluated: ") && text.contains(" is no longer statically extractable") {
+        "shape-not-extractable"
+    } else {
+        "unclassified"
+    };
+    code.to_string()
+}
+
+/// The artifact names a contract block binds as producers.
+fn bound_producers(block: &[(String, String)]) -> Vec<String> {
+    ["producer", "producer_base", "producer_code", "producer_code_base"]
+        .iter()
+        .filter_map(|k| crate::check::getk(block, k))
+        .map(|v| crate::check::artifact_name(&v))
+        .collect()
+}
+
 pub fn outcome_json(o: &ContractOutcome) -> Value {
+    outcome_json_bound(o, &[])
+}
+
+/// `outcome_json` with the contract's bound producer names (R-3).
+pub fn outcome_json_bound(o: &ContractOutcome, bound: &[String]) -> Value {
+    let mut v = outcome_json_base(o);
+    if let Some(items) = v["residue"].as_array_mut() {
+        for (item, w) in items.iter_mut().zip(&o.witnesses) {
+            item["rule"] = json!(rule_of(w, &o.kind));
+            item["consumer_sites"] = json!(consumer_sites(w, &o.kind));
+            item["producers"] = json!(producers_of(w, bound));
+            item["candidate_rename"] = match w.missing_from.as_deref().and_then(crate::check::rename_candidate) {
+                Some((_, to, ty)) => json!({"key": to, "type": ty}),
+                None => Value::Null,
+            };
+        }
+    }
+    v["not_evaluated_items"] = json!(o.unevaluated.iter().map(|u| json!({"reason": reason_code(u), "text": u})).collect::<Vec<_>>());
+    v["skip"] = match &o.skipped {
+        Some(s) => json!({"reason": reason_code(s), "text": s}),
+        None => Value::Null,
+    };
+    v
+}
+
+fn outcome_json_base(o: &ContractOutcome) -> Value {
     let status = if o.skipped.is_some() {
         "skipped"
     } else if o.violated() {
@@ -123,9 +263,18 @@ impl Server<'_> {
         } else {
             "all_hold"
         };
+        let blocks = crate::check::gather_blocks(&sections).unwrap_or_default();
+        let bound = |id: &str| -> Vec<String> {
+            blocks
+                .iter()
+                .find(|b| crate::check::getk(b, "id").as_deref() == Some(id))
+                .map(|b| bound_producers(b))
+                .unwrap_or_default()
+        };
         Ok(json!({
             "result": result,
-            "contracts": outcomes.iter().map(outcome_json).collect::<Vec<_>>(),
+            "exit_code": crate::receipt::contracts_exit(&outcomes),
+            "contracts": outcomes.iter().map(|o| outcome_json_bound(o, &bound(&o.id))).collect::<Vec<_>>(),
         }))
     }
 

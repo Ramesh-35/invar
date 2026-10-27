@@ -1,0 +1,32 @@
+J-M1 KILLED ['j_f03']
+J-M2 KILLED ['j_f04']
+J-M3 KILLED ['j_f02']
+J-M4 KILLED ['j_f03']
+J-M5 KILLED ['j_f04']
+J-M6 KILLED ['j_f01', 'j_f02', 'j_f05']
+J-M7 KILLED ['j_f01']
+J-M8 KILLED ['j_f06', 'j_f13']
+J-M9 KILLED ['j_f07']
+J-M10 KILLED ['j_f08']
+J-M11 KILLED ['j_f09']
+J-M12 KILLED ['j_f10']
+J-M13 KILLED ['j_f11']
+J-M14 KILLED ['j_f12']
+J-M15 KILLED ['j_f06', 'j_f13']
+J-M16 KILLED ['j_f13']
+J-M1	j_f03	KILLED	j_f03	
+J-M2	j_f04	KILLED	j_f04	
+J-M3	j_f02	KILLED	j_f02	
+J-M4	j_f03	KILLED	j_f03	
+J-M5	j_f04	KILLED	j_f04	
+J-M6	j_f01	KILLED	j_f01,j_f02,j_f05	
+J-M7	j_f01	KILLED	j_f01	
+J-M8	j_f06	KILLED	j_f06,j_f13	
+J-M9	j_f07	KILLED	j_f07	
+J-M10	j_f08	KILLED	j_f08	
+J-M11	j_f09	KILLED	j_f09	
+J-M12	j_f10	KILLED	j_f10	
+J-M13	j_f11	KILLED	j_f11	
+J-M14	j_f12	KILLED	j_f12	
+J-M15	j_f06	KILLED	j_f06,j_f13	
+J-M16	j_f13	KILLED	j_f13	

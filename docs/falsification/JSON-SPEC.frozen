@@ -1,0 +1,8 @@
+# JSON-1 freeze record (r0), written before any implementation.
+# Baseline: the S2 tree (sandbox binary d2c449b14aa1).
+blake3(docs/falsification/JSON-SPEC.md) = 180e1d66ddace910d036c71af0272b1cac0209ce29242b9deb93ceec9bd8c0c2
+sha256(docs/falsification/JSON-SPEC.md) = ec11cbe66dc46ef062025f178cdde7f835504f84cc6381f72f58dc1ddafcee75
+blake3(crates/invar-falsify/tests/json_test.rs) = 46040dfa294ee251514348d93dcb219ebcda1d1b3bfbb3a962edc450cf8d06b8
+sha256(crates/invar-falsify/tests/json_test.rs) = f3e6f9e59a48810ca58506acf2c0ed12c25df0e595eb04fcbe750d45d5706699
+blake3(scripts/json/measure.py) = 01253c515a4ff5142643edeb11a68a4ae7fde47b7618c7596f184053dc3f8809
+sha256(scripts/json/measure.py) = 25aaf67ee5e689d6162a37d429030e221a266f6c96a30a9faefc1c7cd97f80f4

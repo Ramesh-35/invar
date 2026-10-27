@@ -1,0 +1,15 @@
+test j_f01_a_removal_names_rule_sites_producer_and_candidate ... ok
+test j_f02_a_retype_is_rule_retyped_with_its_producer ... ok
+test j_f03_request_side_sites_are_the_consumer_writes ... ok
+test j_f04_a_lock_order_witness_is_located_in_the_trace ... ok
+test j_f06_a_tagged_statement_keeps_its_text_and_its_code ... ok
+test j_f05_a_lock_mode_removal_names_its_producer ... ok
+test j_f07_a_lock_mode_mention_is_pattern_not_read ... ok
+test j_f09_zero_bindings_is_no_bindings ... ok
+test j_f08_a_lock_mode_move_is_field_moved ... ok
+test j_f10_an_unsupported_language_skip_states_its_reason ... ok
+test j_f11_an_unlocked_egress_contract_states_no_lock_entry ... ok
+test j_f13_a_conviction_with_statements_carries_both ... ok
+test j_f14_the_text_output_is_untouched ... ok
+test j_f12_the_result_carries_the_cli_exit_code ... ok
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s

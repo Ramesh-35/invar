@@ -1,0 +1,16 @@
+    3  candidate
+   33  exit_code:0
+   65  exit_code:1
+   24  exit_code:4
+  127  producers:named
+    6  reason:default-switch
+   61  reason:field-moved
+    1  reason:opaque-emission
+   27  reason:pattern-not-read
+    1  reason:read-only-field
+  108  rule:absent
+    1  rule:request-side
+   18  rule:retyped
+  352  sites
+    6  skip:unsupported-language
+existing keys identical to baseline: 122 of 122 []

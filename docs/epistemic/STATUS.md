@@ -1684,6 +1684,25 @@ three or more hops, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
 docs/evidence/stage3/eval008.
 
+## 2026-10-26: JSON-1 implemented (AGENT-1 P1, structured verdicts for agents)
+
+The MCP `check` tool now gives an agent its facts as fields instead of
+prose, additively: each conviction carries `rule` (absent, retyped,
+request-side, lock-order), `consumer_sites` as `{file, line, access}`
+(read, write or trace), `producers` (the bound producer files it names,
+never a guess) and `candidate_rename`; each contract carries
+`not_evaluated_items` and `skip` as `{reason, text}`, the reason a stable
+code; the result carries the CLI's `exit_code`. Every existing key keeps
+its value, and the CLI text, receipts and SARIF are untouched. The fields
+are derived from the outcome the engine already built, with no struct or
+fixture change (ruling JSON-D1); every new statement must carry a reason
+tag (JSON-D2). Measured on all 122 corpus cases: CLI text identical,
+existing JSON keys identical, producers named on 127 of 127 convictions,
+96 of 96 statements classified. 562 of 562 tests in the sandbox with S3,
+zero warnings; 16 of 16 operators killed. Fixtures frozen before code.
+Not claimed: a JSON output for the CLI (JSON-D3); producer line numbers.
+Record: docs/falsification/JSON-SPEC.md; docs/evidence/json.
+
 ## 2026-10-26: SECURITY-1 S3 implemented (programs INVAR runs, supply chain)
 
 Two ways a repository could make INVAR run its own program are closed,

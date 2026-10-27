@@ -1,0 +1,28 @@
+   39  abst-under-violated:field-moved
+   14  abst-under-violated:pattern-not-read
+    6  abst:default-switch
+   22  abst:field-moved
+    1  abst:opaque-emission
+   13  abst:pattern-not-read
+    1  abst:read-only-field
+    3  candidate
+   33  contract:HOLDS
+   18  contract:NOT EVALUATED
+    6  contract:SKIPPED
+   65  contract:VIOLATED
+  127  producer:named
+    3  rs-writes
+  108  rule:absent
+    1  rule:request-side
+   18  rule:retyped
+    2  site:BAD
+  240  site:ok
+   25  sites:elided
+    6  skip:UNTAGGED
+  127  witness
+CHECK skip-untagged r1-020-syncthing-type-int-tray language not supported (C++: syncthingconnector/syncthingconnection_requests.cpp)
+CHECK skip-untagged r1-021-memos-openid-moememos language not supported (Swift: MoeMemos/Model/User.swift)
+CHECK skip-untagged r1-023-syncthing-pending-android language not supported (Java: app/src/main/java/com/nutomic/syncthingandroid/service/RestA
+CHECK skip-untagged r1-031-bitcoin-warnings-explorer language not supported (C++: src/rpc/blockchain.cpp)
+CHECK skip-untagged r1-033-bitcoin-mempool-fee-explorer language not supported (C++: src/rpc/blockchain.cpp)
+CHECK skip-untagged r1-036-control-bitcoin-fees-added language not supported (C++: src/rpc/blockchain.cpp)
