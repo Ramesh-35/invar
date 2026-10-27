@@ -1,0 +1,4 @@
+# macOS native run (founder's MacBook Air, 2026-10-26): bash scripts/release/repro-check.sh /tmp/invar-repro on commit 5f7619e
+binary   13be8c9a2f63dd0f2c5135b7fde27d05124f88c4f84cde2cb60338212e6dcafd 13be8c9a2f63dd0f2c5135b7fde27d05124f88c4f84cde2cb60338212e6dcafd
+archive  2249ceda31ce2477d17cb14a61f6bda94768d786d746cbe6738d623292f4e0ae 2249ceda31ce2477d17cb14a61f6bda94768d786d746cbe6738d623292f4e0ae
+reproducible

@@ -43,6 +43,7 @@ any S3 code. Ruling of 2026-10-26: S3-D1 to S3-D4 as recommended.
 |---|---|---|
 | git-hostile-s3.tsv | dbde8e7bba43febd | before: INVAR's 7 git invocations against 7 hostile .git/config vectors, each with a firing positive control; only `hash-object` runs a program (filter clean, filter process) |
 | git-hostile-s3-after.tsv | 0b6b60777be8e000 | after: `hash-object --no-filters` runs neither filter |
+| repro-check-s3-macos.txt | 16e0ba4a9fd3dae8 | native run on the founder's Mac, commit 5f7619e: binary 13be8c9a2f63 and archive 2249ceda31ce identical from two paths (macOS differs from Linux, as a different target must) |
 | git-hostile-s3-macos.tsv | 0539d2f2542c4997 | native run on the founder's Mac (git 2.54.0): every row identical to the sandbox (git 2.43.0); only `hash-object` runs the filters, all 7 controls fire |
 | run-binpath-s3.tsv | e558fa8a1340651b | before: `run` and `report` execute composite.toml's bin_path |
 | run-binpath-s3-after.tsv | 1d536514bfe07eab | after: neither executes it |
@@ -62,6 +63,6 @@ binary run that way reproduced the recorded S2 capture byte for byte on all
 122 cases, fetched-text BLAKE3 lines included.
 
 Native (S3-D4): 548 of 548 tests on macOS; the git probe on macOS git
-2.54.0 matches the sandbox row for row. Not yet measured: a macOS
-reproducible build (repro-check.sh on the Mac, run after this commit);
-GitHub running the two new CI jobs (the first push).
+2.54.0 matches the sandbox row for row; repro-check.sh on macOS is
+reproducible (binary and archive identical from two paths). Not yet
+measured: GitHub running the two new CI jobs (the first push).
