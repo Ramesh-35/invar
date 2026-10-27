@@ -1,0 +1,14 @@
+# LOCK-1 freeze record (r0), written before any implementation.
+# Baseline: main with S3 and JSON-1 (native 562 of 562).
+blake3(docs/falsification/LOCK-VERIFIED-SPEC.md) = d26ca29679deca40edcb20fe571be0e963ded932787762594da05604a55dad17
+sha256(docs/falsification/LOCK-VERIFIED-SPEC.md) = 93f07aa0a470e832e5982d609fa1fb1d44d31d8f6fda2f0952b8d976eb4f91be
+blake3(crates/invar-falsify/tests/lock_verified_test.rs) = d39ffc718168ac0cc2ab31b8aea0180866f8425b786af28033f63877f2821853
+sha256(crates/invar-falsify/tests/lock_verified_test.rs) = 0db57643a4c3c45afc9207683f1a938c1e33dfe1f237584014aead363a5e44bf
+blake3(scripts/lock/premises.sh) = 01ec972320d9d46d2ba5528356795cfbb1dccf36424f9b2e0f0b04d69f454d98
+sha256(scripts/lock/premises.sh) = 226acdc1c36d3392727248629934dd6d7c668b1cfa6a0d67eb2d979b034c1035
+
+# r1 (2026-10-27, at implementation): p4_f01 expected value corrected (spec F3).
+blake3(docs/falsification/LOCK-VERIFIED-SPEC.md) = d951c9bd425f5deaf298aa886ad501f3a1ea0142818d68fae0ac78a2bafae6cf
+sha256(docs/falsification/LOCK-VERIFIED-SPEC.md) = 1d6ec86fa642f690c03eb3f9439ada08df9a25fbb594eb1cc9c90cb2ecff57fe
+blake3(crates/invar-falsify/tests/lock_verified_test.rs) = 599bcfe9c9baa9973a8b492e1d4159a16d0bf04db7686d27504a30177a014897
+sha256(crates/invar-falsify/tests/lock_verified_test.rs) = fc6f75ea9d6e1dd07987e2bac178cffe7ebfa54477740ddabc201a1e132ceb68

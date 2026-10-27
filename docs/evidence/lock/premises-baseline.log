@@ -1,0 +1,6 @@
+f04 trusted signature: lock signature ok (release@invar) exit 0
+f05 no signature: ERROR (not a verdict): lock not confirmed: ./invar.lock.sig is missing; sign with: ssh-keygen -Y sign -n invar-lock -f <key> ./invar.lock exit 3
+f06 untrusted key: ERROR (not a verdict): lock not confirmed: ./invar.lock.sig does not verify against signers as release@invar exit 3
+f07 lines to edit: 1
+f07 edited after signing: ERROR (not a verdict): lock not confirmed: ./invar.lock.sig does not verify against signers as release@invar exit 3
+f08 newline appended: ERROR (not a verdict): lock not confirmed: ./invar.lock.sig does not verify against signers as release@invar exit 3

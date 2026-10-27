@@ -363,6 +363,13 @@ struct McpArgs {
     /// Read local files only (no github: fetches).
     #[arg(long, default_value_t = false)]
     offline: bool,
+    /// LOCK-1: allowed-signers file; every `check` and `contract` call then
+    /// verifies invar.lock.sig (namespace invar-lock) or returns an error.
+    #[arg(long)]
+    lock_signers: Option<String>,
+    /// Principal to verify as; required with --lock-signers.
+    #[arg(long)]
+    lock_principal: Option<String>,
 }
 
 #[derive(Parser)]
@@ -1258,6 +1265,11 @@ fn cmd_lock(args: LockArgs) -> Result<i32> {
 
 /// `invar mcp`: serve `check` and `contract` over stdio until EOF.
 fn cmd_mcp(args: McpArgs) -> Result<i32> {
+    let lock_signers = match (args.lock_signers, args.lock_principal) {
+        (Some(file), Some(principal)) => Some(invar_falsify::mcp::LockSigners { file: PathBuf::from(file), principal }),
+        (Some(_), None) => anyhow::bail!("--lock-signers needs --lock-principal"),
+        (None, _) => None,
+    };
     let curl = CurlTransport::default();
     let server = invar_falsify::mcp::Server {
         config: PathBuf::from(&args.config),
@@ -1265,6 +1277,7 @@ fn cmd_mcp(args: McpArgs) -> Result<i32> {
         token: std::env::var("GITHUB_TOKEN").ok().filter(|v| !v.is_empty()),
         today: lock::today_utc(),
         measured_record: MEASURED_RECORD,
+        lock_signers,
     };
     let stdin = std::io::stdin();
     server.serve(stdin.lock(), std::io::stdout())?;

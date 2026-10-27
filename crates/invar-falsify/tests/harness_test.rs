@@ -1290,7 +1290,7 @@ fn fix_suggest_and_mcp_server() {
     assert!(s[0].patch.is_none() && s[0].note.as_deref().unwrap().starts_with("type change"));
 
     // MCP: initialize, list, both tools, unknown method; notifications get no reply.
-    let server = Server { config: dir.join("invar.toml"), transport: None, token: None, today: day, measured_record: "test" };
+    let server = Server { config: dir.join("invar.toml"), transport: None, token: None, today: day, measured_record: "test", lock_signers: None };
     let input = concat!(
         r#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05"}}"#, "\n",
         r#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#, "\n",

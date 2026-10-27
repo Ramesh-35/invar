@@ -39,6 +39,15 @@ pub struct Server<'a> {
     /// The binary's MEASURED_RECORD line, passed in so the coverage tool
     /// states the same record as `invar coverage` (one source, main.rs).
     pub measured_record: &'static str,
+    /// LOCK-1 (LOCK-VERIFIED-SPEC.md): with signers, every `check` and
+    /// `contract` call verifies invar.lock.sig over the lock bytes it parses.
+    pub lock_signers: Option<LockSigners>,
+}
+
+/// `--lock-signers` and `--lock-principal`, namespace `invar-lock` (as `invar check`).
+pub struct LockSigners {
+    pub file: PathBuf,
+    pub principal: String,
 }
 
 fn base_dir(config: &Path) -> PathBuf {
@@ -56,6 +65,34 @@ pub fn load_lock(config: &Path) -> Result<Option<Lock>> {
     }
     let text = std::fs::read_to_string(&p)?;
     Ok(Some(lock::parse(&p.display().to_string(), &text)?))
+}
+
+/// L-1..L-4: the lock this call uses and its state. One read: the bytes
+/// verified are the bytes parsed. With signers, anything short of a
+/// verified signature is an error, never a degraded `unsigned`.
+fn read_lock(config: &Path, signers: Option<&LockSigners>) -> Result<(Option<Lock>, &'static str)> {
+    let p = base_dir(config).join("invar.lock");
+    let Some(s) = signers else {
+        return Ok(match load_lock(config)? {
+            Some(l) => (Some(l), "unsigned"),
+            None => (None, "absent"),
+        });
+    };
+    let bytes = std::fs::read(&p).map_err(|_| anyhow!("lock not confirmed: {} does not exist", p.display()))?;
+    let sig = p.with_extension("lock.sig");
+    if !sig.exists() {
+        return Err(anyhow!("lock not confirmed: {} is missing", sig.display()));
+    }
+    if !crate::receipt::verify_ssh(&bytes, &sig, &s.file, &s.principal, "invar-lock")? {
+        return Err(anyhow!(
+            "lock not confirmed: {} does not verify against {} as {}",
+            sig.display(),
+            s.file.display(),
+            s.principal
+        ));
+    }
+    let text = String::from_utf8(bytes).map_err(|e| anyhow!("{}: {e}", p.display()))?;
+    Ok((Some(lock::parse(&p.display().to_string(), &text)?), "verified"))
 }
 
 // ------------------------------------------------------------- JSON-1
@@ -249,7 +286,7 @@ impl Server<'_> {
             .map_err(|e| anyhow!("reading {}: {e}", self.config.display()))?;
         let sections = crate::config::parse_sections(&self.config.display().to_string(), &raw)
             .map_err(|e| anyhow!("{e}"))?;
-        let lock = load_lock(&self.config)?;
+        let (lock, lock_state) = read_lock(&self.config, self.lock_signers.as_ref())?;
         let outcomes = evaluate_with(&sections, &self.resolver(), lock.as_ref(), self.today)?;
         let violated = outcomes.iter().filter(|o| o.violated()).count();
         let skipped = outcomes
@@ -275,11 +312,14 @@ impl Server<'_> {
             "result": result,
             "exit_code": crate::receipt::contracts_exit(&outcomes),
             "contracts": outcomes.iter().map(|o| outcome_json_bound(o, &bound(&o.id))).collect::<Vec<_>>(),
+            "lock_state": lock_state,
+            "lock_verified": lock_state == "verified",
         }))
     }
 
     pub fn contract(&self) -> Result<Value> {
-        let lock = load_lock(&self.config)?.ok_or_else(|| {
+        let (lock, lock_state) = read_lock(&self.config, self.lock_signers.as_ref())?;
+        let lock = lock.ok_or_else(|| {
             anyhow!(
                 "no invar.lock beside {}; run `invar lock`",
                 self.config.display()
@@ -302,6 +342,8 @@ impl Server<'_> {
                 "reason": w.reason, "expires": w.expires,
                 "days_remaining": w.days_left(self.today),
             })).collect::<Vec<_>>(),
+            "lock_state": lock_state,
+            "lock_verified": lock_state == "verified",
         }))
     }
 

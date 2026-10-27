@@ -1684,6 +1684,27 @@ three or more hops, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
 docs/evidence/stage3/eval008.
 
+## 2026-10-27: LOCK-1 implemented (AGENT-1 P4, signed memory for agents)
+
+An agent can now tell an authenticated invar.lock from one anyone with
+write access could have edited. The MCP `check` and `contract` results
+carry `lock_state` (absent, unsigned, verified) and `lock_verified`,
+additively. `invar mcp --lock-signers <file> --lock-principal <name>`
+(the same pair and namespace as `invar check`) makes every call verify
+invar.lock.sig over the exact bytes it then parses, with nothing cached
+between calls; a missing or rejected signature is an error, never a
+verdict and never a fallback to `unsigned` (rulings P4-D1 to D3, as
+recommended). A signature on a server started without signers counts for
+nothing. The CLI, its text and exit codes are untouched. Measured on all
+122 corpus cases: CLI text byte-identical, existing JSON keys identical
+(every case `absent`, the corpus has no locks). 572 of 572 tests in the
+sandbox, zero warnings, no new clippy warnings; 9 of 9 operators killed by
+their declared fixtures. Fixtures frozen before code; one fixture's
+expected value for an existing key was wrong and is corrected in r1
+(measured on the pre-P4 binary), both hashes kept. Not claimed: provenance
+of other repositories' locks read by `dependents` (out of P4 scope).
+Record: docs/falsification/LOCK-VERIFIED-SPEC.md; docs/evidence/lock.
+
 ## 2026-10-26: JSON-1 implemented (AGENT-1 P1, structured verdicts for agents)
 
 The MCP `check` tool now gives an agent its facts as fields instead of

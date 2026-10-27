@@ -1,0 +1,3 @@
+cases 122
+lock_state:absent lock_verified:False 122
+cases differing beyond the two new keys: 0 

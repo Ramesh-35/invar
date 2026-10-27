@@ -1,0 +1,20 @@
+test p4_f01_no_lock_is_absent ... FAILED
+test p4_f02_an_unsigned_lock_is_never_verified ... FAILED
+test p4_f03_a_signature_on_an_unconfigured_server_is_still_unsigned ... FAILED
+test p4_f04_a_lock_signed_by_a_trusted_key_is_verified ... FAILED
+test p4_f05_a_missing_signature_is_refused ... FAILED
+test p4_f06_a_signature_by_an_untrusted_key_is_refused ... FAILED
+test p4_f07_a_lock_edited_after_signing_is_refused ... FAILED
+test p4_f09_signers_without_a_principal_fail_at_start ... FAILED
+test p4_f08_every_call_verifies_again ... FAILED
+test p4_f10_the_cli_is_unchanged ... ok
+thread 'p4_f01_no_lock_is_absent' panicked at crates/invar-falsify/tests/lock_verified_test.rs:145:5:
+thread 'p4_f02_an_unsigned_lock_is_never_verified' panicked at crates/invar-falsify/tests/lock_verified_test.rs:157:9:
+thread 'p4_f03_a_signature_on_an_unconfigured_server_is_still_unsigned' panicked at crates/invar-falsify/tests/lock_verified_test.rs:174:5:
+thread 'p4_f04_a_lock_signed_by_a_trusted_key_is_verified' panicked at crates/invar-falsify/tests/lock_verified_test.rs:107:71:
+thread 'p4_f05_a_missing_signature_is_refused' panicked at crates/invar-falsify/tests/lock_verified_test.rs:107:71:
+thread 'p4_f06_a_signature_by_an_untrusted_key_is_refused' panicked at crates/invar-falsify/tests/lock_verified_test.rs:107:71:
+thread 'p4_f07_a_lock_edited_after_signing_is_refused' panicked at crates/invar-falsify/tests/lock_verified_test.rs:107:71:
+thread 'p4_f09_signers_without_a_principal_fail_at_start' panicked at crates/invar-falsify/tests/lock_verified_test.rs:254:5:
+thread 'p4_f08_every_call_verifies_again' panicked at crates/invar-falsify/tests/lock_verified_test.rs:107:71:
+test result: FAILED. 1 passed; 9 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
