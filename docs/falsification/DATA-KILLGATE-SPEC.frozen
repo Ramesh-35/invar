@@ -1,0 +1,2 @@
+# B1 freeze record (r0, ratified), written before any measurement.
+sha256(docs/falsification/DATA-KILLGATE-SPEC.md) = 5698c199bea15ef5da48033fd6acdfafb60e088abedde6a5025ef99586d01e94
