@@ -1684,6 +1684,24 @@ three or more hops, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
 docs/evidence/stage3/eval008.
 
+## 2026-10-27: SIB-2 and SIB-3 proven live on GitHub (the demo pair)
+
+Two pull requests on the public demo pair (producer invar-demo-api,
+consumer invar-demo-web with a signed lock in the producer's
+.invar/index), Action Ramesh-35/invar@main at e33e7f8. PR 1 removes
+Limits.maxLines: run 40477039872 succeeded and the comment names
+`Limits.maxLines absent (locked number)`, verified as web@demo, exactly
+the fixtured payload (SIB-2 live; absolute paths, the B-3 pass-through).
+PR 2, after main switched to plain relative paths, removes the field AND
+deletes the whole .invar tree, its own judge, in the change under review:
+run 40477674907 succeeded, the log shows the step extracting main's index
+into the runner's temp directory while the checked-out merge tree has no
+.invar at all, and the comment is identical to PR 1's; the deletion
+changed nothing (SIB-3's base-branch read, live). Advisory held in both:
+green runs with the break stated. Not proven live: the unreadable-base
+job failure (B-2 r1), a forged rather than deleted trust root, fork pull
+requests. Raw captures: docs/evidence/sibling/live.
+
 ## 2026-10-27: SIB-3 implemented (a pull request cannot choose its own judge)
 
 On a pull request the Action's consumer step now reads a

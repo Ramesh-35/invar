@@ -1,0 +1,19 @@
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:16.7961841Z ##[start-action display=Evaluate consumer locks (advisory);id=__Ramesh-35_invar.dependents]
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:16.7989928Z ##[group]Run bash "$INVAR_ACTION_PATH/action/dependents.sh"
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:16.7990361Z ^[[36;1mbash "$INVAR_ACTION_PATH/action/dependents.sh"^[[0m
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:16.8048492Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:16.8048842Z env:
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:16.8049176Z   INVAR_BIN: /home/runner/work/_actions/Ramesh-35/invar/main/target/release/invar
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:16.8049633Z   INVAR_DEPENDENTS_REPO: Ramesh-35/invar-demo-api
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:16.8049956Z   INVAR_DEPENDENTS_LOCKS: .invar/index
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:16.8050259Z   INVAR_DEPENDENTS_SIGNERS: .invar/consumer-signers
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:16.8050557Z   INVAR_BASE_REF: main
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:16.8050867Z   INVAR_ACTION_PATH: /home/runner/work/_actions/Ramesh-35/invar/main
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:16.8051216Z ##[endgroup]
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:17.1502967Z dependents of Ramesh-35/invar-demo-api (locks: /home/runner/work/_temp/invar-base/.invar/index, 1 lockfile(s) scanned)
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:17.1504755Z invar-demo-web/invar.lock [verified as web@demo] limits:
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:17.1505548Z     Limits.maxLines absent (locked number)
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:17.1506269Z     1 binding(s) provided
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:17.1506958Z summary: 1 broken | 1 provided | 0 lockfile(s) not evaluated
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:17.1508049Z note: a lock records the fields a consumer depends on, not the lines that read them.
+consumers	Run Ramesh-35/invar@main	2026-10-27T09:03:17.1597734Z ##[end-action id=__Ramesh-35_invar.dependents;outcome=success;conclusion=success;duration_ms=363]
