@@ -97,9 +97,51 @@ verdict, and it says so in its output.
 it does not. `invar check --sarif out.sarif` exports results for GitHub
 code scanning.
 
+## For AI coding agents
+
+One settings entry makes INVAR part of the agent's edit loop:
+
+```sh
+invar hook claude-code --settings   # prints the Claude Code PostToolUse entry; installs nothing
+```
+
+After every edit the hook evaluates this repository's contracts; a
+VIOLATED contract's witness (contract, field, consumer file and line) is
+fed straight back into the agent's context, and nothing else ever is: a
+hold, a skip or an error never claims safety and never thrashes the loop.
+A directory without invar.toml is silent, so one global entry is safe
+everywhere.
+
 `invar mcp` is a read-only MCP server for coding agents (tools: check,
-contract, dependents, coverage); it never writes files. Setup:
+contract, dependents, coverage); it never writes files. Started with
+`--lock-signers`/`--lock-principal`, every check and contract result
+states whether invar.lock's signature verified in that call
+(`lock_state`, `lock_verified`), and a lock that does not verify is an
+error, never a verdict. Setup:
 [docs/reference/MCP-INTEGRATION.md](docs/reference/MCP-INTEGRATION.md).
+
+## Tell a producer who it breaks, before merge
+
+In a repository that PRODUCES an interface, point INVAR at a directory of
+consumers' signed lockfiles:
+
+```sh
+invar dependents --locks index/ --repo OWNER/NAME --lock-signers signers
+```
+
+Every signed consumer lock naming this repository is evaluated against
+the working tree, and each bound field now absent or retyped is named,
+per consumer. Unsigned or unverified locks are stated, never read. In the
+Action (`dependents_repo`, `dependents_locks`, `dependents_signers`,
+`check: 'false'` for pure producers) the report lands as an advisory PR
+comment, and on pull requests the index and trust root are read from the
+BASE branch, never from the pull request, so a change cannot choose its
+own judge. Watch that live: a pull request that deleted the entire index
+and trust root in its own diff was still held against main's signed locks
+([the attack PR](https://github.com/Ramesh-35/invar-demo-api/pull/2), and
+[the honest break](https://github.com/Ramesh-35/invar-demo-api/pull/1)).
+A lock records the fields a consumer depends on, not the lines that read
+them, and every report says so.
 
 ## What INVAR does not do
 
