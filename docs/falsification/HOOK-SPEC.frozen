@@ -1,0 +1,10 @@
+# HOOK-1 freeze record (r0), written before any implementation.
+# Baseline: SIB-3 r1 + live evidence (2667de9), 604 of 604.
+blake3(docs/falsification/HOOK-SPEC.md) = f80c6e838faa0d44fc58b8db198ca4c1a53acdc0ee8eab5cae2d6353c37a0dee
+sha256(docs/falsification/HOOK-SPEC.md) = 4a305df0bcd9d803c2ffb104da9593e3fc2c956efa2bcfa9d5b20f6ddb06cec1
+blake3(crates/invar-falsify/tests/hook_test.rs) = d651b5d421aef278025024180781b862dde361b6418fa714311242b8ba0e30b9
+sha256(crates/invar-falsify/tests/hook_test.rs) = 74a266c799786b83dba2ee162e926cc419c8d30c2d25b721f7c15a8053502e00
+
+# r1 (survivor repaired, spec F2): hk_f11 added; HK-M6 re-pointed; HK-M10 added.
+sha256(docs/falsification/HOOK-SPEC.md) = 64c10c6e0de19ea2f76f7715142ea56e8b8cfb66fdd2e73d35ebc2094ed98e90
+sha256(crates/invar-falsify/tests/hook_test.rs) = 808406cf47e198555ffcb8e5e603d13533c3489dad183a94ac421fda735243ad

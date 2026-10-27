@@ -96,6 +96,10 @@ enum Command {
     /// Read-only MCP server on stdio (tools: check, contract, dependents,
     /// coverage).
     Mcp(McpArgs),
+    /// HOOK-1: run as an agent's edit hook (today: claude-code). Reads one
+    /// PostToolUse event from stdin; a VIOLATED contract goes to stderr with
+    /// exit 2 (fed back to the agent); everything else is silent.
+    Hook(HookArgs),
     /// Research harness: evaluate the falsification corpus and persist the run.
     Run(RunArgs),
     /// Research harness: structurally validate a corpus manifest.
@@ -371,6 +375,15 @@ struct LockArgs {
 }
 
 #[derive(Parser)]
+struct HookArgs {
+    /// The agent whose hook format to speak. Known: claude-code.
+    agent: String,
+    /// Print the one settings entry to add (installs nothing) and exit.
+    #[arg(long, default_value_t = false)]
+    settings: bool,
+}
+
+#[derive(Parser)]
 struct McpArgs {
     #[arg(long, default_value = "invar.toml")]
     config: String,
@@ -455,6 +468,7 @@ fn main() {
         Command::Check(a) => dispatch(cmd_check(a)),
         Command::Lock(a) => dispatch_r2(cmd_lock(a)),
         Command::Mcp(a) => dispatch_r2(cmd_mcp(a)),
+        Command::Hook(a) => dispatch_r2(cmd_hook(a)),
         Command::Fix(a) => dispatch_r2(cmd_fix(a)),
         Command::Explain(a) => {
             let (out, code) = invar_falsify::explain::explain(a.code.as_deref());
@@ -1283,6 +1297,74 @@ fn cmd_lock(args: LockArgs) -> Result<i32> {
         next.contracts.len()
     );
     Ok(0)
+}
+
+/// HOOK-1 (docs/falsification/HOOK-SPEC.md): the binary IS the hook. One
+/// PostToolUse event on stdin; the engine's own evaluation, local files
+/// only (zero network); VIOLATED contracts on stderr with exit 2, the one
+/// code Claude Code feeds back to the model. HOLDS and NOT EVALUATED are
+/// silent (exit 2 never claims safety; it only ever carries a break), and
+/// any error is exit 3 through dispatch_r2, surfaced to the user, never to
+/// the model, so a broken setup cannot thrash the loop.
+fn cmd_hook(args: HookArgs) -> Result<i32> {
+    if args.agent != "claude-code" {
+        anyhow::bail!("unknown agent {:?} (known: claude-code)", args.agent);
+    }
+    if args.settings {
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&serde_json::json!({
+                "hooks": {"PostToolUse": [{
+                    "matcher": "Write|Edit|MultiEdit|NotebookEdit",
+                    "hooks": [{"type": "command", "command": "invar hook claude-code"}]
+                }]}
+            }))?
+        );
+        return Ok(0);
+    }
+    let mut input = String::new();
+    std::io::Read::read_to_string(&mut std::io::stdin(), &mut input)?;
+    let event: serde_json::Value =
+        serde_json::from_str(&input).map_err(|e| anyhow::anyhow!("hook event is not JSON: {e}"))?;
+    let tool = event.get("tool_name").and_then(|t| t.as_str()).unwrap_or("");
+    if !matches!(tool, "Write" | "Edit" | "MultiEdit" | "NotebookEdit") {
+        return Ok(0);
+    }
+    let cwd = event
+        .get("cwd")
+        .and_then(|c| c.as_str())
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from("."));
+    let config = cwd.join("invar.toml");
+    if !config.exists() {
+        return Ok(0);
+    }
+    let raw = std::fs::read_to_string(&config)
+        .with_context(|| format!("reading {}", config.display()))?;
+    let sections = invar_falsify::config::parse_sections(&config.display().to_string(), &raw)?;
+    let lock_file = invar_falsify::mcp::load_lock(&config)?;
+    let resolver = Resolver {
+        base_dir: cwd,
+        allow_remote: false,
+        token: None,
+        base_ref: None,
+        transport: None,
+        record_local: false,
+    };
+    let outcomes = evaluate_with(&sections, &resolver, lock_file.as_ref(), lock::today_utc())?;
+    let violated: Vec<_> = outcomes.iter().filter(|o| o.violated()).collect();
+    if violated.is_empty() {
+        return Ok(0);
+    }
+    for o in &violated {
+        let (_tag, text) = invar_falsify::check::outcome_lines(o);
+        eprint!("{}", invar_falsify::term::neutralize(&text));
+    }
+    eprintln!(
+        "invar: {} contract(s) VIOLATED by this repository's current files; run `invar check` for the full verdict",
+        violated.len()
+    );
+    Ok(2)
 }
 
 /// `invar mcp`: serve `check` and `contract` over stdio until EOF.

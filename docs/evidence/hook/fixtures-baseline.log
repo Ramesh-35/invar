@@ -1,0 +1,11 @@
+test hk_f01_a_holding_repository_is_silent ... FAILED
+test hk_f02_a_violation_reaches_the_agent ... FAILED
+test hk_f03_non_edit_tools_run_nothing ... FAILED
+test hk_f04_a_repository_without_invar_is_silent ... FAILED
+test hk_f05_malformed_stdin_is_an_error_never_feedback ... FAILED
+test hk_f06_an_engine_error_is_an_error_never_feedback ... FAILED
+test hk_f07_settings_prints_the_posttooluse_entry ... FAILED
+test hk_f08_not_evaluated_stays_out_of_the_loop ... FAILED
+test hk_f09_the_events_cwd_wins_over_the_processes ... FAILED
+test hk_f10_an_unknown_agent_is_an_error ... FAILED
+test result: FAILED. 0 passed; 10 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s

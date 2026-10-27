@@ -1,0 +1,28 @@
+HK-M1 KILLED ['hk_f02', 'hk_f09']
+HK-M2 KILLED ['hk_f02', 'hk_f09']
+HK-M3 KILLED ['hk_f03']
+HK-M4 KILLED ['hk_f04']
+HK-M5 KILLED ['hk_f05']
+HK-M6 SURVIVED []
+HK-M7 KILLED ['hk_f07']
+HK-M8 KILLED ['hk_f08']
+HK-M9 KILLED ['hk_f09']
+HK-M1	hk_f02	KILLED	hk_f02,hk_f09
+HK-M2	hk_f02	KILLED	hk_f02,hk_f09
+HK-M3	hk_f03	KILLED	hk_f03
+HK-M4	hk_f04	KILLED	hk_f04
+HK-M5	hk_f05	KILLED	hk_f05
+HK-M6	hk_f06	SURVIVED	
+HK-M7	hk_f07	KILLED	hk_f07
+HK-M8	hk_f08	KILLED	hk_f08
+HK-M9	hk_f09	KILLED	hk_f09
+HK-M1	hk_f02	KILLED	hk_f02,hk_f09
+HK-M2	hk_f02	KILLED	hk_f02,hk_f09
+HK-M3	hk_f03	KILLED	hk_f03
+HK-M4	hk_f04	KILLED	hk_f04
+HK-M5	hk_f05	KILLED	hk_f05
+HK-M6	hk_f11	KILLED	hk_f11
+HK-M10	hk_f06	KILLED	hk_f06
+HK-M7	hk_f07	KILLED	hk_f07
+HK-M8	hk_f08	KILLED	hk_f08
+HK-M9	hk_f09	KILLED	hk_f09

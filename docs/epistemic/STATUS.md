@@ -1684,6 +1684,32 @@ three or more hops, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
 docs/evidence/stage3/eval008.
 
+## 2026-10-27: HOOK-1 implemented (the check inside the agent's edit loop)
+
+`invar hook claude-code` IS the Claude Code PostToolUse hook: one settings
+entry runs the binary, it reads the event from stdin, evaluates this
+repository's contracts with the engine's own path (local files only, zero
+network, the measured reuse carrying the per-edit cost), and speaks only
+when a contract is VIOLATED: the witness text on stderr, exit 2, the one
+code fed back into the model's context. HOLDS and NOT EVALUATED are exit 0
+and silent (exit 2 never claims safety; coverage disclosure stays with the
+MCP coverage tool); malformed stdin, an unreadable or unparsable
+configuration and engine errors are exit 3, surfaced to the user and never
+to the model, so a broken setup cannot thrash the loop. `--settings`
+prints the entry and installs nothing; a directory without invar.toml is
+silent, so the hook is installable globally. Rulings H-D1 to H-D4 as
+recommended. 11 fixtures frozen (10 in r0, all failing on the engine
+without the subcommand; r1 adds hk_f11 after HK-M6 SURVIVED the r0 gate,
+its mutated parse path never exercised by hk_f06's evaluation-stage error;
+both ledgers kept, spec F2); 10 of 10 operators killed by their declared
+fixtures in r1. 615 of 615 tests in the sandbox, zero warnings, no new
+clippy warnings; CLI check text byte-identical on all 122 corpus cases.
+The three completion scripts gained the subcommand (the CLI-surface guard
+enforces this). Not claimed: that an agent acts on the feedback (the
+pre-registered two-week behavioral test, measured separately); other
+agents' hook formats; latency on other machines. Record:
+docs/falsification/HOOK-SPEC.md; docs/evidence/hook.
+
 ## 2026-10-27: SIB-2 and SIB-3 proven live on GitHub (the demo pair)
 
 Two pull requests on the public demo pair (producer invar-demo-api,
