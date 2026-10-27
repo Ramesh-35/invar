@@ -1684,6 +1684,31 @@ three or more hops, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
 docs/evidence/stage3/eval008.
 
+## 2026-10-27: SIB-2 implemented (P5 slice 2, the agent and the PR see it)
+
+SIB-1's evaluation is now one piece of data rendered three ways, so they
+cannot disagree: the CLI text (byte-identical), JSON for agents and a
+markdown PR report. An agent calling the MCP `dependents` tool without a
+query, on a server the operator started with `--repo OWNER/NAME
+--dependents-signers <file>`, receives each consumer, its signer, and each
+bound field now absent or retyped with its locked and current type; an
+unverified lock reaches it as a reason only. Identity and trust root come
+from the operator, never from the agent, and the consumer trust root is
+separate from the repository's own lock signers (rulings S2-D1 to D4).
+`dependents --report-md` writes the PR report: every repository value is
+inert code (a contract id built to break the table or ping someone is
+neutralized). The Action gains optional inputs (`check`,
+`dependents_repo`, `dependents_locks`, `dependents_signers`): a pure
+producer repository skips `check`, and the consumer report is its own,
+advisory comment; its step always exits 0. CLI check text byte-identical
+and MCP check JSON unchanged on all 122 corpus cases. 597 of 597 tests in
+the sandbox, zero warnings, no new clippy warnings; 10 of 10 operators
+killed by their declared fixtures. Fixtures frozen before code. The one
+Server struct literal in tests/harness_test.rs gained two `None` fields
+(mechanical, no assertion changed). Not claimed: the Action on GitHub
+until a real run records it; consumer line numbers. Record:
+docs/falsification/SIBLING-REPORT-SPEC.md; docs/evidence/sibling.
+
 ## 2026-10-27: SIB-1 implemented (P5, which consumers a producer change breaks)
 
 Run in a producer repository, `invar dependents --locks <dir> --repo

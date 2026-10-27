@@ -1,0 +1,14 @@
+test result: FAILED. 0 passed; 13 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.77s
+test s2_f01_the_agent_sees_a_removed_field ... FAILED
+test s2_f02_the_agent_sees_a_retyped_field ... FAILED
+test s2_f03_an_unsigned_lock_reaches_the_agent_as_a_reason_only ... FAILED
+test s2_f04_a_server_without_dependents_signers_evaluates_nothing ... FAILED
+test s2_f05_no_query_on_a_server_without_repo_is_an_error ... FAILED
+test s2_f06_locks_outside_the_configuration_directory_stay_refused ... FAILED
+test s2_f07_text_and_json_are_one_evaluation ... FAILED
+test s2_f08_the_query_mode_is_unchanged ... FAILED
+test s2_f09_tools_list_declares_evaluation ... FAILED
+test s2_f10_the_pr_report_names_the_break_and_changes_nothing_else ... FAILED
+test s2_f11_repository_values_are_inert_in_the_pr_report ... FAILED
+test s2_f12_the_action_wires_evaluation_as_advisory ... FAILED
+test s2_f13_the_action_step_never_fails_the_job ... FAILED

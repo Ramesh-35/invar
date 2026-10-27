@@ -383,16 +383,58 @@ pub fn render_siblings(locks_display: &str, s: &Siblings) -> String {
     out
 }
 
+
 // ---------------------------------------------------------------------------
 // SIB-1 (P5, docs/falsification/SIBLING-EVAL-SPEC.md r1): evaluation mode.
 // Run in a producer repository: every signed consumer lock under `locks_dir`
 // whose remote producer names `repo` is evaluated against the working tree.
 // Advisory: broken fields never fail the run (0); anything not evaluated is
 // a stated blind spot (4). Zero network: remote refs are matched by name.
+// SIB-2 (SIBLING-REPORT-SPEC.md): one evaluation, held as data, rendered as
+// text (CLI), JSON (MCP) and markdown (PR report); the three cannot disagree.
 // ---------------------------------------------------------------------------
 
-pub const SIBLING_NOTE: &str =
-    "note: a lock records the fields a consumer depends on, not the lines that read them.";
+pub const SIBLING_NOTE_TEXT: &str =
+    "a lock records the fields a consumer depends on, not the lines that read them.";
+pub const DEPENDENTS_MARKER: &str = "<!-- invar-dependents -->";
+
+pub struct Broken {
+    pub field: String,
+    /// "absent" or "retyped".
+    pub rule: &'static str,
+    pub locked: String,
+    pub now: Option<String>,
+}
+
+pub struct ContractEval {
+    pub id: String,
+    pub producer: String,
+    /// (broken, provided), or (reason code, text) when not evaluated.
+    pub result: std::result::Result<(Vec<Broken>, usize), (&'static str, String)>,
+}
+
+pub enum Consumer {
+    NotEvaluated { lockfile: String, reason: &'static str, text: String },
+    Verified { lockfile: String, principal: String, contracts: Vec<ContractEval> },
+}
+
+pub struct Evaluation {
+    pub repo: String,
+    pub locks_display: String,
+    pub scanned: usize,
+    pub consumers: Vec<Consumer>,
+    pub broken: usize,
+    pub provided: usize,
+    pub lockfiles_not_evaluated: usize,
+    pub contracts_not_evaluated: usize,
+}
+
+impl Evaluation {
+    /// 0 when everything matched was evaluated, 4 otherwise (blind spots).
+    pub fn exit_code(&self) -> i32 {
+        if self.lockfiles_not_evaluated + self.contracts_not_evaluated > 0 { 4 } else { 0 }
+    }
+}
 
 /// SB-3: the principal that signed `bytes`, when the signature names a
 /// principal in `signers` and verifies over exactly these bytes.
@@ -419,11 +461,15 @@ fn our_path(producer: &str, repo: &str) -> Option<String> {
     format!("{}/{}", r.owner, r.repo).eq_ignore_ascii_case(repo).then_some(r.path)
 }
 
-/// SB-2 for one contract: (broken lines, provided count), or why not.
-fn evaluate_contract(root: &Path, c: &lock::LockedContract, path: &str) -> std::result::Result<(Vec<String>, usize), String> {
+/// SB-2 for one contract: (broken, provided), or (reason, text).
+fn evaluate_contract(
+    root: &Path,
+    c: &lock::LockedContract,
+    path: &str,
+) -> std::result::Result<(Vec<Broken>, usize), (&'static str, String)> {
     let file = root.join(path);
-    let text = std::fs::read_to_string(&file).map_err(|_| format!("{path} not found in this repository"))?;
-    let fields = crate::backtest::surface(c, &text).ok_or_else(|| format!("{path}: fields cannot be extracted"))?;
+    let text = std::fs::read_to_string(&file).map_err(|_| ("producer-missing", format!("{path} not found in this repository")))?;
+    let fields = crate::backtest::surface(c, &text).ok_or_else(|| ("unextractable", format!("{path}: fields cannot be extracted")))?;
     let scoped: std::collections::BTreeSet<String> =
         c.bindings.iter().filter(|b| !b.scope.is_empty()).map(|b| name_key(&b.field)).collect();
     let (mut broken, mut provided) = (Vec::new(), 0usize);
@@ -431,9 +477,9 @@ fn evaluate_contract(root: &Path, c: &lock::LockedContract, path: &str) -> std::
         if b.scope.is_empty() && scoped.contains(&name_key(&b.field)) {
             continue;
         }
-        let locked = b.ty.as_deref().unwrap_or("?");
+        let locked = b.ty.as_deref().unwrap_or("?").to_string();
         if !crate::backtest::present(&fields, b) {
-            broken.push(format!("{} absent (locked {})", b.display(), locked));
+            broken.push(Broken { field: b.display(), rule: "absent", locked, now: None });
             continue;
         }
         let now = fields
@@ -444,7 +490,7 @@ fn evaluate_contract(root: &Path, c: &lock::LockedContract, path: &str) -> std::
             .and_then(|(_, t)| t.clone());
         match (&b.ty, now) {
             (Some(was), Some(now)) if *was != now => {
-                broken.push(format!("{} retyped (locked {was}, now {now})", b.display()))
+                broken.push(Broken { field: b.display(), rule: "retyped", locked: was.clone(), now: Some(now) })
             }
             _ => provided += 1,
         }
@@ -452,32 +498,43 @@ fn evaluate_contract(root: &Path, c: &lock::LockedContract, path: &str) -> std::
     Ok((broken, provided))
 }
 
-/// The evaluation report and its exit code (0 answered, 4 blind spots).
-pub fn evaluate(locks_dir: &Path, root: &Path, repo: &str, signers: Option<&Path>) -> Result<(String, i32)> {
-    let esc = crate::term::escape_value;
+/// Evaluate every lock under `locks_dir` that names `repo`. `signers_flag`
+/// is the option that supplies `signers`, named in the no-signers reason.
+pub fn evaluate(locks_dir: &Path, root: &Path, repo: &str, signers: Option<&Path>, signers_flag: &str) -> Result<Evaluation> {
     let mut files = Vec::new();
     walk(locks_dir, &mut files)?;
     files.sort();
-    let (mut out, mut broken_n, mut provided_n, mut locks_ne, mut contracts_ne) = (String::new(), 0, 0, 0, 0);
+    let mut e = Evaluation {
+        repo: repo.to_string(),
+        locks_display: locks_dir.display().to_string(),
+        scanned: files.len(),
+        consumers: Vec::new(),
+        broken: 0,
+        provided: 0,
+        lockfiles_not_evaluated: 0,
+        contracts_not_evaluated: 0,
+    };
     for lf in &files {
-        let rel = esc(&lf.strip_prefix(locks_dir).unwrap_or(lf).display().to_string());
+        let lockfile = lf.strip_prefix(locks_dir).unwrap_or(lf).display().to_string();
+        let refuse = |e: &mut Evaluation, reason: &'static str, text: String| {
+            e.consumers.push(Consumer::NotEvaluated { lockfile: lockfile.clone(), reason, text });
+            e.lockfiles_not_evaluated += 1;
+        };
         // One read: the bytes verified are the bytes parsed.
         let bytes = match std::fs::read(lf) {
             Ok(b) => b,
-            Err(e) => {
-                out.push_str(&format!("{rel}: not evaluated: unreadable: {}\n", esc(&e.to_string())));
-                locks_ne += 1;
+            Err(err) => {
+                refuse(&mut e, "unreadable", format!("unreadable: {err}"));
                 continue;
             }
         };
         let parsed = std::str::from_utf8(&bytes)
-            .map_err(|e| e.to_string())
-            .and_then(|t| lock::parse(&lf.display().to_string(), t).map_err(|e| e.to_string()));
+            .map_err(|err| err.to_string())
+            .and_then(|t| lock::parse(&lf.display().to_string(), t).map_err(|err| err.to_string()));
         let l = match parsed {
             Ok(l) => l,
-            Err(e) => {
-                out.push_str(&format!("{rel}: not evaluated: unreadable: {}\n", esc(&e)));
-                locks_ne += 1;
+            Err(err) => {
+                refuse(&mut e, "unreadable", format!("unreadable: {err}"));
                 continue;
             }
         };
@@ -491,46 +548,202 @@ pub fn evaluate(locks_dir: &Path, root: &Path, repo: &str, signers: Option<&Path
         }
         let sig = lf.with_extension("lock.sig");
         let principal = match signers {
-            None => Err("no signers configured (--lock-signers)"),
-            Some(_) if !sig.exists() => Err("unsigned (no invar.lock.sig)"),
-            Some(s) => signer(&bytes, &sig, s)?.ok_or("signature does not verify"),
+            None => Err(("no-signers", format!("no signers configured ({signers_flag})"))),
+            Some(_) if !sig.exists() => Err(("unsigned", "unsigned (no invar.lock.sig)".to_string())),
+            Some(s) => signer(&bytes, &sig, s)?.ok_or(("signature", "signature does not verify".to_string())),
         };
         let principal = match principal {
-            Ok(p) => esc(&p),
-            Err(why) => {
-                out.push_str(&format!("{rel}: not evaluated: {why}\n"));
-                locks_ne += 1;
+            Ok(p) => p,
+            Err((reason, text)) => {
+                refuse(&mut e, reason, text);
                 continue;
             }
         };
+        let mut contracts = Vec::new();
         for (c, path) in ours {
-            let head = format!("{rel} [verified as {principal}] {}:", esc(&c.id));
-            match evaluate_contract(root, c, &path) {
-                Ok((broken, provided)) => {
-                    out.push_str(&format!("{head}\n"));
-                    for b in &broken {
-                        out.push_str(&format!("    {}\n", esc(b)));
-                    }
-                    out.push_str(&format!("    {provided} binding(s) provided\n"));
-                    broken_n += broken.len();
-                    provided_n += provided;
+            let result = evaluate_contract(root, c, &path);
+            match &result {
+                Ok((b, p)) => {
+                    e.broken += b.len();
+                    e.provided += p;
                 }
-                Err(why) => {
-                    out.push_str(&format!("{head} not evaluated: {}\n", esc(&why)));
-                    contracts_ne += 1;
+                Err(_) => e.contracts_not_evaluated += 1,
+            }
+            contracts.push(ContractEval { id: c.id.clone(), producer: path, result });
+        }
+        e.consumers.push(Consumer::Verified { lockfile, principal, contracts });
+    }
+    Ok(e)
+}
+
+impl Broken {
+    fn change(&self) -> String {
+        match &self.now {
+            Some(now) => format!("{} (locked {}, now {now})", self.rule, self.locked),
+            None => format!("{} (locked {})", self.rule, self.locked),
+        }
+    }
+}
+
+/// CLI text (SIB-1's exact output).
+pub fn render_evaluation_text(e: &Evaluation) -> String {
+    let esc = crate::term::escape_value;
+    let mut out = format!(
+        "dependents of {} (locks: {}, {} lockfile(s) scanned)\n",
+        esc(&e.repo),
+        esc(&e.locks_display),
+        e.scanned
+    );
+    for c in &e.consumers {
+        match c {
+            Consumer::NotEvaluated { lockfile, text, .. } => {
+                out.push_str(&format!("{}: not evaluated: {}\n", esc(lockfile), esc(text)))
+            }
+            Consumer::Verified { lockfile, principal, contracts } => {
+                for k in contracts {
+                    let head = format!("{} [verified as {}] {}:", esc(lockfile), esc(principal), esc(&k.id));
+                    match &k.result {
+                        Ok((broken, provided)) => {
+                            out.push_str(&format!("{head}\n"));
+                            for b in broken {
+                                out.push_str(&format!("    {} {}\n", esc(&b.field), esc(&b.change())));
+                            }
+                            out.push_str(&format!("    {provided} binding(s) provided\n"));
+                        }
+                        Err((_, why)) => out.push_str(&format!("{head} not evaluated: {}\n", esc(why))),
+                    }
                 }
             }
         }
     }
-    let mut report = format!(
-        "dependents of {} (locks: {}, {} lockfile(s) scanned)\n{out}summary: {broken_n} broken | {provided_n} provided | {locks_ne} lockfile(s) not evaluated",
-        esc(repo),
-        esc(&locks_dir.display().to_string()),
-        files.len()
-    );
-    if contracts_ne > 0 {
-        report.push_str(&format!(" | {contracts_ne} contract(s) not evaluated"));
+    out.push_str(&format!(
+        "summary: {} broken | {} provided | {} lockfile(s) not evaluated",
+        e.broken, e.provided, e.lockfiles_not_evaluated
+    ));
+    if e.contracts_not_evaluated > 0 {
+        out.push_str(&format!(" | {} contract(s) not evaluated", e.contracts_not_evaluated));
     }
-    report.push_str(&format!("\n{SIBLING_NOTE}\n"));
-    Ok((report, if locks_ne + contracts_ne > 0 { 4 } else { 0 }))
+    out.push_str(&format!("\nnote: {SIBLING_NOTE_TEXT}\n"));
+    out
+}
+
+/// MCP JSON (SIB-2 R-2).
+pub fn render_evaluation_json(e: &Evaluation) -> serde_json::Value {
+    let consumers: Vec<serde_json::Value> = e
+        .consumers
+        .iter()
+        .map(|c| match c {
+            Consumer::NotEvaluated { lockfile, reason, text } => {
+                json!({"lockfile": lockfile, "state": "not_evaluated", "reason": reason, "text": text})
+            }
+            Consumer::Verified { lockfile, principal, contracts } => json!({
+                "lockfile": lockfile,
+                "state": "verified",
+                "principal": principal,
+                "contracts": contracts.iter().map(|k| match &k.result {
+                    Ok((broken, provided)) => json!({
+                        "id": k.id,
+                        "producer": k.producer,
+                        "broken": broken.iter().map(|b| {
+                            let mut v = json!({"field": b.field, "rule": b.rule, "locked_type": b.locked});
+                            if let Some(now) = &b.now {
+                                v["now_type"] = json!(now);
+                            }
+                            v
+                        }).collect::<Vec<_>>(),
+                        "provided": provided,
+                    }),
+                    Err((reason, text)) => json!({
+                        "id": k.id,
+                        "producer": k.producer,
+                        "not_evaluated": {"reason": reason, "text": text},
+                    }),
+                }).collect::<Vec<_>>(),
+            }),
+        })
+        .collect();
+    json!({
+        "repo": e.repo,
+        "lockfiles_scanned": e.scanned,
+        "consumers": consumers,
+        "summary": {
+            "broken": e.broken,
+            "provided": e.provided,
+            "lockfiles_not_evaluated": e.lockfiles_not_evaluated,
+            "contracts_not_evaluated": e.contracts_not_evaluated,
+        },
+        "exit_code": e.exit_code(),
+        "note": SIBLING_NOTE_TEXT,
+    })
+}
+
+/// Plain markdown text from a repository value (a type, a reason): no
+/// table break, no code span, no mention, no HTML, one line.
+fn md_plain(s: &str) -> String {
+    crate::term::escape_value(s)
+        .replace('|', "\\|")
+        .replace('`', "'")
+        .replace('@', "&#64;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+}
+
+/// PR report (SIB-2 R-3). Every repository value is inert.
+pub fn render_evaluation_md(e: &Evaluation) -> String {
+    let code = crate::check::md_code;
+    let mut rows = String::new();
+    let mut skipped = String::new();
+    for c in &e.consumers {
+        match c {
+            Consumer::NotEvaluated { lockfile, text, .. } => {
+                skipped.push_str(&format!("- {}: not evaluated: {}\n", code(lockfile), md_plain(text)))
+            }
+            Consumer::Verified { lockfile, principal, contracts } => {
+                for k in contracts {
+                    match &k.result {
+                        Ok((broken, _)) => {
+                            for b in broken {
+                                rows.push_str(&format!(
+                                    "| {} | {} | {} | {} | {} |\n",
+                                    code(lockfile),
+                                    code(principal),
+                                    code(&k.id),
+                                    code(&b.field),
+                                    md_plain(&b.change())
+                                ));
+                            }
+                        }
+                        Err((_, why)) => skipped.push_str(&format!(
+                            "- {} {}: not evaluated: {}\n",
+                            code(lockfile),
+                            code(&k.id),
+                            md_plain(why)
+                        )),
+                    }
+                }
+            }
+        }
+    }
+    let mut md = format!("{DEPENDENTS_MARKER}\n### INVAR: consumers of {}\n\n", code(&e.repo));
+    if rows.is_empty() {
+        md.push_str("No signed consumer lock binds a field this change removes or retypes.\n\n");
+    } else {
+        md.push_str("| Consumer lock | Signed by | Contract | Field | Change |\n|---|---|---|---|---|\n");
+        md.push_str(&rows);
+        md.push('\n');
+    }
+    if !skipped.is_empty() {
+        md.push_str("Not evaluated:\n\n");
+        md.push_str(&skipped);
+        md.push('\n');
+    }
+    md.push_str(&format!(
+        "**{} broken** | {} provided | {} lockfile(s) not evaluated",
+        e.broken, e.provided, e.lockfiles_not_evaluated
+    ));
+    if e.contracts_not_evaluated > 0 {
+        md.push_str(&format!(" | {} contract(s) not evaluated", e.contracts_not_evaluated));
+    }
+    md.push_str(&format!("\n\nAdvisory: this report never fails the check.\n\n_{SIBLING_NOTE_TEXT}_\n"));
+    md
 }

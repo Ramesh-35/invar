@@ -8,7 +8,7 @@
 set -euo pipefail
 
 if [ ! -f "${INVAR_REPORT:-}" ]; then echo "invar: no report to post"; exit 0; fi
-marker='<!-- invar-check -->'
+marker="${INVAR_MARKER:-<!-- invar-check -->}"
 
 existing=$(gh api "repos/$INVAR_REPO/issues/$INVAR_PR/comments" --paginate \
   --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n1)

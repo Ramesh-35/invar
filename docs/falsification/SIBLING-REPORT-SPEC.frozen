@@ -1,0 +1,6 @@
+# SIB-2 freeze record (r0), written before any implementation.
+# Baseline: SIB-1 tree, 584 of 584 in the sandbox.
+blake3(docs/falsification/SIBLING-REPORT-SPEC.md) = 91a422207150c9c7370fc3bfd19ddc96fc89b82e6c4ec492f4560631c3225e8a
+sha256(docs/falsification/SIBLING-REPORT-SPEC.md) = 81c67612ac6c2b8b897a867d092aee93c69a09619d5a1f439e156007f07c0bbc
+blake3(crates/invar-falsify/tests/sibling_report_test.rs) = 87e77d15aa0d142b7f23608805eef796c5306a69da2d5a1962c84f2bf703c18e
+sha256(crates/invar-falsify/tests/sibling_report_test.rs) = 3101d17cef44828a289053c3be659d6781829261bd15fd10c9474a028818e6ba

@@ -41,6 +41,22 @@ inputs:
     description: Release tag of the binary to download. Defaults to the action ref; if no release asset matches, the action builds from source.
     required: false
     default: ''
+  check:
+    description: Run `invar check`. Set 'false' in a pure producer repository (no contracts of its own) that only evaluates its consumers.
+    required: false
+    default: 'true'
+  dependents_repo:
+    description: This repository's identity, OWNER/NAME. When set, the signed consumer locks under dependents_locks are evaluated against this change (advisory, never fails the job) and reported on the PR.
+    required: false
+    default: ''
+  dependents_locks:
+    description: Directory of consumer invar.lock files (for example a checkout of a shared index), relative to the workspace.
+    required: false
+    default: ''
+  dependents_signers:
+    description: Allowed-signers file trusting the consumer repositories. Without it, nothing is evaluated (stated).
+    required: false
+    default: ''
 
 outputs:
   exit_code:
@@ -69,6 +85,7 @@ runs:
 
     - name: Run invar check --ci
       id: check
+      if: inputs.check == 'true'
       shell: bash
       env:
         INVAR_BIN: ${{ steps.bin.outputs.bin }}
@@ -91,7 +108,34 @@ runs:
         INVAR_ACTION_PATH: ${{ github.action_path }}
       run: bash "$INVAR_ACTION_PATH/action/comment.sh"
 
+    - name: Evaluate consumer locks (advisory)
+      id: dependents
+      if: inputs.dependents_repo != ''
+      shell: bash
+      env:
+        INVAR_BIN: ${{ steps.bin.outputs.bin }}
+        INVAR_DEPENDENTS_REPO: ${{ inputs.dependents_repo }}
+        INVAR_DEPENDENTS_LOCKS: ${{ inputs.dependents_locks }}
+        INVAR_DEPENDENTS_SIGNERS: ${{ inputs.dependents_signers }}
+        INVAR_ACTION_PATH: ${{ github.action_path }}
+      run: bash "$INVAR_ACTION_PATH/action/dependents.sh"
+
+    - name: Post or refresh consumer report
+      if: inputs.dependents_repo != '' && steps.dependents.outputs.dependents_report != '' && inputs.post_comment == 'true' && github.event_name == 'pull_request'
+      continue-on-error: true
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+        INVAR_MARKER: '<!-- invar-dependents -->'
+        INVAR_EXIT: ${{ steps.dependents.outputs.dependents_broken != '0' && '1' || '0' }}
+        INVAR_REPORT: ${{ steps.dependents.outputs.dependents_report }}
+        INVAR_PR: ${{ github.event.pull_request.number }}
+        INVAR_REPO: ${{ github.repository }}
+        INVAR_ACTION_PATH: ${{ github.action_path }}
+      run: bash "$INVAR_ACTION_PATH/action/comment.sh"
+
     - name: Gate
+      if: inputs.check == 'true'
       shell: bash
       env:
         INVAR_EXIT: ${{ steps.check.outputs.exit_code }}

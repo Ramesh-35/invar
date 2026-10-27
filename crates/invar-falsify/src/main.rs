@@ -226,6 +226,10 @@ struct DependentsArgs {
     /// without it, nothing is evaluated (stated).
     #[arg(long)]
     lock_signers: Option<String>,
+    /// SIB-2: with --repo, also write the evaluation as a markdown PR
+    /// report here (stdout and exit code unchanged).
+    #[arg(long)]
+    report_md: Option<String>,
     /// Directory to scan for invar.lock files (any depth). Local only: this
     /// command performs no network calls by construction.
     #[arg(long)]
@@ -380,6 +384,14 @@ struct McpArgs {
     /// Principal to verify as; required with --lock-signers.
     #[arg(long)]
     lock_principal: Option<String>,
+    /// SIB-2: this repository's identity (OWNER/NAME); the `dependents`
+    /// tool evaluates consumer locks without a query only when it is set.
+    #[arg(long)]
+    repo: Option<String>,
+    /// SIB-2: allowed signers for consumer locks (one file, many
+    /// principals), separate from --lock-signers.
+    #[arg(long)]
+    dependents_signers: Option<String>,
 }
 
 #[derive(Parser)]
@@ -1288,6 +1300,8 @@ fn cmd_mcp(args: McpArgs) -> Result<i32> {
         today: lock::today_utc(),
         measured_record: MEASURED_RECORD,
         lock_signers,
+        repo: args.repo,
+        dependents_signers: args.dependents_signers.map(PathBuf::from),
     };
     let stdin = std::io::stdin();
     server.serve(stdin.lock(), std::io::stdout())?;
@@ -1698,19 +1712,26 @@ fn cmd_dependents(args: DependentsArgs) -> Result<i32> {
             if args.format != "text" {
                 anyhow::bail!("evaluation (--repo) is text only in this release");
             }
-            let (report, code) = dependents::evaluate(
+            let e = dependents::evaluate(
                 Path::new(&args.locks),
                 Path::new("."),
                 repo,
                 args.lock_signers.as_deref().map(Path::new),
+                "--lock-signers",
             )?;
-            print!("{report}");
-            return Ok(code);
+            print!("{}", dependents::render_evaluation_text(&e));
+            if let Some(path) = &args.report_md {
+                if let Err(err) = std::fs::write(path, dependents::render_evaluation_md(&e)) {
+                    eprintln!("ERROR (not a verdict): writing report {path}: {err}");
+                    return Ok(3);
+                }
+            }
+            return Ok(e.exit_code());
         }
         (Some(q), None) => q,
     };
-    if args.lock_signers.is_some() {
-        anyhow::bail!("--lock-signers applies to evaluation (--repo)");
+    if args.lock_signers.is_some() || args.report_md.is_some() {
+        anyhow::bail!("--lock-signers and --report-md apply to evaluation (--repo)");
     }
     let a = dependents::find(
         std::path::Path::new(&args.locks),

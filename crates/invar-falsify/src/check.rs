@@ -646,7 +646,7 @@ pub const REPORT_MARKER: &str = "<!-- invar-check -->";
 /// and residue are attacker-controllable in a fork PR, so they are always shown
 /// as code (no mention pings, no links, no HTML), with table pipes escaped and
 /// backticks and line breaks neutralized.
-fn md_code(s: &str) -> String {
+pub(crate) fn md_code(s: &str) -> String {
     let cleaned: String = s
         .chars()
         .map(|c| match c {

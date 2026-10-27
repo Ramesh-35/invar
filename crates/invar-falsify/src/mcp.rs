@@ -42,6 +42,12 @@ pub struct Server<'a> {
     /// LOCK-1 (LOCK-VERIFIED-SPEC.md): with signers, every `check` and
     /// `contract` call verifies invar.lock.sig over the lock bytes it parses.
     pub lock_signers: Option<LockSigners>,
+    /// SIB-2 (S2-D2): this repository's identity, set by the operator; the
+    /// `dependents` tool evaluates only when it is set.
+    pub repo: Option<String>,
+    /// SIB-2 (S2-D1): allowed signers for consumer locks, separate from
+    /// `lock_signers` (this repository's own lock).
+    pub dependents_signers: Option<PathBuf>,
 }
 
 /// `--lock-signers` and `--lock-principal`, namespace `invar-lock` (as `invar check`).
@@ -351,10 +357,7 @@ impl Server<'_> {
     /// `locks`. One rendering path with the CLI (`dependents::render_json`),
     /// so the two outputs are the same JSON document for the same inputs.
     pub fn dependents(&self, args: &Value) -> Result<Value> {
-        let query = args
-            .get("query")
-            .and_then(Value::as_str)
-            .ok_or_else(|| anyhow!("missing required argument \"query\""))?;
+        let query = args.get("query").and_then(Value::as_str);
         let locks = args
             .get("locks")
             .and_then(Value::as_str)
@@ -377,6 +380,21 @@ impl Server<'_> {
         if !inside {
             return Err(anyhow!("locks path is outside the configuration directory: {locks}"));
         }
+        let Some(query) = query else {
+            // SIB-2 R-2: evaluation, identity and trust root from the operator.
+            let repo = self
+                .repo
+                .as_deref()
+                .ok_or_else(|| anyhow!("give a field query, or start the server with --repo OWNER/NAME to evaluate"))?;
+            let e = crate::dependents::evaluate(
+                &locks_path,
+                &base_dir(&self.config),
+                repo,
+                self.dependents_signers.as_deref(),
+                "--dependents-signers",
+            )?;
+            return Ok(crate::dependents::render_evaluation_json(&e));
+        };
         let a = crate::dependents::find(&locks_path, query, producer)?;
         Ok(serde_json::from_str(&crate::dependents::render_json(
             query, producer, &a,
@@ -438,12 +456,12 @@ impl Server<'_> {
                 },
                 {
                     "name": "dependents",
-                    "description": "Who depends on a producer field, from invar.lock files on local disk (any depth under `locks`). Query is `Type.field` or a bare `field`, matched by naming form (case and `_`/`-` insignificant). Zero matches is an answer, not an error; unreadable lockfiles are stated in parse_errors, never dropped. Read-only, zero network by construction.",
+                    "description": "Who depends on a producer field, from invar.lock files on local disk (any depth under `locks`). Query is `Type.field` or a bare `field`, matched by naming form (case and `_`/`-` insignificant). Zero matches is an answer, not an error; unreadable lockfiles are stated in parse_errors, never dropped. Without a query, on a server started with --repo, evaluates instead: every consumer lock under `locks` that names this repository, verified against --dependents-signers, is checked against the working tree; each bound field now absent or retyped is listed per consumer (advisory, never a verdict; unverified locks are stated, never read). Read-only, zero network by construction.",
                     "inputSchema": {"type": "object", "properties": {
-                        "query": {"type": "string", "description": "`Type.field` or a bare `field`"},
+                        "query": {"type": "string", "description": "`Type.field` or a bare `field`; omit it to evaluate (server started with --repo)"},
                         "locks": {"type": "string", "description": "Directory to scan for invar.lock files; a relative path resolves against the invar.toml directory"},
                         "producer": {"type": "string", "description": "Only contracts whose producer ref contains this substring"}
-                    }, "required": ["query", "locks"], "additionalProperties": false},
+                    }, "required": ["locks"], "additionalProperties": false},
                     "annotations": {"readOnlyHint": true},
                 },
                 {
