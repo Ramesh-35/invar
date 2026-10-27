@@ -6,3 +6,13 @@ test b3_f05_without_a_base_ref_the_workspace_is_used ... ok
 test b3_f06_absolute_paths_are_the_operators_and_used_as_given ... ok
 test b3_f07_the_action_passes_the_base_ref_to_the_step ... FAILED
 test result: FAILED. 2 passed; 5 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.88s
+
+# r1 baseline (B-D2 revised): on the r0 step the revised fixture fails at its exit-code assertion.
+test b3_f01_a_forged_trust_root_in_the_pr_is_ignored ... ok
+test b3_f02_a_consumer_lock_deleted_in_the_pr_is_still_evaluated ... ok
+test b3_f03_a_lock_and_key_added_in_the_pr_are_not_trusted ... ok
+test b3_f04_an_unreadable_base_fails_the_job ... FAILED
+test b3_f05_without_a_base_ref_the_workspace_is_used ... ok
+test b3_f06_absolute_paths_are_the_operators_and_used_as_given ... ok
+test b3_f07_the_action_passes_the_base_ref_to_the_step ... ok
+test result: FAILED. 6 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.88s

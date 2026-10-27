@@ -163,10 +163,14 @@ fn b3_f03_a_lock_and_key_added_in_the_pr_are_not_trusted() {
 }
 
 #[test]
-fn b3_f04_an_unreadable_base_fails_closed_and_never_falls_back() {
+fn b3_f04_an_unreadable_base_fails_the_job() {
+    // B-D2 as revised 2026-10-27: a broken contract is advisory, but a
+    // trust root the step cannot establish is an infrastructure failure.
+    // Exiting 0 there would be a downgrade attack: break the base read,
+    // get a green job.
     let (root, w, _) = world("f04");
     let (code, out, outputs) = step(&root, &w, "no-such-branch", LOCKS, SIGNERS);
-    assert_eq!(code, 0, "advisory, even here: {out}");
+    assert_eq!(code, 1, "an unreadable trust root fails the job: {out}");
     assert!(outputs.contains("dependents_exit=3\n"), "{outputs}");
     assert!(out.contains("not evaluated: base ref no-such-branch could not be read; the pull request's own index is never used"), "{out}");
     assert!(!out.contains("verified as"), "no fallback to the PR tree: {out}");

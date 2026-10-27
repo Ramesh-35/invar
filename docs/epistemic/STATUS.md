@@ -1694,15 +1694,21 @@ still the pull request's. Found while building the demo pair: before
 this, a pull request could replace the trust root and a lock together, add
 its own signed lock, or delete a consumer's lock so that it vanished from
 the report. An unreadable base evaluates nothing (stated, exit 3
-recorded), never falling back to the pull request's files; the step still
-never fails the job. Absolute paths (an index the operator checked out
-outside the workspace) are used as given. Pushes to a branch are
-unchanged. Rulings B-D1 to B-D3. 7 fixtures frozen before code, each
-attack failing on the previous step; 6 of 6 operators killed by their
-declared fixtures; 604 of 604 tests in the sandbox, zero warnings; no
-engine or CLI change. Not claimed: a GitHub run of the base-branch read
-until one is recorded. Record: docs/falsification/SIBLING-BASE-SPEC.md;
-docs/evidence/sibling.
+recorded), never falling back to the pull request's files, and fails the
+job (B-D2 as revised in r1: a lost trust root is an infrastructure
+failure, and a green job there would let anyone who can break the base
+read silence the check); broken contracts and unverified locks stay
+advisory and never fail the job. Absolute paths (an index the operator
+checked out outside the workspace) are used as given. Pushes to a branch
+are unchanged. Rulings B-D1 and B-D3 as recommended; B-D2 revised by the
+founder after r0 landed (a3d604f asserted exit 0 there; r1 revises one
+fixture and one exit path, both freeze records kept). 7 fixtures frozen
+before code, each attack failing on the previous step, the revised f04
+failing on the r0 step; 7 of 7 operators killed by their declared
+fixtures (6 of 6 in r0); 604 of 604 tests in the sandbox, zero warnings;
+no engine or CLI change. Not claimed: a GitHub run of the base-branch
+read until one is recorded. Record: docs/falsification/
+SIBLING-BASE-SPEC.md; docs/evidence/sibling.
 
 ## 2026-10-27: SIB-2 implemented (P5 slice 2, the agent and the PR see it)
 

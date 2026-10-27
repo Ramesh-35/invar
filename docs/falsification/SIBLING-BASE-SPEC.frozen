@@ -4,3 +4,9 @@ blake3(docs/falsification/SIBLING-BASE-SPEC.md) = 80f42369804c089bf3dc9c002860f9
 sha256(docs/falsification/SIBLING-BASE-SPEC.md) = 4eee8c8655e257f2593c466b6902d49220a28aabdd975217513fbb32ea21f045
 blake3(crates/invar-falsify/tests/sibling_base_test.rs) = 23448cc299a62184ed0b52f194d39f4ef5dafb1f013877f1c7b46f4288b7f7cb
 sha256(crates/invar-falsify/tests/sibling_base_test.rs) = 8ea019c792cb62717a3362853b45567806348d1b817aa4f32cc398b8f2e20644
+
+# r1 (B-D2 revised 2026-10-27): an unreadable base fails the job (spec F2).
+blake3(docs/falsification/SIBLING-BASE-SPEC.md) = 62c3b6d289a1ab634004e31253512867abbb896bc6e3a94770fce55fe960c78a
+sha256(docs/falsification/SIBLING-BASE-SPEC.md) = 8241d303ba8d2e4761c62fc8691fd2e1f529ddc2cc6245683d668f9cf8f631e6
+blake3(crates/invar-falsify/tests/sibling_base_test.rs) = 73b620c8eaa42c110eaa48eab1ceb437bd5ba338f524cb638c5b265afc8e09f0
+sha256(crates/invar-falsify/tests/sibling_base_test.rs) = 3bea9aa7ff8c1c60828eadbd516b7dbb34ca69c8e5b3a89042a662cb77424e89

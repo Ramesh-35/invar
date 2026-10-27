@@ -1,10 +1,11 @@
 # SIB-3: judge a pull request against the base branch's index and trust root
 
-Status: r0, FROZEN with its fixtures before any implementation, for
-founder ruling on B-D1 to B-D3 (the fixtures encode the recommended
-options). Parent: SIB-2 and the 2026-10-27 ruling "the Action must pull
-the trust root and index strictly from the base branch". Fixtures:
-tests/sibling_base_test.rs; hashes in SIBLING-BASE-SPEC.frozen.
+Status: r1, FROZEN with its fixtures before the r1 implementation.
+Parent: SIB-2 and the 2026-10-27 ruling "the Action must pull the trust
+root and index strictly from the base branch". Rulings 2026-10-27: B-D1
+and B-D3 as recommended; B-D2 REVISED by the founder after r0 landed (see
+F2). Fixtures: tests/sibling_base_test.rs; hashes in
+SIBLING-BASE-SPEC.frozen (r0 and r1, both kept).
 
 ## A. The gap, found while building the demo pair
 
@@ -25,11 +26,15 @@ rehearsal: the step read whatever the PR tree held.
   then extracted with `git archive` into the runner's temp directory),
   never from the working tree. The producer files under review are still
   the pull request's: that is the change being judged.
-- B-2, fail closed. If the base ref cannot be fetched or the paths are not
-  on it, nothing is evaluated: `dependents_exit=3` and the stated line
-  `not evaluated: base ref <ref> could not be read; the pull request's own
-  index is never used`. Never a fallback to the working tree. The step
-  still exits 0 (advisory, SIB-2 R-4).
+- B-2, fail closed (r1). If the base ref cannot be fetched or the paths
+  are not on it, nothing is evaluated: `dependents_exit=3` is recorded and
+  the step states `not evaluated: base ref <ref> could not be read; the
+  pull request's own index is never used`. Never a fallback to the working
+  tree, and the step exits 1: a broken contract is advisory, but a trust
+  root the step cannot establish is an infrastructure failure, and a green
+  job there would let anyone who can break the base read silence the
+  check. This is the one case in which the dependents step fails the job
+  (SIB-2 R-4 is amended to say so).
 - B-3, absolute paths. An absolute `dependents_locks` or
   `dependents_signers` (an index the operator checked out outside the
   workspace) is read where it is: not the pull request's to change.
@@ -53,7 +58,7 @@ the step reads the PR tree (fixtures f01 to f03 fail on the current step).
 | b3_f01 | PR replaces the trust root: ignored, web's lock verified from base, PR's producer judged (`maxLines absent`) |
 | b3_f02 | PR deletes a consumer lock: still evaluated from base |
 | b3_f03 | PR adds its own signed lock and key: not trusted, not listed |
-| b3_f04 | unreadable base ref: dependents_exit=3, stated line, no fallback, step exits 0 |
+| b3_f04 | unreadable base ref: dependents_exit=3, stated line, no fallback, the step exits 1 (r1) |
 | b3_f05 | no base ref: the workspace is used (guard) |
 | b3_f06 | absolute paths: used as given (guard) |
 | b3_f07 | action.yml passes `INVAR_BASE_REF` to the dependents step |
@@ -70,6 +75,7 @@ On the current step: f01 to f04 and f07 FAIL; f05 and f06 (guards) pass.
 | B3-M4 | on an unreadable base, fall back to the workspace | b3_f04 |
 | B3-M5 | absolute paths also extracted from base | b3_f06 |
 | B3-M6 | INVAR_BASE_REF not passed by action.yml | b3_f07 |
+| B3-M7 (r1) | an unreadable base exits 0 (the r0 behavior) | b3_f04 |
 
 ## F. Decision points
 
@@ -77,9 +83,21 @@ On the current step: f01 to f04 and f07 FAIL; f05 and f06 (guards) pass.
   opt-in protection is one most workflows will not opt into). Or an input
   to enable it.
 - B-D2 (unreadable base). Fail closed, stated (recommended). Or fall back
-  to the workspace with a warning.
+  to the workspace with a warning. r0 kept the step's exit at 0; see F2.
 - B-D3 (absolute paths). Used as given, operator-controlled (recommended).
   Or refused, forcing every index into the repository.
+
+## F2. Amendment r1 (B-D2 revised, 2026-10-27, after the r0 landing)
+
+Founder ruling: an unreadable trust root is an infrastructure failure, not
+an advisory outcome, so the step must fail the job (exit 1); exiting 0
+there is a downgrade attack (break the base read, get a green job). r0's
+fixture asserted exit 0 and landed as a3d604f; r1 revises b3_f04 to assert
+exit 1 (measured failing on the r0 step at that assertion before the r1
+code), adds operator B3-M7, and changes only the one exit path in
+action/dependents.sh. Everything advisory stays advisory: broken
+contracts, unsigned or unverified locks and missing producers still never
+fail the job.
 
 ## G. Bounds
 

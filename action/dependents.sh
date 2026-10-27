@@ -4,7 +4,9 @@
 # step never fails the job, whatever the evaluation finds.
 # SIB-3: on a pull request (INVAR_BASE_REF set), a workspace-relative index
 # and trust root are read from origin/<base>, never from the pull request;
-# if the base cannot be read, nothing is evaluated (stated, exit 3 recorded).
+# if the base cannot be read, nothing is evaluated (stated, exit 3
+# recorded) and the step fails the job (B-D2 r1): a lost trust root is an
+# infrastructure failure, never an advisory outcome.
 set -uo pipefail
 
 report="${RUNNER_TEMP:-/tmp}/invar-dependents.md"
@@ -32,7 +34,7 @@ if [ -n "$base" ]; then
       echo "$msg"
       { echo "dependents_exit=3"; echo "dependents_broken=0"; } >> "$GITHUB_OUTPUT"
       if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then echo "$msg" >> "$GITHUB_STEP_SUMMARY"; fi
-      exit 0
+      exit 1
     fi
   fi
 fi

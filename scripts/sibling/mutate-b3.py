@@ -10,10 +10,11 @@ OPS = [
  ("B3-M1", "b3_f01", SH, 'if [ -n "$base" ]; then', 'if false; then'),
  ("B3-M2", "b3_f01", SH, '      if relative "$signers"; then signers="$tree/$signers"; fi\n', ''),
  ("B3-M3", "b3_f02", SH, '      if relative "$locks"; then locks="$tree/$locks"; fi\n', ''),
- ("B3-M4", "b3_f04", SH, '      exit 0\n    fi\n  fi\nfi\n', '    fi\n  fi\nfi\n'),
+ ("B3-M4", "b3_f04", SH, '      exit 1\n    fi\n  fi\nfi\n', '    fi\n  fi\nfi\n'),
  ("B3-M5", "b3_f06", SH, 'relative() { [ -n "$1" ] && [ "${1#/}" = "$1" ]; }', 'relative() { [ -n "$1" ]; }'),
  ("B3-M6", "b3_f07", "action.yml", '        INVAR_BASE_REF: ${{ inputs.base_ref }}\n        INVAR_ACTION_PATH: ${{ github.action_path }}\n      run: bash "$INVAR_ACTION_PATH/action/dependents.sh"',
      '        INVAR_ACTION_PATH: ${{ github.action_path }}\n      run: bash "$INVAR_ACTION_PATH/action/dependents.sh"'),
+ ("B3-M7", "b3_f04", SH, '      exit 1\n    fi\n  fi\nfi\n', '      exit 0\n    fi\n  fi\nfi\n'),
 ]
 target = sys.argv[1]
 rows = []

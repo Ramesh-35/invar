@@ -4,3 +4,12 @@ B3-M3	b3_f02	KILLED	b3_f02,b3_f03
 B3-M4	b3_f04	KILLED	b3_f04
 B3-M5	b3_f06	KILLED	b3_f06
 B3-M6	b3_f07	KILLED	b3_f07
+
+# r1 rerun (B-D2 revised): 7 operators.
+B3-M1	b3_f01	KILLED	b3_f01,b3_f02,b3_f03,b3_f04
+B3-M2	b3_f01	KILLED	b3_f01
+B3-M3	b3_f02	KILLED	b3_f02,b3_f03
+B3-M4	b3_f04	KILLED	b3_f04
+B3-M5	b3_f06	KILLED	b3_f06
+B3-M6	b3_f07	KILLED	b3_f07
+B3-M7	b3_f04	KILLED	b3_f04
