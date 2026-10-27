@@ -1,0 +1,8 @@
+test b3_f01_a_forged_trust_root_in_the_pr_is_ignored ... FAILED
+test b3_f02_a_consumer_lock_deleted_in_the_pr_is_still_evaluated ... FAILED
+test b3_f03_a_lock_and_key_added_in_the_pr_are_not_trusted ... FAILED
+test b3_f04_an_unreadable_base_fails_closed_and_never_falls_back ... FAILED
+test b3_f05_without_a_base_ref_the_workspace_is_used ... ok
+test b3_f06_absolute_paths_are_the_operators_and_used_as_given ... ok
+test b3_f07_the_action_passes_the_base_ref_to_the_step ... FAILED
+test result: FAILED. 2 passed; 5 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.88s

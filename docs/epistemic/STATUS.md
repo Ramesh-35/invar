@@ -1684,6 +1684,26 @@ three or more hops, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
 docs/evidence/stage3/eval008.
 
+## 2026-10-27: SIB-3 implemented (a pull request cannot choose its own judge)
+
+On a pull request the Action's consumer step now reads a
+workspace-relative index (`dependents_locks`) and trust root
+(`dependents_signers`) from the base branch, fetched and extracted by the
+step, never from the pull request's tree; the producer files judged are
+still the pull request's. Found while building the demo pair: before
+this, a pull request could replace the trust root and a lock together, add
+its own signed lock, or delete a consumer's lock so that it vanished from
+the report. An unreadable base evaluates nothing (stated, exit 3
+recorded), never falling back to the pull request's files; the step still
+never fails the job. Absolute paths (an index the operator checked out
+outside the workspace) are used as given. Pushes to a branch are
+unchanged. Rulings B-D1 to B-D3. 7 fixtures frozen before code, each
+attack failing on the previous step; 6 of 6 operators killed by their
+declared fixtures; 604 of 604 tests in the sandbox, zero warnings; no
+engine or CLI change. Not claimed: a GitHub run of the base-branch read
+until one is recorded. Record: docs/falsification/SIBLING-BASE-SPEC.md;
+docs/evidence/sibling.
+
 ## 2026-10-27: SIB-2 implemented (P5 slice 2, the agent and the PR see it)
 
 SIB-1's evaluation is now one piece of data rendered three ways, so they

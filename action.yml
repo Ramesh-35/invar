@@ -117,6 +117,7 @@ runs:
         INVAR_DEPENDENTS_REPO: ${{ inputs.dependents_repo }}
         INVAR_DEPENDENTS_LOCKS: ${{ inputs.dependents_locks }}
         INVAR_DEPENDENTS_SIGNERS: ${{ inputs.dependents_signers }}
+        INVAR_BASE_REF: ${{ inputs.base_ref }}
         INVAR_ACTION_PATH: ${{ github.action_path }}
       run: bash "$INVAR_ACTION_PATH/action/dependents.sh"
 
