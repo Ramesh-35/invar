@@ -1684,6 +1684,18 @@ three or more hops, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
 docs/evidence/stage3/eval008.
 
+## 2026-10-27: S3's CI jobs green on GitHub (first run recorded)
+
+The first GitHub run on a tree carrying SECURITY-SPEC S3's two new jobs
+(run 40469576329, head 58aef45) completed success with all five jobs
+green, dependency-audit (cargo-audit 0.22.2, --deny warnings) and
+reproducible-build (scripts/release/repro-check.sh) among them; the next
+two pushes (e33e7f8, 2667de9) repeated it. With the macOS reproducible
+build recorded earlier (0fef457: binary and archive byte-identical from
+two paths), S3's stated blind spots are closed except one, stated:
+advisories not yet published. Raw captures:
+docs/evidence/security/ci.
+
 ## 2026-10-27: HOOK-1 implemented (the check inside the agent's edit loop)
 
 `invar hook claude-code` IS the Claude Code PostToolUse hook: one settings
