@@ -1,0 +1,15 @@
+P1 a lock rewritten to a remote producer parses and is found by the existing query mode:
+consumer-a/invar.lock	lk	Limits.maxLines	github:acme/api@0123456789abcdef0123456789abcdef01234567:lib/limits.ts [number]	(since 2026-10-27)
+1 dependent binding(s) on "Limits.maxLines" in 1 of 1 lockfile(s)
+exit 0
+P2 the TS extractor types a retyped field as string (the same extractor P5 reuses):
+bind = "code 2026-10-27 Limits.maxLines string"
+P3 one signers file names the signer of a lock (find-principals), and verify accepts it:
+principal: consumer-a@acme
+verify exit 0
+P4 an untrusted signer is named by no principal:
+find-principals exit 255
+P5 the current CLI has no evaluation mode (query required):
+error: unexpected argument '--repo' found
+
+exit 2

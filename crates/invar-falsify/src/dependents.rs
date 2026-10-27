@@ -382,3 +382,155 @@ pub fn render_siblings(locks_display: &str, s: &Siblings) -> String {
     }
     out
 }
+
+// ---------------------------------------------------------------------------
+// SIB-1 (P5, docs/falsification/SIBLING-EVAL-SPEC.md r1): evaluation mode.
+// Run in a producer repository: every signed consumer lock under `locks_dir`
+// whose remote producer names `repo` is evaluated against the working tree.
+// Advisory: broken fields never fail the run (0); anything not evaluated is
+// a stated blind spot (4). Zero network: remote refs are matched by name.
+// ---------------------------------------------------------------------------
+
+pub const SIBLING_NOTE: &str =
+    "note: a lock records the fields a consumer depends on, not the lines that read them.";
+
+/// SB-3: the principal that signed `bytes`, when the signature names a
+/// principal in `signers` and verifies over exactly these bytes.
+fn signer(bytes: &[u8], sig: &Path, signers: &Path) -> Result<Option<String>> {
+    let found = std::process::Command::new("ssh-keygen")
+        .args(["-Y", "find-principals", "-s"])
+        .arg(sig)
+        .arg("-f")
+        .arg(signers)
+        .stderr(std::process::Stdio::null())
+        .output()
+        .map_err(|e| anyhow::anyhow!("running ssh-keygen: {e}"))?;
+    let principal = String::from_utf8_lossy(&found.stdout).lines().next().unwrap_or("").trim().to_string();
+    if !found.status.success() || principal.is_empty() {
+        return Ok(None);
+    }
+    let ok = crate::receipt::verify_ssh(bytes, sig, signers, &principal, "invar-lock")?;
+    Ok(ok.then_some(principal))
+}
+
+/// SB-1: is this producer ref a file of `repo` (case-insensitive)? Its path.
+fn our_path(producer: &str, repo: &str) -> Option<String> {
+    let r = crate::resolver::parse_ref(producer, None).ok()?;
+    format!("{}/{}", r.owner, r.repo).eq_ignore_ascii_case(repo).then_some(r.path)
+}
+
+/// SB-2 for one contract: (broken lines, provided count), or why not.
+fn evaluate_contract(root: &Path, c: &lock::LockedContract, path: &str) -> std::result::Result<(Vec<String>, usize), String> {
+    let file = root.join(path);
+    let text = std::fs::read_to_string(&file).map_err(|_| format!("{path} not found in this repository"))?;
+    let fields = crate::backtest::surface(c, &text).ok_or_else(|| format!("{path}: fields cannot be extracted"))?;
+    let scoped: std::collections::BTreeSet<String> =
+        c.bindings.iter().filter(|b| !b.scope.is_empty()).map(|b| name_key(&b.field)).collect();
+    let (mut broken, mut provided) = (Vec::new(), 0usize);
+    for b in &c.bindings {
+        if b.scope.is_empty() && scoped.contains(&name_key(&b.field)) {
+            continue;
+        }
+        let locked = b.ty.as_deref().unwrap_or("?");
+        if !crate::backtest::present(&fields, b) {
+            broken.push(format!("{} absent (locked {})", b.display(), locked));
+            continue;
+        }
+        let now = fields
+            .iter()
+            .find(|((s, n), _)| {
+                name_key(n) == name_key(&b.field) && (b.scope.is_empty() || name_key(s) == name_key(&b.scope))
+            })
+            .and_then(|(_, t)| t.clone());
+        match (&b.ty, now) {
+            (Some(was), Some(now)) if *was != now => {
+                broken.push(format!("{} retyped (locked {was}, now {now})", b.display()))
+            }
+            _ => provided += 1,
+        }
+    }
+    Ok((broken, provided))
+}
+
+/// The evaluation report and its exit code (0 answered, 4 blind spots).
+pub fn evaluate(locks_dir: &Path, root: &Path, repo: &str, signers: Option<&Path>) -> Result<(String, i32)> {
+    let esc = crate::term::escape_value;
+    let mut files = Vec::new();
+    walk(locks_dir, &mut files)?;
+    files.sort();
+    let (mut out, mut broken_n, mut provided_n, mut locks_ne, mut contracts_ne) = (String::new(), 0, 0, 0, 0);
+    for lf in &files {
+        let rel = esc(&lf.strip_prefix(locks_dir).unwrap_or(lf).display().to_string());
+        // One read: the bytes verified are the bytes parsed.
+        let bytes = match std::fs::read(lf) {
+            Ok(b) => b,
+            Err(e) => {
+                out.push_str(&format!("{rel}: not evaluated: unreadable: {}\n", esc(&e.to_string())));
+                locks_ne += 1;
+                continue;
+            }
+        };
+        let parsed = std::str::from_utf8(&bytes)
+            .map_err(|e| e.to_string())
+            .and_then(|t| lock::parse(&lf.display().to_string(), t).map_err(|e| e.to_string()));
+        let l = match parsed {
+            Ok(l) => l,
+            Err(e) => {
+                out.push_str(&format!("{rel}: not evaluated: unreadable: {}\n", esc(&e)));
+                locks_ne += 1;
+                continue;
+            }
+        };
+        let ours: Vec<(&lock::LockedContract, String)> = l
+            .contracts
+            .iter()
+            .filter_map(|c| our_path(&c.producer, repo).map(|p| (c, p)))
+            .collect();
+        if ours.is_empty() {
+            continue;
+        }
+        let sig = lf.with_extension("lock.sig");
+        let principal = match signers {
+            None => Err("no signers configured (--lock-signers)"),
+            Some(_) if !sig.exists() => Err("unsigned (no invar.lock.sig)"),
+            Some(s) => signer(&bytes, &sig, s)?.ok_or("signature does not verify"),
+        };
+        let principal = match principal {
+            Ok(p) => esc(&p),
+            Err(why) => {
+                out.push_str(&format!("{rel}: not evaluated: {why}\n"));
+                locks_ne += 1;
+                continue;
+            }
+        };
+        for (c, path) in ours {
+            let head = format!("{rel} [verified as {principal}] {}:", esc(&c.id));
+            match evaluate_contract(root, c, &path) {
+                Ok((broken, provided)) => {
+                    out.push_str(&format!("{head}\n"));
+                    for b in &broken {
+                        out.push_str(&format!("    {}\n", esc(b)));
+                    }
+                    out.push_str(&format!("    {provided} binding(s) provided\n"));
+                    broken_n += broken.len();
+                    provided_n += provided;
+                }
+                Err(why) => {
+                    out.push_str(&format!("{head} not evaluated: {}\n", esc(&why)));
+                    contracts_ne += 1;
+                }
+            }
+        }
+    }
+    let mut report = format!(
+        "dependents of {} (locks: {}, {} lockfile(s) scanned)\n{out}summary: {broken_n} broken | {provided_n} provided | {locks_ne} lockfile(s) not evaluated",
+        esc(repo),
+        esc(&locks_dir.display().to_string()),
+        files.len()
+    );
+    if contracts_ne > 0 {
+        report.push_str(&format!(" | {contracts_ne} contract(s) not evaluated"));
+    }
+    report.push_str(&format!("\n{SIBLING_NOTE}\n"));
+    Ok((report, if locks_ne + contracts_ne > 0 { 4 } else { 0 }))
+}

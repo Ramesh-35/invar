@@ -1,0 +1,10 @@
+# SIB-1 freeze record (r1), written before any implementation.
+# Baseline: P4 tree (LOCK-1), 572 of 572 in the sandbox.
+blake3(docs/falsification/SIBLING-EVAL-SPEC.md) = 7c77adde44ac07a3d5ed29032e6d62b806c096a29fa2bab5d8e1f9d59bba6114
+sha256(docs/falsification/SIBLING-EVAL-SPEC.md) = f2cdbb9252d8e39db185f318f92004d0248c0571171835cfcfac0e5e4787fa7f
+blake3(crates/invar-falsify/tests/sibling_eval_test.rs) = 63baa52795fdeddd8e5c8d4494766feba3d69c238f6274ed2e892fd4bd6daf32
+sha256(crates/invar-falsify/tests/sibling_eval_test.rs) = 1d915fac67a15e368a958452f2833fb6f9945a0c31c52e6856a014db3ed4e537
+blake3(scripts/sibling/premises.sh) = 74ae51ae192e97ec90b7c0278d4b873b87d4977d59fa7895e1e87e0846c2fc06
+sha256(scripts/sibling/premises.sh) = 502dd7713548f8da295051c0a22e40a9fa2c12d5030803ced2e5e143d556fbb7
+blake3(scripts/sibling/killgate.py) = 3f05845801674538d31fbf185d333f8c0dca9f645c7dca8215053bf120ca2e0d
+sha256(scripts/sibling/killgate.py) = de8bba9f1654b63b8117089f4ae694d4df518d9d462492eb1bfa9794c47cd89d

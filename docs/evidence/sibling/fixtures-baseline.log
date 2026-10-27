@@ -1,0 +1,13 @@
+test p5_f01_a_removed_field_is_named_and_advisory ... FAILED
+test p5_f02_a_retyped_field_is_named ... FAILED
+test p5_f04_an_unsigned_lock_is_never_evaluated ... FAILED
+test p5_f03_all_provided_counts_each_field_once ... FAILED
+test p5_f05_a_signature_by_an_untrusted_key_is_refused ... FAILED
+test p5_f06_a_lock_edited_after_signing_is_refused ... FAILED
+test p5_f07_a_lock_on_another_repository_is_not_ours ... FAILED
+test p5_f08_repository_names_match_without_case ... FAILED
+test p5_f09_without_signers_nothing_is_evaluated ... FAILED
+test p5_f10_a_missing_producer_file_is_not_evaluated_not_absent ... FAILED
+test p5_f11_no_query_and_no_repo_is_an_error ... FAILED
+test p5_f12_evaluation_is_text_only_in_this_slice ... FAILED
+test result: FAILED. 0 passed; 12 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.41s

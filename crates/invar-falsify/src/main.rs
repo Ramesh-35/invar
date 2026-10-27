@@ -215,7 +215,17 @@ struct CheckArgs {
 #[derive(Parser)]
 struct DependentsArgs {
     /// `Type.field` or a bare `field` (naming-form match, as the engine).
-    query: String,
+    /// Omit it, with --repo, to evaluate (SIB-1).
+    query: Option<String>,
+    /// SIB-1: evaluate every signed consumer lock whose remote producer is
+    /// this repository (OWNER/NAME) against the working tree. Advisory:
+    /// exit 0, or 4 when anything was not evaluated.
+    #[arg(long)]
+    repo: Option<String>,
+    /// SIB-1: one allowed-signers file for every consumer repository;
+    /// without it, nothing is evaluated (stated).
+    #[arg(long)]
+    lock_signers: Option<String>,
     /// Directory to scan for invar.lock files (any depth). Local only: this
     /// command performs no network calls by construction.
     #[arg(long)]
@@ -1681,14 +1691,35 @@ fn cmd_backtest(args: BacktestArgs) -> Result<i32> {
 
 fn cmd_dependents(args: DependentsArgs) -> Result<i32> {
     use invar_falsify::dependents;
+    let query = match (args.query, &args.repo) {
+        (None, None) => anyhow::bail!("give a field query, or --repo OWNER/NAME to evaluate"),
+        (Some(_), Some(_)) => anyhow::bail!("a field query and --repo are separate modes"),
+        (None, Some(repo)) => {
+            if args.format != "text" {
+                anyhow::bail!("evaluation (--repo) is text only in this release");
+            }
+            let (report, code) = dependents::evaluate(
+                Path::new(&args.locks),
+                Path::new("."),
+                repo,
+                args.lock_signers.as_deref().map(Path::new),
+            )?;
+            print!("{report}");
+            return Ok(code);
+        }
+        (Some(q), None) => q,
+    };
+    if args.lock_signers.is_some() {
+        anyhow::bail!("--lock-signers applies to evaluation (--repo)");
+    }
     let a = dependents::find(
         std::path::Path::new(&args.locks),
-        &args.query,
+        &query,
         args.producer.as_deref(),
     )?;
     match args.format.as_str() {
-        "text" => print!("{}", dependents::render_text(&args.query, &a)),
-        "json" => print!("{}", dependents::render_json(&args.query, args.producer.as_deref(), &a)),
+        "text" => print!("{}", dependents::render_text(&query, &a)),
+        "json" => print!("{}", dependents::render_json(&query, args.producer.as_deref(), &a)),
         other => anyhow::bail!("unknown --format {other:?}: text or json"),
     }
     // An answer with unreadable lockfiles is an answer with stated blind

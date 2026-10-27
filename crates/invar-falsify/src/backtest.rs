@@ -49,13 +49,34 @@ fn git(dir: &Path, args: &[&str]) -> Result<String> {
 /// Is `binding` present in the extracted surface? The engine's naming-form
 /// rule (case and `_`/`-` insignificant); an unscoped binding matches any
 /// scope, a scoped one must match its declaring scope.
-fn present(fields: &crate::surface::Fields, b: &Binding) -> bool {
+pub(crate) fn present(fields: &crate::surface::Fields, b: &Binding) -> bool {
     let want_field = name_key(&b.field);
     let want_scope = if b.scope.is_empty() { None } else { Some(name_key(&b.scope)) };
     fields.keys().any(|(scope, name)| {
         name_key(name) == want_field
             && want_scope.as_ref().map_or(true, |w| &name_key(scope) == w)
     })
+}
+
+/// The producer surface of locked contract `c` in `text`, with the very
+/// readers `check` uses (INVAR-BACKTEST-002 B-D1, B-D2): a strings
+/// contract's producer is a Zod shape (the bindings' scope); NotFound is an
+/// empty surface (B-D3); Dynamic or an unreadable source is `None` (B-D4).
+/// Shared by backtest and SIB-1, so the two never read bytes differently.
+pub(crate) fn surface(c: &LockedContract, text: &str) -> Option<crate::surface::Fields> {
+    let strings_shape = c
+        .id
+        .starts_with("strings:")
+        .then(|| c.bindings.first().map(|b| b.scope.clone()))
+        .flatten();
+    match strings_shape {
+        Some(shape) => match read_any_shape(text, &shape) {
+            ShapeRead::Found(keys) => Some(keys.into_iter().map(|k| ((shape.clone(), k), None)).collect()),
+            ShapeRead::NotFound => Some(crate::surface::Fields::new()),
+            ShapeRead::Dynamic(_) => None,
+        },
+        None => source_fields(&c.id, &c.producer, text, c.pointer.as_deref()).ok(),
+    }
 }
 
 #[derive(Clone, PartialEq)]
@@ -120,25 +141,11 @@ fn replay_contract(base: &Path, prefix: &str, c: &LockedContract, depth: usize) 
     // (read_any_shape), so the two can never disagree on the same bytes.
     // The shape is the bindings' scope. NotFound is absent (the shape did
     // not exist yet, B-D3); Dynamic is a stated blind spot (B-D4).
-    let strings_shape = c
-        .id
-        .starts_with("strings:")
-        .then(|| c.bindings.first().map(|b| b.scope.clone()))
-        .flatten();
     let mut surfaces = Vec::with_capacity(commits.len());
     for (hash, _) in &commits {
-        let text = git(base, &["show", &format!("{hash}:{rel}")]);
-        surfaces.push(match (text, &strings_shape) {
-            (Err(_), _) => Err(State::Unreadable),
-            (Ok(t), Some(shape)) => match read_any_shape(&t, shape) {
-                ShapeRead::Found(keys) => Ok(keys.into_iter().map(|k| ((shape.clone(), k), None)).collect()),
-                ShapeRead::NotFound => Ok(crate::surface::Fields::new()),
-                ShapeRead::Dynamic(_) => Err(State::Unextractable),
-            },
-            (Ok(t), None) => match source_fields(&c.id, &c.producer, &t, c.pointer.as_deref()) {
-                Ok(f) => Ok(f),
-                Err(_) => Err(State::Unextractable),
-            },
+        surfaces.push(match git(base, &["show", &format!("{hash}:{rel}")]) {
+            Err(_) => Err(State::Unreadable),
+            Ok(t) => surface(c, &t).ok_or(State::Unextractable),
         });
     }
     let mut timelines = Vec::new();

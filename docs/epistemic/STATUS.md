@@ -1684,6 +1684,31 @@ three or more hops, or general detection capability. Record:
 docs/architecture/INIT-DISCOVERY-SLICE8.md, LOCK-SLICE2.md;
 docs/evidence/stage3/eval008.
 
+## 2026-10-27: SIB-1 implemented (P5, which consumers a producer change breaks)
+
+Run in a producer repository, `invar dependents --locks <dir> --repo
+OWNER/NAME --lock-signers <file>` (no field query) evaluates every signed
+consumer lock under the directory whose remote producer names this
+repository against the working tree, and names each bound field that is
+now absent or retyped, by consumer lock and contract. Advisory: a broken
+field never fails the run (exit 0); an unsigned, untrusted or edited lock,
+or a producer file that is missing, is stated as not evaluated (exit 4),
+and nothing read from an unverified lock reaches the output. Identity is
+declared, never guessed; one signers file trusts every consumer; zero
+network. It lives in `dependents` because `check` refuses a repository
+with no contracts of its own (rulings P5-D1 to D5). Kill gate first, on the
+37 non-held-out cases: 15 of 31 breaks actionable, 0 false alarms on 5
+measured controls, 7 cases not measured (languages not read); tuning rung,
+not recall, the sealed record stays 38 of 70. Backtest's extraction is now
+one shared function: backtest output byte-identical on 3 real repositories
+over 100 commits, text and JSON. CLI check text byte-identical and MCP JSON
+unchanged on all 122 corpus cases. 584 of 584 tests in the sandbox, zero
+warnings, no new clippy warnings; 11 of 11 operators killed by their
+declared fixtures. Fixtures frozen before code. Not claimed: consumer line
+numbers (a lock records fields, not reads); JSON, MCP and PR report output
+(next slice); how many consumers will publish signed locks. Record:
+docs/falsification/SIBLING-EVAL-SPEC.md; docs/evidence/sibling.
+
 ## 2026-10-27: LOCK-1 implemented (AGENT-1 P4, signed memory for agents)
 
 An agent can now tell an authenticated invar.lock from one anyone with

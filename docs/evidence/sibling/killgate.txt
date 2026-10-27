@@ -1,0 +1,39 @@
+r1-000	break	NOT MEASURED	no producer_base	
+r1-001	break	ACTIONABLE	duration	retyped:AssetResponseDto.duration(string|null->integer|null)
+r1-002	break	ACTIONABLE	account_id, account_name	absent:PiggyBank.account_id absent:PiggyBank.account_name
+r1-003	break	SILENT	VirtualSize	
+r1-004	break	SILENT	ContainerConfig, Container	
+r1-005	break	SILENT	begin_block_events, end_block_events	
+r1-006	control	QUIET	none	
+r1-007	break	ACTIONABLE	isFood, disableAmount	absent:ShoppingListItemBase.is_food
+r1-008	break	ACTIONABLE	temperatures	absent:temperatures
+r1-009	break	ACTIONABLE	auth, auth_password	absent:AuthenticatorSMSStage.auth absent:AuthenticatorSMSStage.auth_password
+r1-010	break	ACTIONABLE	FILESIZE	absent:StatsReturn.FILESIZE
+r1-011	break	SILENT	gridPower	
+r1-012	break	ACTIONABLE	advisory	retyped:Warning.advisory(advisory.clone()->advisory::Metadata)
+r1-013	break	ACTIONABLE	Created	retyped:image.Created(string->int64)
+r1-014	break	SILENT	root:array->object	
+r1-015	break	ACTIONABLE	rule, file, lineNumber, offender, line, commitMessage, commit, author, email, date, tags, leakURL	absent:Leak.author absent:Leak.commit absent:Leak.commitMessage absent:Leak.date absent:Leak.email absent:Leak.file absent:Leak.leakURL absent:Leak.line absent:Leak.lineNumber absent:Leak.offender absent:Leak.rule absent:Leak.tags
+r1-016	break	SILENT	advisories	
+r1-017	control	QUIET	none	
+r1-018	control	QUIET	none	
+r1-019	break	ACTIONABLE	qu_factor_purchase_to_stock	absent:Product.qu_factor_purchase_to_stock
+r1-020	break	NOT MEASURED	lock exit 3: ['ERROR (not a verdict): r1-020: cannot lock, language not supported (C++: syncthingconnector/syncthingconnection_requests.cpp) [not-evaluated:unsupported-language]']	
+r1-021	break	NOT MEASURED	lock exit 3: ['ERROR (not a verdict): r1-021: cannot lock, language not supported (Swift: MoeMemos/Model/User.swift) [not-evaluated:unsupported-language]']	
+r1-022	break	ACTIONABLE	version	absent:version
+r1-023	break	NOT MEASURED	lock exit 3: ['ERROR (not a verdict): r1-023: cannot lock, language not supported (Java: app/src/main/java/com/nutomic/syncthingandroid/service/RestApi.java) [not-evaluated:unsupported-language]']	
+r1-024	break	SILENT	row	
+r1-025	break	ACTIONABLE	line_no, line_pos	absent:get_info_dict.code absent:get_info_dict.description absent:get_info_dict.line_no absent:get_info_dict.line_pos
+r1-026	break	SILENT	lines	
+r1-027	break	ACTIONABLE	base_branch, head_branch	absent:PullRequest.base_branch absent:PullRequest.head_branch retyped:PullRequest.mergeable(*bool->bool)
+r1-028	break	ACTIONABLE	data, errors, check, start, end, severity	absent:errors_to_json.column absent:errors_to_json.end absent:errors_to_json.errors absent:errors_to_json.line absent:errors_to_json.severity absent:errors_to_json.start
+r1-029	break	ACTIONABLE	chains	retyped:lnrpcGetInfoResponse.chains(array<string>->array<ref:lnrpcChain>)
+r1-030	break	SILENT	channel_sat, msatoshi_sent, msatoshi	
+r1-031	break	NOT MEASURED	lock exit 3: ['ERROR (not a verdict): r1-031: cannot lock, language not supported (C++: src/rpc/blockchain.cpp) [not-evaluated:unsupported-language]']	
+r1-032	break	SILENT	languageProfileId	
+r1-033	break	NOT MEASURED	lock exit 3: ['ERROR (not a verdict): r1-033: cannot lock, language not supported (C++: src/rpc/blockchain.cpp) [not-evaluated:unsupported-language]']	
+r1-034	control	QUIET	none	
+r1-035	control	QUIET	none	
+r1-036	control	NOT MEASURED	lock exit 3: ['ERROR (not a verdict): r1-036: cannot lock, language not supported (C++: src/rpc/blockchain.cpp) [not-evaluated:unsupported-language]']	
+breaks 31 actionable 15 | controls 6 false-alarms 0 | not measured 7
+KILL GATE (fewer than 3 actionable kills P5): PASS
