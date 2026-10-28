@@ -1,0 +1,9 @@
+id	b1-009
+contract_repo	https://github.com/hashicorp/terraform-provider-aws
+pre	v3.76.1 (e7ced86d7a2067a2c11c4d2005d0eb2b760b2d69) internal/service/s3/bucket.go
+post	v4.0.0 (7a0664683357fe4a515dc90fa48ec7751ab69cd9) same path: 14 attributes RETYPED, Optional dropped, each with a deprecation message naming its replacement resource
+consumer_repo	https://github.com/terraform-aws-modules/terraform-aws-s3-bucket
+consumer_pre	v2.15.0 (a4a1cb74aa0c2617bc608f56b09473495c52136d): monolithic args read inside aws_s3_bucket (acl :14, website :21, cors_rule :32, ...)
+consumer_post	v3.0.0 (1ae31acf6043927bb37d503ff447b4ded79a3992): rewrite into 12 separate resources + UPGRADE-3.0.md; follow-up coping commits 895cfa5, 8366ccc (ignore_changes loops caused by the absorption)
+restatements	5: producer schema flags with 12 replacement-resource deprecation messages; consumer v2 monolithic reads; consumer v3 twelve-resource rewrite; UPGRADE-3.0.md migration guide; lifecycle ignore_changes workaround commits
+note	aws_s3_bucket v3->v4: writable arguments turned read-only at a major boundary, the canonical IaC contract break

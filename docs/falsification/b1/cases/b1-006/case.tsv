@@ -1,0 +1,9 @@
+id	b1-006
+contract_repo	https://github.com/kubernetes/api
+pre_checkout	k8s-api-kubernetes-1.21.0 (5d0d5b56b51109a75225966be27ca7b6c6ca6dcd)
+post_checkout	master (32a56a94764ef12425493aa43a50fe6ba091ab7e)
+contract	networking/v1beta1 (prerelease-lifecycle declaration)
+consumer_repo	cert-manager-v1.5.3
+consumer_sha	b26bd256f124d480fcb198e1464854f41b0d0d2c
+restatements	5: producer lifecycle declaration; dual Go imports (sync.go:28-29); conversion shim package pkg/internal/ingress (v1.go, v1beta1.go, convert.go); runtime discovery (ingress.go:116); version-constraint comment (ingresses/controller.go:122)
+note	Ingress networking.k8s.io/v1beta1 deprecated 1.19 removed 1.22; cert-manager v1.5.3 maintains an entire dual-version shim package to absorb it

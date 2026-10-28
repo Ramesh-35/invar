@@ -1,0 +1,11 @@
+id	b1-002
+producer_repo	https://github.com/snowplow/iglu-central
+contract	schemas/com.snowplowanalytics.snowplow/browser_context/jsonschema (1-0-0 vs 2-0-0)
+break_commit	69d2afd9228b09404ed816696fbe008a639c081c (2023-11-09, adds 2-0-0)
+contract_added	b76c1c4086d16d533abb6d556e93eedf51c82403 (2023-01-30, adds 1-0-0)
+fields	deviceMemory retyped: integer|null -> number|null
+consumer_repo	https://github.com/snowplow/dbt-snowplow-unified
+consumer_pinned	54fbd2caa6062e10603cc1a6172a124dba78be7b
+consumer_reads	macros/field_extractions/get_browser_context_fields.sql:44,60,76 (device_memory extracted as dtype integer from browser, browser1, browser2 context generations); models/base/src_base.yml:560
+impact	the consumer macro carries all context generations side by side (the multi-version burden in code); the v2 field is still extracted as integer against the declared number type
+class	break (cross-repository, cross-team; retype)

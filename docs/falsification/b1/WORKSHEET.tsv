@@ -1,0 +1,33 @@
+# B1 worksheet (DATA-KILLGATE-SPEC r0). status: ADMITTED | REJECTED(<reason>) | VERIFYING | CANDIDATE
+# opened 2026-10-27, cap 2026-11-01. Tally kept at the bottom.
+id	family	producer	break	consumer	status	evidence
+b1-001	snowplow	iglu-central media_player 1-0-0->2-0-0 (25d59d3e)	percentProgress,isLive removed	dbt-snowplow-media-player@1878aa06 reads percentProgress (:160,:247)	ADMITTED	cases/b1-001 (pinned, manifest); official migration guide; restatements: 2
+b1-002	snowplow	iglu-central browser_context 1-0-0->2-0-0 (69d2afd9)	deviceMemory retyped integer->number	dbt-snowplow-unified@54fbd2ca extraction macro (:44,:60,:76), still dtype integer	ADMITTED	cases/b1-002 (pinned, manifest); restatements: 2
+r-001	snowplow	dbt-snowplow-ecommerce 0.8.0	package-internal defaults change	-	REJECTED(not an upstream contract change)	release notes
+r-002	fivetran	dbt_github_source	v0.5.0 label model	int_github__issue_label	REJECTED(addition, not removal/retype)	CHANGELOG
+r-003	snowplow	com.iterable system_webhook email	retyped	ecommerce user context reads	REJECTED(same-name different schema; matcher mislink)	harvest v2 snippets
+r-004	fivetran	dbt_*_source src ymls (family)	9 column removals found in dbt_github_source history, several with HEAD consumer reads	fivetran dbt_* transform packages	REJECTED(kind): passive assertion, not a contract; unenforced consumer-side map, no upstream registry; founder ruling 2026-10-28	fivetran-github.tsv; ruling text in ledger
+r-005	snowplow	identity/identity_merge/badrows/storage rows	removals/retypes without genuine consumer reads	comments, jinja, unrelated strings	REJECTED(no consumer read)	harvest v2 snippets
+b1-003	otel	semantic-conventions schemas/1.27.0 (1fae3e9e)	messaging.kafka.consumer.group renamed to messaging.consumer.group.name	SigNoz@665e70b1 kafka/sql.go reads old name in production SQL (:29,:91); http_handler.go emits user-facing 'attribute is not present' error	ADMITTED	cases/b1-003 (pinned, manifest); rename at post/1.27.0:22, absent in pre; restatements: 3 (declaration, SQL read, user-facing error string)
+b1-004	otel	semantic-conventions schemas/1.17.0 (1fae3e9e)	messaging.destination renamed to messaging.destination.name	SigNoz@665e70b1 queues/sql.go reads old name (:64); Celery pages carry both-name fallback arrays (coping evidence)	ADMITTED	cases/b1-004 (pinned, manifest); rename in post/1.17.0, absent in pre; restatements: 3 (declaration, SQL read, both-name fallback arrays)
+b1-005	otel	semantic-conventions schemas/1.21.0 (1fae3e9e)	http.method, http.status_code renamed to http.request.method, http.response.status_code	jaeger@6cf7987e anonymizer.go default allowed-tags keyed on old names (:25,:26)	ADMITTED	cases/b1-005 (pinned, manifest); renames in post/1.21.0, absent in pre; restatements: 2 (declaration, allow-list read)
+r-006	otel	semantic-conventions rename ledger	message.id, message.type, code.function and similar	chat-UI object properties, dashboard example markdown, test/mock files	REJECTED(no consumer read)	filtered sweep 2026-10-28
+b1-006	kubernetes	k8s.io/api networking/v1beta1 Ingress: deprecated 1.19, removed 1.22 (prerelease-lifecycle declaration, pre@5d0d5b56, stable at master@32a56a94)	serving removal of networking.k8s.io/v1beta1 Ingress	cert-manager@v1.5.3 (b26bd256): entire dual-version shim package pkg/internal/ingress (convert.go, v1.go, v1beta1.go), dual imports sync.go:28-29, runtime discovery ingress.go:116	ADMITTED	cases/b1-006 (pinned, manifest); restatements: 5
+b1-007	kubernetes	k8s.io/api policy/v1beta1 PodSecurityPolicy: deprecated 1.21, removed 1.25 (pre@988d7a1d); type ABSENT at master (kind-level check)	serving removal of policy/v1beta1 PodSecurityPolicy	cert-manager@HEAD (43405a5a): four values-gated chart templates still read policy/v1beta1 today	ADMITTED	cases/b1-007 (pinned, manifest); restatements: 3; cross-org (cert-manager org)
+b1-008	kubernetes	k8s.io/api autoscaling/v2beta2 HPA: deprecated 1.22, removed 1.26; 1.21-era declaration said 1.25, postponed by 1.24 (the contract itself moved)	serving removal of autoscaling/v2beta2 HPA	ingress-nginx@HEAD (dbb11b92): ternary Capabilities.APIVersions.Has branching in two chart templates	ADMITTED	cases/b1-008 (pinned, manifest); restatements: 3; caveat: same GitHub org as producer (kubernetes), separate project/maintainers/releases
+b1-009	terraform	hashicorp/terraform-provider-aws aws_s3_bucket schema, v3.76.1 -> v4.0.0: 14 writable arguments RETYPED to read-only, each with a deprecation message naming its replacement resource	writable arguments refused at a major boundary (acl, versioning, cors_rule, server_side_encryption_configuration, ...)	terraform-aws-modules/terraform-aws-s3-bucket: v2.15.0 reads monolithic args in main.tf; v3.0.0 rewrites into 12 separate resources + UPGRADE-3.0.md; follow-up coping commits 895cfa5, 8366ccc fixed loops the absorption itself caused	ADMITTED	cases/b1-009 (pinned, manifest); restatements: 5
+b1-010	terraform	hashicorp/terraform-provider-aws aws_eip vpc argument: v4.0.0 Optional undeclared, v5.0.0 Deprecated 'use domain attribute instead' + ConflictsWith, v6.0.0 ABSENT	full lifecycle pinned: silent -> declared -> removed	terraform-aws-modules/terraform-aws-vpc main.tf:1044 read vpc = true for six years (97c5f73 2017-09-11); absorbed in 2517eb9 (2023-05-30) as a module MAJOR bump, re-propagating the break to module users	ADMITTED	cases/b1-010 (pinned, manifest); restatements: 4
+# tally: admitted 10 | rejected 6 | GATE MET 2026-10-28, four days before the 2026-11-01 cap
+# family caps: snowplow 2, otel 3, kubernetes 3, terraform 2. Four ecosystems: event analytics,
+# distributed tracing, container orchestration, infrastructure as code.
+# market note (founder, 2026-10-28): the fivetran rejection is evidence of the vacancy itself:
+# declarations everywhere, enforcement nowhere, no judge at the PR boundary.
+# otel note (2026-10-28): schema files are cumulative version ledgers; 151 dotted renames declared,
+# 12 old names still read in jaeger/signoz production paths. SigNoz http.url backward_compat_keys.go
+# is a hand-maintained compat map: a consumer paying the enforcement tax by hand.
+# k8s note (2026-10-28): the declared ledger is generated code (APILifecycleRemoved per Kind), the
+# strongest producer-side declaration found so far. b1-008 shows the declaration itself being
+# renegotiated (1.25 -> 1.26). cert-manager v1.5.3's pkg/internal/ingress is a whole package whose
+# only job is absorbing one rename: the restatement-count specimen in its purest form.
+# terraform note (2026-10-28): restatement counts across all 10 admitted: 2,2,3,3,2,5,3,3,5,4 (mean 3.2).
+# Every case: one declared promise, N notations, zero enforcement at the moment of change.

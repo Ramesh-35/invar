@@ -1,0 +1,9 @@
+id	b1-008
+contract_repo	https://github.com/kubernetes/api
+pre_checkout	k8s-api-kubernetes-1.24.0 (988d7a1d2141e6cdb6b4d3c1a0652471928351aa)
+post_checkout	master (32a56a94764ef12425493aa43a50fe6ba091ab7e)
+contract	autoscaling/v2beta2 (prerelease-lifecycle declaration)
+consumer_repo	ingress-nginx
+consumer_sha	dbb11b92ddb77bee9c35e462479129354c84f939
+restatements	3: producer lifecycle declaration; ternary Capabilities.APIVersions.Has branching in two chart templates at HEAD; autoscaling values flags
+note	HorizontalPodAutoscaler autoscaling/v2beta2 deprecated 1.22 removed 1.26 (declaration at 1.21 said 1.25, postponed to 1.26 by 1.24: the contract itself moved); ingress-nginx chart HEAD branches apiVersion at render time per cluster

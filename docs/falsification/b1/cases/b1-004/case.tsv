@@ -1,0 +1,8 @@
+id	b1-004
+contract_repo	https://github.com/open-telemetry/semantic-conventions
+contract_sha	1fae3e9e00df840bb0069b927284d4c6e8507f87
+pre	schemas/1.16.0
+post	schemas/1.17.0
+consumer_repo	https://github.com/SigNoz/signoz
+consumer_sha	665e70b17a6c74b51bfcae16d0c7f29a84f013a9
+note	messaging.destination renamed to messaging.destination.name in 1.17.0; SigNoz queues SQL reads old name; Celery pages carry both-name fallback arrays

@@ -1,0 +1,5 @@
+968345105af00f156f7a14efc486f7f2cc057a7f1bd2c51dd0e7d5d0744beea1  ./case.tsv
+a5ea4db65841071e6d4092bea56a5fcea33fe0991a2b07b8ab33c26de2fe2125  ./consumer/snowplow_media_player_base_events_this_run.sql
+98e659361b20448ce830b7336ce98224cfc95892985029a354dc3b8edfc9bbd2  ./consumer/snowplow_media_player_base_this_run.sql
+d68fd2f7d5ce385c96a5b23a7eb33cab422eb51ec8cee2475e3882d251d682aa  ./producer/1-0-0
+f5999d688049c16607622dd270ef67df2d2404973e1901194c203ef158d6e07d  ./producer/2-0-0

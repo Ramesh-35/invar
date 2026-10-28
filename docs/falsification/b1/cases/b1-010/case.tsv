@@ -1,0 +1,9 @@
+id	b1-010
+contract_repo	https://github.com/hashicorp/terraform-provider-aws
+pre	v4.0.0 (7a0664683357fe4a515dc90fa48ec7751ab69cd9) eip.go: vpc Optional, undeclared
+post	v5.0.0 (d8cdf4ced81b957ba7c7b3c3a8cb1e2af0ed1a41) ec2_eip.go: vpc Deprecated "use domain attribute instead" + ConflictsWith domain; v6.0.0: vpc ABSENT (removed)
+consumer_repo	https://github.com/terraform-aws-modules/terraform-aws-vpc
+consumer_pre	0ea859dd659701e6e8dda61e61c47629eeda5ba3 main.tf:1044 reads vpc = true (since 97c5f73, 2017-09-11)
+consumer_post	2517eb9 (2023-05-30) feat!: Bump Terraform AWS Provider version to 5.0: -vpc = true +domain = "vpc", a module MAJOR bump forced by the rename
+restatements	4: producer schema deprecation + ConflictsWith; consumer vpc=true read held six years; absorption commit forcing a module major version (the break re-propagates to module users); README and docs updates in the same commit
+note	aws_eip vpc argument: silent at v4, declared deprecated at v5, removed at v6, the full lifecycle pinned

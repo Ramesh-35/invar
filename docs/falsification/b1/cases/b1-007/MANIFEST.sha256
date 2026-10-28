@@ -1,0 +1,10 @@
+84ed0f53081d60818f3cd647c58749ab27ee054ad8e0d44105ca6b63e4d486f3  ./case.tsv
+a4f08f608b362a393e3a3b6450513d6447f8eca361b16f67d869f7217c0372f1  ./consumer/deploy/charts/cert-manager/templates/cainjector-psp.yaml
+d6ada32de09811548f54c0b4e9bc3c1b50687a094354e3e7f349cf1d68e7937b  ./consumer/deploy/charts/cert-manager/templates/psp.yaml
+bb3bd3092b5753ab1d856829fe32035ed8785a328c522ac333c4eebf3307a415  ./consumer/deploy/charts/cert-manager/templates/startupapicheck-psp.yaml
+dc49b2093ab4a3c4d5af73b699300d049787c4cb447100ddb86cec0138c366f7  ./consumer/deploy/charts/cert-manager/templates/webhook-psp.yaml
+c98184484dc471559df3f947c999ff69bec3060a96316f0a352dfa02daa476cd  ./consumer/deploy/charts/cert-manager/values.yaml
+7a5aab74aa5a93f4b9fb91f4f52f5f118def1426051d612c51492a1f7c09ef97  ./post/ABSENCE-policy.txt
+5600bcb16a309081e7d6abe83c55ae253830912874b4ea5580f0fd0c06223ede  ./pre/policy/v1beta1/register.go
+d7f4ff4ae67b08b0a6d7eab90f5e7400ba024f44e11855706be6ea99b6188434  ./pre/policy/v1beta1/types.go
+d739bc0aa7ddbb318cfedc20694495828d78d2397d42aed629dc0dc4e317bc94  ./pre/policy/v1beta1/zz_generated.prerelease-lifecycle.go

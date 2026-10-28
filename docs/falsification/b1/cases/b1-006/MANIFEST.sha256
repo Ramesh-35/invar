@@ -1,0 +1,12 @@
+1b8635e466cceeb75728086300296a7371c227450136179ce31ab77073e52305  ./case.tsv
+050ea35ca6ecba3860c3fa1e525a8f845584f3281b26225ba4655840ce18b34d  ./consumer/pkg/controller/certificate-shim/ingresses/controller.go
+d35a7ccf44584960f4383a83828e9a9788d7aaa69740a586fe620cd7146129dc  ./consumer/pkg/controller/certificate-shim/sync.go
+3e8d70edb2e0601e30ce1e40c41a6c99eed16fffd008a01c1a6eae0fe03b11d8  ./consumer/pkg/internal/ingress/convert.go
+9daa40da3a108f5338de0cd2960095098cb348920072ef3ca970a1e20011741e  ./consumer/pkg/internal/ingress/ingress.go
+efc192333d4f42ce74d5a9721209d2e0f21c15ded4b3b6fc59ee69ace309abf2  ./consumer/pkg/internal/ingress/v1.go
+9d5faf091cc45276c8517ac76cb0ebde3705ca7642ce54392f60b72fd973b703  ./consumer/pkg/internal/ingress/v1beta1.go
+9fb0edae1b8637d0cfa9e9cd01ad6696db6350e10ad5b446f708082b7a90ff40  ./post/ABSENCE-networking.txt
+f22d0fb0d76000167072255bbb59015251cc853bd33d23b9f37fc90236afb600  ./post/zz_generated.prerelease-lifecycle.go.master
+7f4256fc252d66235a8050799f57a514c481406584e585c097a63566838184c5  ./pre/networking/v1beta1/register.go
+4cbfecedbfac9bdbf33d086f781a272a13503e580ebc63093db0fdc3cf60a58e  ./pre/networking/v1beta1/types.go
+eaa344a9dd248fecc53e0f32c1199e3fb58aef0525927a380857f1ecb32dd858  ./pre/networking/v1beta1/zz_generated.prerelease-lifecycle.go

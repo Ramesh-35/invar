@@ -1,0 +1,5 @@
+106f65ff6ed8c18fb01157799f565f78ca8dde5f1b190066da9113fea407018b  ./case.tsv
+1385d8704a9ffb9d06933e9347ff454fad7938a8732898f730ec2c5ae0cbe8c8  ./consumer/pkg/query-service/app/http_handler.go
+9ef33e3f49926df086a0fde35a4f62afc132af9637c770148c2e4309200dba89  ./consumer/pkg/query-service/app/integrations/messagingQueues/kafka/sql.go
+52aba384989275b9cd4a185d05ad9993b08be54278b815a1e499cd0bc933aee4  ./post/1.27.0
+4c8cae8f09403698ccf70dc127e9cd0dbfaac37516f2c722b676675a7ad9f6d7  ./pre/1.26.0

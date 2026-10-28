@@ -1,0 +1,9 @@
+id	b1-007
+contract_repo	https://github.com/kubernetes/api
+pre_checkout	k8s-api-kubernetes-1.24.0 (988d7a1d2141e6cdb6b4d3c1a0652471928351aa)
+post_checkout	master (32a56a94764ef12425493aa43a50fe6ba091ab7e)
+contract	policy/v1beta1 (prerelease-lifecycle declaration)
+consumer_repo	cert-manager
+consumer_sha	43405a5aeadec238e53593138d50e9990ba1fee9
+restatements	3: producer lifecycle declaration; four values-gated legacy chart templates reading policy/v1beta1 at HEAD; values.yaml podSecurityPolicy flag (line 62)
+note	PodSecurityPolicy policy/v1beta1 deprecated 1.21 removed 1.25; cert-manager HEAD still ships gated templates reading the removed version

@@ -1,0 +1,11 @@
+id	b1-001
+producer_repo	https://github.com/snowplow/iglu-central
+contract	schemas/com.snowplowanalytics.snowplow/media_player/jsonschema (1-0-0 vs 2-0-0)
+break_commit	25d59d3e39bb54b8c9b431a3c435f8ea4a15b5f8 (2023-08-08, adds 2-0-0)
+contract_added	40d19326433399c1a3466c3becb4b0cfdb655762 (2021-11-22, adds 1-0-0)
+fields	percentProgress removed; isLive removed; loop,muted,playbackRate,volume retyped
+consumer_repo	https://github.com/snowplow/dbt-snowplow-media-player
+consumer_pinned	1878aa06e1f608c196dcaf93d3a72354a86e179a
+consumer_reads	models/base/scratch/snowplow_media_player_base_events_this_run.sql:160 ('percentProgress'), :247 (cast as percent_progress)
+impact	official migration guide (v1/v2 switches), v0.6/v0.7 full-refresh migrations
+class	break (cross-repository, cross-team)
