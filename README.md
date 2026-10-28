@@ -143,6 +143,55 @@ and trust root in its own diff was still held against main's signed locks
 A lock records the fields a consumer depends on, not the lines that read
 them, and every report says so.
 
+## Judge a declared data contract, at the moment of change
+
+Code is not the only place promises live. A JSON Schema that other teams
+read is a declared contract, and `invar judge` holds a change to it
+against the version everyone already trusts:
+
+```sh
+invar judge --contract schemas/media_player.json --base origin/main
+```
+
+The PRE contract is read from the base ref, never from the working tree,
+so a change cannot choose its own baseline. The verdict speaks in
+sentences. On the real Snowplow media_player 1-0-0 to 2-0-0 change (case
+b1-001 of our pinned corpus):
+
+```
+VIOLATED: schemas/media_player.json breaks 6 promises made at origin/main.
+  removed: percentProgress was integer|null (line 47 at origin/main). Consumers
+  reading this field will break; keep the field, or ship this as a new major
+  version and migrate them.
+  ...
+judged: property presence and type, recursively. not judged in r0: enum,
+pattern, maximum, required (stated, never skipped).
+```
+
+In the Action, one input:
+
+```yaml
+- uses: Ramesh-35/invar@COMMIT_SHA
+  with:
+    check: 'false'
+    judge_contract: schemas/media_player.json
+```
+
+HOLDS passes. VIOLATED fails the job and the verdict lands in the step
+summary. A brand-new contract passes, stated as `new_contract`: nothing
+was promised before. An unparsable contract or an unreadable base ref
+fails: a lost baseline is never a pass. `--format json` carries the same
+facts for machines, including `unjudged_constraints`, and `--receipt`
+writes the canonical record.
+
+The judged set is stated and narrow, on purpose: property presence and
+`type`, recursed with dotted-path witnesses. Value constraints (`enum`,
+`pattern`, `maximum`, `required`) are not judged in r0 and every output
+says so. Spec, fixtures and the mutation record:
+[docs/falsification/JUDGE-SPEC.md](docs/falsification/JUDGE-SPEC.md).
+`invar judge` ships in releases from v0.2.0; the v0.1.0 binary does not
+carry it.
+
 ## What INVAR does not do
 
 No semantic checks: INVAR evaluates structure (a field's presence, type,
