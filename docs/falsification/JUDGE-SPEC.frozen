@@ -1,0 +1,16 @@
+# JUDGE-1 freeze record (r1), written before any implementation.
+# Baseline: v0.1.0 (c010a90) + B1 gate MET (9c736ef). Fixtures jf_f01 and
+# jf_f02 are sha256-identical to the pinned B1 case bytes (b1-001, b1-002
+# producer manifests). Ratified J-D1..J-D4 2026-10-28.
+blake3(docs/falsification/JUDGE-SPEC.md) = b86f8f73f8f894d58fae4939e6b5130852945307503954311570d09420ca5523
+sha256(docs/falsification/JUDGE-SPEC.md) = b039eda205aef9cab4883381b4b9a01b67ff18a2d9067522dfe42d0a1416e51f
+blake3(crates/invar-falsify/tests/judge_test.rs) = 4af2c77abda4860c91512e908f67ffd94b7ca7171c9eda1b21d02d041c58b939
+sha256(crates/invar-falsify/tests/judge_test.rs) = 0cd9036b1b24136837fb124bb6bbd2565a7feb02500252c9c8e334c603b99a30
+blake3(crates/invar-falsify/tests/fixtures/judge/b1-001-pre.json) = 48834d97bdceea6109d3b1ffdd6a76703c3a77153771f0b8612399b452f183b1
+sha256(crates/invar-falsify/tests/fixtures/judge/b1-001-pre.json) = d68fd2f7d5ce385c96a5b23a7eb33cab422eb51ec8cee2475e3882d251d682aa
+blake3(crates/invar-falsify/tests/fixtures/judge/b1-001-post.json) = 6b2090a7a4ec7826fe240c4edcf56f4f9c2f05ec4d75e8c187e1d3dcaeeb19ee
+sha256(crates/invar-falsify/tests/fixtures/judge/b1-001-post.json) = f5999d688049c16607622dd270ef67df2d2404973e1901194c203ef158d6e07d
+blake3(crates/invar-falsify/tests/fixtures/judge/b1-002-pre.json) = 79e9b9bea39ab657398f1c4f275a8ba399f421b660be620bac3196e4a5a41058
+sha256(crates/invar-falsify/tests/fixtures/judge/b1-002-pre.json) = 8ca42966b454d8e6b5e0ff62f89a1df605e7f7ee169e5d2805e8c7d522a8cf3d
+blake3(crates/invar-falsify/tests/fixtures/judge/b1-002-post.json) = 0ddcd014a75fbfeca8cf0815d1bd3e2bcd505c9fecc22cb3f8dc2745db0fd710
+sha256(crates/invar-falsify/tests/fixtures/judge/b1-002-post.json) = 08fd402902a34a1b0169e931b04ecc30e506b8f630ff5cd6524be520fb3ae7e6
