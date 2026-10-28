@@ -63,6 +63,9 @@ B2 definition, ratified 2026-10-28:
   PR pipeline within 14 days of the B2 release kills the standalone data
   slice without negotiation; the judge remains an engine capability.
 
+The gated backlog behind these tracks, item by item with unlock gates
+and kill conditions: [BACKLOG.md](BACKLOG.md).
+
 ## Standing rules
 
 - Every claim in public material is backed by the measured record; the
