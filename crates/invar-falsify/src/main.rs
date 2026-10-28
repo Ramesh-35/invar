@@ -100,6 +100,10 @@ enum Command {
     /// PostToolUse event from stdin; a VIOLATED contract goes to stderr with
     /// exit 2 (fed back to the agent); everything else is silent.
     Hook(HookArgs),
+    /// JUDGE-1: judge a declared data contract (JSON Schema) against the
+    /// base ref: a property removed or retyped is VIOLATED with a dotted
+    /// path witness; what r0 does not judge is stated, never skipped.
+    Judge(JudgeArgs),
     /// Research harness: evaluate the falsification corpus and persist the run.
     Run(RunArgs),
     /// Research harness: structurally validate a corpus manifest.
@@ -384,6 +388,24 @@ struct HookArgs {
 }
 
 #[derive(Parser)]
+struct JudgeArgs {
+    /// Path of the declared contract file in this repository.
+    #[arg(long)]
+    contract: String,
+    /// Git ref to read the PRE contract from: the base tree, never the
+    /// working tree (the SIB-3 trust discipline).
+    #[arg(long, default_value = "origin/main")]
+    base: String,
+    /// Output format: text (for people) or json (the same facts for
+    /// machines and agents, deterministically ordered).
+    #[arg(long, default_value = "text")]
+    format: String,
+    /// Also write a canonical, byte-deterministic receipt here.
+    #[arg(long)]
+    receipt: Option<String>,
+}
+
+#[derive(Parser)]
 struct McpArgs {
     #[arg(long, default_value = "invar.toml")]
     config: String,
@@ -469,6 +491,7 @@ fn main() {
         Command::Lock(a) => dispatch_r2(cmd_lock(a)),
         Command::Mcp(a) => dispatch_r2(cmd_mcp(a)),
         Command::Hook(a) => dispatch_r2(cmd_hook(a)),
+        Command::Judge(a) => dispatch_r2(cmd_judge(a)),
         Command::Fix(a) => dispatch_r2(cmd_fix(a)),
         Command::Explain(a) => {
             let (out, code) = invar_falsify::explain::explain(a.code.as_deref());
@@ -1306,6 +1329,12 @@ fn cmd_lock(args: LockArgs) -> Result<i32> {
 /// silent (exit 2 never claims safety; it only ever carries a break), and
 /// any error is exit 3 through dispatch_r2, surfaced to the user, never to
 /// the model, so a broken setup cannot thrash the loop.
+/// JUDGE-1: the declared-data-contract verdict (JUDGE-SPEC r1).
+fn cmd_judge(args: JudgeArgs) -> Result<i32> {
+    let root = std::env::current_dir().context("reading the current directory")?;
+    invar_falsify::judge::run(&root, &args.contract, &args.base, &args.format, args.receipt.as_deref())
+}
+
 fn cmd_hook(args: HookArgs) -> Result<i32> {
     if args.agent != "claude-code" {
         anyhow::bail!("unknown agent {:?} (known: claude-code)", args.agent);

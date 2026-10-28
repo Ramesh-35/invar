@@ -27,6 +27,7 @@ pub mod fix;
 pub mod gate;
 pub mod init;
 pub mod invariant;
+pub mod judge;
 pub mod ledger;
 pub mod lock;
 pub mod manifest;

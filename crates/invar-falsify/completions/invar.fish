@@ -9,7 +9,7 @@ complete -c invar -n "__fish_use_subcommand" -a "coverage" -d "What is evaluated
 complete -c invar -n "__fish_use_subcommand" -a "dependents" -d "Who depends on a producer field"
 complete -c invar -n "__fish_use_subcommand" -a "backtest" -d "Replay locked bindings over git history"
 complete -c invar -n "__fish_use_subcommand" -a "verify-receipt" -d "Re-verify an evidence receipt"
-complete -c invar -n "__fish_use_subcommand" -a "receipt fix explain gate mcp hook completions run validate report verify audit replay help"
+complete -c invar -n "__fish_use_subcommand" -a "receipt fix explain gate mcp hook judge completions run validate report verify audit replay help"
 complete -c invar -n "__fish_seen_subcommand_from check" -l config -l ledger -l ci -l locks -l report-md -l receipt -l lock-signers -l lock-principal -l sample -l contract -l proof
 complete -c invar -n "__fish_seen_subcommand_from lock" -l config -l update -l lock-signers -l lock-principal -l sample -l contract -l emit-proof -l out
 complete -c invar -n "__fish_seen_subcommand_from init" -l root -l force -l stdout
@@ -20,4 +20,5 @@ complete -c invar -n "__fish_seen_subcommand_from fix" -l config -l suggest
 complete -c invar -n "__fish_seen_subcommand_from verify-receipt" -l config -l artifacts -l signers -l principal
 complete -c invar -n "__fish_seen_subcommand_from gate" -l config -l proof
 complete -c invar -n "__fish_seen_subcommand_from hook" -a "claude-code" -l settings
+complete -c invar -n "__fish_seen_subcommand_from judge" -l contract -l base -l format -l receipt
 complete -c invar -n "__fish_seen_subcommand_from completions" -a "bash zsh fish"
