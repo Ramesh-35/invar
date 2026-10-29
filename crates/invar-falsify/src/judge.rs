@@ -35,8 +35,11 @@ enum BaseRead {
 /// code (0 HOLDS, 1 VIOLATED, 4 NOT EVALUATED); real failures (not a git
 /// repository, unwritable receipt) surface as errors and exit 3 upstream.
 pub fn run(root: &Path, contract: &str, base: &str, format: &str, receipt_out: Option<&str>) -> Result<i32> {
-    let post_bytes = match std::fs::read_to_string(root.join(contract)) {
-        Ok(s) => s,
+    // Bytes are read raw and decoded lossily: malformed encoding is a
+    // contract that cannot be parsed (NOT EVALUATED unparsable, exit 4),
+    // never a process error. Only a missing or unreadable FILE is an error.
+    let post_bytes = match std::fs::read(root.join(contract)) {
+        Ok(b) => String::from_utf8_lossy(&b).into_owned(),
         Err(e) => anyhow::bail!("reading {contract} from the working tree: {e}"),
     };
     let (verdict, reason, witnesses, pre_text) = match base_bytes(root, base, contract)? {

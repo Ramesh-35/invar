@@ -41,6 +41,16 @@ if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
     echo '```'
     printf '%s\n' "$text"
     echo '```'
+    # The seal: one quiet line from the real receipt bytes. It states the
+    # receipt's own BLAKE3 and the engine version, nothing it cannot prove.
+    if [ -f "$receipt" ]; then
+      rb="$(sed -n 's/^{"receipt_blake3":"\([0-9a-f]\{16\}\).*/\1/p' "$receipt" | head -n1)"
+      ver="$("$INVAR_BIN" --version 2>/dev/null | head -n1)"
+      if [ -n "$rb" ]; then
+        echo
+        echo "<sub>sealed by ${ver:-invar} · receipt blake3 \`$rb…\` · a skip is never a pass</sub>"
+      fi
+    fi
   } >> "$GITHUB_STEP_SUMMARY"
 fi
 
