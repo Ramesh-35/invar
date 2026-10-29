@@ -53,7 +53,7 @@ if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
       ver="$("$INVAR_BIN" --version 2>/dev/null | head -n1)"
       if [ -n "$rb" ]; then
         echo
-        echo "<sub>sealed by ${ver:-invar} · receipt blake3 \`$rb…\` · a skip is never a pass</sub>"
+        echo "<sub>sealed by ${ver:-invar} · receipt blake3 \`${rb}…\` · a skip is never a pass</sub>"
       fi
     fi
   } >> "$GITHUB_STEP_SUMMARY"
