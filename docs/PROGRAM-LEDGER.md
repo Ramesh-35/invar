@@ -43,6 +43,15 @@ Kubernetes 3, Terraform 2); mean restatement count 3.2 coping notations
 per broken promise; PR-time enforcement observed in any ecosystem: none.
 Evidence: docs/falsification/b1/ (ledger, manifests, harvesters).
 
+B2 WINDOW OPEN, recorded 2026-10-29: v0.2.0 released and
+stranger-verified (checksum, ed25519 signature against the committed
+anchor, judge verdict replayed from the released binary). The 14-day
+window closes 2026-11-12; the kill rule is measured by
+docs/falsification/b2-watch.sh, one row per day. Distribution note,
+honest: HN Show HN blocked by a new-account restriction (moderators
+emailed), first r/rust post held by moderation (modmail sent);
+distribution is accreting via direct channels during the window.
+
 B2 definition, ratified 2026-10-28:
 - Surface: a single stateless `invar judge` subcommand, run in CI against
   the base branch exactly as SIB-3 reads trust (never from the PR tree).
