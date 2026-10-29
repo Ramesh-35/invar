@@ -29,7 +29,8 @@ reference the registry. The registry is therefore a second copy of each code
 string, and the no-drift guarantee comes from a consistency test that extracts
 emission sites from the source text at test time (R-X-6), not from shared
 constants. This is stated plainly rather than hidden.
-B4. Zero tokens, zero network, no clock, sub-millisecond.
+B4. Zero tokens, zero network, no clock; fast enough that latency is
+not the constraint (measured per release, never promised).
 
 Inventory at the time of drafting (tree 8861f63): 19 distinct abstention codes
 are emitted across codepairs.rs, valuepairs.rs, strings.rs and init.rs (H2,

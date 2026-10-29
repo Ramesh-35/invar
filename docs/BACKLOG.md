@@ -112,6 +112,37 @@ program: the judge nobody has to trust.
 Kill: if a quarter passes with no external verification event, this
 stays parked here without shame.
 
+## 6. H2, invar compat: the coping layer compiled from the declared diff
+
+What: a new output command on the existing engine. It reads a producer's
+declared rename diff, intersects it with the fields the consumer's
+signed invar.lock proves are read, and emits the coping artifacts people
+today write by hand (alias tables as OTTL, JSON, TypeScript, Go), plus,
+for every change it cannot translate one to one (merges, value changes,
+unit changes), an executable falsification test harness instead of a
+bare NOT COVERED, and a signed receipt listing both. Source: Brief 4
+(docs/research/BRIEF4-REPORT-coping-layer.md) and the founder's
+elevation memo (docs/research/H2-ELEVATION-three-breakthroughs.md).
+
+Gate (founder ruling 2026-10-28): B2 clears its kill rule first. Timing
+tension, recorded for a founder decision: the dated forcing event is the
+OpenTelemetry Java agent 3.0 cutover, targeted October 2026, which may
+not wait out B2's full 14 days; a possible amendment is opening H2 on a
+strong day-7 B2 signal. Not amended until ruled.
+
+Innovation thesis: the coping layer is the largest unowned, unverified
+body of code at every boundary, now increasingly written by agents, and
+its input is already data. H2 makes INVAR the deterministic ground truth
+agents consult instead of hallucinating fallbacks, and turns every
+untranslatable change into a test the hand-written bridge must pass.
+
+Kill (pre-registered in Brief 4): fewer than 3 external events (merged
+INVAR-generated artifact, CI run, or third-party receipt verification)
+from at least 2 independent organizations by day 14 after release kills
+H2 as a product direction; separately, fewer than 1 of 10 platform teams
+on the Java agent 3.0 cutover agreeing to a paid or letter-of-intent
+pilot by day 14 records H2 as having no willingness to pay.
+
 ## Where innovation enters this stream
 
 The unprecedented work is not more features; it is the compounding of
