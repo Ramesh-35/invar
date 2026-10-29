@@ -44,7 +44,12 @@ if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
     # The seal: one quiet line from the real receipt bytes. It states the
     # receipt's own BLAKE3 and the engine version, nothing it cannot prove.
     if [ -f "$receipt" ]; then
-      rb="$(sed -n 's/^{"receipt_blake3":"\([0-9a-f]\{16\}\).*/\1/p' "$receipt" | head -n1)"
+      # Pure-shell extraction (no sed): the receipt footer is the last
+      # line, {"receipt_blake3":"<hex>"}; portable across BSD and GNU.
+      footer="$(tail -n1 "$receipt")"
+      rb="${footer#*\"receipt_blake3\":\"}"
+      rb="$(printf '%.16s' "$rb")"
+      case "$rb" in *[!0-9a-f]*) rb="";; esac
       ver="$("$INVAR_BIN" --version 2>/dev/null | head -n1)"
       if [ -n "$rb" ]; then
         echo
