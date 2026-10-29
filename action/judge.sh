@@ -46,10 +46,10 @@ if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
     if [ -f "$receipt" ]; then
       # Pure-shell extraction (no sed): the receipt footer is the last
       # line, {"receipt_blake3":"<hex>"}; portable across BSD and GNU.
-      footer="$(tail -n1 "$receipt")"
-      rb="${footer#*\"receipt_blake3\":\"}"
-      rb="$(printf '%.16s' "$rb")"
-      case "$rb" in *[!0-9a-f]*) rb="";; esac
+      # footer is {"receipt_blake3":"<hex>"}; field 4 of a quote-split is
+      # the hex. cut only: no sed, no pattern expansion, same on bash 3.2.
+      rb="$(tail -n 1 "$receipt" | cut -d'"' -f4 | cut -c1-16)"
+      case "$rb" in *[!0-9a-f]*|"") rb="";; esac
       ver="$("$INVAR_BIN" --version 2>/dev/null | head -n1)"
       if [ -n "$rb" ]; then
         echo
