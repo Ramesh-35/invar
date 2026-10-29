@@ -143,6 +143,31 @@ H2 as a product direction; separately, fewer than 1 of 10 platform teams
 on the Java agent 3.0 cutover agreeing to a paid or letter-of-intent
 pilot by day 14 records H2 as having no willingness to pay.
 
+## 7. Warm-keeping, licensed by Brief 5 (the only new build the evidence permits)
+
+Two small items from docs/research/BRIEF5-REPORT-dating-the-wall.md's
+capture map; everything else Brief 5 examined is a watch item or on the
+do-not-build list (agent identity services, PLD evidence packs, runtime
+policy engines, blocking MCP gates, LLM-review competitors).
+
+- 7a. MCP deprecation reader: judge learns to read the MCP
+  deprecated-features registry and flag servers and clients using
+  Roots, Sampling, Logging or Dynamic Client Registration. Gate to
+  BUILD: judge is a shipped surface, so this is active-track deepening
+  after v0.2.1 (JUDGE-SUBTYPE) lands. Gate to PUBLISH or announce: an
+  MCP removal revision is announced (Prediction 6). Cost 1 to 2 weeks.
+  Dated collision: removals eligible 2027-07-28.
+- 7b. Verdicts in reviewer-native formats: the judge Action emits
+  check-run annotations and SARIF so platform LLM reviewers cite
+  INVAR's decidable verdict instead of guessing. Supersedes the
+  COMPAT-SPEC C-D3 question for the judge surface. Gate: after v0.2.1.
+  Cost about 1 week. This is the H5-world position: the deterministic
+  oracle inside the default reviewer's loop.
+
+Kill, both: if by 2027-12-31 neither an MCP removal revision exists
+(Prediction 6 falsified) nor any platform reviewer is observed citing a
+judge verdict, both items are recorded dead here with that evidence.
+
 ## Where innovation enters this stream
 
 The unprecedented work is not more features; it is the compounding of
