@@ -168,6 +168,26 @@ Kill, both: if by 2027-12-31 neither an MCP removal revision exists
 (Prediction 6 falsified) nor any platform reviewer is observed citing a
 judge verdict, both items are recorded dead here with that evidence.
 
+## Rejected, with reasons (kept so the reasoning is not re-litigated)
+
+- 2026-10-30, runtime execution permit (libinvar_permit at the CUDA /
+  Triton / allocator boundary; agent hypervisor gating every tool call).
+  REJECTED. (1) Its corpus evidence does not exist: the cited SPEC-012,
+  SPEC-029 (SGLang, vLLM fused kernels) and SPEC-038 (CAGE) appear
+  nowhere in this repository or the B1 corpus; "vllm" occurs only as two
+  MCP server names in Experiment A's sampling frame and "CAGE" only
+  inside "opencage". (2) Brief 5 put runtime authority (H6) with cloud
+  and identity platforms and pre-registered "do not build a runtime
+  destructive-action policy engine"; this is that, extended into the
+  GPU stack. (3) Category mismatch: INVAR judges declared, decidable
+  surfaces; an allocation or kernel launch carries sizes and bytes, not
+  a declared contract, and frameworks already guard tensor shapes. (4) A
+  permit no runtime calls is the most avoidable control there is;
+  unavoidability comes from adoption, not from a position in the stack.
+  The kernel of truth kept: a CI check is only as strong as its
+  enforcement, so the realistic step is documenting the judge check as a
+  required status check under branch protection (cheap, no gate).
+
 ## Where innovation enters this stream
 
 The unprecedented work is not more features; it is the compounding of
