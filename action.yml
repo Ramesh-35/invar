@@ -1,9 +1,5 @@
 name: INVAR contract check
-description: >-
-  Check the cross-repository contracts declared in invar.toml. Remote artifacts
-  referenced as github:OWNER/REPO@REF:PATH are fetched in-process, BLAKE3-hashed
-  and never written to disk. A contract violation fails the job; an evaluation
-  ERROR fails it separately and is never reported as a verdict.
+description: 'Stateless contract firewall CLI that gates breaking schema and contract changes in CI.'
 author: INVAR
 branding:
   icon: shield
