@@ -98,3 +98,15 @@ The text format speaks to a person, not a parser. Rules, each testable:
 - J-D3 output: text and JSON in r0; SARIF deferred.
 - J-D4 breaking set: presence and type, recursive, with the not-judged
   constraint classes stated in every receipt rather than silently passed.
+
+## r2 amendment (2026-10-30), forced by JUDGE-SUBTYPE r1
+
+JUDGE-SUBTYPE r1 judges enum, bounds, required, pattern and format, so
+the r0 scope statement in this spec ("not judged in r0: enum, pattern,
+maximum, required") is superseded. The unjudged list is now `$ref`,
+`allOf`, `anyOf`, `oneOf`, `items`, defined in JUDGE-SUBTYPE-SPEC.md.
+`$ref` enters the list because r0 never followed references and never
+said so: a gap found while writing r1, stated from r2 on. The one
+assertion in judge_test.rs that encoded the r0 list is updated; every
+other r1 assertion is unchanged. The r1 freeze record is kept and the r2
+hashes are appended to JUDGE-SPEC.frozen.

@@ -1,0 +1,7 @@
+# JUDGE-SUBTYPE r1 freeze record, written before any implementation.
+# Baseline: v0.2.0 (8716660). Rulings JS-D1..JS-D4 ratified 2026-10-30
+# (JS-D3 implemented as constraint_changed: pattern containment not decided).
+blake3(docs/falsification/JUDGE-SUBTYPE-SPEC.md) = a2a1966f0c2e5460a0b30452809b62e58b687b37df8bdb5c95fb4dc1d084628a
+sha256(docs/falsification/JUDGE-SUBTYPE-SPEC.md) = 71d7f94b7b30a92fbfa7d78e1cf387c95b3edd5a8ed58a7e8bd1377ad4cadcb3
+blake3(crates/invar-falsify/tests/judge_subtype_test.rs) = ed488ab20c2bc63ffa4147893f175fdbb92fdbfe2e728ba14eb9938061e0d116
+sha256(crates/invar-falsify/tests/judge_subtype_test.rs) = fa6a5cfeccfe404dc5cd1dfcc35cee0655320075b9e98d352789dc75f364bc8c

@@ -176,8 +176,11 @@ fn json_format_carries_witnesses_and_unjudged_constraints() {
     assert!(w["pre_type"].as_str().unwrap().contains("integer"));
     assert!(w["post_type"].as_str().unwrap().contains("number"));
     assert!(w["pre_line"].as_u64().unwrap() > 0);
+    // JUDGE-SPEC r2 (2026-10-30): r1 of JUDGE-SUBTYPE judges enum, bounds,
+    // required and pattern/format, so they leave the list; the r1 list is
+    // asserted exactly in judge_subtype_test.rs js_f08. Here: the list
+    // exists, is non-empty, and states the r0 gap $ref.
     let uj = v["unjudged_constraints"].as_array().expect("unjudged_constraints[]");
-    for k in ["enum", "pattern", "maximum", "required"] {
-        assert!(uj.iter().any(|x| x == k), "missing {k} in {uj:?}");
-    }
+    assert!(!uj.is_empty(), "the unjudged list is stated, never empty: {uj:?}");
+    assert!(uj.iter().any(|x| x == "$ref"), "missing $ref in {uj:?}");
 }

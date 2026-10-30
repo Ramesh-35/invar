@@ -14,3 +14,11 @@ blake3(crates/invar-falsify/tests/fixtures/judge/b1-002-pre.json) = 79e9b9bea39a
 sha256(crates/invar-falsify/tests/fixtures/judge/b1-002-pre.json) = 8ca42966b454d8e6b5e0ff62f89a1df605e7f7ee169e5d2805e8c7d522a8cf3d
 blake3(crates/invar-falsify/tests/fixtures/judge/b1-002-post.json) = 0ddcd014a75fbfeca8cf0815d1bd3e2bcd505c9fecc22cb3f8dc2745db0fd710
 sha256(crates/invar-falsify/tests/fixtures/judge/b1-002-post.json) = 08fd402902a34a1b0169e931b04ecc30e506b8f630ff5cd6524be520fb3ae7e6
+
+# r2 amendment (2026-10-30), forced by JUDGE-SUBTYPE r1: the r0 unjudged-list
+# assertion in judge_test.rs updated; spec amendment section appended. r1
+# hashes above are kept as history.
+blake3(docs/falsification/JUDGE-SPEC.md) = abf01802f9877f590dbfc5bdc09e16f3abfb11718b4d165f287f08246c23c362
+sha256(docs/falsification/JUDGE-SPEC.md) = ca1ace85794ff23789ae101991bf0bd6a012914ac51298728d45e445cb165ccf
+blake3(crates/invar-falsify/tests/judge_test.rs) = 803924307b3966ee341f21d7fcfe90ed8126cec8acdb2cfaf993252a63858558
+sha256(crates/invar-falsify/tests/judge_test.rs) = 1cafd9ecccac16f596899f2763c55333848ccea4de7e3b6e5ce1fc851ad884de
