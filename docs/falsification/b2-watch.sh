@@ -28,8 +28,13 @@ if [ -n "${GH_TOKEN:-}" ]; then
 d=json.load(sys.stdin)
 items=d.get("items",[])
 repos=sorted({i["repository"]["full_name"] for i in items if not i["repository"]["full_name"].startswith("Ramesh-35/")})
-print(f"{len(repos)}:{\",\".join(repos)}" if repos else "0")')"
+joined = ",".join(repos); print(f"{len(repos)}:{joined}" if repos else "0")')"
   note="code search live"
+  # A failed search (rate limit, auth, malformed reply) must never render
+  # as a blank or a zero: it is stated as ERROR. A skip is never a pass.
+  case "$ext" in
+    ""|*[!0-9:,a-zA-Z_./-]*) ext="ERROR"; note="code search failed: column not evaluated, stated" ;;
+  esac
 else
   ext="NOT_EVALUATED"
   note="no GH_TOKEN: external-repo column not evaluated, stated"
