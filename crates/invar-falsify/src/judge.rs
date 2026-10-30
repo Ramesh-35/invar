@@ -14,15 +14,26 @@ use std::path::Path;
 use std::process::Command;
 
 /// The constraint classes r0 does not judge, stated in every receipt.
-const UNJUDGED: [&str; 4] = ["enum", "pattern", "maximum", "required"];
+/// What r1 does not judge, stated in every output (JUDGE-SUBTYPE r1).
+/// `$ref` is a gap r0 had and never stated: references are not followed.
+const UNJUDGED: [&str; 5] = ["$ref", "allOf", "anyOf", "oneOf", "items"];
+
+/// Lower bounds tighten when raised; upper bounds tighten when lowered.
+const LOWER: [&str; 4] = ["minimum", "exclusiveMinimum", "minLength", "minItems"];
+const UPPER: [&str; 4] = ["maximum", "exclusiveMaximum", "maxLength", "maxItems"];
 
 pub struct Witness {
     pub path: String,
-    pub kind: &'static str, // "removed" | "retyped"
+    /// removed | retyped | narrowed | tightened | escalated | constraint_changed
+    pub kind: &'static str,
     pub pre_type: String,
     pub post_type: Option<String>,
     pub pre_line: Option<u64>,
     pub post_line: Option<u64>,
+    /// The constraint keyword for the r1 kinds; None for removed and retyped.
+    pub keyword: Option<&'static str>,
+    pub pre_value: Option<String>,
+    pub post_value: Option<String>,
 }
 
 enum BaseRead {
@@ -52,11 +63,11 @@ pub fn run(root: &Path, contract: &str, base: &str, format: &str, receipt_out: O
                 (Ok(pre), Ok(post)) => {
                     let mut w = Vec::new();
                     walk("", &pre, &post, &mut w);
-                    w.sort_by(|a, b| a.path.cmp(&b.path));
+                    w.sort_by(|a, b| (a.path.as_str(), a.kind, a.keyword).cmp(&(b.path.as_str(), b.kind, b.keyword)));
                     for x in &mut w {
                         let last = x.path.rsplit('.').next().unwrap_or(&x.path).to_string();
                         x.pre_line = find_line(&pre_text, &last);
-                        if x.kind == "retyped" {
+                        if x.kind != "removed" {
                             x.post_line = find_line(&post_bytes, &last);
                         }
                     }
@@ -142,6 +153,21 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
     let empty = serde_json::Map::new();
     let pp = pre.get("properties").and_then(Value::as_object).unwrap_or(&empty);
     let qp = post.get("properties").and_then(Value::as_object).unwrap_or(&empty);
+    for name in newly_required(pre, post) {
+        let path = if prefix.is_empty() { name.clone() } else { format!("{prefix}.{name}") };
+        let ty = pp.get(&name).or_else(|| qp.get(&name)).map(type_str).unwrap_or_default();
+        out.push(Witness {
+            path,
+            kind: "escalated",
+            pre_type: ty,
+            post_type: None,
+            pre_line: None,
+            post_line: None,
+            keyword: Some("required"),
+            pre_value: None,
+            post_value: None,
+        });
+    }
     for (k, pv) in pp {
         let dotted = if prefix.is_empty() { k.clone() } else { format!("{prefix}.{k}") };
         match qp.get(k) {
@@ -152,6 +178,9 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
                 post_type: None,
                 pre_line: None,
                 post_line: None,
+                keyword: None,
+                pre_value: None,
+                post_value: None,
             }),
             Some(qv) => {
                 if type_str(pv) != type_str(qv) {
@@ -162,10 +191,94 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
                         post_type: Some(type_str(qv)),
                         pre_line: None,
                         post_line: None,
+                        keyword: None,
+                        pre_value: None,
+                        post_value: None,
                     });
                 }
+                constraints(&dotted, pv, qv, out);
                 walk(&dotted, pv, qv, out);
             }
+        }
+    }
+}
+
+/// Names newly present in an object's `required[]` (JUDGE-SUBTYPE JS-D4).
+fn newly_required(pre: &Value, post: &Value) -> Vec<String> {
+    let names = |v: &Value| -> Vec<String> {
+        v.get("required")
+            .and_then(Value::as_array)
+            .map(|a| a.iter().filter_map(|x| x.as_str().map(str::to_string)).collect())
+            .unwrap_or_default()
+    };
+    let before = names(pre);
+    let mut added: Vec<String> = names(post).into_iter().filter(|n| !before.contains(n)).collect();
+    added.sort();
+    added.dedup();
+    added
+}
+
+/// True when post's `enum` accepts less than pre's (JS-D1): a value lost,
+/// or an enum added where there was none. Dropping the enum widens.
+fn narrowed_enum(pv: &Value, qv: &Value) -> bool {
+    match (pv.get("enum").and_then(Value::as_array), qv.get("enum").and_then(Value::as_array)) {
+        (_, None) => false,
+        (None, Some(_)) => true,
+        (Some(a), Some(b)) => a.iter().any(|x| !b.contains(x)),
+    }
+}
+
+/// A constraint value as people read it: strings bare, everything else JSON.
+fn disp(v: Option<&Value>) -> Option<String> {
+    v.map(|x| x.as_str().map(str::to_string).unwrap_or_else(|| x.to_string()))
+}
+
+fn constraint_witness(path: &str, kind: &'static str, keyword: &'static str, pv: &Value, a: Option<&Value>, b: Option<&Value>) -> Witness {
+    Witness {
+        path: path.to_string(),
+        kind,
+        pre_type: type_str(pv),
+        post_type: None,
+        pre_line: None,
+        post_line: None,
+        keyword: Some(keyword),
+        pre_value: disp(a),
+        post_value: disp(b),
+    }
+}
+
+/// The JUDGE-SUBTYPE r1 validators on one property present at both refs:
+/// enum narrowing, bound tightening, pattern and format changes. A schema
+/// is read as a validation contract: narrowing what it accepts is VIOLATED.
+fn constraints(path: &str, pv: &Value, qv: &Value, out: &mut Vec<Witness>) {
+    if narrowed_enum(pv, qv) {
+        out.push(constraint_witness(path, "narrowed", "enum", pv, pv.get("enum"), qv.get("enum")));
+    }
+    let bounds = LOWER.iter().map(|k| (*k, true)).chain(UPPER.iter().map(|k| (*k, false)));
+    for (kw, is_lower) in bounds {
+        let (ra, rb) = (pv.get(kw), qv.get(kw));
+        if ra == rb || rb.is_none() {
+            continue; // unchanged, or the bound was removed: a loosening
+        }
+        let numeric_a = !matches!(ra, Some(v) if !v.is_number());
+        match (ra.and_then(Value::as_f64), rb.and_then(Value::as_f64)) {
+            (a, Some(b)) if numeric_a => {
+                let tightened = match a {
+                    None => true,
+                    Some(a) => (is_lower && b > a) || (!is_lower && b < a),
+                };
+                if tightened {
+                    out.push(constraint_witness(path, "tightened", kw, pv, ra, rb));
+                }
+            }
+            // A non-numeric bound (draft-04 boolean exclusiveMinimum, say)
+            // changed: flagged as changed, never silently passed.
+            _ => out.push(constraint_witness(path, "constraint_changed", kw, pv, ra, rb)),
+        }
+    }
+    for kw in ["pattern", "format"] {
+        if pv.get(kw) != qv.get(kw) && qv.get(kw).is_some() {
+            out.push(constraint_witness(path, "constraint_changed", kw, pv, pv.get(kw), qv.get(kw)));
         }
     }
 }
@@ -208,7 +321,7 @@ fn body_json(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w:
         "reason": reason,
         "contract": contract,
         "base": base,
-        "judged": "property presence and type, recursive",
+        "judged": "property presence and type, enum, numeric, length and item-count bounds, required, pattern and format, recursive",
         "unjudged_constraints": UNJUDGED,
         "witnesses": w.iter().map(|x| json!({
             "path": x.path,
@@ -218,6 +331,9 @@ fn body_json(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w:
             "contract": contract,
             "pre_line": x.pre_line,
             "post_line": x.post_line,
+            "keyword": x.keyword,
+            "pre_value": x.pre_value,
+            "post_value": x.post_value,
         })).collect::<Vec<_>>(),
     })
 }
@@ -241,6 +357,52 @@ fn render_text(verdict: &str, reason: Option<&str>, contract: &str, base: &str, 
                         s.push_str(&format!(
                             "  removed: {} was {}{at}. Consumers reading this field will break; keep the field, or ship this as a new major version and migrate them.\n",
                             x.path, x.pre_type
+                        ));
+                    }
+                    "narrowed" => {
+                        let post = x.post_value.as_deref().unwrap_or("[]");
+                        match x.pre_value.as_deref() {
+                            Some(pre) => {
+                                let parse = |s: &str| serde_json::from_str::<Vec<Value>>(s).unwrap_or_default();
+                                let (a, b) = (parse(pre), parse(post));
+                                let lost: Vec<String> = a.iter().filter(|v| !b.contains(v)).map(|v| v.to_string()).collect();
+                                s.push_str(&format!(
+                                    "  narrowed: {} no longer accepts {}. Senders using a removed value will be rejected; keep the value, or version the change.\n",
+                                    x.path, lost.join(", ")
+                                ));
+                            }
+                            None => s.push_str(&format!(
+                                "  narrowed: {} now accepts only {post}. Values outside that set, valid before, will be rejected; drop the enum, or version the change.\n",
+                                x.path
+                            )),
+                        }
+                    }
+                    "tightened" => {
+                        let kw = x.keyword.unwrap_or("bound");
+                        let to = x.post_value.as_deref().unwrap_or("?");
+                        let change = match x.pre_value.as_deref() {
+                            None => format!("{kw} added at {to}"),
+                            Some(from) if LOWER.contains(&kw) => format!("{kw} raised from {from} to {to}"),
+                            Some(from) => format!("{kw} lowered from {from} to {to}"),
+                        };
+                        s.push_str(&format!(
+                            "  tightened: {} {change}. Values valid before can now be rejected; restore the bound, or version the change.\n",
+                            x.path
+                        ));
+                    }
+                    "escalated" => {
+                        s.push_str(&format!(
+                            "  escalated: {} is now required. Payloads that omit it, valid before, will be rejected; keep it optional, or version the change.\n",
+                            x.path
+                        ));
+                    }
+                    "constraint_changed" => {
+                        s.push_str(&format!(
+                            "  changed: {} {} was {}, is now {}. Whether this narrows what is accepted is not decided here; review it, or version the change.\n",
+                            x.path,
+                            x.keyword.unwrap_or("constraint"),
+                            x.pre_value.as_deref().unwrap_or("absent"),
+                            x.post_value.as_deref().unwrap_or("absent")
                         ));
                     }
                     _ => {
@@ -270,7 +432,7 @@ fn render_text(verdict: &str, reason: Option<&str>, contract: &str, base: &str, 
         }
     }
     s.push_str(&format!(
-        "judged: property presence and type, recursively. not judged in r0: {} (stated, never skipped).\n",
+        "judged: property presence and type, enum, numeric, length and item-count bounds, required, pattern and format, recursively. not judged: {} (stated, never skipped).\n",
         UNJUDGED.join(", ")
     ));
     s

@@ -18,11 +18,11 @@ open(p, "w").write(t.replace(old, new, 1))
 EOF
 }
 
-run_one() { # name old new killer_test
-  name=$1; old=$2; new=$3; killer=$4
+run_one() { # name old new killer_test [test_target]
+  name=$1; old=$2; new=$3; killer=$4; target=${5:-judge_test}
   cp "$J.orig" "$J"
   mutate "$old" "$new"
-  if cargo test -q --test judge_test "$killer" 2>&1 | grep -q "test result: ok"; then
+  if cargo test -q --test "$target" "$killer" 2>&1 | grep -q "test result: ok"; then
     echo "$name: SURVIVED (killer $killer still passes)"; fail=$((fail+1))
   else
     echo "$name: KILLED by $killer"; pass=$((pass+1))
@@ -47,6 +47,17 @@ run_one JM-M4 'match untar_single(&out.stdout, contract) {
 run_one JM-M5 'walk(&dotted, pv, qv, out);' 'let _ = &dotted;' jf_f07_nested_removal_has_dotted_path
 # JM-M6 missing base contract treated as HOLDS
 run_one JM-M6 'BaseRead::NoFile => ("NOT EVALUATED", Some("new_contract"), Vec::new(), None),' 'BaseRead::NoFile => ("HOLDS", None, Vec::new(), None),' jf_f06_new_contract_is_not_evaluated
+
+# JUDGE-SUBTYPE r1 (docs/falsification/JUDGE-SUBTYPE-SPEC.md)
+# JS-M1 enum narrowing check dropped
+run_one JS-M1 'if narrowed_enum(pv, qv) {' 'if false && narrowed_enum(pv, qv) {' js_f01_enum_value_removed_is_narrowed judge_subtype_test
+# JS-M2 bounds comparison inverted (killed from both directions)
+run_one JS-M2a 'Some(a) => (is_lower && b > a) || (!is_lower && b < a),' 'Some(a) => (is_lower && b < a) || (!is_lower && b > a),' js_f03_minimum_raised_is_tightened judge_subtype_test
+run_one JS-M2b 'Some(a) => (is_lower && b > a) || (!is_lower && b < a),' 'Some(a) => (is_lower && b < a) || (!is_lower && b > a),' js_f04_maximum_raised_holds judge_subtype_test
+# JS-M3 required diff dropped
+run_one JS-M3 'for name in newly_required(pre, post) {' 'for name in newly_required(pre, post).into_iter().take(0) {' js_f05_optional_promoted_to_required_is_escalated judge_subtype_test
+# JS-M4 pattern or format change treated as HOLDS
+run_one JS-M4 'if pv.get(kw) != qv.get(kw) && qv.get(kw).is_some() {' 'if false && pv.get(kw) != qv.get(kw) && qv.get(kw).is_some() {' js_f06_pattern_change_is_flagged_not_proven judge_subtype_test
 
 cp "$J.orig" "$J"; rm "$J.orig"
 cargo build -q 2>/dev/null

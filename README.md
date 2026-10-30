@@ -154,18 +154,22 @@ invar judge --contract schemas/media_player.json --base origin/main
 ```
 
 The PRE contract is read from the base ref, never from the working tree,
-so a change cannot choose its own baseline. The verdict speaks in
-sentences. On the real Snowplow media_player 1-0-0 to 2-0-0 change (case
-b1-001 of our pinned corpus):
+so a change cannot choose its own baseline. A schema is read as a
+validation contract: narrowing what it accepts is a break. The verdict
+speaks in sentences. On the real Snowplow media_player 1-0-0 to 2-0-0
+change (case b1-001 of our pinned corpus), excerpted:
 
 ```
-VIOLATED: schemas/media_player.json breaks 6 promises made at origin/main.
+VIOLATED: schemas/media_player.json breaks 10 promises made at origin/main.
+  tightened: currentTime maximum lowered from 9007199254740991 to 2147483647.
+  Values valid before can now be rejected; restore the bound, or version the change.
   removed: percentProgress was integer|null (line 47 at origin/main). Consumers
   reading this field will break; keep the field, or ship this as a new major
   version and migrate them.
   ...
-judged: property presence and type, recursively. not judged in r0: enum,
-pattern, maximum, required (stated, never skipped).
+judged: property presence and type, enum, numeric, length and item-count
+bounds, required, pattern and format, recursively. not judged: $ref, allOf,
+anyOf, oneOf, items (stated, never skipped).
 ```
 
 In the Action, one input:
@@ -185,12 +189,16 @@ facts for machines, including `unjudged_constraints`, and `--receipt`
 writes the canonical record.
 
 The judged set is stated and narrow, on purpose: property presence and
-`type`, recursed with dotted-path witnesses. Value constraints (`enum`,
-`pattern`, `maximum`, `required`) are not judged in r0 and every output
-says so. Spec, fixtures and the mutation record:
-[docs/falsification/JUDGE-SPEC.md](docs/falsification/JUDGE-SPEC.md).
-`invar judge` ships in releases from v0.2.0; the v0.1.0 binary does not
-carry it.
+`type`, enum narrowing, tightened bounds, newly required fields, and
+changes to `pattern` or `format` (flagged as changed; whether a regex
+change narrows what is accepted is not decided, and the verdict says so),
+recursed with dotted-path witnesses. Not judged yet, and printed in every
+output: `$ref`, `allOf`, `anyOf`, `oneOf`, `items`. Specs, fixtures and
+the mutation record:
+[docs/falsification/JUDGE-SPEC.md](docs/falsification/JUDGE-SPEC.md),
+[docs/falsification/JUDGE-SUBTYPE-SPEC.md](docs/falsification/JUDGE-SUBTYPE-SPEC.md).
+`invar judge` ships from v0.2.0; the subtype checks (enum, bounds,
+required, pattern, format) from v0.2.1.
 
 ## What INVAR does not do
 
