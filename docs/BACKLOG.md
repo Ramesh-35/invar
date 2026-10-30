@@ -187,6 +187,12 @@ judge verdict, both items are recorded dead here with that evidence.
   The kernel of truth kept: a CI check is only as strong as its
   enforcement, so the realistic step is documenting the judge check as a
   required status check under branch protection (cheap, no gate).
+  CLOSED PERMANENTLY 2026-10-30 by founder ruling after a revised
+  resubmission removed the fabricated references; the remaining three
+  objections stood. The offered R-1 evidence gate was declined as
+  unnecessary. This direction is not to be reopened without new,
+  independently verified evidence of contract drift between separately
+  owned components reaching kernel launch or memory copy.
 
 ## Where innovation enters this stream
 
