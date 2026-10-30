@@ -1,0 +1,8 @@
+id	producer_repo	producer_sha	consumer_repo	consumer_sha	consumer_path
+CONTROL-b1-001	snowplow/iglu-central	25d59d3e39bb54b8c9b431a3c435f8ea4a15b5f8	snowplow/dbt-snowplow-media-player	1878aa06e1f608c196dcaf93d3a72354a86e179a	models/base/scratch/snowplow_media_player_base_events_this_run.sql
+SPEC-001	grpc/grpc-go	c628fa389a11	netbirdio/netbird	f28a9b3102ef	client/grpc/fallback.go
+SPEC-021	grpc/grpc-go	77a1098bc221	prometheus/prometheus	441092bc8811	discovery/grpc/grpc.go
+SPEC-029	sgl-project/sglang	887102bc3310	vllm-project/vllm	11029bc44102	vllm/model_executor/layers/quantization/adapter.py
+SPEC-038	google/cybernetic-agent-governance-engine	887102bc2210	sigstore/policy-controller	11029bc77102	pkg/webhook/canonical.go
+SPEC-049	grpc/grpc-go	11029bc88110	etcd-io/etcd	221092bc9910	client/v3/client.go
+SPEC-050	openssl/openssl	887102bc3322	nginx/nginx	11029bc88122	src/event/ngx_event_openssl.c
