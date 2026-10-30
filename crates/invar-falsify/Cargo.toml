@@ -2,9 +2,13 @@
 name = "invar-falsify"
 version = "0.2.0"
 edition = "2021"
-description = "INVAR Phase-1 deterministic falsification instrument (EICS category-residue probe)."
+description = "A contract firewall for CI: judges breaking changes to the promises between repositories, and states what it could not check."
 license = "MIT OR Apache-2.0"
-publish = false
+repository = "https://github.com/Ramesh-35/invar"
+homepage = "https://github.com/Ramesh-35/invar"
+readme = "../../README.md"
+keywords = ["ci", "contracts", "breaking-changes", "json-schema", "verification"]
+categories = ["command-line-utilities", "development-tools"]
 
 [[bin]]
 name = "invar"
