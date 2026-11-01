@@ -1,0 +1,13 @@
+# JUDGE-RECEIPT r0 freeze record, written before any implementation.
+# Baseline: v0.2.2 line (38be6bf). Founder go 2026-11-01.
+# Corrections at freeze, stated: INVAR holds no keys (signing is the
+# signer's ssh-keygen step, namespace invar-receipt); receipt_format stays 1
+# with receipt_kind judge (no format 2); the full result is kept, not a
+# witness count, so reproduction compares byte for byte.
+# Measured before implementation: 3 of 10 pass (jr_f08, jr_f09, jr_f10:
+# today's verifier already errors on these and receipts are already
+# deterministic), 7 fail.
+blake3(docs/falsification/JUDGE-RECEIPT-SPEC.md) = d12b2464cac1c1a1edebf9ead72a1070b3cdce2f2e77f854d2210f77cc1094f2
+sha256(docs/falsification/JUDGE-RECEIPT-SPEC.md) = e5386ef070e92360e408cbcf8baec2ceccf284dca6c06460766fc5f627271c6e
+blake3(crates/invar-falsify/tests/judge_receipt_test.rs) = b7f7087c9f2f4abd393d44e6f643bdf0eb750657941186a0ba7a4c4cb2a08242
+sha256(crates/invar-falsify/tests/judge_receipt_test.rs) = 917702ab47a94ed4e22cf973edd5806d64c2afb47a985f38894dee912baceb63
