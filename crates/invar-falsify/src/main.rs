@@ -1550,6 +1550,13 @@ fn cmd_verify_receipt(args: VerifyReceiptArgs) -> Result<i32> {
         println!("signature ok ({principal})");
     }
 
+    // JUDGE-RECEIPT r0: a judge receipt is reproduced from git, not from a
+    // config (the signature, when asked for, was checked above).
+    if body.get("receipt_kind").and_then(|v| v.as_str()) == Some("judge") {
+        let root = std::env::current_dir().context("reading the current directory")?;
+        return invar_falsify::judge::verify_receipt(&root, body, &parsed.body_text);
+    }
+
     // Inputs: the config and lock must be the recorded bytes.
     let raw = std::fs::read_to_string(&args.config)
         .map_err(|e| anyhow::anyhow!("reading {}: {e}", args.config))?;

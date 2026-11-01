@@ -52,38 +52,18 @@ pub fn run(root: &Path, contract: &str, base: &str, format: &str, receipt_out: O
     // Bytes are read raw and decoded lossily: malformed encoding is a
     // contract that cannot be parsed (NOT EVALUATED unparsable, exit 4),
     // never a process error. Only a missing or unreadable FILE is an error.
-    let post_bytes = match std::fs::read(root.join(contract)) {
-        Ok(b) => String::from_utf8_lossy(&b).into_owned(),
+    let post_raw = match std::fs::read(root.join(contract)) {
+        Ok(b) => b,
         Err(e) => anyhow::bail!("reading {contract} from the working tree: {e}"),
     };
-    let (verdict, reason, witnesses, pre_text) = match base_bytes(root, base, contract)? {
-        BaseRead::NoRef => ("NOT EVALUATED", Some("unreadable_base"), Vec::new(), None),
-        BaseRead::NoFile => ("NOT EVALUATED", Some("new_contract"), Vec::new(), None),
-        BaseRead::Found(bytes) => {
-            let pre_text = String::from_utf8_lossy(&bytes).into_owned();
-            match (serde_json::from_str::<Value>(&pre_text), serde_json::from_str::<Value>(&post_bytes)) {
-                (Err(_), _) | (_, Err(_)) => ("NOT EVALUATED", Some("unparsable"), Vec::new(), Some(pre_text)),
-                (Ok(pre), Ok(post)) => {
-                    let mut w = Vec::new();
-                    walk("", &pre, &post, &mut w);
-                    w.sort_by(|a, b| (a.path.as_str(), a.kind, a.keyword).cmp(&(b.path.as_str(), b.kind, b.keyword)));
-                    for x in &mut w {
-                        let last = x.path.rsplit('.').next().unwrap_or(&x.path).to_string();
-                        x.pre_line = find_line(&pre_text, &last);
-                        if x.kind != "removed" {
-                            x.post_line = find_line(&post_bytes, &last);
-                        } else {
-                            let parent = x.path.rsplit('.').nth(1).unwrap_or("properties");
-                            x.anchor_line = find_line(&post_bytes, parent);
-                        }
-                    }
-                    let v = if w.is_empty() { "HOLDS" } else { "VIOLATED" };
-                    (v, None, w, Some(pre_text))
-                }
-            }
-        }
+    let post_bytes = String::from_utf8_lossy(&post_raw).into_owned();
+    let read = base_bytes(root, base, contract)?;
+    let base_b3 = match &read {
+        BaseRead::Found(b) => Some(blake3::hash(b).to_hex().to_string()),
+        _ => None,
     };
-    let _ = pre_text; // pre bytes are consumed by line lookup above
+    let (verdict, reason, witnesses, pre_text) = evaluate(read, &post_bytes);
+    let _ = pre_text; // pre bytes are consumed by line lookup in evaluate
     let body = body_json(verdict, reason, contract, base, &witnesses);
     match format {
         "json" => println!("{}", serde_json::to_string_pretty(&body).unwrap_or_default()),
@@ -92,13 +72,152 @@ pub fn run(root: &Path, contract: &str, base: &str, format: &str, receipt_out: O
         _ => print!("{}", render_text(verdict, reason, contract, base, &witnesses)),
     }
     if let Some(p) = receipt_out {
-        std::fs::write(p, crate::receipt::render(&body)).with_context(|| format!("writing receipt {p}"))?;
+        let inputs = ReceiptInputs {
+            base_ref: base,
+            base_commit: resolve_commit(root, base),
+            base_contract_blake3: base_b3,
+            contract,
+            post_contract_blake3: blake3::hash(&post_raw).to_hex().to_string(),
+        };
+        let receipt = receipt_body(&inputs, body);
+        std::fs::write(p, crate::receipt::render(&receipt)).with_context(|| format!("writing receipt {p}"))?;
     }
     Ok(match verdict {
         "HOLDS" => 0,
         "VIOLATED" => 1,
         _ => 4,
     })
+}
+
+/// The judgment proper: base contract (as read from git) against the
+/// working-tree bytes. Pure: the same inputs give the same verdict,
+/// reason and witnesses, which is what lets a receipt be reproduced.
+#[allow(clippy::type_complexity)]
+fn evaluate(read: BaseRead, post_bytes: &str) -> (&'static str, Option<&'static str>, Vec<Witness>, Option<String>) {
+    match read {
+            BaseRead::NoRef => ("NOT EVALUATED", Some("unreadable_base"), Vec::new(), None),
+            BaseRead::NoFile => ("NOT EVALUATED", Some("new_contract"), Vec::new(), None),
+            BaseRead::Found(bytes) => {
+                let pre_text = String::from_utf8_lossy(&bytes).into_owned();
+                match (serde_json::from_str::<Value>(&pre_text), serde_json::from_str::<Value>(post_bytes)) {
+                    (Err(_), _) | (_, Err(_)) => ("NOT EVALUATED", Some("unparsable"), Vec::new(), Some(pre_text)),
+                    (Ok(pre), Ok(post)) => {
+                        let mut w = Vec::new();
+                        walk("", &pre, &post, &mut w);
+                        w.sort_by(|a, b| (a.path.as_str(), a.kind, a.keyword).cmp(&(b.path.as_str(), b.kind, b.keyword)));
+                        for x in &mut w {
+                            let last = x.path.rsplit('.').next().unwrap_or(&x.path).to_string();
+                            x.pre_line = find_line(&pre_text, &last);
+                            if x.kind != "removed" {
+                                x.post_line = find_line(post_bytes, &last);
+                            } else {
+                                let parent = x.path.rsplit('.').nth(1).unwrap_or("properties");
+                                x.anchor_line = find_line(post_bytes, parent);
+                            }
+                        }
+                        let v = if w.is_empty() { "HOLDS" } else { "VIOLATED" };
+                        (v, None, w, Some(pre_text))
+                    }
+                }
+            }
+    }
+}
+
+/// What a judge receipt names as judged (JUDGE-RECEIPT r0).
+struct ReceiptInputs<'a> {
+    base_ref: &'a str,
+    base_commit: Option<String>,
+    base_contract_blake3: Option<String>,
+    contract: &'a str,
+    post_contract_blake3: String,
+}
+
+/// The commit a ref resolves to, or None when it does not resolve.
+fn resolve_commit(root: &Path, base: &str) -> Option<String> {
+    let out = Command::new("git")
+        .args(["rev-parse", "--verify", "--quiet", &format!("{base}^{{commit}}")])
+        .current_dir(root)
+        .output()
+        .ok()?;
+    if !out.status.success() {
+        return None;
+    }
+    Some(String::from_utf8_lossy(&out.stdout).trim().to_string())
+}
+
+/// JUDGE-RECEIPT r0 body: the inputs judged, and the `--format json`
+/// document unchanged as `result`. Sorted keys, no wall clock.
+fn receipt_body(i: &ReceiptInputs, result: Value) -> Value {
+    json!({
+        "engine": {"version": env!("CARGO_PKG_VERSION")},
+        "inputs": {
+            "base_commit": i.base_commit,
+            "base_contract_blake3": i.base_contract_blake3,
+            "base_ref": i.base_ref,
+            "contract": i.contract,
+            "post_contract_blake3": i.post_contract_blake3,
+        },
+        "receipt_format": crate::receipt::RECEIPT_FORMAT,
+        "receipt_kind": "judge",
+        "result": result,
+    })
+}
+
+/// JUDGE-RECEIPT r0 verification, after the footer, format, engine version
+/// and optional signature have been checked upstream: the inputs must be
+/// the recorded bytes, and re-judging them must reproduce the recorded
+/// body byte for byte. 0 reproduced, 1 drift or not reproduced; a base
+/// commit this repository lacks is an error (exit 3 upstream).
+pub fn verify_receipt(root: &Path, body: &Value, body_text: &str) -> Result<i32> {
+    let s = |k: &str| body.pointer(&format!("/inputs/{k}")).and_then(Value::as_str).map(str::to_string);
+    let contract = s("contract").ok_or_else(|| anyhow::anyhow!("judge receipt has no inputs.contract"))?;
+    let base_ref = s("base_ref").ok_or_else(|| anyhow::anyhow!("judge receipt has no inputs.base_ref"))?;
+    let base_commit = s("base_commit");
+    let recorded_post = s("post_contract_blake3").unwrap_or_default();
+    let recorded_base = s("base_contract_blake3");
+
+    let post_raw = std::fs::read(root.join(&contract)).with_context(|| format!("reading {contract} from the working tree"))?;
+    let post_b3 = blake3::hash(&post_raw).to_hex().to_string();
+    if post_b3 != recorded_post {
+        println!("input drift: {contract} is not the contract the receipt judged");
+        println!("result: receipt NOT reproduced");
+        return Ok(1);
+    }
+    let read = match base_commit.as_deref() {
+        Some(base_commit) => match base_bytes(root, base_commit, &contract)? {
+            BaseRead::NoRef => anyhow::bail!("base commit {base_commit} is not in this repository; fetch it, then verify"),
+            other => other,
+        },
+        None => BaseRead::NoRef,
+    };
+    let base_b3 = match &read {
+        BaseRead::Found(b) => Some(blake3::hash(b).to_hex().to_string()),
+        _ => None,
+    };
+    if base_b3.as_deref() != recorded_base.as_deref() {
+        println!("input drift: the base contract at {} is not the one the receipt judged", base_commit.as_deref().unwrap_or("(no commit)"));
+        println!("result: receipt NOT reproduced");
+        return Ok(1);
+    }
+    let post_bytes = String::from_utf8_lossy(&post_raw).into_owned();
+    let (verdict, reason, witnesses, _) = evaluate(read, &post_bytes);
+    let inputs = ReceiptInputs {
+        base_ref: &base_ref,
+        base_commit,
+        base_contract_blake3: base_b3,
+        contract: &contract,
+        post_contract_blake3: post_b3,
+    };
+    let rederived = receipt_body(&inputs, body_json(verdict, reason, &contract, &base_ref, &witnesses));
+    let rendered = serde_json::to_string_pretty(&rederived).unwrap_or_default();
+    if rendered != body_text {
+        println!("re-judging the recorded inputs gives a different result ({verdict})");
+        println!("result: receipt NOT reproduced");
+        return Ok(1);
+    }
+    println!("inputs ok: {contract} and its base at {}", inputs.base_commit.as_deref().unwrap_or("(no commit)"));
+    println!("result: receipt reproduced ({verdict})");
+    Ok(0)
 }
 
 /// Read the contract from the base ref via `git archive`: the base tree,

@@ -198,7 +198,30 @@ the mutation record:
 [docs/falsification/JUDGE-SPEC.md](docs/falsification/JUDGE-SPEC.md),
 [docs/falsification/JUDGE-SUBTYPE-SPEC.md](docs/falsification/JUDGE-SUBTYPE-SPEC.md).
 `invar judge` ships from v0.2.0; the subtype checks (enum, bounds,
-required, pattern, format) from v0.2.1.
+required, pattern, format) from v0.2.1; inline PR annotations and
+`--format sarif` from v0.2.2.
+
+**Make the check hold at merge time.** INVAR judges the change against
+the base as it was when the job ran. If the base moves before the merge,
+that verdict is about an older base. GitHub closes that gap for you: in
+branch protection, make the judge check required and turn on "Require
+branches to be up to date before merging", or use a merge queue. Either
+way, nothing merges until the judge has passed against the current base.
+
+**A receipt anyone can check.** `--receipt` records the exact base
+commit, a BLAKE3 hash of both contract versions, and the full result.
+Sign it with your own key (INVAR never holds one):
+
+```sh
+ssh-keygen -Y sign -n invar-receipt -f ~/.ssh/id_ed25519 receipt.json
+invar verify-receipt receipt.json --signers allowed_signers --principal you@example.com
+```
+
+Run in the repository with the base commit fetched, `verify-receipt`
+re-reads both contracts from git and the working tree,
+re-judges them, and must reproduce the receipt byte for byte. An edited
+verdict fails, even with its footer recomputed. Spec:
+[docs/falsification/JUDGE-RECEIPT-SPEC.md](docs/falsification/JUDGE-RECEIPT-SPEC.md).
 
 ## What INVAR does not do
 

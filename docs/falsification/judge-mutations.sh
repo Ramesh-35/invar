@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0).
-# Each operator (JM-M1..M6, JS-M1..M4, SF-M1..M3) is
+# JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
+# JUDGE-RECEIPT r0). Each operator (JM-M1..M6, JS-M1..M4, SF-M1..M3, RM-1..4) is
 # applied to src/judge.rs as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -67,6 +67,16 @@ run_one SF-M1 '"results": results,' '"results": Vec::<Value>::new(),' sf_f02_res
 run_one SF-M2 '"executionSuccessful": verdict != "NOT EVALUATED",' '"executionSuccessful": true,' sf_f05_not_evaluated_is_a_failed_execution judge_sarif_test
 # SF-M3 base-file line used where the post-file line belongs
 run_one SF-M3 'x.post_line.or(x.anchor_line).unwrap_or(1)' 'x.pre_line.unwrap_or(1)' sf_f03_retype_located_at_post_line judge_sarif_test
+
+# JUDGE-RECEIPT r0 (docs/falsification/JUDGE-RECEIPT-SPEC.md)
+# RM-1 re-derived body not compared
+run_one RM-1 'if rendered != body_text {' 'if false && rendered != body_text {' jr_f03_forged_verdict_with_recomputed_footer_fails judge_receipt_test
+# RM-2 base read from base_ref instead of the recorded commit
+run_one RM-2 'Some(base_commit) => match base_bytes(root, base_commit, &contract)? {' 'Some(base_commit) => match base_bytes(root, { let _ = base_commit; base_ref.as_str() }, &contract)? {' jr_f05_base_is_pinned_to_the_commit_not_the_ref judge_receipt_test
+# RM-3 post contract hash not checked
+run_one RM-3 'if post_b3 != recorded_post {' 'if false && post_b3 != recorded_post {' jr_f06_post_substitution_is_input_drift judge_receipt_test
+# RM-4 base contract hash not checked
+run_one RM-4 'if base_b3.as_deref() != recorded_base.as_deref() {' 'if false && base_b3.as_deref() != recorded_base.as_deref() {' jr_f07_forged_base_hash_is_input_drift judge_receipt_test
 
 cp "$J.orig" "$J"; rm "$J.orig"
 cargo build -q 2>/dev/null
