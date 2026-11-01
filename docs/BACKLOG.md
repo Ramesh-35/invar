@@ -194,6 +194,23 @@ judge verdict, both items are recorded dead here with that evidence.
   independently verified evidence of contract drift between separately
   owned components reaching kernel launch or memory copy.
 
+- 2026-11-01, RDCE runtime judge (an independent, stateless contract
+  judge in the commit path, emitting signed judgments that storage acts
+  on). REJECTED. Compared against native serializable storage (MVCC/SSI,
+  conditional writes) and an Envoy + OPA + Temporal stack (founder's D05
+  comparison; that document is not in this repository). (1) TOCTOU: state
+  can change between the judge's evaluation and the commit, so the target
+  must re-check its own version at commit time (compare-and-swap or a
+  serializable transaction) no matter what the judge said; the judge adds
+  no commit-time guarantee the storage does not already give. (2) Policy
+  evaluation at runtime is owned by OPA and database constraints. (3) It
+  adds a network hop, a failure domain and key management. Same
+  conclusion as the runtime permit above: INVAR's domain is change time
+  (pre-merge, in the developer and agent loop), never the execution path.
+  CLOSED PERMANENTLY 2026-11-01 by founder ruling; not to be reopened
+  without new, independently verified evidence that a change-time
+  verdict prevents a failure commit-time checks cannot.
+
 ## Where innovation enters this stream
 
 The unprecedented work is not more features; it is the compounding of
