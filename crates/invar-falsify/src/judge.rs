@@ -34,6 +34,9 @@ pub struct Witness {
     pub keyword: Option<&'static str>,
     pub pre_value: Option<String>,
     pub post_value: Option<String>,
+    /// JUDGE-SARIF S-D1: where a removed field used to live in the POST
+    /// file (its parent's key line). Not part of the JSON surface.
+    pub anchor_line: Option<u64>,
 }
 
 enum BaseRead {
@@ -69,6 +72,9 @@ pub fn run(root: &Path, contract: &str, base: &str, format: &str, receipt_out: O
                         x.pre_line = find_line(&pre_text, &last);
                         if x.kind != "removed" {
                             x.post_line = find_line(&post_bytes, &last);
+                        } else {
+                            let parent = x.path.rsplit('.').nth(1).unwrap_or("properties");
+                            x.anchor_line = find_line(&post_bytes, parent);
                         }
                     }
                     let v = if w.is_empty() { "HOLDS" } else { "VIOLATED" };
@@ -81,6 +87,8 @@ pub fn run(root: &Path, contract: &str, base: &str, format: &str, receipt_out: O
     let body = body_json(verdict, reason, contract, base, &witnesses);
     match format {
         "json" => println!("{}", serde_json::to_string_pretty(&body).unwrap_or_default()),
+        "sarif" => println!("{}", serde_json::to_string_pretty(&render_sarif(verdict, reason, contract, base, &witnesses)).unwrap_or_default()),
+        "github" => print!("{}", render_github(verdict, reason, contract, base, &witnesses)),
         _ => print!("{}", render_text(verdict, reason, contract, base, &witnesses)),
     }
     if let Some(p) = receipt_out {
@@ -166,6 +174,7 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
             keyword: Some("required"),
             pre_value: None,
             post_value: None,
+            anchor_line: None,
         });
     }
     for (k, pv) in pp {
@@ -181,6 +190,7 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
                 keyword: None,
                 pre_value: None,
                 post_value: None,
+                anchor_line: None,
             }),
             Some(qv) => {
                 if type_str(pv) != type_str(qv) {
@@ -194,6 +204,7 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
                         keyword: None,
                         pre_value: None,
                         post_value: None,
+                        anchor_line: None,
                     });
                 }
                 constraints(&dotted, pv, qv, out);
@@ -244,6 +255,7 @@ fn constraint_witness(path: &str, kind: &'static str, keyword: &'static str, pv:
         keyword: Some(keyword),
         pre_value: disp(a),
         post_value: disp(b),
+        anchor_line: None,
     }
 }
 
@@ -338,102 +350,210 @@ fn body_json(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w:
     })
 }
 
+/// The sentence the text format prints for one witness, without the
+/// indent or newline. Every encoding (text, SARIF, GitHub) carries this
+/// exact sentence: one voice (JUDGE-SARIF r0).
+fn witness_sentence(x: &Witness, base: &str) -> String {
+    match x.kind {
+        "removed" => {
+            let at = x.pre_line.map(|l| format!(" (line {l} at {base})")).unwrap_or_default();
+            format!(
+                "removed: {} was {}{at}. Consumers reading this field will break; keep the field, or ship this as a new major version and migrate them.",
+                x.path, x.pre_type
+            )
+        }
+        "narrowed" => {
+            let post = x.post_value.as_deref().unwrap_or("[]");
+            match x.pre_value.as_deref() {
+                Some(pre) => {
+                    let parse = |s: &str| serde_json::from_str::<Vec<Value>>(s).unwrap_or_default();
+                    let (a, b) = (parse(pre), parse(post));
+                    let lost: Vec<String> = a.iter().filter(|v| !b.contains(v)).map(|v| v.to_string()).collect();
+                    format!(
+                        "narrowed: {} no longer accepts {}. Senders using a removed value will be rejected; keep the value, or version the change.",
+                        x.path,
+                        lost.join(", ")
+                    )
+                }
+                None => format!(
+                    "narrowed: {} now accepts only {post}. Values outside that set, valid before, will be rejected; drop the enum, or version the change.",
+                    x.path
+                ),
+            }
+        }
+        "tightened" => {
+            let kw = x.keyword.unwrap_or("bound");
+            let to = x.post_value.as_deref().unwrap_or("?");
+            let change = match x.pre_value.as_deref() {
+                None => format!("{kw} added at {to}"),
+                Some(from) if LOWER.contains(&kw) => format!("{kw} raised from {from} to {to}"),
+                Some(from) => format!("{kw} lowered from {from} to {to}"),
+            };
+            format!(
+                "tightened: {} {change}. Values valid before can now be rejected; restore the bound, or version the change.",
+                x.path
+            )
+        }
+        "escalated" => format!(
+            "escalated: {} is now required. Payloads that omit it, valid before, will be rejected; keep it optional, or version the change.",
+            x.path
+        ),
+        "constraint_changed" => format!(
+            "changed: {} {} was {}, is now {}. Whether this narrows what is accepted is not decided here; review it, or version the change.",
+            x.path,
+            x.keyword.unwrap_or("constraint"),
+            x.pre_value.as_deref().unwrap_or("absent"),
+            x.post_value.as_deref().unwrap_or("absent")
+        ),
+        _ => {
+            let to = x.post_type.as_deref().unwrap_or("unspecified");
+            format!(
+                "retyped: {} was {}, is now {to}. Consumers parsing the old type can misread values; restore the type, or version the change.",
+                x.path, x.pre_type
+            )
+        }
+    }
+}
+
+/// The NOT EVALUATED sentence for a reason code, shared by every format.
+fn not_evaluated_sentence(reason: Option<&str>, contract: &str, base: &str) -> String {
+    match reason {
+        Some("new_contract") => format!(
+            "NOT EVALUATED (new_contract): {contract} does not exist at {base}; nothing was promised before. The next change to this contract will be judged against this version."
+        ),
+        Some("unreadable_base") => format!(
+            "NOT EVALUATED (unreadable_base): the ref {base} cannot be read in this repository. Fetch it, or pass --base a ref that exists."
+        ),
+        _ => format!(
+            "NOT EVALUATED (unparsable): could not read {contract} as JSON (checked the working tree and {base}). Fix the JSON before judging."
+        ),
+    }
+}
+
 /// The human surface, frozen as part of the contract (JUDGE-SPEC r1,
 /// Voice): sentences that name the field, the change, and a next step.
 fn render_text(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w: &[Witness]) -> String {
     let mut s = String::new();
-    match (verdict, reason) {
-        ("HOLDS", _) => {
-            s.push_str(&format!("HOLDS: {contract} keeps every promise it made at {base}.\n"));
-        }
-        ("VIOLATED", _) => {
+    match verdict {
+        "HOLDS" => s.push_str(&format!("HOLDS: {contract} keeps every promise it made at {base}.\n")),
+        "VIOLATED" => {
             let n = w.len();
             let noun = if n == 1 { "promise" } else { "promises" };
             s.push_str(&format!("VIOLATED: {contract} breaks {n} {noun} made at {base}.\n"));
             for x in w {
-                match x.kind {
-                    "removed" => {
-                        let at = x.pre_line.map(|l| format!(" (line {l} at {base})")).unwrap_or_default();
-                        s.push_str(&format!(
-                            "  removed: {} was {}{at}. Consumers reading this field will break; keep the field, or ship this as a new major version and migrate them.\n",
-                            x.path, x.pre_type
-                        ));
-                    }
-                    "narrowed" => {
-                        let post = x.post_value.as_deref().unwrap_or("[]");
-                        match x.pre_value.as_deref() {
-                            Some(pre) => {
-                                let parse = |s: &str| serde_json::from_str::<Vec<Value>>(s).unwrap_or_default();
-                                let (a, b) = (parse(pre), parse(post));
-                                let lost: Vec<String> = a.iter().filter(|v| !b.contains(v)).map(|v| v.to_string()).collect();
-                                s.push_str(&format!(
-                                    "  narrowed: {} no longer accepts {}. Senders using a removed value will be rejected; keep the value, or version the change.\n",
-                                    x.path, lost.join(", ")
-                                ));
-                            }
-                            None => s.push_str(&format!(
-                                "  narrowed: {} now accepts only {post}. Values outside that set, valid before, will be rejected; drop the enum, or version the change.\n",
-                                x.path
-                            )),
-                        }
-                    }
-                    "tightened" => {
-                        let kw = x.keyword.unwrap_or("bound");
-                        let to = x.post_value.as_deref().unwrap_or("?");
-                        let change = match x.pre_value.as_deref() {
-                            None => format!("{kw} added at {to}"),
-                            Some(from) if LOWER.contains(&kw) => format!("{kw} raised from {from} to {to}"),
-                            Some(from) => format!("{kw} lowered from {from} to {to}"),
-                        };
-                        s.push_str(&format!(
-                            "  tightened: {} {change}. Values valid before can now be rejected; restore the bound, or version the change.\n",
-                            x.path
-                        ));
-                    }
-                    "escalated" => {
-                        s.push_str(&format!(
-                            "  escalated: {} is now required. Payloads that omit it, valid before, will be rejected; keep it optional, or version the change.\n",
-                            x.path
-                        ));
-                    }
-                    "constraint_changed" => {
-                        s.push_str(&format!(
-                            "  changed: {} {} was {}, is now {}. Whether this narrows what is accepted is not decided here; review it, or version the change.\n",
-                            x.path,
-                            x.keyword.unwrap_or("constraint"),
-                            x.pre_value.as_deref().unwrap_or("absent"),
-                            x.post_value.as_deref().unwrap_or("absent")
-                        ));
-                    }
-                    _ => {
-                        let to = x.post_type.as_deref().unwrap_or("unspecified");
-                        s.push_str(&format!(
-                            "  retyped: {} was {}, is now {to}. Consumers parsing the old type can misread values; restore the type, or version the change.\n",
-                            x.path, x.pre_type
-                        ));
-                    }
-                }
+                s.push_str(&format!("  {}\n", witness_sentence(x, base)));
             }
         }
-        (_, Some("new_contract")) => {
-            s.push_str(&format!(
-                "NOT EVALUATED (new_contract): {contract} does not exist at {base}; nothing was promised before. The next change to this contract will be judged against this version.\n"
-            ));
-        }
-        (_, Some("unreadable_base")) => {
-            s.push_str(&format!(
-                "NOT EVALUATED (unreadable_base): the ref {base} cannot be read in this repository. Fetch it, or pass --base a ref that exists.\n"
-            ));
-        }
-        _ => {
-            s.push_str(&format!(
-                "NOT EVALUATED (unparsable): could not read {contract} as JSON (checked the working tree and {base}). Fix the JSON before judging.\n"
-            ));
-        }
+        _ => s.push_str(&format!("{}\n", not_evaluated_sentence(reason, contract, base))),
     }
     s.push_str(&format!(
         "judged: property presence and type, enum, numeric, length and item-count bounds, required, pattern and format, recursively. not judged: {} (stated, never skipped).\n",
         UNJUDGED.join(", ")
     ));
     s
+}
+
+/// JUDGE-SARIF S-D1: the post-file line for a witness; a removed field
+/// anchors to its parent's key line in the post file; 1 when none.
+fn location_line(x: &Witness) -> u64 {
+    x.post_line.or(x.anchor_line).unwrap_or(1)
+}
+
+const RULES: [(&str, &str); 6] = [
+    ("removed", "A property the base ref declared is gone."),
+    ("retyped", "A property's declared type changed."),
+    ("narrowed", "An enum accepts fewer values than at the base ref."),
+    ("tightened", "A numeric, length or item-count bound rejects values valid at the base ref."),
+    ("escalated", "A property became required."),
+    ("constraint_changed", "A pattern, format or non-numeric bound changed; whether it narrows is not decided."),
+];
+
+/// JUDGE-SARIF r0: a SARIF 2.1.0 log. Sorted keys, no timestamps, no
+/// absolute paths: byte-stable. NOT EVALUATED is a failed execution with
+/// a warning notification, never an empty log that reads as clean (S-D2).
+fn render_sarif(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w: &[Witness]) -> Value {
+    let results: Vec<Value> = w
+        .iter()
+        .map(|x| {
+            json!({
+                "ruleId": format!("invar.judge.{}", x.kind),
+                "level": "error",
+                "message": { "text": witness_sentence(x, base) },
+                "locations": [{
+                    "physicalLocation": {
+                        "artifactLocation": { "uri": contract },
+                        "region": { "startLine": location_line(x) },
+                    }
+                }],
+            })
+        })
+        .collect();
+    let notifications: Vec<Value> = match verdict {
+        "HOLDS" | "VIOLATED" => Vec::new(),
+        _ => vec![json!({
+            "level": "warning",
+            "descriptor": { "id": reason.unwrap_or("unparsable") },
+            "message": { "text": not_evaluated_sentence(reason, contract, base) },
+        })],
+    };
+    let rules: Vec<Value> = RULES
+        .iter()
+        .map(|(k, d)| json!({ "id": format!("invar.judge.{k}"), "shortDescription": { "text": d } }))
+        .collect();
+    json!({
+        "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+        "version": "2.1.0",
+        "runs": [{
+            "tool": { "driver": {
+                "name": "invar",
+                "version": env!("CARGO_PKG_VERSION"),
+                "informationUri": "https://github.com/Ramesh-35/invar",
+                "rules": rules,
+            }},
+            "invocations": [{
+                "executionSuccessful": verdict != "NOT EVALUATED",
+                "toolExecutionNotifications": notifications,
+            }],
+            "results": results,
+            "properties": {
+                "unjudged_constraints": UNJUDGED,
+                "verdict": verdict,
+                "base": base,
+            },
+        }],
+    })
+}
+
+/// GitHub workflow-command escaping: message data escapes %, CR and LF;
+/// property values (file, title) also escape `:` and `,`.
+fn gh_data(s: &str) -> String {
+    s.replace('%', "%25").replace('\r', "%0D").replace('\n', "%0A")
+}
+
+fn gh_prop(s: &str) -> String {
+    gh_data(s).replace(':', "%3A").replace(',', "%2C")
+}
+
+/// JUDGE-SARIF r0: one `::error` per witness, located on the post line;
+/// one `::warning` when NOT EVALUATED. HOLDS prints nothing.
+fn render_github(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w: &[Witness]) -> String {
+    let file = gh_prop(contract);
+    match verdict {
+        "HOLDS" => String::new(),
+        "VIOLATED" => w
+            .iter()
+            .map(|x| {
+                format!(
+                    "::error file={file},line={},title={}::{}\n",
+                    location_line(x),
+                    gh_prop(&format!("invar.judge.{}", x.kind)),
+                    gh_data(&witness_sentence(x, base))
+                )
+            })
+            .collect(),
+        _ => format!(
+            "::warning file={file},title=invar.judge.not_evaluated::{}\n",
+            gh_data(&not_evaluated_sentence(reason, contract, base))
+        ),
+    }
 }

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# JUDGE-1 mutant elimination (JUDGE-SPEC r1). Each operator JM-M1..M6 is
+# JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0).
+# Each operator (JM-M1..M6, JS-M1..M4, SF-M1..M3) is
 # applied to src/judge.rs as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -58,6 +59,14 @@ run_one JS-M2b 'Some(a) => (is_lower && b > a) || (!is_lower && b < a),' 'Some(a
 run_one JS-M3 'for name in newly_required(pre, post) {' 'for name in newly_required(pre, post).into_iter().take(0) {' js_f05_optional_promoted_to_required_is_escalated judge_subtype_test
 # JS-M4 pattern or format change treated as HOLDS
 run_one JS-M4 'if pv.get(kw) != qv.get(kw) && qv.get(kw).is_some() {' 'if false && pv.get(kw) != qv.get(kw) && qv.get(kw).is_some() {' js_f06_pattern_change_is_flagged_not_proven judge_subtype_test
+
+# JUDGE-SARIF r0 (docs/falsification/SARIF-SPEC.md)
+# SF-M1 results dropped from the SARIF log
+run_one SF-M1 '"results": results,' '"results": Vec::<Value>::new(),' sf_f02_result_message_is_the_text_sentence judge_sarif_test
+# SF-M2 NOT EVALUATED emitted as a successful run
+run_one SF-M2 '"executionSuccessful": verdict != "NOT EVALUATED",' '"executionSuccessful": true,' sf_f05_not_evaluated_is_a_failed_execution judge_sarif_test
+# SF-M3 base-file line used where the post-file line belongs
+run_one SF-M3 'x.post_line.or(x.anchor_line).unwrap_or(1)' 'x.pre_line.unwrap_or(1)' sf_f03_retype_located_at_post_line judge_sarif_test
 
 cp "$J.orig" "$J"; rm "$J.orig"
 cargo build -q 2>/dev/null

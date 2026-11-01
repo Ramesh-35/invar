@@ -27,6 +27,13 @@ json="$("$INVAR_BIN" judge --contract "$INVAR_JUDGE_CONTRACT" --base "$ref" --fo
 verdict="$(printf '%s\n' "$json" | sed -n 's/^  "verdict": "\(.*\)",*$/\1/p' | head -n1)"
 reason="$(printf '%s\n' "$json" | sed -n 's/^  "reason": "\(.*\)",*$/\1/p' | head -n1)"
 
+# JUDGE-SARIF r0: each witness becomes an inline annotation on the pull
+# request diff (::error on the post-file line; ::warning for NOT
+# EVALUATED). A new contract promised nothing before, so it stays quiet.
+if [ "$code" -ne 0 ] && [ "$reason" != "new_contract" ]; then
+  "$INVAR_BIN" judge --contract "$INVAR_JUDGE_CONTRACT" --base "$ref" --format github 2>/dev/null || true
+fi
+
 {
   echo "judge_exit=$code"
   echo "judge_verdict=${verdict:-error}"
