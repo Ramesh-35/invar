@@ -1,65 +1,80 @@
-# JUDGE-SARIF r0: the verdict inside the pull-request diff (r0 DRAFT, NOT FROZEN)
+# JUDGE-SARIF r0: the verdict inside the pull-request diff (r0, FROZEN)
 
-Backlog 7b, licensed by Brief 5: when platform LLM reviewers become the
-default, the deterministic verdict they cite must arrive in the formats
-they and every CI system already read. Two surfaces, one source of truth:
-the judge's existing witnesses. No new verdict logic.
+Rulings S-D1..S-D4 ratified 2026-10-30. Frozen with
+crates/invar-falsify/tests/judge_sarif_test.rs BEFORE implementation;
+freeze record: SARIF-SPEC.frozen. Backlog 7b, licensed by Brief 5: when
+platform LLM reviewers become the default, the deterministic verdict
+they cite must arrive in formats they and every CI system already read.
+No new verdict logic: every result is an existing judge witness.
 
 ## Surfaces
 
 1. `invar judge --format sarif`: a SARIF 2.1.0 log on stdout, for code
-   scanning upload, GitLab, IDEs and agents. Exit codes unchanged.
-2. The Action's judge step emits one GitHub workflow annotation per
-   witness (`::error file=...,line=...,title=...::message`), visible on
-   the pull request's Files changed tab with no code scanning setup,
-   on public and private repositories alike.
+   scanning upload, GitLab, IDEs and agents.
+2. `invar judge --format github`: GitHub workflow commands, one line per
+   witness, which the Action prints so each break is annotated on the
+   pull request's Files changed tab with no code scanning setup, on
+   public and private repositories alike.
+Exit codes unchanged for every format.
 
-## Mapping
+## Mapping (SARIF)
 
-- One run; `tool.driver` = name `invar`, the engine version,
-  `informationUri` the repository URL; `rules` = the six witness kinds,
-  rule ids `invar.judge.<kind>` (removed, retyped, narrowed, tightened,
-  escalated, constraint_changed), each with a one-line description.
-- One result per witness: `ruleId`, `level: error`, `message.text` = the
-  exact sentence the text format prints (one voice, two encodings),
-  `locations[0]` = the contract file and a line (S-D1).
-- `run.properties.unjudged_constraints` = the stated unjudged list.
-- NOT EVALUATED: zero results, `invocations[0].executionSuccessful`
-  false, and a `toolExecutionNotifications` entry carrying the reason
-  code and sentence; exit 4. An empty run must never read as clean (S-D2).
-- Byte-stable output: no timestamps, no absolute paths, deterministic
-  ordering, so two runs on the same inputs are identical (S-D3).
+- `$schema` https://json.schemastore.org/sarif-2.1.0.json, `version`
+  2.1.0, exactly one run.
+- `tool.driver`: name `invar`, the engine version, informationUri the
+  repository URL, and the six rules `invar.judge.removed`,
+  `invar.judge.retyped`, `invar.judge.narrowed`, `invar.judge.tightened`,
+  `invar.judge.escalated`, `invar.judge.constraint_changed` (S-D3),
+  each with a one-line description.
+- One result per witness: `ruleId`, `level` error (S-D4), `message.text`
+  equal to the exact sentence the text format prints for that witness
+  (one voice, every encoding), one location: the contract file and a
+  line.
+- Line (S-D1): the witness's line in the POST file; for a removed field,
+  which has no post line, the line of its parent's key in the post file
+  (the root `properties` key for a top-level field), so the annotation
+  sits inside the reviewer's diff where the field used to live; line 1
+  only when no anchor is found. The message keeps the base-ref line.
+- `run.properties`: `unjudged_constraints`, `verdict`, `base`.
+- NOT EVALUATED (S-D2): zero results, `invocations[0].executionSuccessful`
+  false, one `toolExecutionNotifications` entry with level warning,
+  `descriptor.id` the reason code and the plain sentence; exit 4. An
+  empty SARIF log must never read as clean.
+- Byte-stable: no timestamps, no absolute paths, sorted keys and
+  deterministic order; two runs on the same inputs are identical.
 
-## Decision points for ratification
+## Mapping (GitHub annotations)
 
-- S-D1 location of a REMOVED field: it has no line in the post file.
-  Recommended: annotate the line of the parent object's `properties`
-  key in the post file (where the field used to live), with the base-ref
-  line stated in the message; fall back to line 1 when no parent line
-  is found. Alternative: file-level only.
-- S-D2 NOT EVALUATED shape: recommended as above (notification, zero
-  results, executionSuccessful false). Alternative: a single warning
-  result, which risks being filtered out by severity.
-- S-D3 rule id form: recommended `invar.judge.<kind>`. Alternative:
-  numbered ids (INV-J001), which are less readable for agents and humans.
-- S-D4 annotation level: recommended `error` for VIOLATED, `warning` for
-  NOT EVALUATED (stated, not hidden). Alternative: `error` for both.
+- VIOLATED: per witness, `::error file=<contract>,line=<line>,title=invar.judge.<kind>::<sentence>`
+  with the same line rule as SARIF.
+- NOT EVALUATED: one `::warning file=<contract>,title=invar.judge.not_evaluated::<sentence>` (S-D4).
+- Messages escape `%`, CR and LF as GitHub requires.
 
-## Fixtures (to freeze on ratification)
+## Meaning of the levels
 
-- sf_f01 the log is SARIF 2.1.0: `version`, `$schema`, one run, driver
-  name `invar`, the six rules present.
-- sf_f02 one result per witness on the real b1-002 bytes; ruleId
-  `invar.judge.retyped`; message equals the text sentence.
-- sf_f03 a retyped field's region.startLine is its POST-file line.
-- sf_f04 a removed field's location follows S-D1.
-- sf_f05 an unparsable post: zero results, notification with
-  `unparsable`, executionSuccessful false, exit 4.
+`error` means a witnessed violation of the declared contract, located
+and reproducible from the receipt. `warning` means the judge could not
+evaluate, with the reason stated. Neither claims more than that.
+
+## Fixtures (judge_sarif_test.rs)
+
+- sf_f01 SARIF 2.1.0 shape: version, $schema, one run, driver `invar`,
+  the six rule ids.
+- sf_f02 real b1-002: one result, ruleId invar.judge.retyped, message
+  equal to the text sentence.
+- sf_f03 real b1-001: the `volume` retype is located at its POST line
+  (115), not its base line (62) (kills SF-M3).
+- sf_f04 removed fields: b1-001 `isLive` anchors to the post root
+  `properties` line; a nested removal anchors to its parent's key line.
+- sf_f05 unparsable post: zero results, executionSuccessful false,
+  notification id unparsable at level warning, exit 4 (kills SF-M2).
 - sf_f06 two runs byte-identical.
-- sf_f07 unjudged_constraints present in run properties.
+- sf_f07 unjudged_constraints in run properties.
+- sf_f08 `--format github`: an ::error line with file, line, title and
+  the sentence; a NOT EVALUATED run gives one ::warning line.
 
 ## Mutation operators
 
-- SF-M1 results dropped (empty array): killed by sf_f02.
-- SF-M2 NOT EVALUATED emitted as a clean run, no notification: sf_f05.
-- SF-M3 pre-file line used where the post-file line belongs: sf_f03.
+- SF-M1 results dropped: killed by sf_f02.
+- SF-M2 NOT EVALUATED emitted as a successful run: killed by sf_f05.
+- SF-M3 base-file line used where the post-file line belongs: sf_f03.

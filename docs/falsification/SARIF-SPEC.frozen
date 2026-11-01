@@ -1,0 +1,9 @@
+# JUDGE-SARIF r0 freeze record, written before any implementation.
+# Baseline: v0.2.1 (037b74a). Rulings S-D1..S-D4 ratified 2026-10-30.
+# Amendment at freeze, stated: an `error` means a witnessed violation of
+# the declared contract, not a mathematical proof; `--format github`
+# carries the annotation surface so it is testable in Rust fixtures.
+blake3(docs/falsification/SARIF-SPEC.md) = 1b69b5957a3ed880a08639d792f22780b9745c102d5f6048805f228790109eec
+sha256(docs/falsification/SARIF-SPEC.md) = 6ad74511e3d8c6800cac6cd951ad84945b47cc2233ddcdc727ce130cc96b39e2
+blake3(crates/invar-falsify/tests/judge_sarif_test.rs) = f26aa3673d41fff1888fe446548ecac6bedcf68426893ff221fc7779bb1a8e2b
+sha256(crates/invar-falsify/tests/judge_sarif_test.rs) = d352a41b456e3fb10e6d9f97606228317c310b46f1a3fa5d9ad1d0843b2c2ab4
