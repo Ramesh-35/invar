@@ -6,6 +6,8 @@
 #   HOLDS (0)                        -> pass
 #   VIOLATED (1)                     -> fail, unless INVAR_FAIL_ON_VIOLATION=false
 #   NOT EVALUATED new_contract (4)   -> pass: nothing was promised before
+#   NOT EVALUATED unjudged_construct -> pass with a ::warning stating the
+#                                       reason (r2 D1): stated, never claimed
 #   NOT EVALUATED unparsable (4)     -> fail: this change made the contract unreadable
 #   NOT EVALUATED unreadable_base(4) -> fail (B-D2 r1): a lost baseline is an
 #                                       infrastructure failure, never a pass
@@ -70,7 +72,7 @@ case "$code" in
   0) exit 0 ;;
   1) if [ "${INVAR_FAIL_ON_VIOLATION:-true}" = "false" ]; then exit 0; else exit 1; fi ;;
   4) case "$reason" in
-       new_contract) exit 0 ;;
+       new_contract|unjudged_construct) exit 0 ;;
        *) exit 1 ;;
      esac ;;
   *) exit 1 ;;

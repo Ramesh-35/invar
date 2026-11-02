@@ -62,14 +62,14 @@ pub fn run(root: &Path, contract: &str, base: &str, format: &str, receipt_out: O
         BaseRead::Found(b) => Some(blake3::hash(b).to_hex().to_string()),
         _ => None,
     };
-    let (verdict, reason, witnesses, pre_text) = evaluate(read, &post_bytes);
+    let (verdict, reason, witnesses, pre_text, stated) = evaluate(read, &post_bytes);
     let _ = pre_text; // pre bytes are consumed by line lookup in evaluate
-    let body = body_json(verdict, reason, contract, base, &witnesses);
+    let body = body_json(verdict, reason, contract, base, &witnesses, &stated);
     match format {
         "json" => println!("{}", serde_json::to_string_pretty(&body).unwrap_or_default()),
-        "sarif" => println!("{}", serde_json::to_string_pretty(&render_sarif(verdict, reason, contract, base, &witnesses)).unwrap_or_default()),
+        "sarif" => println!("{}", serde_json::to_string_pretty(&render_sarif(verdict, reason, contract, base, &witnesses, &stated)).unwrap_or_default()),
         "github" => print!("{}", render_github(verdict, reason, contract, base, &witnesses)),
-        _ => print!("{}", render_text(verdict, reason, contract, base, &witnesses)),
+        _ => print!("{}", render_text(verdict, reason, contract, base, &witnesses, &stated)),
     }
     if let Some(p) = receipt_out {
         let inputs = ReceiptInputs {
@@ -93,17 +93,20 @@ pub fn run(root: &Path, contract: &str, base: &str, format: &str, receipt_out: O
 /// working-tree bytes. Pure: the same inputs give the same verdict,
 /// reason and witnesses, which is what lets a receipt be reproduced.
 #[allow(clippy::type_complexity)]
-fn evaluate(read: BaseRead, post_bytes: &str) -> (&'static str, Option<&'static str>, Vec<Witness>, Option<String>) {
+fn evaluate(read: BaseRead, post_bytes: &str) -> (&'static str, Option<&'static str>, Vec<Witness>, Option<String>, Stated) {
     match read {
-            BaseRead::NoRef => ("NOT EVALUATED", Some("unreadable_base"), Vec::new(), None),
-            BaseRead::NoFile => ("NOT EVALUATED", Some("new_contract"), Vec::new(), None),
+            BaseRead::NoRef => ("NOT EVALUATED", Some("unreadable_base"), Vec::new(), None, Stated::default()),
+            BaseRead::NoFile => ("NOT EVALUATED", Some("new_contract"), Vec::new(), None, Stated::default()),
             BaseRead::Found(bytes) => {
                 let pre_text = String::from_utf8_lossy(&bytes).into_owned();
                 match (serde_json::from_str::<Value>(&pre_text), serde_json::from_str::<Value>(post_bytes)) {
-                    (Err(_), _) | (_, Err(_)) => ("NOT EVALUATED", Some("unparsable"), Vec::new(), Some(pre_text)),
+                    (Err(_), _) | (_, Err(_)) => ("NOT EVALUATED", Some("unparsable"), Vec::new(), Some(pre_text), Stated::default()),
                     (Ok(pre), Ok(post)) => {
                         let mut w = Vec::new();
+                        ROOTS.with(|r| *r.borrow_mut() = Some([pre.clone(), post.clone()]));
                         walk("", &pre, &post, &mut w);
+                        ROOTS.with(|r| *r.borrow_mut() = None);
+                        let stated = take_stated(&mut w);
                         w.sort_by(|a, b| (a.path.as_str(), a.kind, a.keyword).cmp(&(b.path.as_str(), b.kind, b.keyword)));
                         for x in &mut w {
                             let last = x.path.rsplit('.').next().unwrap_or(&x.path).to_string();
@@ -115,8 +118,14 @@ fn evaluate(read: BaseRead, post_bytes: &str) -> (&'static str, Option<&'static 
                                 x.anchor_line = find_line(post_bytes, parent);
                             }
                         }
-                        let v = if w.is_empty() { "HOLDS" } else { "VIOLATED" };
-                        (v, None, w, Some(pre_text))
+                        let (v, r) = if !w.is_empty() {
+                            ("VIOLATED", None)
+                        } else if !stated.not_evaluated.is_empty() {
+                            ("NOT EVALUATED", Some("unjudged_construct"))
+                        } else {
+                            ("HOLDS", None)
+                        };
+                        (v, r, w, Some(pre_text), stated)
                     }
                 }
             }
@@ -200,7 +209,7 @@ pub fn verify_receipt(root: &Path, body: &Value, body_text: &str) -> Result<i32>
         return Ok(1);
     }
     let post_bytes = String::from_utf8_lossy(&post_raw).into_owned();
-    let (verdict, reason, witnesses, _) = evaluate(read, &post_bytes);
+    let (verdict, reason, witnesses, _, stated) = evaluate(read, &post_bytes);
     let inputs = ReceiptInputs {
         base_ref: &base_ref,
         base_commit,
@@ -208,7 +217,7 @@ pub fn verify_receipt(root: &Path, body: &Value, body_text: &str) -> Result<i32>
         contract: &contract,
         post_contract_blake3: post_b3,
     };
-    let rederived = receipt_body(&inputs, body_json(verdict, reason, &contract, &base_ref, &witnesses));
+    let rederived = receipt_body(&inputs, body_json(verdict, reason, &contract, &base_ref, &witnesses, &stated));
     let rendered = serde_json::to_string_pretty(&rederived).unwrap_or_default();
     if rendered != body_text {
         println!("re-judging the recorded inputs gives a different result ({verdict})");
@@ -296,12 +305,26 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
             anchor_line: None,
         });
     }
+    // D2 (r2): a removal breaks validation only when the object it left is
+    // closed at the post ref; from an open object it is a stated note.
+    let closed = is_closed(post);
     for (k, pv) in pp {
         let dotted = if prefix.is_empty() { k.clone() } else { format!("{prefix}.{k}") };
-        match qp.get(k) {
+        // D4 (r2 Amendment A): local references resolved before comparing.
+        let (pv_resolved, p_refs) = resolve_ref(0, pv);
+        let pv = &pv_resolved;
+        let q_pair = qp.get(k).map(|q| resolve_ref(1, q));
+        let q_refs = q_pair.as_ref().map(|(_, r)| r.clone()).unwrap_or_default();
+        let qv_resolved = q_pair.map(|(v, _)| v);
+        ACTIVE.with(|a| {
+            let mut a = a.borrow_mut();
+            a[0].extend(p_refs.iter().cloned());
+            a[1].extend(q_refs.iter().cloned());
+        });
+        match qv_resolved.as_ref() {
             None => out.push(Witness {
                 path: dotted,
-                kind: "removed",
+                kind: if closed { "removed" } else { "removed_open" },
                 pre_type: type_str(pv),
                 post_type: None,
                 pre_line: None,
@@ -311,8 +334,19 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
                 post_value: None,
                 anchor_line: None,
             }),
+            Some(qv) if has_combinator(pv) || has_combinator(qv) => {
+                // D1 (r2): a node under anyOf/oneOf/allOf/$ref is not followed,
+                // so it is never accused: a changed one is stated, not judged.
+                if pv != qv {
+                    out.push(stated_witness(&dotted, "not_evaluated", pv));
+                }
+            }
             Some(qv) => {
-                if type_str(pv) != type_str(qv) {
+                if type_str(pv) == "unspecified" && type_made_explicit(pv, qv) {
+                    // D5 (r2 Amendment B): the type its own keywords already
+                    // implied, now written down: a stated note, not a break.
+                    out.push(stated_witness(&dotted, "type_explicit", qv));
+                } else if type_str(pv) != type_str(qv) {
                     out.push(Witness {
                         path: dotted.clone(),
                         kind: "retyped",
@@ -330,6 +364,159 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
                 walk(&dotted, pv, qv, out);
             }
         }
+        ACTIVE.with(|a| {
+            let mut a = a.borrow_mut();
+            let (n0, n1) = (a[0].len() - p_refs.len(), a[1].len() - q_refs.len());
+            a[0].truncate(n0);
+            a[1].truncate(n1);
+        });
+    }
+}
+
+thread_local! {
+    /// The base and post documents of the judgment in progress, so a local
+    /// `$ref` resolves against its own side (D4). Set and cleared by
+    /// `evaluate`; nothing else reads it.
+    static ROOTS: std::cell::RefCell<Option<[Value; 2]>> = const { std::cell::RefCell::new(None) };
+    /// References being expanded along the current walk path, per side: a
+    /// reference already on the path is a cycle through `properties`, and
+    /// stays a `$ref` (stated by D1) instead of recursing forever.
+    static ACTIVE: std::cell::RefCell<[Vec<String>; 2]> = const { std::cell::RefCell::new([Vec::new(), Vec::new()]) };
+}
+
+/// D4 (r2 Amendment A): resolve a node's local `$ref` chain against the
+/// document of `side` (0 base, 1 post). Keywords beside a `$ref` override
+/// the target's. At most 8 hops; a cycle, an external or missing target,
+/// or a non-object target leaves the `$ref` in place, so D1 states it.
+fn resolve_ref(side: usize, v: &Value) -> (Value, Vec<String>) {
+    let active = ACTIVE.with(|a| a.borrow()[side].clone());
+    ROOTS.with(|r| match r.borrow().as_ref() {
+        Some(roots) => deref(&roots[side], v, active),
+        None => (v.clone(), Vec::new()),
+    })
+}
+
+fn deref(root: &Value, v: &Value, on_path: Vec<String>) -> (Value, Vec<String>) {
+    let mut cur = v.clone();
+    let mut seen: Vec<String> = on_path;
+    let mut followed: Vec<String> = Vec::new();
+    for _ in 0..8 {
+        let Some(r) = cur.get("$ref").and_then(Value::as_str).map(str::to_string) else {
+            return (cur, followed);
+        };
+        if !r.starts_with('#') || seen.contains(&r) {
+            return (cur, followed);
+        }
+        let Some(mut merged) = root.pointer(&r[1..]).cloned() else {
+            return (cur, followed);
+        };
+        let (Some(m), Some(o)) = (merged.as_object_mut(), cur.as_object()) else {
+            return (cur, followed);
+        };
+        for (k, val) in o {
+            if k != "$ref" {
+                m.insert(k.clone(), val.clone());
+            }
+        }
+        seen.push(r.clone());
+        followed.push(r);
+        cur = merged;
+    }
+    (cur, followed)
+}
+
+/// D1 (r2): does this node carry a construct the judge does not follow?
+fn has_combinator(v: &Value) -> bool {
+    ["anyOf", "oneOf", "allOf", "$ref"].iter().any(|k| v.get(*k).is_some())
+}
+
+/// D5 (r2 Amendment B): is every type `post` declares already implied by
+/// the keywords `pre` carried while it declared none?
+fn type_made_explicit(pre: &Value, post: &Value) -> bool {
+    const IMPLIED: [(&str, &[&str]); 4] = [
+        ("object", &["properties", "additionalProperties", "patternProperties", "required", "propertyNames", "minProperties", "maxProperties"]),
+        ("array", &["items", "prefixItems", "contains", "minItems", "maxItems", "uniqueItems"]),
+        ("string", &["minLength", "maxLength", "pattern", "format"]),
+        ("number", &["minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "multipleOf"]),
+    ];
+    let implied: Vec<&str> = IMPLIED.iter().filter(|(_, kws)| kws.iter().any(|k| pre.get(*k).is_some())).map(|(t, _)| *t).collect();
+    let post_type = type_str(post);
+    let declared: Vec<&str> = post_type.split('|').map(|t| if t == "integer" { "number" } else { t }).collect();
+    !implied.is_empty() && declared.iter().all(|t| implied.contains(t))
+}
+
+/// D2 (r2): an object that admits no other keys.
+fn is_closed(v: &Value) -> bool {
+    v.get("additionalProperties") == Some(&Value::Bool(false)) || v.get("unevaluatedProperties") == Some(&Value::Bool(false))
+}
+
+/// A stated finding that is not a break (not evaluated, or a note).
+fn stated_witness(path: &str, kind: &'static str, pv: &Value) -> Witness {
+    Witness {
+        path: path.to_string(),
+        kind,
+        pre_type: type_str(pv),
+        post_type: None,
+        pre_line: None,
+        post_line: None,
+        keyword: None,
+        pre_value: None,
+        post_value: None,
+        anchor_line: None,
+    }
+}
+
+/// What the judge states without accusing: fields it did not follow (D1)
+/// and removals from open objects (D2). Neither is a witness of a break.
+#[derive(Default)]
+pub struct Stated {
+    pub not_evaluated: Vec<String>,
+    pub notes: Vec<String>,
+}
+
+/// Move the stated findings out of the witness list, sorted.
+fn take_stated(w: &mut Vec<Witness>) -> Stated {
+    let mut st = Stated::default();
+    w.retain(|x| match x.kind {
+        "not_evaluated" => {
+            st.not_evaluated.push(x.path.clone());
+            false
+        }
+        "type_explicit" => {
+            st.notes.push(format!(
+                "type made explicit: {} is now {}, which its own keywords already implied; values of other types, accepted before, are now rejected.",
+                x.path, x.pre_type
+            ));
+            false
+        }
+        "removed_open" => {
+            st.notes.push(format!(
+                "removed from an object that admits other keys: {} ({}); instances carrying it still validate.",
+                x.path, x.pre_type
+            ));
+            false
+        }
+        _ => true,
+    });
+    st.not_evaluated.sort();
+    st.notes.sort();
+    st
+}
+
+/// D3 (r2): would this value, valid under the old enum, fail the new bound?
+/// A keyword constrains only its own type, as JSON Schema defines it.
+fn violates(kw: &str, v: &Value, b: f64) -> bool {
+    let n = match kw {
+        "minimum" | "maximum" | "exclusiveMinimum" | "exclusiveMaximum" => v.as_f64(),
+        "minLength" | "maxLength" => v.as_str().map(|s| s.chars().count() as f64),
+        _ => v.as_array().map(|a| a.len() as f64),
+    };
+    match (kw, n) {
+        (_, None) => false,
+        ("minimum" | "minLength" | "minItems", Some(n)) => n < b,
+        ("exclusiveMinimum", Some(n)) => n <= b,
+        ("exclusiveMaximum", Some(n)) => n >= b,
+        (_, Some(n)) => n > b,
     }
 }
 
@@ -385,6 +572,8 @@ fn constraints(path: &str, pv: &Value, qv: &Value, out: &mut Vec<Witness>) {
     if narrowed_enum(pv, qv) {
         out.push(constraint_witness(path, "narrowed", "enum", pv, pv.get("enum"), qv.get("enum")));
     }
+    // D3 (r2): an enum dropped at the post ref is judged by its old values.
+    let old_enum = if qv.get("enum").is_none() { pv.get("enum").and_then(Value::as_array) } else { None };
     let bounds = LOWER.iter().map(|k| (*k, true)).chain(UPPER.iter().map(|k| (*k, false)));
     for (kw, is_lower) in bounds {
         let (ra, rb) = (pv.get(kw), qv.get(kw));
@@ -394,9 +583,12 @@ fn constraints(path: &str, pv: &Value, qv: &Value, out: &mut Vec<Witness>) {
         let numeric_a = !matches!(ra, Some(v) if !v.is_number());
         match (ra.and_then(Value::as_f64), rb.and_then(Value::as_f64)) {
             (a, Some(b)) if numeric_a => {
-                let tightened = match a {
-                    None => true,
-                    Some(a) => (is_lower && b > a) || (!is_lower && b < a),
+                let tightened = match old_enum {
+                    Some(vals) => vals.iter().any(|v| violates(kw, v, b)),
+                    None => match a {
+                        None => true,
+                        Some(a) => (is_lower && b > a) || (!is_lower && b < a),
+                    },
                 };
                 if tightened {
                     out.push(constraint_witness(path, "tightened", kw, pv, ra, rb));
@@ -446,8 +638,10 @@ fn find_line(text: &str, key: &str) -> Option<u64> {
 
 /// One JSON document, deterministically ordered (sorted keys), the same
 /// facts the text states: the machine surface for agents and CI.
-fn body_json(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w: &[Witness]) -> Value {
+fn body_json(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w: &[Witness], st: &Stated) -> Value {
     json!({
+        "not_evaluated_paths": st.not_evaluated,
+        "notes": st.notes,
         "verdict": verdict,
         "reason": reason,
         "contract": contract,
@@ -540,6 +734,9 @@ fn not_evaluated_sentence(reason: Option<&str>, contract: &str, base: &str) -> S
         Some("new_contract") => format!(
             "NOT EVALUATED (new_contract): {contract} does not exist at {base}; nothing was promised before. The next change to this contract will be judged against this version."
         ),
+        Some("unjudged_construct") => format!(
+            "NOT EVALUATED (unjudged_construct): {contract} changed only where this judge does not look (anyOf, oneOf, allOf or $ref). Nothing here was judged a break or a pass; review those fields by hand."
+        ),
         Some("unreadable_base") => format!(
             "NOT EVALUATED (unreadable_base): the ref {base} cannot be read in this repository. Fetch it, or pass --base a ref that exists."
         ),
@@ -551,7 +748,7 @@ fn not_evaluated_sentence(reason: Option<&str>, contract: &str, base: &str) -> S
 
 /// The human surface, frozen as part of the contract (JUDGE-SPEC r1,
 /// Voice): sentences that name the field, the change, and a next step.
-fn render_text(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w: &[Witness]) -> String {
+fn render_text(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w: &[Witness], st: &Stated) -> String {
     let mut s = String::new();
     match verdict {
         "HOLDS" => s.push_str(&format!("HOLDS: {contract} keeps every promise it made at {base}.\n")),
@@ -564,6 +761,12 @@ fn render_text(verdict: &str, reason: Option<&str>, contract: &str, base: &str, 
             }
         }
         _ => s.push_str(&format!("{}\n", not_evaluated_sentence(reason, contract, base))),
+    }
+    for p in &st.not_evaluated {
+        s.push_str(&format!("  not evaluated: {p} uses anyOf, oneOf, allOf or $ref, which this judge does not follow.\n"));
+    }
+    for n in &st.notes {
+        s.push_str(&format!("  noted: {n}\n"));
     }
     s.push_str(&format!(
         "judged: property presence and type, enum, numeric, length and item-count bounds, required, pattern and format, recursively. not judged: {} (stated, never skipped).\n",
@@ -590,7 +793,7 @@ const RULES: [(&str, &str); 6] = [
 /// JUDGE-SARIF r0: a SARIF 2.1.0 log. Sorted keys, no timestamps, no
 /// absolute paths: byte-stable. NOT EVALUATED is a failed execution with
 /// a warning notification, never an empty log that reads as clean (S-D2).
-fn render_sarif(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w: &[Witness]) -> Value {
+fn render_sarif(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w: &[Witness], st: &Stated) -> Value {
     let results: Vec<Value> = w
         .iter()
         .map(|x| {
@@ -636,6 +839,8 @@ fn render_sarif(verdict: &str, reason: Option<&str>, contract: &str, base: &str,
             "results": results,
             "properties": {
                 "unjudged_constraints": UNJUDGED,
+                "not_evaluated_paths": st.not_evaluated,
+                "notes": st.notes,
                 "verdict": verdict,
                 "base": base,
             },

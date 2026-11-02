@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0). Each operator (JM-M1..M6, JS-M1..M4, SF-M1..M3, RM-1..4) is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -14,7 +15,7 @@ mutate() { python3 - "$J" "$1" "$2" <<'EOF'
 import sys
 p, old, new = sys.argv[1], sys.argv[2], sys.argv[3]
 t = open(p).read()
-assert t.count(old) >= 1, f"mutation anchor not found: {old!r}"
+assert t.count(old) == 1, f"mutation anchor must match exactly once, found {t.count(old)}: {old!r}"
 open(p, "w").write(t.replace(old, new, 1))
 EOF
 }
@@ -23,6 +24,10 @@ run_one() { # name old new killer_test [test_target]
   name=$1; old=$2; new=$3; killer=$4; target=${5:-judge_test}
   cp "$J.orig" "$J"
   mutate "$old" "$new"
+  # A mutant that does not build proves nothing: it is INVALID, never KILLED.
+  if ! cargo build -q 2>/dev/null; then
+    echo "$name: INVALID (mutant does not compile)"; fail=$((fail+1)); return
+  fi
   if cargo test -q --test "$target" "$killer" 2>&1 | grep -q "test result: ok"; then
     echo "$name: SURVIVED (killer $killer still passes)"; fail=$((fail+1))
   else
@@ -31,11 +36,11 @@ run_one() { # name old new killer_test [test_target]
 }
 
 # JM-M1 drop removal detection
-run_one JM-M1 'None => out.push(Witness {' 'None if false => out.push(Witness {' jf_f01_removal_is_violated_with_named_fields
+run_one JM-M1 'None => out.push(Witness {' 'None => drop(Witness {' jf_f01_removal_is_violated_with_named_fields
 # JM-M2 drop retype detection
 run_one JM-M2 'if type_str(pv) != type_str(qv) {' 'if false && type_str(pv) != type_str(qv) {' jf_f02_retype_is_violated_with_both_types
 # JM-M3 unparsable input treated as HOLDS
-run_one JM-M3 '(Err(_), _) | (_, Err(_)) => ("NOT EVALUATED", Some("unparsable"), Vec::new(), Some(pre_text)),' '(Err(_), _) | (_, Err(_)) => ("HOLDS", None, Vec::new(), Some(pre_text)),' jf_f05_unparsable_is_not_evaluated
+run_one JM-M3 '(Err(_), _) | (_, Err(_)) => ("NOT EVALUATED", Some("unparsable"), Vec::new(), Some(pre_text), Stated::default()),' '(Err(_), _) | (_, Err(_)) => ("HOLDS", None, Vec::new(), Some(pre_text), Stated::default()),' jf_f05_unparsable_is_not_evaluated
 # JM-M4 pre read from working tree instead of base ref
 run_one JM-M4 'match untar_single(&out.stdout, contract) {
         Some(bytes) => Ok(BaseRead::Found(bytes)),
@@ -47,7 +52,7 @@ run_one JM-M4 'match untar_single(&out.stdout, contract) {
 # JM-M5 recursion removed, top level only
 run_one JM-M5 'walk(&dotted, pv, qv, out);' 'let _ = &dotted;' jf_f07_nested_removal_has_dotted_path
 # JM-M6 missing base contract treated as HOLDS
-run_one JM-M6 'BaseRead::NoFile => ("NOT EVALUATED", Some("new_contract"), Vec::new(), None),' 'BaseRead::NoFile => ("HOLDS", None, Vec::new(), None),' jf_f06_new_contract_is_not_evaluated
+run_one JM-M6 'BaseRead::NoFile => ("NOT EVALUATED", Some("new_contract"), Vec::new(), None, Stated::default()),' 'BaseRead::NoFile => ("HOLDS", None, Vec::new(), None, Stated::default()),' jf_f06_new_contract_is_not_evaluated
 
 # JUDGE-SUBTYPE r1 (docs/falsification/JUDGE-SUBTYPE-SPEC.md)
 # JS-M1 enum narrowing check dropped
@@ -78,6 +83,20 @@ run_one RM-3 'if post_b3 != recorded_post {' 'if false && post_b3 != recorded_po
 # RM-4 base contract hash not checked
 run_one RM-4 'if base_b3.as_deref() != recorded_base.as_deref() {' 'if false && base_b3.as_deref() != recorded_base.as_deref() {' jr_f07_forged_base_hash_is_input_drift judge_receipt_test
 
+# JUDGE-SUBTYPE r2 (docs/falsification/JUDGE-SUBTYPE-R2-SPEC.md)
+# R2-M1 combinator check dropped
+run_one R2-M1 'Some(qv) if has_combinator(pv) || has_combinator(qv) => {' 'Some(qv) if false && (has_combinator(pv) || has_combinator(qv)) => {' r2_f01_field_moved_into_anyof_is_not_evaluated judge_subtype_r2_test
+# R2-M2 closed-object check ignored: every removal VIOLATED
+run_one R2-M2 'let closed = is_closed(post);' 'let closed = { let _ = is_closed(post); true };' r2_f04_open_object_removal_is_a_note judge_subtype_r2_test
+# R2-M3 old enum values not checked against the new bound
+run_one R2-M3 'Some(vals) => vals.iter().any(|v| violates(kw, v, b)),' 'Some(vals) => { let _ = vals; true },' r2_f07_enum_replaced_by_wider_bound_holds judge_subtype_r2_test
+# R2-M4 unjudged_construct reported as HOLDS
+run_one R2-M4 '("NOT EVALUATED", Some("unjudged_construct"))' '("HOLDS", None)' r2_f01_field_moved_into_anyof_is_not_evaluated judge_subtype_r2_test
+
+# R2-M5 local reference resolution disabled (Amendment A)
+run_one R2-M5 'Some(roots) => deref(&roots[side], v, active),' 'Some(_roots) => { let _ = active; (v.clone(), Vec::new()) },' r2_f12_tightened_defs_target_is_violated judge_subtype_r2_test
+# R2-M6 implied-type check dropped (Amendment B)
+run_one R2-M6 'if type_str(pv) == "unspecified" && type_made_explicit(pv, qv) {' 'if false && type_str(pv) == "unspecified" && type_made_explicit(pv, qv) {' r2_f15_implied_type_made_explicit_is_a_note judge_subtype_r2_test
 cp "$J.orig" "$J"; rm "$J.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"
