@@ -13,6 +13,12 @@ not evaluate (an unsupported language, a read pattern it cannot parse, a
 changed default it cannot trace) is stated, with a reason, and the exit code
 says so.
 
+![invar judge annotating a real schema break inline on a pull request](docs/assets/pr-annotation-demo.png)
+
+*A real break, replayed: Snowplow's media_player 1-0-0 to 2-0-0 change on
+[demo PR #3](https://github.com/Ramesh-35/invar-demo-api/pull/3/files).
+Each broken promise is annotated on the line where it lives.*
+
 ## Sixty seconds
 
 Watch it catch three real breaks first (real incidents, pinned bytes,
