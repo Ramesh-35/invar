@@ -28,9 +28,9 @@ const B1_001_POST: &str = include_str!("fixtures/judge/b1-001-post.json");
 const B1_002_PRE: &str = include_str!("fixtures/judge/b1-002-pre.json");
 const B1_002_POST: &str = include_str!("fixtures/judge/b1-002-post.json");
 
-const NESTED_PRE: &str = r#"{"properties":{"payload":{"type":"object","properties":{"user":{"type":"object","properties":{"zipcode":{"type":"string"},"name":{"type":"string"}}}}}}}"#;
-const NESTED_POST: &str = r#"{"properties":{"payload":{"type":"object","properties":{"user":{"type":"object","properties":{"name":{"type":"string"}}}}}}}"#;
-const ADDED_POST: &str = r#"{"properties":{"payload":{"type":"object","properties":{"user":{"type":"object","properties":{"zipcode":{"type":"string"},"name":{"type":"string"},"email":{"type":"string"}}}}}}}"#;
+const NESTED_PRE: &str = r#"{"properties":{"payload":{"type":"object","properties":{"user":{"type":"object","additionalProperties":false,"properties":{"zipcode":{"type":"string"},"name":{"type":"string"}}}}}}}"#;
+const NESTED_POST: &str = r#"{"properties":{"payload":{"type":"object","properties":{"user":{"type":"object","additionalProperties":false,"properties":{"name":{"type":"string"}}}}}}}"#;
+const ADDED_POST: &str = r#"{"properties":{"payload":{"type":"object","properties":{"user":{"type":"object","additionalProperties":false,"properties":{"zipcode":{"type":"string"},"name":{"type":"string"},"email":{"type":"string"}}}}}}}"#;
 
 fn ws(tag: &str) -> PathBuf {
     let nanos = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);

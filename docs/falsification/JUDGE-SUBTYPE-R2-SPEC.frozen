@@ -1,0 +1,48 @@
+# JUDGE-SUBTYPE r2 freeze record, written before any implementation.
+# Baseline: v0.2.3 (ac9557f). Rulings D1..D3 ratified 2026-11-02.
+# Measured before implementation: fixtures 4 of 10 pass (r2_f02, f05, f08,
+# f09: behaviour r1 already has, kept as guards), 6 fail. Replay with the
+# v0.2.3 engine: real 19/19 VIOLATED, false alarms 54/54 VIOLATED: FAIL.
+# Pre-registered: real 19/19 stay VIOLATED; at most 10 of 54 false alarms
+# remain; no HOLDS commit becomes VIOLATED.
+# Amended earlier fixtures (old hashes in JUDGE-SPEC.frozen, SARIF-SPEC.frozen):
+blake3(docs/falsification/JUDGE-SUBTYPE-R2-SPEC.md) = 08981378389a323d170cfcb6f0b1d5740b9151973d21c095e1c86b99d1e8534a
+sha256(docs/falsification/JUDGE-SUBTYPE-R2-SPEC.md) = 79addd0386fac399a6f056ee801bae2a5605bc6ae8a7def0e84ac7ddf6c0811a
+blake3(crates/invar-falsify/tests/judge_subtype_r2_test.rs) = 241982f7c530544df5a580fbae3ec4df9e2d5769dfebf2bb5f8456b802d69cb2
+sha256(crates/invar-falsify/tests/judge_subtype_r2_test.rs) = 91e060586f7f03ad4b3243b96b24afd5f6a42e04845e7e9ba02a1ae1a8130107
+blake3(docs/falsification/schemastore-replay/MANIFEST.tsv) = 75f552be5a097c8cc6fea36bb4c6fc8266e3505e486133abbcec3c009ec0b832
+sha256(docs/falsification/schemastore-replay/MANIFEST.tsv) = 8902c12ee872fad11a9936acb24523deab891e173f2b5bd4e540cb1d0b240d2d
+blake3(docs/falsification/schemastore-replay/replay.sh) = dda79dd5c3c497024a87140638fd47096bd54e949d4b57603a91e30416029a4e
+sha256(docs/falsification/schemastore-replay/replay.sh) = edc50df44ff8d518e91ba0a30bb30c4ab9247ea5c62090bb1725a45a7381b013
+blake3(crates/invar-falsify/tests/judge_test.rs) = 9828f06f64e4eac52cc2630d7df4e7d33e8e83a96cac9253ac9a7be5d29e5b1d
+sha256(crates/invar-falsify/tests/judge_test.rs) = fcee18d909c81d83efcf851cb705f5cfd77b973588d943a0df2a3380a25bcaf4
+blake3(crates/invar-falsify/tests/judge_sarif_test.rs) = 6e30c8fb3459ba6998e875a166bc8e26634cb81e7a58c7db76611d39fc913c78
+sha256(crates/invar-falsify/tests/judge_sarif_test.rs) = f825210a7cf4bfae6a242b0579c00f013a50ae9d7dc193c7edb20e069ef87f9d
+
+# Amendment A (D4, ratified 2026-11-02), frozen before D4 implementation.
+# First r2 build replay: real 15/19, false alarms 6/54 (FAIL as frozen).
+# e7373bd3f relabelled false_alarm (resolved $ref is identical). Real 18, false alarms 55.
+# Measured before D4: r2 fixtures 12 of 14 pass; r2_f11, r2_f12 fail (D4 not built).
+# The hashes above are the original r2 freeze; these supersede them for the files listed.
+blake3(docs/falsification/JUDGE-SUBTYPE-R2-SPEC.md) = 59f26f8ebdabeb191cde2b85a98db0c5fe7bd26c88a8bcea689e5d59a1ce40e8
+sha256(docs/falsification/JUDGE-SUBTYPE-R2-SPEC.md) = 6af084a800c0d97cb65835dd083d58d3d6d8a500c4ec6818f6a3c939391103e3
+blake3(crates/invar-falsify/tests/judge_subtype_r2_test.rs) = 9dbcb71160774dba72253b185972386037e34c8383ab33275f4f8b7e40035ce3
+sha256(crates/invar-falsify/tests/judge_subtype_r2_test.rs) = 9c0825bd20fe6799bde062c557c2634734c927c4443a4c3c8a8997cbebdf8a21
+blake3(docs/falsification/schemastore-replay/MANIFEST.tsv) = 7cced0e816b96f86b18683fbeac6eebb8f01802638f073be977de28e033cef90
+sha256(docs/falsification/schemastore-replay/MANIFEST.tsv) = 4c9cf7602193cb5d1104034789a71acd13e63c3f411119d0e3ecacf3bf95a39e
+blake3(docs/falsification/schemastore-replay/replay.sh) = 8b052aa504f4bff5ea42dfd02d4e988685e8517cb82a9adeca2496f7be337dbb
+sha256(docs/falsification/schemastore-replay/replay.sh) = 95153f599e617e7266476ecd925f448056680f1403debca3857497e12399ae7d
+
+# Amendment B (D5 and corrected labels, ratified 2026-11-02), frozen before D5 implementation.
+# D4 build replay: real 16/18, false alarms 7/55, 5 holds newly VIOLATED (FAIL as frozen); all hand-resolved.
+# Labels now: real 20, stated 2, false_alarm 54, holds 399, undecided 4.
+# Measured before D5: r2 fixtures 16 of 17 pass; r2_f15 fails (D5 not built). r2_f17 already passes:
+# the walk-path cycle guard was written during Amendment A after the replay crashed on jsone.json.
+blake3(docs/falsification/JUDGE-SUBTYPE-R2-SPEC.md) = 8e745f3dc44aca48d614cd2af3f60ff38a60c323661c52c28e2b05db7d63bf3a
+sha256(docs/falsification/JUDGE-SUBTYPE-R2-SPEC.md) = f1db90b7be47dfa000323feddb7ce1ea84b6eec9695db2376fddbbf75cfa533c
+blake3(crates/invar-falsify/tests/judge_subtype_r2_test.rs) = 39db9231c35d1c504db3ec4b605570144bd69f910d66b76439e91dd67dbf945c
+sha256(crates/invar-falsify/tests/judge_subtype_r2_test.rs) = 55920c06701db4012935f202979377d060cf79ea0ac8c1206bbacf7d70b2343b
+blake3(docs/falsification/schemastore-replay/MANIFEST.tsv) = 79c91cf0207d18b4aa88f3d1d11c0ecfe3c35f597f4b33911bef94842b98a581
+sha256(docs/falsification/schemastore-replay/MANIFEST.tsv) = 4899e5dc80a7073ed35f403c0858b44359fee49d6d6df60c9049065c2dce3976
+blake3(docs/falsification/schemastore-replay/replay.sh) = 6b26446c07ed66e9c9dd261659b34ecf666c74e121ec0bb52c4c695e319ab221
+sha256(docs/falsification/schemastore-replay/replay.sh) = cd8d6c11f08a171f03181b09a1c26269f9cbc1a0b88c68b42250f1484671bef8

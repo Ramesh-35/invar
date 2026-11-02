@@ -16,8 +16,8 @@ const B1_001_POST: &str = include_str!("fixtures/judge/b1-001-post.json");
 const B1_002_PRE: &str = include_str!("fixtures/judge/b1-002-pre.json");
 const B1_002_POST: &str = include_str!("fixtures/judge/b1-002-post.json");
 
-const NESTED_PRE: &str = "{\n  \"properties\": {\n    \"payload\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"user\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"zipcode\": {\"type\": \"string\"},\n            \"name\": {\"type\": \"string\"}\n          }\n        }\n      }\n    }\n  }\n}\n";
-const NESTED_POST: &str = "{\n  \"properties\": {\n    \"payload\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"user\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"name\": {\"type\": \"string\"}\n          }\n        }\n      }\n    }\n  }\n}\n";
+const NESTED_PRE: &str = "{\n  \"properties\": {\n    \"payload\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"user\": {\n          \"type\": \"object\",\n          \"additionalProperties\": false,\n          \"properties\": {\n            \"zipcode\": {\"type\": \"string\"},\n            \"name\": {\"type\": \"string\"}\n          }\n        }\n      }\n    }\n  }\n}\n";
+const NESTED_POST: &str = "{\n  \"properties\": {\n    \"payload\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"user\": {\n          \"type\": \"object\",\n          \"additionalProperties\": false,\n          \"properties\": {\n            \"name\": {\"type\": \"string\"}\n          }\n        }\n      }\n    }\n  }\n}\n";
 
 fn ws(tag: &str) -> PathBuf {
     let nanos = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
