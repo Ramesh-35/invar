@@ -1,0 +1,14 @@
+# JUDGE-CONTRACTS r0 freeze record, written before any implementation.
+# Baseline: v0.2.4 (1dae339). D6 (epistemic voice) ratified 2026-11-02.
+# Measured before implementation: fixtures 0 of 11 pass (the v0.2.4 CLI
+# has no --contracts flag; jc_f05 and jc_f11 exit 2 from argument
+# parsing, not 3). D6 probe on v0.2.4: removed and retyped openings
+# match the frozen sentences (kind, path, types, line); removed gains the
+# D2 clause, and every consequence differs.
+blake3(docs/falsification/JUDGE-CONTRACTS-SPEC.md) = 81ad899bdb394efab3e3d440e628b97e3a4479b8797d9d1ef36850ef4871131a
+sha256(docs/falsification/JUDGE-CONTRACTS-SPEC.md) = 2065ae99239dff15e62d61ca6c8c98f3f12e58b69e67477db2ec6afd0c0c9e7b
+blake3(crates/invar-falsify/tests/judge_contracts_test.rs) = 56093b12945fa0f87cd1cc24e58293fbd137278dec82d119629dd61bfe36ce5d
+sha256(crates/invar-falsify/tests/judge_contracts_test.rs) = aa0606b66574bafe3bd692a7980a81ffc528d4ff0785a7cbc2659769fa7b45c8
+# Amendment A (2026-11-02, during implementation): spec text only; test file hash above unchanged.
+blake3(docs/falsification/JUDGE-CONTRACTS-SPEC.md) = 672e9cc42b83fb779e174ccbaec4425de79e8dcc12234c162645b5556a837e14
+sha256(docs/falsification/JUDGE-CONTRACTS-SPEC.md) = 0cc962f5a34ddfc58e381a68424662429eeffd122af63acdecea109186315848
