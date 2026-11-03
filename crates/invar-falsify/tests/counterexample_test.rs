@@ -181,13 +181,18 @@ fn cx_f11_unchecked_keyword_at_base_is_stated() {
     assert_eq!(why, "minProperties is not checked by this judge");
 }
 
-/// cx_f12: the judge claims a removal; the post admits the key through
-/// patternProperties, which the checker cannot judge. The claim is not
-/// confirmed, and the output says so. Kills CX-M2.
+/// cx_f12: the judge claims a break the post check cannot confirm, so
+/// the output says so. Kills CX-M2. JUDGE-R3 r0 amendment: the original
+/// case (patternProperties admitting the removed key) was a false claim,
+/// which J1 now refuses to make. Here the post bound sits beside a `$ref`:
+/// the judge merges the two (r2 D4) and claims `maxLength` tightened, but
+/// drafts disagree on whether a keyword beside `$ref` applies (draft-07
+/// ignores it), so the checker cannot confirm the rejection.
 #[test]
 fn cx_f12_unconfirmed_rejection_is_stated() {
-    let post = r#"{"additionalProperties":false,"patternProperties":{"^a":{}},"properties":{"name":{"type":"string"}}}"#;
-    let (cx, why) = one(CLOSED, post, "f12");
+    let pre = r#"{"properties":{"f":{"type":"string","maxLength":10}}}"#;
+    let post = r##"{"definitions":{"s":{"type":"string"}},"properties":{"f":{"$ref":"#/definitions/s","maxLength":3}}}"##;
+    let (cx, why) = one(pre, post, "f12");
     assert_eq!(cx, Value::Null);
-    assert_eq!(why, "patternProperties is not checked by this judge");
+    assert_eq!(why, "$ref is not checked by this judge");
 }

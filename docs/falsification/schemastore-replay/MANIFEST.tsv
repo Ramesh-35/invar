@@ -3,6 +3,7 @@
 # commit_label is per commit, from structural rules spot-checked by hand (spec section Why): real, undecided, false_alarm, holds.
 # Amendment A (2026-11-02): e7373bd3f relabelled real -> false_alarm; its $ref resolves to the same enum (spec, Amendment A).
 # Amendment B (2026-11-02): e7373bd3f real; 929201f41 and 585b21f01 stated (NOT EVALUATED expected); b056a70c8, 51b3fa1a0, 8ae3e0c8c real (found by D4). Evidence: spec, Amendment B.
+# JUDGE-R3 r0 (2026-11-03): 4836277f2, 0091e807a, b514ab55c relabelled real -> false_alarm; no instance valid at base is rejected at post (COUNTEREXAMPLE-SPEC.md Amendment A, hand-checks.py).
 commit	file	v023_verdict	v023_witnesses	commit_label
 276b087324e60a62492e8c788615268fbdcb44f9	src/schemas/json/cargo-lints-rust.json	HOLDS	0	holds
 d3cbd0bf40e8c45f8b88e87d3bc40fdbf9644500	src/schemas/json/claude-code-settings.json	HOLDS	0	holds
@@ -49,7 +50,7 @@ bc1a4019659207d4a3c7566b699be299b13ec006	src/schemas/json/pnpm-workspace.json	HO
 2d7d28fe3e8bc0511a4edd7457cb6ae9df41910c	src/schemas/json/claude-code-keybindings.json	HOLDS	0	holds
 61ef5c60ed23986388141a35476c767bed45288d	src/schemas/json/pnpm-workspace.json	HOLDS	0	holds
 bd4878f12bdd5a5870a937143234a5356aa8ebed	src/schemas/json/ryl.json	VIOLATED	1	false_alarm
-0091e807a9357749902db2862f9f713f5fffa85d	src/schemas/json/partial-poe.json	VIOLATED	3	real
+0091e807a9357749902db2862f9f713f5fffa85d	src/schemas/json/partial-poe.json	VIOLATED	3	false_alarm
 803561f5f5459bd1edd3cfcf44258b5c5fad3e3b	src/schemas/json/pnpm-workspace.json	HOLDS	0	holds
 3a9b1ff559b6cb9a594985455ae5e97941b441c7	src/schemas/json/host.json	HOLDS	0	holds
 469df854905d40c0bddb8b75b0912b850643d3bd	src/schemas/json/claude-code-settings.json	HOLDS	0	holds
@@ -305,8 +306,8 @@ b65cf6498fa4198344f1b561ce5ed345877a9d18	src/schemas/json/nuget-project.json	HOL
 9b3a4b49db9262a88803885916ff77b97d670961	src/schemas/json/pantsbuild-2.30.0.json	HOLDS	0	holds
 9b3a4b49db9262a88803885916ff77b97d670961	src/schemas/json/pantsbuild-2.31.0.json	HOLDS	0	holds
 9b3a4b49db9262a88803885916ff77b97d670961	src/schemas/json/pantsbuild-2.32.0.json	HOLDS	0	holds
-b514ab55c193031891981a470d3e508cbe211f63	src/schemas/json/mkdocs-1.0.json	VIOLATED	1	real
-b514ab55c193031891981a470d3e508cbe211f63	src/schemas/json/mkdocs-1.6.json	HOLDS	0	real
+b514ab55c193031891981a470d3e508cbe211f63	src/schemas/json/mkdocs-1.0.json	VIOLATED	1	false_alarm
+b514ab55c193031891981a470d3e508cbe211f63	src/schemas/json/mkdocs-1.6.json	HOLDS	0	false_alarm
 5857071898099235af50efb62a14605414e370cf	src/schemas/json/linutil-tab-data.json	HOLDS	0	holds
 5857071898099235af50efb62a14605414e370cf	src/schemas/json/linutil-tabs.json	HOLDS	0	holds
 4d1152d7e736c5203674f60104e8a3b3153e45a9	src/schemas/json/linkinator-config.json	HOLDS	0	holds
@@ -537,24 +538,24 @@ b3525279d82321c1a80d1b597a901641e729ea88	src/schemas/json/dependabot-2.0.json	HO
 7cd4ffa43d950e6e9d4819e0adb18d1caf05a39b	src/schemas/json/project.json	VIOLATED	18	false_alarm
 6b21aa3c00e8f88d24c592248a07eb9b2f004be1	src/schemas/json/nest-cli.json	HOLDS	0	holds
 060c6eedbfcebcace35336d273099f90d1e6d3c5	src/schemas/json/ruff.json	HOLDS	0	holds
-4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/mprocs-0.6.4.json	HOLDS	0	real
-4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/nest-cli.json	HOLDS	0	real
-4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/netlify.json	HOLDS	0	real
-4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/nodemon.json	HOLDS	0	real
-4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/openhab-5.1.json	HOLDS	0	real
-4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/opensrm.json	HOLDS	0	real
-4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/paper-plugin.json	VIOLATED	1	real
-4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/partial-pyright.json	HOLDS	0	real
-4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/phrase.json	HOLDS	0	real
-4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/pnpm-workspace.json	HOLDS	0	real
-4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/pre-commit-config.json	HOLDS	0	real
-4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/prometheus.json	HOLDS	0	real
-4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/pylock.json	HOLDS	0	real
-4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/pyproject.json	VIOLATED	1	real
-4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/pyrseas-0.8.json	HOLDS	0	real
-4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/size-limit.json	HOLDS	0	real
-4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/starlake.json	HOLDS	0	real
-4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/tmlanguage.json	HOLDS	0	real
+4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/mprocs-0.6.4.json	HOLDS	0	false_alarm
+4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/nest-cli.json	HOLDS	0	false_alarm
+4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/netlify.json	HOLDS	0	false_alarm
+4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/nodemon.json	HOLDS	0	false_alarm
+4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/openhab-5.1.json	HOLDS	0	false_alarm
+4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/opensrm.json	HOLDS	0	false_alarm
+4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/paper-plugin.json	VIOLATED	1	false_alarm
+4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/partial-pyright.json	HOLDS	0	false_alarm
+4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/phrase.json	HOLDS	0	false_alarm
+4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/pnpm-workspace.json	HOLDS	0	false_alarm
+4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/pre-commit-config.json	HOLDS	0	false_alarm
+4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/prometheus.json	HOLDS	0	false_alarm
+4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/pylock.json	HOLDS	0	false_alarm
+4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/pyproject.json	VIOLATED	1	false_alarm
+4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/pyrseas-0.8.json	HOLDS	0	false_alarm
+4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/size-limit.json	HOLDS	0	false_alarm
+4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/starlake.json	HOLDS	0	false_alarm
+4836277f275f669ef1f44fc1d216803467b458d7	src/schemas/json/tmlanguage.json	HOLDS	0	false_alarm
 f71d8129b80bea20c1f848ec68689194d3c9fe72	src/schemas/json/pnpm-workspace.json	VIOLATED	1	false_alarm
 4ed4c5dd7aa0f6fe4231d80cd823d4cfc032bba6	src/schemas/json/utam-page-object-1.5.0.json	HOLDS	0	holds
 4ed4c5dd7aa0f6fe4231d80cd823d4cfc032bba6	src/schemas/json/utam-page-object-2.0.3.json	HOLDS	0	holds

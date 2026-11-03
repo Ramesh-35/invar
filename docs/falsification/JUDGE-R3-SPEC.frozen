@@ -1,0 +1,23 @@
+# JUDGE-R3 r0 freeze record, written before any implementation.
+# Baseline: v0.2.7 (51ab6b3). Founder ruling 2026-11-03: option B plus the payload release gate.
+# Measured before implementation:
+#   judge_r3_test 3 of 9 pass (r3_f02, f06, f09: guards), 6 fail.
+#   replay.sh with the relabelled MANIFEST: FAIL, the 3 relabelled commits VIOLATED.
+#   counterexample_test with amended cx_f12: 12 of 12 (cx_f12 keeps its purpose; premise
+#   checked with jsonschema: {"f":"aaaa"} valid at base, post valid under draft-07 and
+#   invalid under 2020-12, so the claim is draft-dependent and cannot be confirmed).
+#   label-free.py on v0.2.7: 479 commits, VIOLATED 23, confirmed 10, unconfirmed 13;
+#   24 counterexamples printed, 0 failed the independent check.
+# Pre-registered after implementation: replay PASS; label-free 0 failed; the 3
+#   relabelled commits no longer VIOLATED; confirmed and unconfirmed reported as measured.
+# Amended fixture (old hash in COUNTEREXAMPLE-SPEC.frozen): counterexample_test.rs.
+blake3(docs/falsification/JUDGE-R3-SPEC.md) = 646ceb0b7c37e83dcfa3d2edb5786095825f7cfe2b40c10b43dd4fb7d8a5d912
+sha256(docs/falsification/JUDGE-R3-SPEC.md) = 752f466c2e4cc01f0cebd1553317fd45d3c173a95a656ba7390bae764c691b7b
+blake3(crates/invar-falsify/tests/judge_r3_test.rs) = 7a3da8166ce7dd4116dbaefc93d30cdff1faa8f0388f987de89e55b9af584243
+sha256(crates/invar-falsify/tests/judge_r3_test.rs) = 8b019b928d307eaf9bbc32d3050880b6b2ea5fd5a4445eeff8bdf17100133d1d
+blake3(crates/invar-falsify/tests/counterexample_test.rs) = 704c2d563a35d32f92aa3e9b2040ecefbf37de5504743d1047aefc7a2137d506
+sha256(crates/invar-falsify/tests/counterexample_test.rs) = 41c556229e4394ecf54a57ab9ae9362eb7f2ab983c8b7de223580bb8c29b95c0
+blake3(docs/falsification/schemastore-replay/MANIFEST.tsv) = 54d3858b9f26728c4682ea13275ae9ccde3e3ab636dcf2c5c68d529812f504c9
+sha256(docs/falsification/schemastore-replay/MANIFEST.tsv) = fae6f71702b70f80130601500587866ae88300cbd8bff6dba600a03cf17d53d1
+blake3(docs/falsification/schemastore-replay/label-free.py) = 3e8a74fad3e172dc17f7754d4890092207c925d6e8fc85614fde99612766ade9
+sha256(docs/falsification/schemastore-replay/label-free.py) = 737ea1464778facef4ea2bdc1a0ee5feb44dc283c99942fa846fda748c4ef594
