@@ -82,7 +82,8 @@ fn start_line(r: &serde_json::Value) -> u64 {
 /// sf_f01: a SARIF 2.1.0 log with the invar driver and the six rules.
 #[test]
 fn sf_f01_sarif_shape() {
-    let d = repo("f01", B1_002_PRE, B1_002_POST);
+    // JUDGE-WIDEN r0 amendment (D7): b1-002 swapped, the narrowing direction.
+    let d = repo("f01", B1_002_POST, B1_002_PRE);
     let (code, v) = sarif(&d);
     assert_eq!(code, 1);
     assert_eq!(v["version"], "2.1.0");
@@ -101,7 +102,8 @@ fn sf_f01_sarif_shape() {
 /// is exactly the text format's sentence. Kills SF-M1.
 #[test]
 fn sf_f02_result_message_is_the_text_sentence() {
-    let d = repo("f02", B1_002_PRE, B1_002_POST);
+    // JUDGE-WIDEN r0 amendment (D7): b1-002 swapped, the narrowing direction.
+    let d = repo("f02", B1_002_POST, B1_002_PRE);
     let (_, text) = judge(&d, "text");
     let sentence = text.lines().find(|l| l.trim_start().starts_with("retyped:")).expect("text sentence").trim().to_string();
     let (_, v) = sarif(&d);
@@ -116,11 +118,14 @@ fn sf_f02_result_message_is_the_text_sentence() {
 /// in the post file; the result is located at the POST line. Kills SF-M3.
 #[test]
 fn sf_f03_retype_located_at_post_line() {
+    // JUDGE-WIDEN r0 amendment (D7): `volume` (integer to integer|null) now
+    // only widens; the playbackRate tightening (line 56 at base, 90 at
+    // post) separates the two lines the same way.
     let d = repo("f03", B1_001_PRE, B1_001_POST);
     let (_, v) = sarif(&d);
-    let r = result_for(&v, "invar.judge.retyped", "volume");
-    let post = line_of(B1_001_POST, "volume");
-    assert_ne!(post, line_of(B1_001_PRE, "volume"), "fixture must separate the two lines");
+    let r = result_for(&v, "invar.judge.tightened", "playbackRate");
+    let post = line_of(B1_001_POST, "playbackRate");
+    assert_ne!(post, line_of(B1_001_PRE, "playbackRate"), "fixture must separate the two lines");
     assert_eq!(start_line(r), post);
 }
 
@@ -169,7 +174,8 @@ fn sf_f06_byte_identical_runs() {
 /// sf_f07: the stated unjudged list travels with the log.
 #[test]
 fn sf_f07_unjudged_constraints_in_run_properties() {
-    let d = repo("f07", B1_002_PRE, B1_002_POST);
+    // JUDGE-WIDEN r0 amendment (D7): b1-002 swapped, the narrowing direction.
+    let d = repo("f07", B1_002_POST, B1_002_PRE);
     let (_, v) = sarif(&d);
     let uj = v["runs"][0]["properties"]["unjudged_constraints"].as_array().expect("unjudged list");
     assert!(uj.iter().any(|x| x == "$ref"), "{v}");
@@ -179,10 +185,11 @@ fn sf_f07_unjudged_constraints_in_run_properties() {
 /// post line, rule title and the sentence; NOT EVALUATED is one ::warning.
 #[test]
 fn sf_f08_github_annotations() {
-    let d = repo("f08a", B1_002_PRE, B1_002_POST);
+    // JUDGE-WIDEN r0 amendment (D7): b1-002 swapped, the narrowing direction.
+    let d = repo("f08a", B1_002_POST, B1_002_PRE);
     let (code, out) = judge(&d, "github");
     assert_eq!(code, 1);
-    let line = line_of(B1_002_POST, "deviceMemory");
+    let line = line_of(B1_002_PRE, "deviceMemory");
     let want = format!("::error file=schemas/contract.json,line={line},title=invar.judge.retyped::retyped: deviceMemory");
     assert!(out.lines().any(|l| l.starts_with(&want)), "want prefix {want}\ngot:\n{out}");
 

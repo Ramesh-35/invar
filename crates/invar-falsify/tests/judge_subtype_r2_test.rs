@@ -179,17 +179,19 @@ fn r2_f08_bound_rejecting_an_old_enum_value_is_violated() {
     assert_eq!(v["witnesses"][0]["kind"], "tightened", "{v}");
 }
 
-/// r2_f09: the B1 corpus is unchanged by r2.
+/// r2_f09: the B1 corpus is unchanged by r2. JUDGE-WIDEN r0 amendment
+/// (D7): b1-001's four T to T|null retypes only widen (10 -> 6), and
+/// b1-002's only witness widens (VIOLATED -> HOLDS).
 #[test]
 fn r2_f09_b1_verdicts_unchanged() {
     let d = repo("f09a", B1_001_PRE, B1_001_POST);
     let (code, text) = judge(&d, "text");
     assert_eq!(code, 1);
-    assert!(text.starts_with("VIOLATED: schemas/contract.json breaks 10 promises"), "{text}");
+    assert!(text.starts_with("VIOLATED: schemas/contract.json breaks 6 promises"), "{text}");
     let d = repo("f09b", B1_002_PRE, B1_002_POST);
     let (code, text) = judge(&d, "text");
-    assert_eq!(code, 1);
-    assert!(text.starts_with("VIOLATED: schemas/contract.json breaks 1 promise "), "{text}");
+    assert_eq!(code, 0);
+    assert!(text.starts_with("HOLDS: schemas/contract.json"), "{text}");
 }
 
 /// r2_f10: on GitHub, an unjudged construct is one warning naming the reason.

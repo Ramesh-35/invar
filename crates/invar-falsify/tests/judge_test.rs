@@ -95,12 +95,12 @@ fn jf_f01_removal_is_violated_with_named_fields() {
     assert!(out.contains("removed"), "out: {out}");
 }
 
-/// jf_f02: the real b1-002 bytes. browser_context deviceMemory retyped
-/// integer|null -> number|null. VIOLATED, exit 1, both types stated.
-/// Kills JM-M2.
+/// jf_f02: the real b1-002 bytes, swapped: deviceMemory number|null ->
+/// integer|null (1.5 no longer validates). VIOLATED, exit 1, both types
+/// stated. Kills JM-M2. JUDGE-WIDEN r0 amendment (D7): b1-002 widens; judged here in the narrowing direction, pre and post swapped.
 #[test]
 fn jf_f02_retype_is_violated_with_both_types() {
-    let d = repo("f02", Some(B1_002_PRE), B1_002_POST);
+    let d = repo("f02", Some(B1_002_POST), B1_002_PRE);
     let (code, out, _err) = judge(&d, &[]);
     assert_eq!(code, 1, "out: {out}");
     assert!(out.contains("deviceMemory"), "out: {out}");
@@ -165,7 +165,8 @@ fn jf_f07_nested_removal_has_dotted_path() {
 /// unjudged_constraints, naming what r0 does not judge.
 #[test]
 fn json_format_carries_witnesses_and_unjudged_constraints() {
-    let d = repo("json", Some(B1_002_PRE), B1_002_POST);
+    // JUDGE-WIDEN r0 amendment (D7): swapped, the narrowing direction.
+    let d = repo("json", Some(B1_002_POST), B1_002_PRE);
     let (code, out, _err) = judge(&d, &["--format", "json"]);
     assert_eq!(code, 1, "out: {out}");
     let v: serde_json::Value = serde_json::from_str(&out).expect("valid json");
@@ -173,8 +174,8 @@ fn json_format_carries_witnesses_and_unjudged_constraints() {
     let w = &v["witnesses"][0];
     assert_eq!(w["path"], "deviceMemory");
     assert_eq!(w["kind"], "retyped");
-    assert!(w["pre_type"].as_str().unwrap().contains("integer"));
-    assert!(w["post_type"].as_str().unwrap().contains("number"));
+    assert!(w["pre_type"].as_str().unwrap().contains("number"));
+    assert!(w["post_type"].as_str().unwrap().contains("integer"));
     assert!(w["pre_line"].as_u64().unwrap() > 0);
     // JUDGE-SPEC r2 (2026-10-30): r1 of JUDGE-SUBTYPE judges enum, bounds,
     // required and pattern/format, so they leave the list; the r1 list is

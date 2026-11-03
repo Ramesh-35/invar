@@ -201,9 +201,10 @@ fn jc_f10_voice_states_structure_not_readers() {
     let d = three();
     let (_, out) = judge(&d, &["--contracts", "schemas/*.json", "--base", "main"]);
     assert!(out.contains("  removed: age was integer (line 1 at main), from an object that admits no other keys. Instances that carry it, valid before, are now rejected; keep the field, or version the change.\n"), "{out}");
-    let d2 = repo("f10b", &[("schemas/x.json", B1_002_PRE)], &[("schemas/x.json", Some(B1_002_POST))]);
+    // JUDGE-WIDEN r0 amendment (D7): b1-002 swapped, the narrowing direction.
+    let d2 = repo("f10b", &[("schemas/x.json", B1_002_POST)], &[("schemas/x.json", Some(B1_002_PRE))]);
     let (_, out2) = judge(&d2, &["--contract", "schemas/x.json", "--base", "main"]);
-    assert!(out2.contains("  retyped: deviceMemory was integer|null, is now number|null. Values of one type but not the other change between valid and invalid; restore the type, or version the change.\n"), "{out2}");
+    assert!(out2.contains("  retyped: deviceMemory was number|null, is now integer|null. Values outside integer|null, valid before, are now rejected; restore the type, or version the change.\n"), "{out2}");
     for o in [&out, &out2] {
         for word in ["Consumers", "Senders", "Payloads", "misread"] {
             assert!(!o.contains(word), "{word} in: {o}");
