@@ -62,6 +62,17 @@ inputs:
       to the step summary in plain sentences.
     required: false
     default: ''
+  judge_contracts:
+    description: >-
+      One or more git pathspec globs (for example 'schemas/**/*.json'),
+      separated by whitespace or newlines. Every matching contract this
+      change touches is judged against the base ref in one pass; unchanged
+      contracts are counted, not judged. VIOLATED fails (unless
+      fail_on_violation is 'false'); a new contract passes, stated; a
+      deleted or unparsable contract, an unreadable base, or a glob that
+      matches nothing fails.
+    required: false
+    default: ''
 
 outputs:
   exit_code:
@@ -79,6 +90,9 @@ outputs:
   judge_receipt:
     description: Path to the canonical judge receipt (when judge_contract is set).
     value: ${{ steps.judge.outputs.judge_receipt }}
+  judge_contracts_summary:
+    description: The one-line summary of a judge_contracts run (empty when judge_contracts is unset).
+    value: ${{ steps.judge_contracts.outputs.judge_contracts_summary }}
 
 runs:
   using: composite
@@ -157,6 +171,18 @@ runs:
         INVAR_FAIL_ON_VIOLATION: ${{ inputs.fail_on_violation }}
         INVAR_ACTION_PATH: ${{ github.action_path }}
       run: bash "$INVAR_ACTION_PATH/action/judge.sh"
+
+    - name: Judge every changed data contract
+      id: judge_contracts
+      if: inputs.judge_contracts != ''
+      shell: bash
+      env:
+        INVAR_BIN: ${{ steps.bin.outputs.bin }}
+        INVAR_JUDGE_CONTRACTS: ${{ inputs.judge_contracts }}
+        INVAR_BASE_REF: ${{ inputs.base_ref }}
+        INVAR_FAIL_ON_VIOLATION: ${{ inputs.fail_on_violation }}
+        INVAR_ACTION_PATH: ${{ github.action_path }}
+      run: bash "$INVAR_ACTION_PATH/action/judge_contracts.sh"
 
     - name: Gate
       if: inputs.check == 'true'

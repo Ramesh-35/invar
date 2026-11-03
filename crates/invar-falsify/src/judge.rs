@@ -56,14 +56,12 @@ pub fn run(root: &Path, contract: &str, base: &str, format: &str, receipt_out: O
         Ok(b) => b,
         Err(e) => anyhow::bail!("reading {contract} from the working tree: {e}"),
     };
-    let post_bytes = String::from_utf8_lossy(&post_raw).into_owned();
     let read = base_bytes(root, base, contract)?;
     let base_b3 = match &read {
         BaseRead::Found(b) => Some(blake3::hash(b).to_hex().to_string()),
         _ => None,
     };
-    let (verdict, reason, witnesses, pre_text, stated) = evaluate(read, &post_bytes);
-    let _ = pre_text; // pre bytes are consumed by line lookup in evaluate
+    let One { verdict, reason, witnesses, stated, .. } = judge_one(contract, read, Some(&post_raw));
     let body = body_json(verdict, reason, contract, base, &witnesses, &stated);
     match format {
         "json" => println!("{}", serde_json::to_string_pretty(&body).unwrap_or_default()),
@@ -87,6 +85,33 @@ pub fn run(root: &Path, contract: &str, base: &str, format: &str, receipt_out: O
         "VIOLATED" => 1,
         _ => 4,
     })
+}
+
+/// One contract's judgment, as every surface renders it.
+struct One {
+    contract: String,
+    verdict: &'static str,
+    reason: Option<&'static str>,
+    witnesses: Vec<Witness>,
+    stated: Stated,
+}
+
+/// Judge one contract from its base read and its working-tree bytes
+/// (None: the file is gone from the working tree).
+fn judge_one(contract: &str, read: BaseRead, post_raw: Option<&[u8]>) -> One {
+    let (verdict, reason, witnesses, stated) = match (post_raw, read) {
+        // JUDGE-CONTRACTS M-D3: deleting a contract withdraws everything
+        // it promised; stated, never a pass.
+        (None, BaseRead::Found(_)) => ("NOT EVALUATED", Some("contract_deleted"), Vec::new(), Stated::default()),
+        (None, BaseRead::NoRef) => ("NOT EVALUATED", Some("unreadable_base"), Vec::new(), Stated::default()),
+        (None, BaseRead::NoFile) => ("NOT EVALUATED", Some("unparsable"), Vec::new(), Stated::default()),
+        (Some(raw), read) => {
+            let post_bytes = String::from_utf8_lossy(raw).into_owned();
+            let (v, r, w, _pre, st) = evaluate(read, &post_bytes);
+            (v, r, w, st)
+        }
+    };
+    One { contract: contract.to_string(), verdict, reason, witnesses, stated }
 }
 
 /// The judgment proper: base contract (as read from git) against the
@@ -671,7 +696,7 @@ fn witness_sentence(x: &Witness, base: &str) -> String {
         "removed" => {
             let at = x.pre_line.map(|l| format!(" (line {l} at {base})")).unwrap_or_default();
             format!(
-                "removed: {} was {}{at}. Consumers reading this field will break; keep the field, or ship this as a new major version and migrate them.",
+                "removed: {} was {}{at}, from an object that admits no other keys. Instances that carry it, valid before, are now rejected; keep the field, or version the change.",
                 x.path, x.pre_type
             )
         }
@@ -683,13 +708,13 @@ fn witness_sentence(x: &Witness, base: &str) -> String {
                     let (a, b) = (parse(pre), parse(post));
                     let lost: Vec<String> = a.iter().filter(|v| !b.contains(v)).map(|v| v.to_string()).collect();
                     format!(
-                        "narrowed: {} no longer accepts {}. Senders using a removed value will be rejected; keep the value, or version the change.",
+                        "narrowed: {} no longer accepts {}. Instances using them, valid before, are now rejected; keep the values, or version the change.",
                         x.path,
                         lost.join(", ")
                     )
                 }
                 None => format!(
-                    "narrowed: {} now accepts only {post}. Values outside that set, valid before, will be rejected; drop the enum, or version the change.",
+                    "narrowed: {} now accepts only {post}. Values outside that set, valid before, are now rejected; drop the enum, or version the change.",
                     x.path
                 ),
             }
@@ -708,7 +733,7 @@ fn witness_sentence(x: &Witness, base: &str) -> String {
             )
         }
         "escalated" => format!(
-            "escalated: {} is now required. Payloads that omit it, valid before, will be rejected; keep it optional, or version the change.",
+            "escalated: {} is now required. Instances that omit it, valid before, are now rejected; keep it optional, or version the change.",
             x.path
         ),
         "constraint_changed" => format!(
@@ -721,7 +746,7 @@ fn witness_sentence(x: &Witness, base: &str) -> String {
         _ => {
             let to = x.post_type.as_deref().unwrap_or("unspecified");
             format!(
-                "retyped: {} was {}, is now {to}. Consumers parsing the old type can misread values; restore the type, or version the change.",
+                "retyped: {} was {}, is now {to}. Values of one type but not the other change between valid and invalid; restore the type, or version the change.",
                 x.path, x.pre_type
             )
         }
@@ -736,6 +761,9 @@ fn not_evaluated_sentence(reason: Option<&str>, contract: &str, base: &str) -> S
         ),
         Some("unjudged_construct") => format!(
             "NOT EVALUATED (unjudged_construct): {contract} changed only where this judge does not look (anyOf, oneOf, allOf or $ref). Nothing here was judged a break or a pass; review those fields by hand."
+        ),
+        Some("contract_deleted") => format!(
+            "NOT EVALUATED (contract_deleted): {contract} exists at {base} and this change deletes it; everything it promised is withdrawn. Restore it, or version the change."
         ),
         Some("unreadable_base") => format!(
             "NOT EVALUATED (unreadable_base): the ref {base} cannot be read in this repository. Fetch it, or pass --base a ref that exists."
@@ -794,8 +822,24 @@ const RULES: [(&str, &str); 6] = [
 /// absolute paths: byte-stable. NOT EVALUATED is a failed execution with
 /// a warning notification, never an empty log that reads as clean (S-D2).
 fn render_sarif(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w: &[Witness], st: &Stated) -> Value {
-    let results: Vec<Value> = w
-        .iter()
+    let results = sarif_results(contract, base, w);
+    let notifications: Vec<Value> = sarif_notification(verdict, reason, contract, base).into_iter().collect();
+    sarif_log(
+        results,
+        notifications,
+        verdict != "NOT EVALUATED",
+        json!({
+            "unjudged_constraints": UNJUDGED,
+            "not_evaluated_paths": st.not_evaluated,
+            "notes": st.notes,
+            "verdict": verdict,
+            "base": base,
+        }),
+    )
+}
+
+fn sarif_results(contract: &str, base: &str, w: &[Witness]) -> Vec<Value> {
+    w.iter()
         .map(|x| {
             json!({
                 "ruleId": format!("invar.judge.{}", x.kind),
@@ -809,15 +853,21 @@ fn render_sarif(verdict: &str, reason: Option<&str>, contract: &str, base: &str,
                 }],
             })
         })
-        .collect();
-    let notifications: Vec<Value> = match verdict {
-        "HOLDS" | "VIOLATED" => Vec::new(),
-        _ => vec![json!({
+        .collect()
+}
+
+fn sarif_notification(verdict: &str, reason: Option<&str>, contract: &str, base: &str) -> Option<Value> {
+    match verdict {
+        "HOLDS" | "VIOLATED" => None,
+        _ => Some(json!({
             "level": "warning",
             "descriptor": { "id": reason.unwrap_or("unparsable") },
             "message": { "text": not_evaluated_sentence(reason, contract, base) },
-        })],
-    };
+        })),
+    }
+}
+
+fn sarif_log(results: Vec<Value>, notifications: Vec<Value>, success: bool, properties: Value) -> Value {
     let rules: Vec<Value> = RULES
         .iter()
         .map(|(k, d)| json!({ "id": format!("invar.judge.{k}"), "shortDescription": { "text": d } }))
@@ -833,17 +883,11 @@ fn render_sarif(verdict: &str, reason: Option<&str>, contract: &str, base: &str,
                 "rules": rules,
             }},
             "invocations": [{
-                "executionSuccessful": verdict != "NOT EVALUATED",
+                "executionSuccessful": success,
                 "toolExecutionNotifications": notifications,
             }],
             "results": results,
-            "properties": {
-                "unjudged_constraints": UNJUDGED,
-                "not_evaluated_paths": st.not_evaluated,
-                "notes": st.notes,
-                "verdict": verdict,
-                "base": base,
-            },
+            "properties": properties,
         }],
     })
 }
@@ -880,4 +924,147 @@ fn render_github(verdict: &str, reason: Option<&str>, contract: &str, base: &str
             gh_data(&not_evaluated_sentence(reason, contract, base))
         ),
     }
+}
+
+/// JUDGE-CONTRACTS r0 (docs/falsification/JUDGE-CONTRACTS-SPEC.md): judge
+/// every contract a change touches, in one pass. Selection is git's own:
+/// pathspec globs (M-D1), files that differ between the base tree and the
+/// working tree plus untracked files git does not ignore (M-D2). A glob
+/// set matching nothing at either side is an error (M-D4), never a pass.
+pub fn run_many(root: &Path, globs: &[String], base: &str, format: &str) -> Result<i32> {
+    let specs: Vec<String> = globs.iter().map(|g| format!(":(glob){g}")).collect();
+    let base_ok = git_ok(root, &["rev-parse", "--verify", "--quiet", &format!("{base}^{{commit}}")])?;
+
+    // Every file the globs match, at the base and in the working tree.
+    let mut matched: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
+    if base_ok {
+        // ls-tree has no glob pathspec magic; a diff from the empty tree
+        // lists the base tree through the same matcher as every other step.
+        let empty = empty_tree(root)?;
+        matched.extend(git_paths(root, &["diff", "-z", "--name-only", "--no-renames", &empty, base, "--"], &specs)?);
+    }
+    let here = git_paths(root, &["ls-files", "-z", "--cached", "--others", "--exclude-standard", "--"], &specs)?;
+    matched.extend(here.iter().filter(|p| root.join(p).is_file()).cloned());
+    if matched.is_empty() {
+        anyhow::bail!(
+            "no file matches {} at {base} or in the working tree; check the glob (a glob that matches nothing is never a pass)",
+            globs.join(" ")
+        );
+    }
+
+    // The changed ones (M-D2). Without a readable base nothing can be
+    // diffed: every matching contract is judged, and each says why.
+    let mut changed: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
+    if base_ok {
+        changed.extend(git_paths(root, &["diff", "-z", "--name-only", "--no-renames", base, "--"], &specs)?);
+        changed.extend(git_paths(root, &["ls-files", "-z", "--others", "--exclude-standard", "--"], &specs)?);
+    } else {
+        changed.extend(matched.iter().cloned());
+    }
+    let changed: Vec<String> = changed.into_iter().filter(|p| matched.contains(p)).collect();
+    let unchanged = matched.len() - changed.len();
+
+    let mut ones = Vec::new();
+    for c in &changed {
+        let post = std::fs::read(root.join(c)).ok();
+        let read = base_bytes(root, base, c)?;
+        ones.push(judge_one(c, read, post.as_deref()));
+    }
+
+    let count = |f: &dyn Fn(&One) -> bool| ones.iter().filter(|o| f(o)).count();
+    let violated = count(&|o| o.verdict == "VIOLATED");
+    let holds = count(&|o| o.verdict == "HOLDS");
+    let not_evaluated = count(&|o| o.verdict == "NOT EVALUATED");
+    let new = count(&|o| o.reason == Some("new_contract"));
+
+    match format {
+        "json" => {
+            let body = json!({
+                "base": base,
+                "globs": globs,
+                "contracts": ones.iter().map(|o| body_json(o.verdict, o.reason, &o.contract, base, &o.witnesses, &o.stated)).collect::<Vec<_>>(),
+                "summary": { "violated": violated, "holds": holds, "not_evaluated": not_evaluated, "new": new, "unchanged": unchanged },
+            });
+            println!("{}", serde_json::to_string_pretty(&body).unwrap_or_default());
+        }
+        "sarif" => {
+            let results = ones.iter().flat_map(|o| sarif_results(&o.contract, base, &o.witnesses)).collect();
+            let notes: Vec<Value> = ones.iter().filter_map(|o| sarif_notification(o.verdict, o.reason, &o.contract, base)).collect();
+            let props = json!({
+                "unjudged_constraints": UNJUDGED,
+                "base": base,
+                "globs": globs,
+                "unchanged": unchanged,
+                "contracts": ones.iter().map(|o| json!({
+                    "contract": o.contract,
+                    "verdict": o.verdict,
+                    "reason": o.reason,
+                    "not_evaluated_paths": o.stated.not_evaluated,
+                    "notes": o.stated.notes,
+                })).collect::<Vec<_>>(),
+            });
+            println!("{}", serde_json::to_string_pretty(&sarif_log(results, notes, not_evaluated == 0, props)).unwrap_or_default());
+        }
+        "github" => {
+            for o in &ones {
+                print!("{}", render_github(o.verdict, o.reason, &o.contract, base, &o.witnesses));
+            }
+        }
+        _ => {
+            for o in &ones {
+                print!("{}", render_text(o.verdict, o.reason, &o.contract, base, &o.witnesses, &o.stated));
+            }
+            println!(
+                "judged {} changed contracts under {} at {base}: {violated} VIOLATED, {holds} HOLDS, {not_evaluated} NOT EVALUATED ({new} new); {unchanged} unchanged, not judged.",
+                ones.len(),
+                globs.join(" ")
+            );
+        }
+    }
+
+    // M-D5, with Amendment A: the worst verdict decides; a new contract
+    // promised nothing before and never moves the exit code.
+    Ok(if violated > 0 {
+        1
+    } else if ones.iter().any(|o| o.verdict == "NOT EVALUATED" && o.reason != Some("new_contract")) {
+        4
+    } else {
+        0
+    })
+}
+
+/// The empty tree's id in this repository's hash (SHA-1 or SHA-256).
+fn empty_tree(root: &Path) -> Result<String> {
+    use std::io::Write;
+    let mut child = Command::new("git")
+        .args(["hash-object", "-t", "tree", "--stdin"])
+        .current_dir(root)
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .spawn()
+        .context("running git hash-object")?;
+    if let Some(mut i) = child.stdin.take() {
+        i.write_all(b"").context("writing to git hash-object")?;
+    }
+    let o = child.wait_with_output().context("running git hash-object")?;
+    let id = String::from_utf8_lossy(&o.stdout).trim().to_string();
+    if !o.status.success() || id.is_empty() {
+        anyhow::bail!("git hash-object could not name the empty tree");
+    }
+    Ok(id)
+}
+
+fn git_ok(root: &Path, args: &[&str]) -> Result<bool> {
+    let o = Command::new("git").args(args).current_dir(root).output().context("running git")?;
+    Ok(o.status.success())
+}
+
+/// Run git with NUL-separated path output; any failure is an error, never
+/// an empty list that would read as "nothing changed".
+fn git_paths(root: &Path, args: &[&str], specs: &[String]) -> Result<Vec<String>> {
+    let o = Command::new("git").args(args).args(specs).current_dir(root).output().context("running git")?;
+    if !o.status.success() {
+        anyhow::bail!("git {} failed: {}", args.first().unwrap_or(&""), String::from_utf8_lossy(&o.stderr).trim());
+    }
+    Ok(o.stdout.split(|b| *b == 0).filter(|p| !p.is_empty()).map(|p| String::from_utf8_lossy(p).into_owned()).collect())
 }

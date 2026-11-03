@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -23,7 +23,10 @@ EOF
 run_one() { # name old new killer_test [test_target]
   name=$1; old=$2; new=$3; killer=$4; target=${5:-judge_test}
   cp "$J.orig" "$J"
-  mutate "$old" "$new"
+  # An anchor that no longer matches mutates nothing: INVALID, never a verdict.
+  if ! mutate "$old" "$new"; then
+    echo "$name: INVALID (anchor does not match exactly once)"; fail=$((fail+1)); return
+  fi
   # A mutant that does not build proves nothing: it is INVALID, never KILLED.
   if ! cargo build -q 2>/dev/null; then
     echo "$name: INVALID (mutant does not compile)"; fail=$((fail+1)); return
@@ -69,7 +72,9 @@ run_one JS-M4 'if pv.get(kw) != qv.get(kw) && qv.get(kw).is_some() {' 'if false 
 # SF-M1 results dropped from the SARIF log
 run_one SF-M1 '"results": results,' '"results": Vec::<Value>::new(),' sf_f02_result_message_is_the_text_sentence judge_sarif_test
 # SF-M2 NOT EVALUATED emitted as a successful run
-run_one SF-M2 '"executionSuccessful": verdict != "NOT EVALUATED",' '"executionSuccessful": true,' sf_f05_not_evaluated_is_a_failed_execution judge_sarif_test
+run_one SF-M2 'notifications,
+        verdict != "NOT EVALUATED",' 'notifications,
+        true,' sf_f05_not_evaluated_is_a_failed_execution judge_sarif_test
 # SF-M3 base-file line used where the post-file line belongs
 run_one SF-M3 'x.post_line.or(x.anchor_line).unwrap_or(1)' 'x.pre_line.unwrap_or(1)' sf_f03_retype_located_at_post_line judge_sarif_test
 
@@ -97,6 +102,21 @@ run_one R2-M4 '("NOT EVALUATED", Some("unjudged_construct"))' '("HOLDS", None)' 
 run_one R2-M5 'Some(roots) => deref(&roots[side], v, active),' 'Some(_roots) => { let _ = active; (v.clone(), Vec::new()) },' r2_f12_tightened_defs_target_is_violated judge_subtype_r2_test
 # R2-M6 implied-type check dropped (Amendment B)
 run_one R2-M6 'if type_str(pv) == "unspecified" && type_made_explicit(pv, qv) {' 'if false && type_str(pv) == "unspecified" && type_made_explicit(pv, qv) {' r2_f15_implied_type_made_explicit_is_a_note judge_subtype_r2_test
+# JUDGE-CONTRACTS r0 (docs/falsification/JUDGE-CONTRACTS-SPEC.md)
+# JC-M1 unchanged-file filter dropped: every matching contract judged
+run_one JC-M1 'let changed: Vec<String> = changed.into_iter().filter(|p| matched.contains(p)).collect();' 'let changed: Vec<String> = { let _ = changed; matched.iter().cloned().collect() };' jc_f01_three_schemas_only_changed_ones_judged judge_contracts_test
+# JC-M2 aggregate takes the last verdict, not the worst
+run_one JC-M2 'Ok(if violated > 0 {' 'Ok(if let Some(o) = ones.last() { match o.verdict { "VIOLATED" => 1, "HOLDS" => 0, _ => 4 } } else if violated > 0 {' jc_f08_violation_dominates_and_both_are_stated judge_contracts_test
+# JC-M3 a glob matching nothing passes
+run_one JC-M3 'if matched.is_empty() {' 'if false && matched.is_empty() {' jc_f05_glob_matching_nothing_is_an_error judge_contracts_test
+# JC-M4 untracked files ignored
+run_one JC-M4 'changed.extend(git_paths(root, &["ls-files", "-z", "--others", "--exclude-standard", "--"], &specs)?);' '' jc_f07_untracked_schema_is_judged judge_contracts_test
+# JC-M5 a new contract moves the exit code (Amendment A)
+run_one JC-M5 'o.verdict == "NOT EVALUATED" && o.reason != Some("new_contract")' 'o.verdict == "NOT EVALUATED"' jc_f03_added_schema_is_new_contract judge_contracts_test
+# JC-M6 a deleted contract passes (Amendment A)
+run_one JC-M6 '(None, BaseRead::Found(_)) => ("NOT EVALUATED", Some("contract_deleted"),' '(None, BaseRead::Found(_)) => ("HOLDS", None,' jc_f04_deleted_schema_is_not_evaluated judge_contracts_test
+# JC-M7 D6 reverted: the removed sentence guesses at readers again (Amendment A)
+run_one JC-M7 'Instances that carry it, valid before, are now rejected; keep the field, or version the change.' 'Consumers reading this field will break; keep the field, or ship this as a new major version and migrate them.' jc_f10_voice_states_structure_not_readers judge_contracts_test
 cp "$J.orig" "$J"; rm "$J.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"

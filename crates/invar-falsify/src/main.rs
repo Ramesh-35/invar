@@ -391,7 +391,11 @@ struct HookArgs {
 struct JudgeArgs {
     /// Path of the declared contract file in this repository.
     #[arg(long)]
-    contract: String,
+    contract: Option<String>,
+    /// JUDGE-CONTRACTS r0: a git pathspec glob; every matching contract
+    /// this change touches is judged in one pass. Repeatable.
+    #[arg(long)]
+    contracts: Vec<String>,
     /// Git ref to read the PRE contract from: the base tree, never the
     /// working tree (the SIB-3 trust discipline).
     #[arg(long, default_value = "origin/main")]
@@ -1332,7 +1336,17 @@ fn cmd_lock(args: LockArgs) -> Result<i32> {
 /// JUDGE-1: the declared-data-contract verdict (JUDGE-SPEC r1).
 fn cmd_judge(args: JudgeArgs) -> Result<i32> {
     let root = std::env::current_dir().context("reading the current directory")?;
-    invar_falsify::judge::run(&root, &args.contract, &args.base, &args.format, args.receipt.as_deref())
+    match (args.contract, args.contracts.is_empty()) {
+        (Some(_), false) => anyhow::bail!("--contract and --contracts cannot be combined: judge one contract, or every contract a glob selects"),
+        (Some(c), true) => invar_falsify::judge::run(&root, &c, &args.base, &args.format, args.receipt.as_deref()),
+        (None, false) => {
+            if args.receipt.is_some() {
+                anyhow::bail!("--receipt with --contracts is not supported in r0: receipts are written one contract at a time (use --contract)");
+            }
+            invar_falsify::judge::run_many(&root, &args.contracts, &args.base, &args.format)
+        }
+        (None, true) => anyhow::bail!("pass --contract <path> or --contracts '<glob>'"),
+    }
 }
 
 fn cmd_hook(args: HookArgs) -> Result<i32> {

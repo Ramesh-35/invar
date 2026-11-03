@@ -169,9 +169,9 @@ change (case b1-001 of our pinned corpus), excerpted:
 VIOLATED: schemas/media_player.json breaks 10 promises made at origin/main.
   tightened: currentTime maximum lowered from 9007199254740991 to 2147483647.
   Values valid before can now be rejected; restore the bound, or version the change.
-  removed: percentProgress was integer|null (line 47 at origin/main). Consumers
-  reading this field will break; keep the field, or ship this as a new major
-  version and migrate them.
+  removed: percentProgress was integer|null (line 47 at origin/main), from an
+  object that admits no other keys. Instances that carry it, valid before, are
+  now rejected; keep the field, or version the change.
   ...
 judged: property presence and type, enum, numeric, length and item-count
 bounds, required, pattern and format, recursively. not judged: $ref, allOf,
@@ -193,6 +193,24 @@ was promised before. An unparsable contract or an unreadable base ref
 fails: a lost baseline is never a pass. `--format json` carries the same
 facts for machines, including `unjudged_constraints`, and `--receipt`
 writes the canonical record.
+
+A repository with many contracts gives a glob instead. Every matching
+contract the change touches is judged in one pass; unchanged ones are
+counted, not judged:
+
+```yaml
+    judge_contracts: 'schemas/**/*.json'
+```
+
+```sh
+invar judge --contracts 'schemas/**/*.json' --base origin/main
+```
+
+Each file keeps its own verdict and its own annotations. A deleted
+contract is NOT EVALUATED (`contract_deleted`) and fails the job:
+everything it promised is withdrawn. A glob that matches nothing is an
+error, never a pass. The sentences state what changed in the contract and
+what that does to validity, never a guess about who reads it.
 
 The judged set is stated and narrow, on purpose: property presence and
 `type`, enum narrowing, tightened bounds, newly required fields, and
