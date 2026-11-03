@@ -52,6 +52,15 @@ honest: HN Show HN blocked by a new-account restriction (moderators
 emailed), first r/rust post held by moderation (modmail sent);
 distribution is accreting via direct channels during the window.
 
+B2 outreach, recorded 2026-11-03: v0.2.5 adds `judge_contracts` (every
+changed schema, one glob, one pass); live proof on
+Ramesh-35/invar-demo-api PR #4 (10 annotations on the narrowed schema
+only). Proposed to SchemaStore as an optional, non-blocking check:
+SchemaStore/schemastore#6587, with the frozen replay of their own
+2026-05..11 history. An issue is outreach, not adoption: it does not
+count toward the kill rule until a repository runs the judge in its PR
+pipeline.
+
 B2 definition, ratified 2026-10-28:
 - Surface: a single stateless `invar judge` subcommand, run in CI against
   the base branch exactly as SIB-3 reads trust (never from the PR tree).
