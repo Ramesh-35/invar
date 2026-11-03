@@ -1,0 +1,17 @@
+# COUNTEREXAMPLE r0 freeze record, written before any implementation.
+# Baseline: v0.2.6 (7eee620). Ruling C-D1 ratified 2026-11-03.
+# Measured before implementation: counterexample_test 0 of 12 pass.
+# Expected instances checked independently at freeze:
+#   python3 counterexample-check.py fixtures -> 11 of 11 confirmed by jsonschema 4.26.0
+#   (each valid at base, invalid at post).
+# cx_f12 premise checked the same way: {"age":0} is valid at BOTH refs, so the
+#   judge's 'removed' claim there is false (patternProperties admits the key);
+#   r0 states it as unconfirmed. A judge ruling on patternProperties is open.
+# Pre-registered (replay over the 20 real SchemaStore commits): every printed
+#   counterexample passes the independent check; coverage reported as measured.
+blake3(docs/falsification/COUNTEREXAMPLE-SPEC.md) = 064f742558244983fe3fdaf2cdd718800959944ace2189cf60c1cd068c42f802
+sha256(docs/falsification/COUNTEREXAMPLE-SPEC.md) = a0c1183c1e930f3d2215ec1b7cb1944d7c840897c27842a4b4236d7c8735da3c
+blake3(crates/invar-falsify/tests/counterexample_test.rs) = 27243e18469cb5e453766a98220a99a9751b204a47906377bf37f6d8cc63b4eb
+sha256(crates/invar-falsify/tests/counterexample_test.rs) = 2c4bc86d66ae81dcd82010dd26729ee7adf9a6b453d597db5d2a19eede9a86c5
+blake3(docs/falsification/counterexample-check.py) = 8260589ef206dc75ee2657e8ce738ad915a0e1d14380e425e2861889e2c83cc9
+sha256(docs/falsification/counterexample-check.py) = ede5cec3a343db120966f8220793512e9e93af0243e4625fc8b1e7a0d1d96919
