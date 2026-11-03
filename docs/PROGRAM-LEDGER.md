@@ -69,6 +69,13 @@ widening is a stated note and PR #4 carries 6 annotations, every one a
 narrowing. SchemaStore#6587 is unaffected: none of its 20 commits is a
 widening.
 
+Correction, recorded 2026-11-03 (COUNTEREXAMPLE r0, v0.2.7): the
+counterexample engine and hand checks with Python jsonschema show 3 of
+the 20 commits posted in #6587 are not breaks (4836277f2 pyproject,
+0091e807a partial-poe, b514ab55c mkdocs); 17 are confirmed. Posted
+publicly on the issue the same day:
+https://github.com/SchemaStore/schemastore/issues/6587#issuecomment-6602826522
+
 B2 definition, ratified 2026-10-28:
 - Surface: a single stateless `invar judge` subcommand, run in CI against
   the base branch exactly as SIB-3 reads trust (never from the PR tree).
