@@ -18,3 +18,8 @@ blake3(crates/invar-falsify/tests/judge_subtype_r2_test.rs) = 77f5b0aa3052bd79e7
 sha256(crates/invar-falsify/tests/judge_subtype_r2_test.rs) = f2dcf10b885af946f1aeb3b96516d0736551319161cb09516b0715d75e3fb668
 blake3(crates/invar-falsify/tests/judge_contracts_test.rs) = 5d72c2ca90fb9ba4fe62f8ccec1ba0e4eb01ddcb7ddf9835e1ea66a7b7ab75d1
 sha256(crates/invar-falsify/tests/judge_contracts_test.rs) = fc559e0aa3283e79d66a0f37549ef2a897e908ef7dbc05531a4271ec010ec4ff
+# Amendment A (2026-11-03, during implementation): receipt fixtures swapped; spec text appended.
+blake3(docs/falsification/JUDGE-WIDEN-SPEC.md) = f0e9df4040aa9decb2cbcc6cdc9a1aea46d584b005a61635a4b3961b0ae79664
+sha256(docs/falsification/JUDGE-WIDEN-SPEC.md) = aca284a0dd67a7dfcba9dc4b7480ca76f2fe87a89c89949472ee8563a9742c19
+blake3(crates/invar-falsify/tests/judge_receipt_test.rs) = f4f60d54d70d5033c0b27f10b9045724dc4ce13ec8f879c6116814a8b262b06f
+sha256(crates/invar-falsify/tests/judge_receipt_test.rs) = 612dacf675e44ad532dbb5ac146e620e080023ef07506d929de975bb21e95432

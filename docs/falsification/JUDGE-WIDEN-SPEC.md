@@ -90,3 +90,15 @@ are in JUDGE-WIDEN-SPEC.frozen.
 - W-M2 `integer` not contained in `number`: w_f02.
 - W-M3 any shared type counts as widening: w_f10.
 - W-M4 widened note dropped (silent HOLDS): w_f01.
+
+## Amendment A (stated during implementation, 2026-11-03)
+
+The freeze missed one fixture file. judge_receipt_test.rs reads the
+b1-002 bytes under the names PRE and POST, which the survey (a search for
+`B1_002`) did not match; its ten fixtures expect VIOLATED, which D7
+reverses. Their purpose is receipt binding and reproduction, not the
+direction, so the same real bytes are swapped (narrowing direction),
+exactly as for the seven fixtures above. Measured: the swapped receipt
+fixtures pass 10 of 10 on the pre-D7 engine and on the D7 engine. The
+survey for this amendment searched every test file for `b1-00` and found
+no further use. New hashes appended to JUDGE-WIDEN-SPEC.frozen.

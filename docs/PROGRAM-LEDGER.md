@@ -61,6 +61,14 @@ SchemaStore/schemastore#6587, with the frozen replay of their own
 count toward the kill rule until a repository runs the judge in its PR
 pipeline.
 
+Correction, recorded 2026-11-03 (D7, JUDGE-WIDEN r0, v0.2.6): the entry
+above said PR #4 shows 10 annotations. Four of them (`loop`, `muted`,
+`playbackRate`, `volume`, each `T` to `T|null`) only widened: no instance
+valid before is rejected, so they were not breaks. From v0.2.6 a
+widening is a stated note and PR #4 carries 6 annotations, every one a
+narrowing. SchemaStore#6587 is unaffected: none of its 20 commits is a
+widening.
+
 B2 definition, ratified 2026-10-28:
 - Surface: a single stateless `invar judge` subcommand, run in CI against
   the base branch exactly as SIB-3 reads trust (never from the PR tree).

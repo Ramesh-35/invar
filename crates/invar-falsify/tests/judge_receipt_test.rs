@@ -13,8 +13,10 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-const PRE: &str = include_str!("fixtures/judge/b1-002-pre.json");
-const POST: &str = include_str!("fixtures/judge/b1-002-post.json");
+// JUDGE-WIDEN r0 Amendment A (D7): b1-002 widens, so a receipt needs the
+// narrowing direction: the same real bytes, pre and post swapped.
+const PRE: &str = include_str!("fixtures/judge/b1-002-post.json");
+const POST: &str = include_str!("fixtures/judge/b1-002-pre.json");
 const C: &str = "schemas/contract.json";
 
 fn ws(tag: &str) -> PathBuf {

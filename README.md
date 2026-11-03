@@ -166,7 +166,7 @@ speaks in sentences. On the real Snowplow media_player 1-0-0 to 2-0-0
 change (case b1-001 of our pinned corpus), excerpted:
 
 ```
-VIOLATED: schemas/media_player.json breaks 10 promises made at origin/main.
+VIOLATED: schemas/media_player.json breaks 6 promises made at origin/main.
   tightened: currentTime maximum lowered from 9007199254740991 to 2147483647.
   Values valid before can now be rejected; restore the bound, or version the change.
   removed: percentProgress was integer|null (line 47 at origin/main), from an
@@ -213,7 +213,8 @@ error, never a pass. The sentences state what changed in the contract and
 what that does to validity, never a guess about who reads it.
 
 The judged set is stated and narrow, on purpose: property presence and
-`type`, enum narrowing, tightened bounds, newly required fields, and
+`type` (a type change that keeps every value valid, such as `boolean` to
+`boolean|null`, is a stated note, not a break), enum narrowing, tightened bounds, newly required fields, and
 changes to `pattern` or `format` (flagged as changed; whether a regex
 change narrows what is accepted is not decided, and the verdict says so),
 recursed with dotted-path witnesses. Not judged yet, and printed in every

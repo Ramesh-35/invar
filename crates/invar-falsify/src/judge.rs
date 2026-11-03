@@ -371,6 +371,10 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
                     // D5 (r2 Amendment B): the type its own keywords already
                     // implied, now written down: a stated note, not a break.
                     out.push(stated_witness(&dotted, "type_explicit", qv));
+                } else if type_str(pv) != type_str(qv) && widens(pv, qv) {
+                    // D7 (JUDGE-WIDEN r0): every value valid before is still
+                    // valid; a stated note, never a break.
+                    out.push(Witness { kind: "retyped_widened", post_type: Some(type_str(qv)), ..stated_witness(&dotted, "retyped_widened", pv) });
                 } else if type_str(pv) != type_str(qv) {
                     out.push(Witness {
                         path: dotted.clone(),
@@ -470,6 +474,21 @@ fn type_made_explicit(pre: &Value, post: &Value) -> bool {
     !implied.is_empty() && declared.iter().all(|t| implied.contains(t))
 }
 
+/// D7 (JUDGE-WIDEN r0): does `post` accept every type `pre` declared?
+/// `integer` is contained in `number`; no `type` at post accepts all. A
+/// field with no `type` at base is not a widening (D5 or VIOLATED decide).
+fn widens(pre: &Value, post: &Value) -> bool {
+    let (a, b) = (type_str(pre), type_str(post));
+    if a == "unspecified" {
+        return false;
+    }
+    if b == "unspecified" {
+        return true;
+    }
+    let b: Vec<&str> = b.split('|').collect();
+    a.split('|').all(|t| b.contains(&t) || (t == "integer" && b.contains(&"number")))
+}
+
 /// D2 (r2): an object that admits no other keys.
 fn is_closed(v: &Value) -> bool {
     v.get("additionalProperties") == Some(&Value::Bool(false)) || v.get("unevaluatedProperties") == Some(&Value::Bool(false))
@@ -505,6 +524,15 @@ fn take_stated(w: &mut Vec<Witness>) -> Stated {
     w.retain(|x| match x.kind {
         "not_evaluated" => {
             st.not_evaluated.push(x.path.clone());
+            false
+        }
+        "retyped_widened" => {
+            st.notes.push(format!(
+                "retyped (widened): {} was {}, is now {}; every value valid before is still valid.",
+                x.path,
+                x.pre_type,
+                x.post_type.as_deref().unwrap_or("unspecified")
+            ));
             false
         }
         "type_explicit" => {
@@ -746,7 +774,7 @@ fn witness_sentence(x: &Witness, base: &str) -> String {
         _ => {
             let to = x.post_type.as_deref().unwrap_or("unspecified");
             format!(
-                "retyped: {} was {}, is now {to}. Values of one type but not the other change between valid and invalid; restore the type, or version the change.",
+                "retyped: {} was {}, is now {to}. Values outside {to}, valid before, are now rejected; restore the type, or version the change.",
                 x.path, x.pre_type
             )
         }

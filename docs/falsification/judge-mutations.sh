@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -117,6 +117,17 @@ run_one JC-M5 'o.verdict == "NOT EVALUATED" && o.reason != Some("new_contract")'
 run_one JC-M6 '(None, BaseRead::Found(_)) => ("NOT EVALUATED", Some("contract_deleted"),' '(None, BaseRead::Found(_)) => ("HOLDS", None,' jc_f04_deleted_schema_is_not_evaluated judge_contracts_test
 # JC-M7 D6 reverted: the removed sentence guesses at readers again (Amendment A)
 run_one JC-M7 'Instances that carry it, valid before, are now rejected; keep the field, or version the change.' 'Consumers reading this field will break; keep the field, or ship this as a new major version and migrate them.' jc_f10_voice_states_structure_not_readers judge_contracts_test
+# JUDGE-WIDEN r0 (docs/falsification/JUDGE-WIDEN-SPEC.md)
+# W-M1 widening check dropped: every retype VIOLATED
+run_one W-M1 '} else if type_str(pv) != type_str(qv) && widens(pv, qv) {' '} else if false && widens(pv, qv) {' w_f07_b1_002_holds_with_note judge_widen_test
+# W-M2 integer not contained in number
+run_one W-M2 'b.contains(&t) || (t == "integer" && b.contains(&"number"))' 'b.contains(&t)' w_f02_integer_to_number_is_a_note judge_widen_test
+# W-M3 any shared type counts as widening
+run_one W-M3 "a.split('|').all(|t|" "a.split('|').any(|t|" w_f10_partial_overlap_is_violated judge_widen_test
+# W-M4 widened note dropped: a silent HOLDS
+run_one W-M4 'st.notes.push(format!(
+                "retyped (widened)' 'drop(format!(
+                "retyped (widened)' w_f01_nullable_widening_is_a_note judge_widen_test
 cp "$J.orig" "$J"; rm "$J.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"
