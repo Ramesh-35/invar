@@ -76,6 +76,14 @@ the 20 commits posted in #6587 are not breaks (4836277f2 pyproject,
 publicly on the issue the same day:
 https://github.com/SchemaStore/schemastore/issues/6587#issuecomment-6602826522
 
+Judge corrected, recorded 2026-11-03 (JUDGE-R3 r0, v0.2.8): the three
+rules behind those false accusations are fixed (J1 patternProperties,
+J2 enum added over a finite domain, J3 required inside allOf) and the
+three commits relabelled false_alarm (real 17). New release gate,
+label-free (it reads no labels): on all 479 corpus commits, 20 VIOLATED,
+10 confirmed by a counterexample checked with Python jsonschema, 10
+unconfirmed and listed; 0 printed counterexamples failed the check.
+
 B2 definition, ratified 2026-10-28:
 - Surface: a single stateless `invar judge` subcommand, run in CI against
   the base branch exactly as SIB-3 reads trust (never from the PR tree).

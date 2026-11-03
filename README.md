@@ -198,6 +198,10 @@ every one passed an independent check with Python `jsonschema`. Checking
 the rest by hand the same way showed 3 of the 20 commits we had labelled
 breaks are not breaks: no such instance exists
 ([COUNTEREXAMPLE-SPEC.md](docs/falsification/COUNTEREXAMPLE-SPEC.md)).
+From v0.2.8 the three rules behind them are corrected
+([JUDGE-R3-SPEC.md](docs/falsification/JUDGE-R3-SPEC.md)), and every
+release must pass a gate that reads no hand labels: every counterexample
+printed on the whole replay corpus is checked with Python `jsonschema`.
 
 In the Action, one input:
 

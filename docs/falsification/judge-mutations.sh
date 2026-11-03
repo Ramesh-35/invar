@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -60,7 +60,7 @@ run_one JM-M6 'BaseRead::NoFile => ("NOT EVALUATED", Some("new_contract"), Vec::
 
 # JUDGE-SUBTYPE r1 (docs/falsification/JUDGE-SUBTYPE-SPEC.md)
 # JS-M1 enum narrowing check dropped
-run_one JS-M1 'if narrowed_enum(pv, qv) {' 'if false && narrowed_enum(pv, qv) {' js_f01_enum_value_removed_is_narrowed judge_subtype_test
+run_one JS-M1 '_ if narrowed_enum(pv, qv) => {' '_ if false && narrowed_enum(pv, qv) => {' js_f01_enum_value_removed_is_narrowed judge_subtype_test
 # JS-M2 bounds comparison inverted (killed from both directions)
 run_one JS-M2a 'Some(a) => (is_lower && b > a) || (!is_lower && b < a),' 'Some(a) => (is_lower && b < a) || (!is_lower && b > a),' js_f03_minimum_raised_is_tightened judge_subtype_test
 run_one JS-M2b 'Some(a) => (is_lower && b > a) || (!is_lower && b < a),' 'Some(a) => (is_lower && b < a) || (!is_lower && b > a),' js_f04_maximum_raised_holds judge_subtype_test
@@ -146,6 +146,15 @@ run_one CX-M4 '(true, Some(i)) => json!(if up { i + 1 } else { i - 1 }),' '(true
 run_one CX-M5 '    for name in req {
         let sub' '    for name in req.into_iter().take(0) {
         let sub' cx_f09_b1_001_every_break_has_a_counterexample counterexample_test "$X"
+# JUDGE-R3 r0 (docs/falsification/JUDGE-R3-SPEC.md)
+# R3-M1 patternProperties check dropped
+run_one R3-M1 'None if closed && patterned => out.push(stated_witness(&dotted, "not_evaluated", pv)),' 'None if false && closed && patterned => out.push(stated_witness(&dotted, "not_evaluated", pv)),' r3_f01_removal_under_pattern_properties_is_not_evaluated judge_r3_test
+# R3-M2 finite domain not compared
+run_one R3-M2 'match (pv.get("enum").is_none(), finite_domain(pv),' 'match (pv.get("enum").is_none() && false, finite_domain(pv),' r3_f03_enum_over_finite_domain_that_keeps_every_value_holds judge_r3_test
+# R3-M3 allOf members ignored at base
+run_one R3-M3 'let before = names(pre);' 'let before = own(pre);' r3_f07_required_moved_out_of_all_of_holds judge_r3_test
+# R3-M4 allOf members ignored at post
+run_one R3-M4 'names(post).into_iter()' 'own(post).into_iter()' r3_f08_newly_required_inside_all_of_is_escalated judge_r3_test
 cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"

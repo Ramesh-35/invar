@@ -344,6 +344,10 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
     // D2 (r2): a removal breaks validation only when the object it left is
     // closed at the post ref; from an open object it is a stated note.
     let closed = is_closed(post);
+    // J1 (JUDGE-R3 r0): a pattern may still admit a key that left
+    // `properties`; this judge does not evaluate patterns, so it states the
+    // path instead of accusing.
+    let patterned = post.get("patternProperties").is_some();
     for (k, pv) in pp {
         let dotted = if prefix.is_empty() { k.clone() } else { format!("{prefix}.{k}") };
         // D4 (r2 Amendment A): local references resolved before comparing.
@@ -358,6 +362,7 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
             a[1].extend(q_refs.iter().cloned());
         });
         match qv_resolved.as_ref() {
+            None if closed && patterned => out.push(stated_witness(&dotted, "not_evaluated", pv)),
             None => out.push(Witness {
                 path: dotted,
                 kind: if closed { "removed" } else { "removed_open" },
@@ -552,6 +557,14 @@ fn take_stated(w: &mut Vec<Witness>) -> Stated {
             ));
             false
         }
+        "enum_covered" => {
+            st.notes.push(format!(
+                "enum added: {} now lists every value valid before ({}).",
+                x.path,
+                x.pre_value.as_deref().unwrap_or("")
+            ));
+            false
+        }
         "type_explicit" => {
             st.notes.push(format!(
                 "type made explicit: {} is now {}, which its own keywords already implied; values of other types, accepted before, are now rejected.",
@@ -592,11 +605,20 @@ fn violates(kw: &str, v: &Value, b: f64) -> bool {
 
 /// Names newly present in an object's `required[]` (JUDGE-SUBTYPE JS-D4).
 fn newly_required(pre: &Value, post: &Value) -> Vec<String> {
-    let names = |v: &Value| -> Vec<String> {
+    // J3 (JUDGE-R3 r0): an object requires its own `required` names and
+    // those of each direct `allOf` member (members are conjunctive).
+    let own = |v: &Value| -> Vec<String> {
         v.get("required")
             .and_then(Value::as_array)
             .map(|a| a.iter().filter_map(|x| x.as_str().map(str::to_string)).collect())
             .unwrap_or_default()
+    };
+    let names = |v: &Value| -> Vec<String> {
+        let mut n = own(v);
+        for m in v.get("allOf").and_then(Value::as_array).into_iter().flatten() {
+            n.extend(own(m));
+        }
+        n
     };
     let before = names(pre);
     let mut added: Vec<String> = names(post).into_iter().filter(|n| !before.contains(n)).collect();
@@ -607,6 +629,33 @@ fn newly_required(pre: &Value, post: &Value) -> Vec<String> {
 
 /// True when post's `enum` accepts less than pre's (JS-D1): a value lost,
 /// or an enum added where there was none. Dropping the enum widens.
+/// J2 (JUDGE-R3 r0): the values a field accepts, when they are few and
+/// known: `boolean`, or `integer` bounded on both sides, at most 256.
+fn finite_domain(v: &Value) -> Option<Vec<Value>> {
+    let ty = type_str(v);
+    if ty == "boolean" {
+        return Some(vec![Value::Bool(true), Value::Bool(false)]);
+    }
+    if ty != "integer" {
+        return None;
+    }
+    let f = |k: &str| v.get(k).and_then(Value::as_f64);
+    let lo = [f("minimum").map(f64::ceil), f("exclusiveMinimum").map(|x| x.floor() + 1.0)].into_iter().flatten().reduce(f64::max)?;
+    let hi = [f("maximum").map(f64::floor), f("exclusiveMaximum").map(|x| x.ceil() - 1.0)].into_iter().flatten().reduce(f64::min)?;
+    if hi < lo || hi - lo >= 256.0 {
+        return None;
+    }
+    Some((lo as i64..=hi as i64).map(Value::from).collect())
+}
+
+/// Numbers compared by value (an enum may write 1 as 1.0).
+fn same_value(a: &Value, b: &Value) -> bool {
+    match (a.as_f64(), b.as_f64()) {
+        (Some(x), Some(y)) if a.is_number() && b.is_number() => x == y,
+        _ => a == b,
+    }
+}
+
 fn narrowed_enum(pv: &Value, qv: &Value) -> bool {
     match (pv.get("enum").and_then(Value::as_array), qv.get("enum").and_then(Value::as_array)) {
         (_, None) => false,
@@ -641,8 +690,24 @@ fn constraint_witness(path: &str, kind: &'static str, keyword: &'static str, pv:
 /// enum narrowing, bound tightening, pattern and format changes. A schema
 /// is read as a validation contract: narrowing what it accepts is VIOLATED.
 fn constraints(path: &str, pv: &Value, qv: &Value, out: &mut Vec<Witness>) {
-    if narrowed_enum(pv, qv) {
-        out.push(constraint_witness(path, "narrowed", "enum", pv, pv.get("enum"), qv.get("enum")));
+    match (pv.get("enum").is_none(), finite_domain(pv), qv.get("enum").and_then(Value::as_array)) {
+        // J2 (JUDGE-R3 r0): an enum added over a finite base domain is
+        // judged as an enum narrowing of that domain.
+        (true, Some(dom), Some(new)) => {
+            let lost = dom.iter().any(|v| !new.iter().any(|n| same_value(n, v)));
+            if lost {
+                let dom = Value::Array(dom);
+                out.push(constraint_witness(path, "narrowed", "enum", pv, Some(&dom), qv.get("enum")));
+            } else {
+                let mut w = stated_witness(path, "enum_covered", pv);
+                w.pre_value = Some(dom.iter().map(Value::to_string).collect::<Vec<_>>().join(", "));
+                out.push(w);
+            }
+        }
+        _ if narrowed_enum(pv, qv) => {
+            out.push(constraint_witness(path, "narrowed", "enum", pv, pv.get("enum"), qv.get("enum")));
+        }
+        _ => {}
     }
     // D3 (r2): an enum dropped at the post ref is judged by its old values.
     let old_enum = if qv.get("enum").is_none() { pv.get("enum").and_then(Value::as_array) } else { None };
