@@ -137,3 +137,32 @@ same library at freeze (recorded in the freeze record).
 - CX-M3 the kept enum value used instead of the lost one: cx_f03.
 - CX-M4 tightened value on the bound instead of past it: cx_f04.
 - CX-M5 required properties not built (path only): cx_f06.
+
+## Amendment A (stated during implementation, 2026-11-03; fixtures unchanged)
+
+- CX-M5 (required properties not built) is killed by cx_f09, not cx_f06
+  as frozen. In cx_f06 every required property lies on the witness path,
+  and the path is built anyway, so the mutant leaves its output unchanged;
+  b1-001 requires eight root properties that are not on any witness path,
+  so without them the base rejects every candidate and cx_f09 fails. The
+  operator is unchanged; only its named killer moves.
+
+Measured at implementation (counterexample-check.py replay, the 20
+commits labelled real): 47 VIOLATED witnesses, 24 counterexamples built,
+0 failed the independent check (PASS as pre-registered). Of the 23 not
+built: 4 pattern or format changes (not decided by rule), 15 reached a
+keyword the checker does not read (pattern 4, patternProperties 3,
+dependentRequired 2, format 2, minProperties 2, allOf, oneOf,
+propertyNames, uniqueItems), 2 found no candidate. 10 of the 20 commits
+carry at least one counterexample.
+
+Found by this measurement and confirmed by hand with Python jsonschema:
+3 of the 20 commits labelled real are not breaks (no instance valid at
+base is rejected at post): 4836277f2 (pyproject: `dependency-groups.dev`
+left `properties`, but `patternProperties` still admits `dev` with the
+same schema), 0091e807a (poe: `verbosity` went from integer -1..1 to enum
+-2..2, which holds every old value), b514ab55c (mkdocs: `site_name` was
+already required, inside the base's `allOf`). For each, the engine built
+no counterexample (patternProperties, no candidate, allOf). The other 17
+are confirmed breaks: 10 by the engine's counterexamples, 7 by
+instances built by hand (docs/falsification/schemastore-replay/hand-checks.py re-runs every one).

@@ -15,3 +15,6 @@ blake3(crates/invar-falsify/tests/counterexample_test.rs) = 27243e18469cb5e45376
 sha256(crates/invar-falsify/tests/counterexample_test.rs) = 2c4bc86d66ae81dcd82010dd26729ee7adf9a6b453d597db5d2a19eede9a86c5
 blake3(docs/falsification/counterexample-check.py) = 8260589ef206dc75ee2657e8ce738ad915a0e1d14380e425e2861889e2c83cc9
 sha256(docs/falsification/counterexample-check.py) = ede5cec3a343db120966f8220793512e9e93af0243e4625fc8b1e7a0d1d96919
+# Amendment A (2026-11-03, during implementation): CX-M5 killer moved to cx_f09; measured coverage and 3 mislabels recorded; fixtures unchanged.
+blake3(docs/falsification/COUNTEREXAMPLE-SPEC.md) = 5f005eea05a92842cc7bccf0f70323882f46fb950d321abd6d34ae6558b58bde
+sha256(docs/falsification/COUNTEREXAMPLE-SPEC.md) = 6b8f931c273a7d6cb07e5d9968c03537ab2e8e62d0b540823d4bb1907e83c0d5

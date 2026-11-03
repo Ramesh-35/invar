@@ -37,6 +37,10 @@ pub struct Witness {
     /// JUDGE-SARIF S-D1: where a removed field used to live in the POST
     /// file (its parent's key line). Not part of the JSON surface.
     pub anchor_line: Option<u64>,
+    /// COUNTEREXAMPLE r0: an instance valid at base and rejected now,
+    /// checked before it is set; or why none was built.
+    pub counterexample: Option<Value>,
+    pub counterexample_reason: Option<String>,
 }
 
 enum BaseRead {
@@ -142,6 +146,11 @@ fn evaluate(read: BaseRead, post_bytes: &str) -> (&'static str, Option<&'static 
                                 let parent = x.path.rsplit('.').nth(1).unwrap_or("properties");
                                 x.anchor_line = find_line(post_bytes, parent);
                             }
+                        }
+                        for x in &mut w {
+                            let (c, why) = crate::counterexample::build(x, &pre, &post);
+                            x.counterexample = c;
+                            x.counterexample_reason = why;
                         }
                         let (v, r) = if !w.is_empty() {
                             ("VIOLATED", None)
@@ -328,6 +337,8 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
             pre_value: None,
             post_value: None,
             anchor_line: None,
+            counterexample: None,
+            counterexample_reason: None,
         });
     }
     // D2 (r2): a removal breaks validation only when the object it left is
@@ -358,6 +369,8 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
                 pre_value: None,
                 post_value: None,
                 anchor_line: None,
+                counterexample: None,
+                counterexample_reason: None,
             }),
             Some(qv) if has_combinator(pv) || has_combinator(qv) => {
                 // D1 (r2): a node under anyOf/oneOf/allOf/$ref is not followed,
@@ -387,6 +400,8 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
                         pre_value: None,
                         post_value: None,
                         anchor_line: None,
+                        counterexample: None,
+                        counterexample_reason: None,
                     });
                 }
                 constraints(&dotted, pv, qv, out);
@@ -507,6 +522,8 @@ fn stated_witness(path: &str, kind: &'static str, pv: &Value) -> Witness {
         pre_value: None,
         post_value: None,
         anchor_line: None,
+        counterexample: None,
+        counterexample_reason: None,
     }
 }
 
@@ -615,6 +632,8 @@ fn constraint_witness(path: &str, kind: &'static str, keyword: &'static str, pv:
         pre_value: disp(a),
         post_value: disp(b),
         anchor_line: None,
+        counterexample: None,
+        counterexample_reason: None,
     }
 }
 
@@ -712,6 +731,8 @@ fn body_json(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w:
             "keyword": x.keyword,
             "pre_value": x.pre_value,
             "post_value": x.post_value,
+            "counterexample": x.counterexample,
+            "counterexample_reason": x.counterexample_reason,
         })).collect::<Vec<_>>(),
     })
 }
@@ -781,6 +802,15 @@ fn witness_sentence(x: &Witness, base: &str) -> String {
     }
 }
 
+/// COUNTEREXAMPLE r0: the line under a witness, shared by text and GitHub.
+fn counterexample_line(x: &Witness, base: &str) -> String {
+    match (&x.counterexample, &x.counterexample_reason) {
+        (Some(v), _) => format!("counterexample (valid at {base}, rejected now): {}", serde_json::to_string(v).unwrap_or_default()),
+        (None, Some(r)) => format!("no counterexample built: {r}."),
+        (None, None) => "no counterexample built.".to_string(),
+    }
+}
+
 /// The NOT EVALUATED sentence for a reason code, shared by every format.
 fn not_evaluated_sentence(reason: Option<&str>, contract: &str, base: &str) -> String {
     match reason {
@@ -814,6 +844,7 @@ fn render_text(verdict: &str, reason: Option<&str>, contract: &str, base: &str, 
             s.push_str(&format!("VIOLATED: {contract} breaks {n} {noun} made at {base}.\n"));
             for x in w {
                 s.push_str(&format!("  {}\n", witness_sentence(x, base)));
+                s.push_str(&format!("    {}\n", counterexample_line(x, base)));
             }
         }
         _ => s.push_str(&format!("{}\n", not_evaluated_sentence(reason, contract, base))),
@@ -873,6 +904,7 @@ fn sarif_results(contract: &str, base: &str, w: &[Witness]) -> Vec<Value> {
                 "ruleId": format!("invar.judge.{}", x.kind),
                 "level": "error",
                 "message": { "text": witness_sentence(x, base) },
+                "properties": { "counterexample": x.counterexample },
                 "locations": [{
                     "physicalLocation": {
                         "artifactLocation": { "uri": contract },
@@ -940,10 +972,11 @@ fn render_github(verdict: &str, reason: Option<&str>, contract: &str, base: &str
             .iter()
             .map(|x| {
                 format!(
-                    "::error file={file},line={},title={}::{}\n",
+                    "::error file={file},line={},title={}::{}%0A{}\n",
                     location_line(x),
                     gh_prop(&format!("invar.judge.{}", x.kind)),
-                    gh_data(&witness_sentence(x, base))
+                    gh_data(&witness_sentence(x, base)),
+                    gh_data(&counterexample_line(x, base))
                 )
             })
             .collect(),

@@ -18,6 +18,7 @@
 pub mod backtest;
 pub mod check;
 pub mod codepairs;
+pub mod counterexample;
 pub mod demo;
 pub mod dependents;
 pub mod config;

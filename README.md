@@ -167,16 +167,37 @@ change (case b1-001 of our pinned corpus), excerpted:
 
 ```
 VIOLATED: schemas/media_player.json breaks 6 promises made at origin/main.
-  tightened: currentTime maximum lowered from 9007199254740991 to 2147483647.
+  tightened: playbackRate maximum lowered from 9007199254740991 to 16.
   Values valid before can now be rejected; restore the bound, or version the change.
+    counterexample (valid at origin/main, rejected now): {"currentTime":0,
+    "duration":0,"ended":true,"loop":true,"muted":true,"paused":true,
+    "playbackRate":16.5,"volume":0}
   removed: percentProgress was integer|null (line 47 at origin/main), from an
   object that admits no other keys. Instances that carry it, valid before, are
   now rejected; keep the field, or version the change.
+    counterexample (valid at origin/main, rejected now): {"currentTime":0,
+    "duration":0,"ended":true,"loop":true,"muted":true,"paused":true,
+    "percentProgress":0,"playbackRate":0,"volume":0}
   ...
+  noted: retyped (widened): loop was boolean, is now boolean|null; every value
+  valid before is still valid.
 judged: property presence and type, enum, numeric, length and item-count
 bounds, required, pattern and format, recursively. not judged: $ref, allOf,
 anyOf, oneOf, items (stated, never skipped).
 ```
+
+A break comes with a counterexample whenever INVAR can build one: a whole
+instance the base schema accepts and the changed schema rejects. You do not have to trust INVAR to
+believe it; save it and run any validator you already use against both
+versions. The judge checks each instance itself before printing it, with
+a checker for exactly the keywords it reads; when a schema uses one it
+does not read (`pattern`, `format`, a combinator and so on), the output
+says `no counterexample built:` and names it, rather than print a guess.
+On the SchemaStore replay it built 24 instances for 47 findings, and
+every one passed an independent check with Python `jsonschema`. Checking
+the rest by hand the same way showed 3 of the 20 commits we had labelled
+breaks are not breaks: no such instance exists
+([COUNTEREXAMPLE-SPEC.md](docs/falsification/COUNTEREXAMPLE-SPEC.md)).
 
 In the Action, one input:
 

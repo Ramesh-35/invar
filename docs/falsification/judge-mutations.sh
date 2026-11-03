@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4) must first COMPILE (else INVALID), then is
-# applied to src/judge.rs as a real source mutation; the named killer
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5) must first COMPILE (else INVALID), then is
+# applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
 # exits 1. Run from the repo root.
 set -uo pipefail
 J=crates/invar-falsify/src/judge.rs
-cp "$J" "$J.orig"
+X=crates/invar-falsify/src/counterexample.rs
+cp "$J" "$J.orig"; cp "$X" "$X.orig"
 pass=0; fail=0
 
-mutate() { python3 - "$J" "$1" "$2" <<'EOF'
+mutate() { python3 - "${3:-$J}" "$1" "$2" <<'EOF'
 import sys
 p, old, new = sys.argv[1], sys.argv[2], sys.argv[3]
 t = open(p).read()
@@ -20,11 +21,11 @@ open(p, "w").write(t.replace(old, new, 1))
 EOF
 }
 
-run_one() { # name old new killer_test [test_target]
-  name=$1; old=$2; new=$3; killer=$4; target=${5:-judge_test}
-  cp "$J.orig" "$J"
+run_one() { # name old new killer_test [test_target] [file]
+  name=$1; old=$2; new=$3; killer=$4; target=${5:-judge_test}; file=${6:-$J}
+  cp "$J.orig" "$J"; cp "$X.orig" "$X"
   # An anchor that no longer matches mutates nothing: INVALID, never a verdict.
-  if ! mutate "$old" "$new"; then
+  if ! mutate "$old" "$new" "$file"; then
     echo "$name: INVALID (anchor does not match exactly once)"; fail=$((fail+1)); return
   fi
   # A mutant that does not build proves nothing: it is INVALID, never KILLED.
@@ -128,7 +129,24 @@ run_one W-M3 "a.split('|').all(|t|" "a.split('|').any(|t|" w_f10_partial_overlap
 run_one W-M4 'st.notes.push(format!(
                 "retyped (widened)' 'drop(format!(
                 "retyped (widened)' w_f01_nullable_widening_is_a_note judge_widen_test
-cp "$J.orig" "$J"; rm "$J.orig"
+# COUNTEREXAMPLE r0 (docs/falsification/COUNTEREXAMPLE-SPEC.md), in counterexample.rs
+# CX-M1 base check skipped
+run_one CX-M1 '        match check(base, base, &inst, 0) {
+            Check::Valid => {}' '        match Check::Valid {
+            Check::Valid => {}' cx_f11_unchecked_keyword_at_base_is_stated counterexample_test "$X"
+# CX-M2 post check skipped
+run_one CX-M2 '        match check(post, post, &inst, 0) {
+            Check::Invalid => return Ok(inst),' '        match { let _ = post; Check::Invalid } {
+            Check::Invalid => return Ok(inst),' cx_f12_unconfirmed_rejection_is_stated counterexample_test "$X"
+# CX-M3 the kept enum value used instead of the lost one
+run_one CX-M3 'a.into_iter().filter(|v| !b.contains(v)).map(Some).collect()' 'a.into_iter().filter(|v| b.contains(v)).map(Some).collect()' cx_f03_narrowed_carries_the_lost_value counterexample_test "$X"
+# CX-M4 tightened value on the bound instead of past it
+run_one CX-M4 '(true, Some(i)) => json!(if up { i + 1 } else { i - 1 }),' '(true, Some(i)) => json!(i),' cx_f04_tightened_steps_past_the_new_bound counterexample_test "$X"
+# CX-M5 required properties not built (Amendment A: killed by cx_f09, not cx_f06)
+run_one CX-M5 '    for name in req {
+        let sub' '    for name in req.into_iter().take(0) {
+        let sub' cx_f09_b1_001_every_break_has_a_counterexample counterexample_test "$X"
+cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"
 [ "$fail" -eq 0 ]
