@@ -335,3 +335,9 @@ data is separately licensed under
 [CDLA-Permissive-2.0](LICENSE-DATA); see
 [docs/reference/CORPUS-DATA.md](docs/reference/CORPUS-DATA.md). Files
 under `demo/` keep their upstream licenses ([demo/NOTICE](demo/NOTICE)).
+
+<!-- Total Downloads -->
+[![Crates.io Downloads](https://img.shields.io/crates/d/invar-falsify?color=crimson)](https://crates.io/crates/invar-falsify)
+
+<!-- Recent Version Downloads -->
+[![Crates.io Recent Downloads](https://img.shields.io/crates/dr/invar-falsify)](https://crates.io/crates/invar-falsify)
