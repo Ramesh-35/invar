@@ -127,8 +127,8 @@ fn line_scopes(text: &str, ext: &str) -> Vec<String> {
             let (mut scope, mut depth, mut open_at) = (String::new(), 0i64, -1i64);
             for line in text.lines() {
                 let t = line.trim_start();
-                if t.starts_with("func ") {
-                    let rest = t["func ".len()..].trim_start();
+                if let Some(after) = t.strip_prefix("func ") {
+                    let rest = after.trim_start();
                     let rest = if rest.starts_with('(') {
                         rest.find(')')
                             .map(|i| rest[i + 1..].trim_start())
@@ -367,7 +367,7 @@ pub fn rename_candidates(base: &Fields, head: &Fields) -> BTreeMap<String, (Stri
             .filter(|((s, k), t)| s == scope && t.as_ref() == Some(ty) && !head.contains_key(&(s.clone(), k.clone())))
             .count();
         if added.len() == 1 && rivals == 1 {
-            out.entry(key.clone()).or_insert_with(Vec::new).push((added[0].clone(), ty.clone()));
+            out.entry(key.clone()).or_default().push((added[0].clone(), ty.clone()));
         }
     }
     // A key removed from two scopes with candidates is ambiguous: no pairing.

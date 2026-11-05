@@ -631,9 +631,9 @@ fn strings_lines(p: &crate::valuepairs::strings::StringsProposal) -> Vec<String>
     v.push(format!("S4 scope: {}", p.scope));
     let o: Vec<String> = p.overlap.iter().map(|(f, _, l)| format!("{f} ({}:{l})", p.list_file)).collect();
     v.push(format!("S5 distinctive overlap ({} of {} list entries): {}", names.len(), p.distinctive, o.join(", ")));
-    v.push(format!(
-        "S6 DISCLAIMER: that this list reaches the store the shape describes is not verified; a name overlap is not proof (display column lists and unrelated lists can overlap)"
-    ));
+    v.push(
+        "S6 DISCLAIMER: that this list reaches the store the shape describes is not verified; a name overlap is not proof (display column lists and unrelated lists can overlap)".to_string()
+    );
     if !p.also.is_empty() {
         let sites: Vec<String> = p.also.iter().map(|(at, line, n)| format!("{at}@{line} |O|={n}")).collect();
         v.push(format!("S7 also: {} (other sites are not locked; add a block by hand to lock them)", sites.join("; ")));

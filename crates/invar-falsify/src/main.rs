@@ -1931,7 +1931,7 @@ fn cmd_lock_sample(args: &LockArgs) -> Result<i32> {
         for p in lock::pii_suspects(&fields) {
             eprintln!("warning: sample key {p:?} looks like personal data or a credential; scrub the sample file before committing it anywhere");
         }
-        lock::merge_observation_scalars(&mut sm, &fields, &scalars, &today, &blake3::hash(&bytes).to_hex().to_string());
+        lock::merge_observation_scalars(&mut sm, &fields, &scalars, &today, blake3::hash(&bytes).to_hex().as_ref());
     }
     eprintln!("note: only payload SHAPES are locked; the sample files may hold real data, are not retained, and stay your responsibility");
     let (n_paths, n_obs) = (sm.witnesses.len(), sm.observations);
@@ -1953,14 +1953,17 @@ fn cmd_lock_sample(args: &LockArgs) -> Result<i32> {
 /// Check-side observed-reality evaluation: fresh sample vs locked sample
 /// (drift is residue, waivers respected), and staleness (stated, exit 4
 /// path). Returns per-contract (residue additions, unevaluated additions).
+type SampleFindings = Vec<(String, Vec<(String, String)>, Vec<String>)>;
+
+/// See [`SampleFindings`].
 fn sample_findings(
     lockf: &invar_falsify::lock::Lock,
     fresh: Option<(&str, &serde_json::Value, Option<&str>)>,
     today: i64,
-) -> Result<Vec<(String, Vec<(String, String)>, Vec<String>)>> {
+) -> Result<SampleFindings> {
     use invar_falsify::lock::{parse_date, payload_scalars, payload_shape, witness_drift_scalars, SAMPLE_STALE_DAYS};
-    let mut out: Vec<(String, Vec<(String, String)>, Vec<String>)> = Vec::new();
-    fn entry(out: &mut Vec<(String, Vec<(String, String)>, Vec<String>)>, id: &str) -> usize {
+    let mut out: SampleFindings = Vec::new();
+    fn entry(out: &mut SampleFindings, id: &str) -> usize {
         if let Some(i) = out.iter().position(|(c, _, _)| c == id) {
             i
         } else {

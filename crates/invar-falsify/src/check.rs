@@ -20,6 +20,10 @@ use crate::surface::{
 
 pub type Sections = Vec<(String, Vec<(String, String)>)>;
 
+/// One invariant's evaluation, as `(residue lines, witnesses, unevaluated
+/// notes, skip reason)`: what the per-kind `*_outcome` functions yield.
+type Outcome = anyhow::Result<(Vec<String>, Vec<Witness>, Vec<String>, Option<String>)>;
+
 #[derive(Debug, Clone, Default)]
 pub struct ContractOutcome {
     pub id: String,
@@ -194,7 +198,7 @@ fn schema_outcome(
     b: &[(String, String)],
     resolver: &Resolver,
     prov: &mut Vec<Fetched>,
-) -> Result<(Vec<String>, Vec<Witness>, Vec<String>, Option<String>)> {
+) -> Outcome {
     let p = getk(b, "producer").context("schema invariant needs producer")?;
     let c = getk(b, "consumer").context("schema invariant needs consumer")?;
     let ptr = getk(b, "pointer");
@@ -1266,7 +1270,7 @@ fn egress_outcome(
     shape: &str,
     resolver: &Resolver,
     prov: &mut Vec<Fetched>,
-) -> Result<(Vec<String>, Vec<Witness>, Vec<String>, Option<String>)> {
+) -> Outcome {
     if entry.producer != producer {
         bail!(
             "{}: invar.toml names a different producer than invar.lock; run `invar lock --update`",
@@ -1302,7 +1306,7 @@ fn egress_outcome(
     let mut residue = Vec::new();
     let mut witnesses = Vec::new();
     for b in entry.bindings.iter().filter(|b| b.scope == shape) {
-        let present = live.as_ref().is_some_and(|f| f.iter().any(|x| *x == b.field));
+        let present = live.as_ref().is_some_and(|f| f.contains(&b.field));
         if present {
             continue;
         }
@@ -1350,7 +1354,7 @@ fn strings_outcome(
     listat: &str,
     resolver: &Resolver,
     prov: &mut Vec<Fetched>,
-) -> Result<(Vec<String>, Vec<Witness>, Vec<String>, Option<String>)> {
+) -> Outcome {
     use crate::surface::name_key;
     use crate::valuepairs::strings::{read_any_shape, read_list, ListRead};
     use crate::valuepairs::ShapeRead;

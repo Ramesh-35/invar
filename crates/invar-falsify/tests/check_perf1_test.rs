@@ -143,7 +143,7 @@ fn p_f3_key_reads_across_lines_and_crlf() {
     assert!(lock_out.contains("+ contract code:a (6 bindings)"), "{lock_out}");
     // Recorded at Gate 1 on the baseline (93e93ce): exactly these bindings.
     let lock = std::fs::read_to_string(d.join("invar.lock")).unwrap();
-    let binds: Vec<String> = lock.lines().filter_map(|l| l.strip_prefix("bind = \"code ")).map(|l| l.splitn(2, ' ').nth(1).unwrap_or("").trim_end_matches('"').to_string()).collect();
+    let binds: Vec<String> = lock.lines().filter_map(|l| l.strip_prefix("bind = \"code ")).map(|l| l.split_once(' ').map_or("", |x| x.1).trim_end_matches('"').to_string()).collect();
     assert_eq!(binds, vec!["w_val ?", "x_val ?", "y_val ?", "A.w_val string", "A.x_val number", "A.y_val number"], "{lock}");
     let (code, out) = invar(&d, &["check"]);
     assert_eq!(code, 0, "{out}");

@@ -54,7 +54,7 @@ pub(crate) fn present(fields: &crate::surface::Fields, b: &Binding) -> bool {
     let want_scope = if b.scope.is_empty() { None } else { Some(name_key(&b.scope)) };
     fields.keys().any(|(scope, name)| {
         name_key(name) == want_field
-            && want_scope.as_ref().map_or(true, |w| &name_key(scope) == w)
+            && want_scope.as_ref().is_none_or(|w| &name_key(scope) == w)
     })
 }
 

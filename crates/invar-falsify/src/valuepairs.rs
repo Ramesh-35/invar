@@ -108,9 +108,9 @@ fn mask(text: &str) -> Vec<u8> {
                         out[i + 1] = b' ';
                     }
                     i += 1;
-                } else if c == q {
-                    s = S::Code;
-                } else if c == b'\n' && q != b'`' {
+                } else if c == q || (c == b'\n' && q != b'`') {
+                    // the closing quote, or a newline ending a non-template
+                    // string: either way the string is over.
                     s = S::Code;
                 } else if c != b'\n' {
                     out[i] = b' ';
@@ -1089,13 +1089,13 @@ impl World {
         // cut path, outrank a value: silence must be earned everywhere
         for pick in [0u8, 1, 2, 3] {
             for r in &results {
-                let hit = match (pick, r) {
-                    (0, Silence::ZodNotObject(_) | Silence::ZodUnreached(_)) => true,
-                    (1, Silence::Unread(_)) => true,
-                    (2, Silence::TooDeep) => true,
-                    (3, Silence::Earned) => true,
-                    _ => false,
-                };
+                let hit = matches!(
+                    (pick, r),
+                    (0, Silence::ZodNotObject(_) | Silence::ZodUnreached(_))
+                        | (1, Silence::Unread(_))
+                        | (2, Silence::TooDeep)
+                        | (3, Silence::Earned)
+                );
                 if hit {
                     return r.clone();
                 }

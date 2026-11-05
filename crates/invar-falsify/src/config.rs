@@ -7,6 +7,10 @@
 
 use crate::manifest::{CompositeConfig, ToolConfig};
 
+/// `(section -> [(key, value)])` pairs, in file order: what the flat
+/// TOML-subset parser yields (the same shape as `check::Sections`).
+pub type Sections = Vec<(String, Vec<(String, String)>)>;
+
 #[derive(Debug, thiserror::Error)]
 pub enum ConfigError {
     #[error("failed to read composite config {path}: {source}")]
@@ -25,7 +29,7 @@ pub enum ConfigError {
 
 /// Parse a flat TOML-subset file into `(section -> [(key, value)])` pairs,
 /// preserving order and rejecting keys that appear before any section.
-fn parse_flat(path: &str, text: &str) -> Result<Vec<(String, Vec<(String, String)>)>, ConfigError> {
+fn parse_flat(path: &str, text: &str) -> Result<Sections, ConfigError> {
     let mut sections: Vec<(String, Vec<(String, String)>)> = Vec::new();
     for (idx, raw_line) in text.lines().enumerate() {
         let line_no = idx + 1;
@@ -74,7 +78,7 @@ fn parse_flat(path: &str, text: &str) -> Result<Vec<(String, Vec<(String, String
 pub fn parse_sections(
     path: &str,
     text: &str,
-) -> Result<Vec<(String, Vec<(String, String)>)>, ConfigError> {
+) -> Result<Sections, ConfigError> {
     parse_flat(path, text)
 }
 

@@ -34,17 +34,13 @@ pub enum EpistemicStatus {
 /// Provenance of the evidence backing a case. FIXTURE evidence can never, by
 /// itself, promote a category claim; only REAL evidence can.
 #[allow(non_camel_case_types)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EvidenceTier {
+    #[default]
     FIXTURE,
     REAL,
 }
 
-impl Default for EvidenceTier {
-    fn default() -> Self {
-        EvidenceTier::FIXTURE
-    }
-}
 
 /// One corpus case.
 #[derive(Debug, Clone, Serialize, Deserialize)]

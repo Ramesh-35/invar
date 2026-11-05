@@ -1896,7 +1896,7 @@ fn bare_invocation_and_completions_stay_in_step() {
             if line.trim().is_empty() || line.starts_with("Options:") {
                 break;
             }
-            if let Some(name) = line.trim_start().split_whitespace().next() {
+            if let Some(name) = line.split_whitespace().next() {
                 if name != "help" {
                     commands.push(name.to_string());
                 }

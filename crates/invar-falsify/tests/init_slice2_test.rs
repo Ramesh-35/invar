@@ -481,7 +481,7 @@ fn k2_f2_js_consumer_lock_binds_exactly_the_evidence() {
         "k2f2",
         &[
             ("lib/order.ts", ORDER_IN),
-            ("src/consume.js", &format!("import {{ OrderIn, Other }} from \"../lib/order\";\nexport function f(row, x) {{\n  return [row.total_minor, row.currency_code, x.mode];\n}}\n")),
+            ("src/consume.js", "import { OrderIn, Other } from \"../lib/order\";\nexport function f(row, x) {\n  return [row.total_minor, row.currency_code, x.mode];\n}\n"),
         ],
     );
     let o = init(&d);

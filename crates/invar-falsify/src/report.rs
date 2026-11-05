@@ -56,6 +56,7 @@ impl RunReport {
     /// Run-level conservation. Two properties, both must hold:
     ///   1. the three verdict buckets partition every case (nothing dropped);
     ///   2. every case's composite-coverage accounting balances.
+    ///
     /// Property 1 is trivially true for three total variants, but asserting it
     /// guards against a future verdict state silently escaping the partition,
     /// and property 2 is the per-case residual conservation.
@@ -164,11 +165,11 @@ impl RunReport {
             if self.conservation_holds() { "x" } else { " " },
             self.cases.len()
         ));
-        out.push_str(&format!(
+        out.push_str(
             "Leg-state legend: `PASS`/`FAIL` = executed; `SKIPPED` = did not run (tool absent/offline); \
              `ERROR` = ran but uninterpretable; `UNKNOWN` = executed but irreducible. \
              Only executed legs contribute to a verdict.\n",
-        ));
+        );
 
         out
     }

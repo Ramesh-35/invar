@@ -53,7 +53,7 @@ fn recorded(lock: &str) -> String {
 
 fn binds(d: &Path) -> Vec<String> {
     let t = std::fs::read_to_string(d.join("invar.lock")).unwrap();
-    t.lines().filter_map(|l| l.strip_prefix("bind = \"code ")).map(|l| l.splitn(2, ' ').nth(1).unwrap_or("").trim_end_matches('"').to_string()).collect()
+    t.lines().filter_map(|l| l.strip_prefix("bind = \"code ")).map(|l| l.split_once(' ').map_or("", |x| x.1).trim_end_matches('"').to_string()).collect()
 }
 
 

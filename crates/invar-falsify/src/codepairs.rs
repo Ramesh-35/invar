@@ -982,7 +982,7 @@ fn route_fns(
     p: usize,
     s: &str,
     locals: &BTreeMap<usize, Vec<(String, String, usize, String)>>,
-    funcs: &BTreeMap<usize, BTreeMap<String, Vec<(String, usize, Option<(String, RetForm)>)>>>,
+    funcs: &PkgFuncs,
     shape_names: &BTreeMap<usize, BTreeMap<String, usize>>,
 ) -> BTreeMap<String, (Route, Via)> {
     let mut out = BTreeMap::new();
@@ -1158,7 +1158,7 @@ struct PropIndex<'c, 'i> {
     ctx: &'c Ctx<'c>,
     infos: &'i BTreeMap<String, FileInfo>,
     types: BTreeMap<(String, String), Option<(String, Decl)>>,
-    members: BTreeMap<(String, String), Vec<(String, usize, MType)>>,
+    members: BTreeMap<(String, String), Vec<Member>>,
 }
 
 impl PropIndex<'_, '_> {
@@ -1268,7 +1268,10 @@ impl PropIndex<'_, '_> {
 
 /// Reads of the shape's fields through property paths in this file, and
 /// per field key the paths (by index into `paths`) they were read through.
-fn path_reads(fi: &FileInfo, paths: &[PropPath]) -> (BTreeMap<String, (String, usize)>, BTreeMap<String, BTreeSet<usize>>) {
+type PathReads = (BTreeMap<String, (String, usize)>, BTreeMap<String, BTreeSet<usize>>);
+
+/// See [`PathReads`].
+fn path_reads(fi: &FileInfo, paths: &[PropPath]) -> PathReads {
     let m = &fi.masked;
     let all = tokens(m);
     let t = Toks(&all);
@@ -1462,9 +1465,19 @@ enum RetForm {
 /// A route a receiver can be tied through: (form, declaring file, line).
 type Route = (RetForm, String, usize);
 
+/// One function declaration: (name, line, written return type as
+/// (head, form) when it is one of the permitted forms).
+type FuncDecl = (String, usize, Option<(String, RetForm)>);
+
+/// Per package, every function declaration by name.
+type PkgFuncs = BTreeMap<usize, BTreeMap<String, Vec<FuncDecl>>>;
+
+/// One declared member of a shape: (name, line, member type).
+type Member = (String, usize, MType);
+
 /// Every function declaration in this file: (name, line, written return
 /// type as (head, form) when it is one of the permitted forms).
-fn function_decls(fi: &FileInfo) -> Vec<(String, usize, Option<(String, RetForm)>)> {
+fn function_decls(fi: &FileInfo) -> Vec<FuncDecl> {
     let m = &fi.masked;
     let all = tokens(m);
     let t = Toks(&all);
@@ -2588,7 +2601,7 @@ pub fn discover_code(root: &Path, files: &[String], oversized: &[String], skip_d
     }
     // SLICE7: per package, every function declaration (with its permitted
     // written return type, if any), and how many exported shapes carry each name.
-    let mut pkg_funcs: BTreeMap<usize, BTreeMap<String, Vec<(String, usize, Option<(String, RetForm)>)>>> = BTreeMap::new();
+    let mut pkg_funcs: PkgFuncs = BTreeMap::new();
     let mut pkg_shape_names: BTreeMap<usize, BTreeMap<String, usize>> = BTreeMap::new();
     for (g, gi) in &infos {
         if let Some(p) = ctx.pkg_of(g) {

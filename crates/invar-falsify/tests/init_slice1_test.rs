@@ -140,7 +140,11 @@ fn init(dir: &Path) -> Out {
     parse(&first)
 }
 
-fn prop(id: &str, producer: &str, consumer: &str, category: &str, shapes: &[(&str, &[&str], &[&str])]) -> (String, String, String, String, BTreeMap<String, Vec<String>>, BTreeMap<String, Vec<String>>) {
+/// What `prop` builds: (id, producer, consumer, category, fields per
+/// shape, samples per shape).
+type Prop = (String, String, String, String, BTreeMap<String, Vec<String>>, BTreeMap<String, Vec<String>>);
+
+fn prop(id: &str, producer: &str, consumer: &str, category: &str, shapes: &[(&str, &[&str], &[&str])]) -> Prop {
     let mut f = BTreeMap::new();
     let mut s = BTreeMap::new();
     for (shape, fields, stop) in shapes {
@@ -683,7 +687,7 @@ fn m04_unrepresentable_pair_is_abstained_not_inventoried() {
 fn m05_oversized_consumer_abstains() {
     let d = ws("m05", &[ROOT_AB, PKG_A, PKG_B, ("a/order.ts", ORDER)]);
     let mut big = USE_ORDER.as_bytes().to_vec();
-    big.extend(std::iter::repeat(b' ').take(1_000_001));
+    big.extend(std::iter::repeat_n(b' ', 1_000_001));
     put(&d, "b/src/big.ts", &big);
     expect(
         &init(&d),

@@ -56,6 +56,7 @@ jobs:
         uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
         with:
           toolchain: stable
+          components: clippy
 
       - name: Cache cargo
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
@@ -68,6 +69,9 @@ jobs:
 
       - name: Build
         run: cargo build --workspace --locked
+
+      - name: Clippy (zero warnings, enforced)
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
 
       - name: Test (acceptance)
         run: cargo test --workspace --locked

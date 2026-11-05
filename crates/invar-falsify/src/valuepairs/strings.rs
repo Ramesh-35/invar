@@ -142,7 +142,7 @@ fn parse_array(t: &Text, open: usize) -> (Vec<(String, usize)>, Option<String>) 
 fn ident_path(tok: &str) -> bool {
     !tok.is_empty()
         && !matches!(tok, "keyof" | "typeof" | "readonly")
-        && tok.split('.').all(|seg| !seg.is_empty() && seg.bytes().next().map_or(false, is_ident_start) && seg.bytes().all(is_ident))
+        && tok.split('.').all(|seg| !seg.is_empty() && seg.bytes().next().is_some_and(is_ident_start) && seg.bytes().all(is_ident))
 }
 
 /// `keyof X` or `keyof typeof X` at `toks[i]`: (rendered operand, target, next index).
