@@ -20,12 +20,12 @@ const MAX_BYTES: usize = 512;
 /// UNCHECKED makes a node unknown; every other keyword is an annotation
 /// or outside the vocabulary, which validators ignore.
 /// COUNTEREXAMPLE r1 reads minProperties, maxProperties, uniqueItems,
-/// dependentRequired, dependencies (array form) and multipleOf.
-const UNCHECKED: [&str; 21] = [
+/// dependentRequired, dependencies (array form) and multipleOf; r2 reads
+/// allOf, anyOf, oneOf and not.
+const UNCHECKED: [&str; 17] = [
     "pattern", "format", "contains", "minContains", "maxContains", "patternProperties",
-    "propertyNames", "dependentSchemas", "not", "if", "then", "else", "anyOf", "oneOf", "allOf",
-    "unevaluatedProperties", "unevaluatedItems", "prefixItems", "additionalItems", "$dynamicRef",
-    "$recursiveRef",
+    "propertyNames", "dependentSchemas", "if", "then", "else", "unevaluatedProperties",
+    "unevaluatedItems", "prefixItems", "additionalItems", "$dynamicRef", "$recursiveRef",
 ];
 
 /// What the checker can say about an instance.
@@ -245,6 +245,25 @@ fn minimal(root: &Value, schema: &Value, depth: usize) -> Result<Value, String> 
         return Ok(first.clone());
     }
     let ty = types(&s).into_iter().next().unwrap_or_default();
+    if ty.is_empty() {
+        // COUNTEREXAMPLE r2: the first anyOf/oneOf member whose minimal
+        // value the checker says is valid for this node; else the first.
+        for kw in ["anyOf", "oneOf"] {
+            if let Some(members) = s.get(kw).and_then(Value::as_array) {
+                let mut first = None;
+                for m in members {
+                    let cand = minimal(root, m, depth + 1)?;
+                    if check(root, &s, &cand, 0) == Check::Valid {
+                        return Ok(cand);
+                    }
+                    first.get_or_insert(cand);
+                }
+                if let Some(c) = first {
+                    return Ok(c);
+                }
+            }
+        }
+    }
     Ok(match ty.as_str() {
         "boolean" => json!(true),
         "integer" | "number" => {
@@ -306,8 +325,18 @@ fn items_of(root: &Value, s: &Value, n: usize, depth: usize) -> Result<Value, St
 fn object_of(root: &Value, schema: &Value, depth: usize) -> Result<Value, String> {
     let s = resolve(root, schema, 0).unwrap_or(Value::Null);
     let mut m = Map::new();
-    let req: Vec<&str> = s.get("required").and_then(Value::as_array).map(|a| a.iter().filter_map(Value::as_str).collect()).unwrap_or_default();
-    for name in req {
+    let own = |v: &Value| -> Vec<String> {
+        v.get("required").and_then(Value::as_array).map(|a| a.iter().filter_map(|x| x.as_str().map(str::to_string)).collect()).unwrap_or_default()
+    };
+    let mut req = own(&s);
+    // COUNTEREXAMPLE r2: names required by direct allOf members (a local
+    // $ref member resolved) are required too.
+    for member in s.get("allOf").and_then(Value::as_array).into_iter().flatten() {
+        if let Some(r) = resolve(root, member, 0) {
+            req.extend(own(&r));
+        }
+    }
+    for name in req.iter().map(String::as_str) {
         let sub = s.get("properties").and_then(|p| p.get(name)).cloned().unwrap_or(Value::Null);
         m.insert(name.to_string(), minimal(root, &sub, depth + 1)?);
     }
@@ -448,7 +477,7 @@ fn check(root: &Value, schema: &Value, inst: &Value, depth: usize) -> Check {
 /// Does a keyword assert anything this checker must account for?
 fn asserts(k: &str) -> bool {
     UNCHECKED.contains(&k)
-        || ["type", "properties", "required", "additionalProperties", "enum", "const", "minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "minLength", "maxLength", "minItems", "maxItems", "items", "minProperties", "maxProperties", "uniqueItems", "dependentRequired", "dependencies", "multipleOf"].contains(&k)
+        || ["type", "properties", "required", "additionalProperties", "enum", "const", "minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "minLength", "maxLength", "minItems", "maxItems", "items", "minProperties", "maxProperties", "uniqueItems", "dependentRequired", "dependencies", "multipleOf", "allOf", "anyOf", "oneOf", "not"].contains(&k)
 }
 
 fn keyword(root: &Value, s: &Value, k: &str, v: &Value, inst: &Value, depth: usize) -> Check {
@@ -529,6 +558,36 @@ fn keyword(root: &Value, s: &Value, k: &str, v: &Value, inst: &Value, depth: usi
             }
             (Some(m), _) if m > 0.0 => Check::Valid,
             _ => Check::Unknown(k.to_string()),
+        },
+        // COUNTEREXAMPLE r2: combinators over checks already made. An
+        // unknown keeps the inner keyword's name, never the combinator's.
+        "allOf" | "anyOf" | "oneOf" => {
+            let Some(members) = v.as_array() else { return Check::Unknown(k.to_string()) };
+            let results: Vec<Check> = members.iter().map(|m| check(root, m, inst, depth + 1)).collect();
+            let valid = results.iter().filter(|c| **c == Check::Valid).count();
+            let first_unknown = results.iter().find_map(|c| match c {
+                Check::Unknown(r) => Some(r.clone()),
+                _ => None,
+            });
+            match k {
+                "allOf" => results.into_iter().fold(Check::Valid, and),
+                "anyOf" => match (valid, first_unknown) {
+                    (n, _) if n > 0 => Check::Valid,
+                    (_, Some(r)) => Check::Unknown(r),
+                    _ => Check::Invalid,
+                },
+                _ => match (valid, first_unknown) {
+                    (n, _) if n >= 2 => Check::Invalid,
+                    (1, None) => Check::Valid,
+                    (_, Some(r)) => Check::Unknown(r),
+                    _ => Check::Invalid,
+                },
+            }
+        }
+        "not" => match check(root, v, inst, depth + 1) {
+            Check::Valid => Check::Invalid,
+            Check::Invalid => Check::Valid,
+            u => u,
         },
         "required" => match (v.as_array(), inst.as_object()) {
             (Some(r), Some(o)) => ok(r.iter().filter_map(Value::as_str).all(|n| o.contains_key(n))),

@@ -190,11 +190,14 @@ A break comes with a counterexample whenever INVAR can build one: a whole
 instance the base schema accepts and the changed schema rejects. You do not have to trust INVAR to
 believe it; save it and run any validator you already use against both
 versions. The judge checks each instance itself before printing it, with
-a checker for exactly the keywords it reads; when a schema uses one it
-does not read (`pattern`, `format`, a combinator and so on), the output
+a checker for exactly the keywords it reads (from v0.2.9 including
+`allOf`, `anyOf`, `oneOf`, `not`, `minProperties`, `maxProperties`,
+`uniqueItems`, `dependentRequired` and `multipleOf`); when a schema uses
+one it does not read (`pattern`, `format`, `if` and so on), the output
 says `no counterexample built:` and names it, rather than print a guess.
-On the SchemaStore replay it built 24 instances for 47 findings, and
-every one passed an independent check with Python `jsonschema`. Checking
+On the SchemaStore replay v0.2.9 builds 28 instances for 44 findings on
+the 17 commits that break, and every one passes an independent check
+with Python `jsonschema`. Checking
 the rest by hand the same way showed 3 of the 20 commits we had labelled
 breaks are not breaks: no such instance exists
 ([COUNTEREXAMPLE-SPEC.md](docs/falsification/COUNTEREXAMPLE-SPEC.md)).

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -143,9 +143,7 @@ run_one CX-M3 'a.into_iter().filter(|v| !b.contains(v)).map(Some).collect()' 'a.
 # CX-M4 tightened value on the bound instead of past it
 run_one CX-M4 '(true, Some(i)) => json!(if up { i + 1 } else { i - 1 }),' '(true, Some(i)) => json!(i),' cx_f04_tightened_steps_past_the_new_bound counterexample_test "$X"
 # CX-M5 required properties not built (Amendment A: killed by cx_f09, not cx_f06)
-run_one CX-M5 '    for name in req {
-        let sub' '    for name in req.into_iter().take(0) {
-        let sub' cx_f09_b1_001_every_break_has_a_counterexample counterexample_test "$X"
+run_one CX-M5 'for name in req.iter().map(String::as_str) {' 'for name in req.iter().map(String::as_str).take(0) {' cx_f09_b1_001_every_break_has_a_counterexample counterexample_test "$X"
 # JUDGE-R3 r0 (docs/falsification/JUDGE-R3-SPEC.md)
 # R3-M1 patternProperties check dropped
 run_one R3-M1 'None if closed && patterned => out.push(stated_witness(&dotted, "not_evaluated", pv)),' 'None if false && closed && patterned => out.push(stated_witness(&dotted, "not_evaluated", pv)),' r3_f01_removal_under_pattern_properties_is_not_evaluated judge_r3_test
@@ -164,6 +162,16 @@ run_one K-M5 '        complete(base, base, &mut inst, 0)?;' '        if false { 
 run_one K-M6 'Some(o) => ok(deps.iter()' 'Some(o) => ok(true || deps.iter()' k_f09_dependent_required_unbuildable counterexample_r1_test "$X"
 run_one K-M7 'ok((q - q.round()).abs() < 1e-9)' 'ok(true || (q - q.round()).abs() < 1e-9)' k_f11_multiple_of_is_read counterexample_r1_test "$X"
 run_one K-M8 'v = (v / m).ceil() * m;' 'v += 0.0 * m;' k_f12_multiple_of_generation counterexample_r1_test "$X"
+# COUNTEREXAMPLE r2 (docs/falsification/COUNTEREXAMPLE-R2-SPEC.md), in counterexample.rs
+run_one C-M1 '"anyOf" => match (valid, first_unknown) {' '"anyOf" => match (0usize, Some("anyOf".to_string())) {' c_f02_any_of_read counterexample_r2_test "$X"
+run_one C-M2 '(n, _) if n >= 2 => Check::Invalid,' '(n, _) if n >= 1 => Check::Valid,' c_f04_one_of_counted counterexample_r2_test "$X"
+run_one C-M3 'Check::Invalid => Check::Valid,' 'Check::Invalid => Check::Invalid,' c_f05_not_read counterexample_r2_test "$X"
+run_one C-M4 'req.extend(own(&r));' 'let _ = own(&r);' c_f01_all_of_required_built counterexample_r2_test "$X"
+run_one C-M5 '"anyOf" => match (valid, first_unknown) {
+                    (n, _) if n > 0 => Check::Valid,
+                    (_, Some(r)) => Check::Unknown(r),' '"anyOf" => match (valid, first_unknown) {
+                    (n, _) if n > 0 => Check::Valid,
+                    (_, Some(r)) => Check::Unknown({ let _ = r; "anyOf".to_string() }),' c_f07_unknown_names_the_inner_keyword counterexample_r2_test "$X"
 cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"
