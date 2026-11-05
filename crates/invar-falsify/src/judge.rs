@@ -91,6 +91,35 @@ pub fn run(root: &Path, contract: &str, base: &str, format: &str, receipt_out: O
     })
 }
 
+/// JUDGE-FILEPAIR r0: judge two files directly, no git anywhere. The
+/// first path is the base (the promise), the second the head (the
+/// change), and the paths as given are the labels every surface prints.
+/// The engine is the repository mode's by construction: the same
+/// judge_one, the same renderers. Only how the base bytes arrive
+/// differs, so the two modes cannot diverge on the same bytes.
+pub fn run_files(base_path: &str, head_path: &str, format: &str) -> Result<i32> {
+    let base_raw = std::fs::read(base_path).map_err(|e| anyhow::anyhow!("reading {base_path}: {e}"))?;
+    let head_raw = std::fs::read(head_path).map_err(|e| anyhow::anyhow!("reading {head_path}: {e}"))?;
+    // Ad-hoc files that do not parse are operator errors (exit 3), unlike
+    // a repository contract, whose unparsable bytes are a change under
+    // judgment (NOT EVALUATED, exit 4). Ruled in JUDGE-FILEPAIR r0.
+    serde_json::from_slice::<Value>(&base_raw).map_err(|e| anyhow::anyhow!("{base_path} is not JSON: {e}"))?;
+    serde_json::from_slice::<Value>(&head_raw).map_err(|e| anyhow::anyhow!("{head_path} is not JSON: {e}"))?;
+    let One { verdict, reason, witnesses, stated, .. } = judge_one(head_path, BaseRead::Found(base_raw), Some(&head_raw));
+    let (c, b) = (head_path, base_path);
+    match format {
+        "json" => println!("{}", serde_json::to_string_pretty(&body_json(verdict, reason, c, b, &witnesses, &stated)).unwrap_or_default()),
+        "sarif" => println!("{}", serde_json::to_string_pretty(&render_sarif(verdict, reason, c, b, &witnesses, &stated)).unwrap_or_default()),
+        "github" => print!("{}", render_github(verdict, reason, c, b, &witnesses)),
+        _ => print!("{}", render_text(verdict, reason, c, b, &witnesses, &stated)),
+    }
+    Ok(match verdict {
+        "HOLDS" => 0,
+        "VIOLATED" => 1,
+        _ => 4,
+    })
+}
+
 /// One contract's judgment, as every surface renders it.
 struct One {
     contract: String,

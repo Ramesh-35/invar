@@ -262,6 +262,12 @@ output: `$ref`, `allOf`, `anyOf`, `oneOf`, `items`. Specs, fixtures and
 the mutation record:
 [docs/falsification/JUDGE-SPEC.md](docs/falsification/JUDGE-SPEC.md),
 [docs/falsification/JUDGE-SUBTYPE-SPEC.md](docs/falsification/JUDGE-SUBTYPE-SPEC.md).
+From v0.2.12 the judge also takes two files directly, with no git and
+no setup: `invar judge old.json new.json` (the base first, then the
+change). The engine, the verdicts and the exit codes are the repository
+mode's, by construction
+([JUDGE-FILEPAIR-SPEC.md](docs/falsification/JUDGE-FILEPAIR-SPEC.md)).
+
 `invar judge` ships from v0.2.0; the subtype checks (enum, bounds,
 required, pattern, format) from v0.2.1; inline PR annotations and
 `--format sarif` from v0.2.2.

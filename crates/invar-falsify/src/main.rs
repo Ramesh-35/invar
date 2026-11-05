@@ -389,6 +389,11 @@ struct HookArgs {
 
 #[derive(Parser)]
 struct JudgeArgs {
+    /// JUDGE-FILEPAIR r0: two files, the base (the promise) then the
+    /// head (the change), judged directly with no git anywhere. Not
+    /// combined with --contract, --contracts, --base or --receipt.
+    #[arg(value_name = "FILE", num_args = 0..=2)]
+    files: Vec<String>,
     /// Path of the declared contract file in this repository.
     #[arg(long)]
     contract: Option<String>,
@@ -397,9 +402,9 @@ struct JudgeArgs {
     #[arg(long)]
     contracts: Vec<String>,
     /// Git ref to read the PRE contract from: the base tree, never the
-    /// working tree (the SIB-3 trust discipline).
-    #[arg(long, default_value = "origin/main")]
-    base: String,
+    /// working tree (the SIB-3 trust discipline) [default: origin/main].
+    #[arg(long)]
+    base: Option<String>,
     /// Output format: text (for people) or json (the same facts for
     /// machines and agents, deterministically ordered).
     #[arg(long, default_value = "text")]
@@ -1335,15 +1340,33 @@ fn cmd_lock(args: LockArgs) -> Result<i32> {
 /// the model, so a broken setup cannot thrash the loop.
 /// JUDGE-1: the declared-data-contract verdict (JUDGE-SPEC r1).
 fn cmd_judge(args: JudgeArgs) -> Result<i32> {
+    // JUDGE-FILEPAIR r0: two positional files are their own mode, and the
+    // modes never mix. Every conflict is a stated error, never a guess.
+    if !args.files.is_empty() {
+        if args.contract.is_some() || !args.contracts.is_empty() {
+            anyhow::bail!("two files and --contract cannot be combined: judge the two files, or judge a contract in this repository.");
+        }
+        if args.base.is_some() {
+            anyhow::bail!("two files and --base cannot be combined: the first file is the base.");
+        }
+        if args.receipt.is_some() {
+            anyhow::bail!("--receipt needs a repository; judge two files without it.");
+        }
+        if args.files.len() != 2 {
+            anyhow::bail!("judge takes two files: the base (the promise), then the head (the change)");
+        }
+        return invar_falsify::judge::run_files(&args.files[0], &args.files[1], &args.format);
+    }
     let root = std::env::current_dir().context("reading the current directory")?;
+    let base = args.base.as_deref().unwrap_or("origin/main");
     match (args.contract, args.contracts.is_empty()) {
         (Some(_), false) => anyhow::bail!("--contract and --contracts cannot be combined: judge one contract, or every contract a glob selects"),
-        (Some(c), true) => invar_falsify::judge::run(&root, &c, &args.base, &args.format, args.receipt.as_deref()),
+        (Some(c), true) => invar_falsify::judge::run(&root, &c, base, &args.format, args.receipt.as_deref()),
         (None, false) => {
             if args.receipt.is_some() {
                 anyhow::bail!("--receipt with --contracts is not supported in r0: receipts are written one contract at a time (use --contract)");
             }
-            invar_falsify::judge::run_many(&root, &args.contracts, &args.base, &args.format)
+            invar_falsify::judge::run_many(&root, &args.contracts, base, &args.format)
         }
         (None, true) => anyhow::bail!("pass --contract <path> or --contracts '<glob>'"),
     }
