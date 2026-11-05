@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -172,6 +172,10 @@ run_one C-M5 '"anyOf" => match (valid, first_unknown) {
                     (_, Some(r)) => Check::Unknown(r),' '"anyOf" => match (valid, first_unknown) {
                     (n, _) if n > 0 => Check::Valid,
                     (_, Some(r)) => Check::Unknown({ let _ = r; "anyOf".to_string() }),' c_f07_unknown_names_the_inner_keyword counterexample_r2_test "$X"
+# JUDGE-D9 r0 (docs/falsification/JUDGE-D9-SPEC.md)
+run_one D9-M1 '!values.is_empty() && values.iter().all(|v| value_has_type(v, &t))' '!values.is_empty() && { let _ = &t; true }' d9_f04_type_excluding_an_enum_value_is_violated judge_d9_test
+run_one D9-M2 't.contains(&ty) || (ty == "integer" && t.contains(&"number"))' 't.contains(&ty)' d9_f06_integers_are_numbers judge_d9_test
+run_one D9-M3 'let mut c: Vec<Value> = leaf.get("enum").and_then(Value::as_array).cloned().unwrap_or_default();' 'let mut c: Vec<Value> = Vec::new();' d9_f04_type_excluding_an_enum_value_is_violated judge_d9_test "$X"
 cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"

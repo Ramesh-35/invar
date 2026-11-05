@@ -389,6 +389,10 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
                     // D5 (r2 Amendment B): the type its own keywords already
                     // implied, now written down: a stated note, not a break.
                     out.push(stated_witness(&dotted, "type_explicit", qv));
+                } else if type_str(pv) == "unspecified" && enum_covered(pv, qv) {
+                    // D9 (JUDGE-D9 r0): the enum (or const) already limited
+                    // the field to values of the new type.
+                    out.push(Witness { post_type: Some(type_str(qv)), ..stated_witness(&dotted, "type_enum_covered", pv) });
                 } else if type_str(pv) != type_str(qv) && widens(pv, qv) {
                     // D7 (JUDGE-WIDEN r0): every value valid before is still
                     // valid; a stated note, never a break.
@@ -509,6 +513,37 @@ fn widens(pre: &Value, post: &Value) -> bool {
     a.split('|').all(|t| b.contains(&t) || (t == "integer" && b.contains(&"number")))
 }
 
+/// D9 (JUDGE-D9 r0): does every value the base enum (or const) allows
+/// have a type the post declares? An integer value is also a number; a
+/// whole number written 1.0 is an integer.
+fn enum_covered(pre: &Value, post: &Value) -> bool {
+    let values: Vec<&Value> = match (pre.get("enum").and_then(Value::as_array), pre.get("const")) {
+        (Some(e), _) => e.iter().collect(),
+        (None, Some(c)) => vec![c],
+        _ => return false,
+    };
+    let declared = type_str(post);
+    if declared == "unspecified" {
+        return false;
+    }
+    let t: Vec<&str> = declared.split('|').collect();
+    !values.is_empty() && values.iter().all(|v| value_has_type(v, &t))
+}
+
+/// Is `v` an instance of one of the JSON Schema types `t`?
+fn value_has_type(v: &Value, t: &[&str]) -> bool {
+    let ty = match v {
+        Value::Null => "null",
+        Value::Bool(_) => "boolean",
+        Value::String(_) => "string",
+        Value::Array(_) => "array",
+        Value::Object(_) => "object",
+        Value::Number(n) if n.is_i64() || n.is_u64() || n.as_f64().is_some_and(|f| f.fract() == 0.0) => "integer",
+        Value::Number(_) => "number",
+    };
+    t.contains(&ty) || (ty == "integer" && t.contains(&"number"))
+}
+
 /// D2 (r2): an object that admits no other keys.
 fn is_closed(v: &Value) -> bool {
     v.get("additionalProperties") == Some(&Value::Bool(false)) || v.get("unevaluatedProperties") == Some(&Value::Bool(false))
@@ -562,6 +597,14 @@ fn take_stated(w: &mut Vec<Witness>) -> Stated {
                 "enum added: {} now lists every value valid before ({}).",
                 x.path,
                 x.pre_value.as_deref().unwrap_or("")
+            ));
+            false
+        }
+        "type_enum_covered" => {
+            st.notes.push(format!(
+                "type made explicit: {} is now {}, which every value of its enum already is; every value valid before is still valid.",
+                x.path,
+                x.post_type.as_deref().unwrap_or("unspecified")
             ));
             false
         }

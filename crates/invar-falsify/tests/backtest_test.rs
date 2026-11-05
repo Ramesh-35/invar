@@ -45,7 +45,15 @@ fn git_cfg(dir: &Path, args: &[&str], day: u32, host_global: Option<&Path>) {
         .arg(dir)
         .args(args)
         .env("GIT_AUTHOR_DATE", &date)
-        .env("GIT_COMMITTER_DATE", &date);
+        .env("GIT_COMMITTER_DATE", &date)
+        // HERM-2 fix: identity too. GIT_AUTHOR_NAME and friends exported in
+        // a contributor's shell outrank the repository's user.name, which
+        // changed the golden SHAs (issue #3). The values match what
+        // repo_cfg writes into the repo config, so the goldens are unchanged.
+        .env("GIT_AUTHOR_NAME", "t")
+        .env("GIT_AUTHOR_EMAIL", "t@t")
+        .env("GIT_COMMITTER_NAME", "t")
+        .env("GIT_COMMITTER_EMAIL", "t@t");
     if let Some(h) = host_global {
         c.env("GIT_CONFIG_GLOBAL", h);
         c.env("GIT_CONFIG_SYSTEM", h);

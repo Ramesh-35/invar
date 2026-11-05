@@ -98,7 +98,14 @@ fn candidates(w: &Witness, root: &Value, leaf: &Value) -> Vec<Option<Value>> {
     match w.kind {
         "escalated" => vec![None],
         "removed" => vec![minimal(root, leaf, 0).ok()],
-        "retyped" => [json!(null), json!(true), json!(0), json!(0.5), json!(""), json!([]), json!({})].into_iter().map(Some).collect(),
+        "retyped" => {
+            // JUDGE-D9 r0: the base enum (or const) values first, so the
+            // value the new type excludes is the instance shown.
+            let mut c: Vec<Value> = leaf.get("enum").and_then(Value::as_array).cloned().unwrap_or_default();
+            c.extend(leaf.get("const").cloned());
+            c.extend([json!(null), json!(true), json!(0), json!(0.5), json!(""), json!([]), json!({})]);
+            c.into_iter().map(Some).collect()
+        }
         "narrowed" => match (parse(&w.pre_value), parse(&w.post_value)) {
             (Some(Value::Array(a)), Some(Value::Array(b))) => a.into_iter().filter(|v| !b.contains(v)).map(Some).collect(),
             _ => vec![minimal(root, leaf, 0).ok()],

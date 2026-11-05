@@ -206,6 +206,18 @@ From v0.2.8 the three rules behind them are corrected
 release must pass a gate that reads no hand labels: every counterexample
 printed on the whole replay corpus is checked with Python `jsonschema`.
 
+From v0.2.10 a field whose `enum` (or `const`) gains a `type` that every
+listed value already has is a stated note, not a break: an enum of
+strings that gains `type: string` rejects nothing it accepted before
+([JUDGE-D9-SPEC.md](docs/falsification/JUDGE-D9-SPEC.md)). A second
+replay runs on Iglu Central (snowplow/iglu-central at 7771e92, 146
+consecutive version pairs,
+[iglu-replay/replay.py](docs/falsification/iglu-replay/replay.py)).
+SchemaVer promises that an ADDITION bump accepts all data the previous
+version did. INVAR flags 5 ADDITION bumps, 3 of them with an instance
+that Python `jsonschema` confirms, and no printed instance fails that
+check.
+
 In the Action, one input:
 
 ```yaml
