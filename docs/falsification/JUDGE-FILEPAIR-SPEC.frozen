@@ -1,0 +1,16 @@
+# JUDGE-FILEPAIR r0 freeze record, written before any implementation.
+# Baseline: v0.2.11 candidate (clippy-clean tree). FP ratified 2026-11-04.
+# Measured before implementation: judge_filepair_test 0 of 11 pass.
+#   'invar judge a.json b.json' today: clap rejects the positional
+#   arguments, exit 2, 'unexpected argument'. Even the error fixtures
+#   fail, because they require exit 3 and the stated sentences.
+# Every repository-mode sentence the fixtures pin was measured against
+#   the v0.2.11 binary on 2026-11-04 (VIOLATED, HOLDS, NOT EVALUATED,
+#   noted lines, the counterexample line, JSON keys).
+# Pre-registered: all 11 pass; FP-M1..M3 killed; full suite passes;
+#   clippy -D warnings silent; SchemaStore and Iglu replays PASS with
+#   unchanged numbers, replay scripts untouched.
+blake3(docs/falsification/JUDGE-FILEPAIR-SPEC.md) = a514417e3d5c0cb317adba00ee8d54dd97e6fecf4cbe18eeb03601df59cd128f
+sha256(docs/falsification/JUDGE-FILEPAIR-SPEC.md) = b3114763ddddb87527003ad59b4dd81f2e1b9495d714199f69d807a89d9d629e
+blake3(crates/invar-falsify/tests/judge_filepair_test.rs) = 623a5fe41a3ee863bc22e4954d282272c31cb6a9bf703584f8093c0fb5f89460
+sha256(crates/invar-falsify/tests/judge_filepair_test.rs) = 442884dee4a3f8e88164e9f88006765f8267f46e9ed83a281964d433850420d3
