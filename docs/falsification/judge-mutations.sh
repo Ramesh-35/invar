@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -155,6 +155,15 @@ run_one R3-M2 'match (pv.get("enum").is_none(), finite_domain(pv),' 'match (pv.g
 run_one R3-M3 'let before = names(pre);' 'let before = own(pre);' r3_f07_required_moved_out_of_all_of_holds judge_r3_test
 # R3-M4 allOf members ignored at post
 run_one R3-M4 'names(post).into_iter()' 'own(post).into_iter()' r3_f08_newly_required_inside_all_of_is_escalated judge_r3_test
+# COUNTEREXAMPLE r1 (docs/falsification/COUNTEREXAMPLE-R1-SPEC.md), in counterexample.rs
+run_one K-M1 'let want = s.get("minProperties").and_then(Value::as_u64).unwrap_or(0) as usize;' 'let want = { let _ = s.get("minProperties"); 0usize };' k_f02_min_properties_padding counterexample_r1_test "$X"
+run_one K-M2 'ok(if k == "minProperties" { o.len() as f64 >= b } else { o.len() as f64 <= b })' 'ok(if k == "minProperties" { true } else { o.len() as f64 <= b })' k_f03_min_properties_impossible counterexample_r1_test "$X"
+run_one K-M3 'if s.get("uniqueItems") != Some(&Value::Bool(true)) {' 'if true || s.get("uniqueItems") != Some(&Value::Bool(true)) {' k_f06_unique_items_distinct_generation counterexample_r1_test "$X"
+run_one K-M4 '(Some(true), Some(a)) => ok(!a.iter()' '(Some(true), Some(a)) => ok(true || !a.iter()' k_f07_unique_items_not_built_for_objects counterexample_r1_test "$X"
+run_one K-M5 '        complete(base, base, &mut inst, 0)?;' '        if false { complete(base, base, &mut inst, 0)?; }' k_f08_dependent_required_completion counterexample_r1_test "$X"
+run_one K-M6 'Some(o) => ok(deps.iter()' 'Some(o) => ok(true || deps.iter()' k_f09_dependent_required_unbuildable counterexample_r1_test "$X"
+run_one K-M7 'ok((q - q.round()).abs() < 1e-9)' 'ok(true || (q - q.round()).abs() < 1e-9)' k_f11_multiple_of_is_read counterexample_r1_test "$X"
+run_one K-M8 'v = (v / m).ceil() * m;' 'v += 0.0 * m;' k_f12_multiple_of_generation counterexample_r1_test "$X"
 cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"

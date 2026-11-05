@@ -19,10 +19,11 @@ const MAX_BYTES: usize = 512;
 /// The assertion keywords the checker reads. Anything listed in
 /// UNCHECKED makes a node unknown; every other keyword is an annotation
 /// or outside the vocabulary, which validators ignore.
-const UNCHECKED: [&str; 27] = [
-    "pattern", "format", "multipleOf", "uniqueItems", "contains", "minContains", "maxContains",
-    "minProperties", "maxProperties", "patternProperties", "propertyNames", "dependencies",
-    "dependentRequired", "dependentSchemas", "not", "if", "then", "else", "anyOf", "oneOf", "allOf",
+/// COUNTEREXAMPLE r1 reads minProperties, maxProperties, uniqueItems,
+/// dependentRequired, dependencies (array form) and multipleOf.
+const UNCHECKED: [&str; 21] = [
+    "pattern", "format", "contains", "minContains", "maxContains", "patternProperties",
+    "propertyNames", "dependentSchemas", "not", "if", "then", "else", "anyOf", "oneOf", "allOf",
     "unevaluatedProperties", "unevaluatedItems", "prefixItems", "additionalItems", "$dynamicRef",
     "$recursiveRef",
 ];
@@ -64,6 +65,7 @@ fn try_build(w: &Witness, base: &Value, post: &Value) -> Result<Value, String> {
     for leaf in candidates(w, base, &leaf_schema) {
         let mut inst = minimal(base, base, 0)?;
         place(&mut inst, base, &keys, &nodes, leaf)?;
+        complete(base, base, &mut inst, 0)?;
         if serde_json::to_string(&inst).map(|s| s.len()).unwrap_or(usize::MAX) > MAX_BYTES {
             return Err(format!("the instance would be larger than {MAX_BYTES} bytes"));
         }
@@ -123,9 +125,8 @@ fn tightened(w: &Witness, root: &Value, leaf: &Value) -> Vec<Option<Value>> {
             (false, _) => number(if up { b + 0.5 } else { b - 0.5 }),
         }
     };
-    let item = || leaf.get("items").map(|s| minimal(root, s, 0).unwrap_or(Value::Null)).unwrap_or(Value::Null);
     let text = |n: f64| Value::String("a".repeat(n.max(0.0) as usize));
-    let items = |n: f64| Value::Array(vec![item(); n.max(0.0) as usize]);
+    let items = |n: f64| items_of(root, leaf, n.max(0.0) as usize, 0).unwrap_or(Value::Null);
     let (b, b_int, a) = (num(&w.post_value), int(&w.post_value), num(&w.pre_value));
     let Some(b) = b else { return Vec::new() };
     let mut out: Vec<Value> = Vec::new();
@@ -262,23 +263,46 @@ fn minimal(root: &Value, schema: &Value, depth: usize) -> Result<Value, String> 
             if let Some(hi) = f("exclusiveMaximum") {
                 v = v.min(if int { hi.ceil() - 1.0 } else { hi - 1.0 });
             }
+            // r1: the smallest multiple at or above the value so far.
+            if let Some(m) = f("multipleOf").filter(|m| *m > 0.0) {
+                v = (v / m).ceil() * m;
+            }
             number(v)
         }
         "string" => Value::String("a".repeat(s.get("minLength").and_then(Value::as_u64).unwrap_or(0) as usize)),
         "array" => {
             let n = s.get("minItems").and_then(Value::as_u64).unwrap_or(0) as usize;
-            let item = match s.get("items") {
-                Some(i) if i.is_object() || i.is_boolean() => minimal(root, i, depth + 1)?,
-                _ => Value::Null,
-            };
-            Value::Array(vec![item; n])
+            items_of(root, &s, n, depth)?
         }
         "object" => object_of(root, &s, depth)?,
         _ => Value::Null,
     })
 }
 
-/// An object carrying exactly the schema's required properties.
+/// n items for an array schema; under `uniqueItems: true`, n distinct
+/// values where the item type allows it (r1), else n copies (the checker
+/// then rejects, and nothing is printed).
+fn items_of(root: &Value, s: &Value, n: usize, depth: usize) -> Result<Value, String> {
+    let item_schema = match s.get("items") {
+        Some(i) if i.is_object() || i.is_boolean() => i.clone(),
+        _ => Value::Null,
+    };
+    let first = minimal(root, &item_schema, depth + 1)?;
+    if s.get("uniqueItems") != Some(&Value::Bool(true)) {
+        return Ok(Value::Array(vec![first; n]));
+    }
+    let it = resolve(root, &item_schema, 0).unwrap_or(Value::Null);
+    let distinct: Option<Vec<Value>> = match types(&it).first().map(String::as_str) {
+        Some("string") => first.as_str().map(|base| (0..n).map(|i| Value::String(format!("{base}{}", "a".repeat(i)))).collect()),
+        Some("integer") | Some("number") => first.as_f64().map(|base| (0..n).map(|i| number(base + i as f64)).collect()),
+        Some("boolean") if n <= 2 => Some([json!(true), json!(false)].into_iter().take(n).collect()),
+        _ => None,
+    };
+    Ok(Value::Array(distinct.unwrap_or_else(|| vec![first; n])))
+}
+
+/// An object carrying the schema's required properties, padded with
+/// declared ones (sorted) up to `minProperties` (r1).
 fn object_of(root: &Value, schema: &Value, depth: usize) -> Result<Value, String> {
     let s = resolve(root, schema, 0).unwrap_or(Value::Null);
     let mut m = Map::new();
@@ -287,7 +311,58 @@ fn object_of(root: &Value, schema: &Value, depth: usize) -> Result<Value, String
         let sub = s.get("properties").and_then(|p| p.get(name)).cloned().unwrap_or(Value::Null);
         m.insert(name.to_string(), minimal(root, &sub, depth + 1)?);
     }
+    let want = s.get("minProperties").and_then(Value::as_u64).unwrap_or(0) as usize;
+    if let Some(props) = s.get("properties").and_then(Value::as_object) {
+        for (name, sub) in props {
+            if m.len() >= want {
+                break;
+            }
+            if !m.contains_key(name) {
+                m.insert(name.clone(), minimal(root, sub, depth + 1)?);
+            }
+        }
+    }
     Ok(Value::Object(m))
+}
+
+/// Add, for every present key, the keys its `dependentRequired` (or array
+/// `dependencies`) names, when the object declares them, recursively (r1).
+fn complete(root: &Value, schema: &Value, inst: &mut Value, depth: usize) -> Result<(), String> {
+    if depth > 32 {
+        return Ok(());
+    }
+    let Some(s) = resolve(root, schema, 0) else { return Ok(()) };
+    let props = s.get("properties").and_then(Value::as_object).cloned().unwrap_or_default();
+    if let Some(o) = inst.as_object_mut() {
+        loop {
+            let mut added = false;
+            for kw in ["dependentRequired", "dependencies"] {
+                let Some(deps) = s.get(kw).and_then(Value::as_object) else { continue };
+                for (key, names) in deps {
+                    if !o.contains_key(key) {
+                        continue;
+                    }
+                    for n in names.as_array().into_iter().flatten().filter_map(Value::as_str) {
+                        if !o.contains_key(n) {
+                            if let Some(sub) = props.get(n) {
+                                o.insert(n.to_string(), minimal(root, sub, depth + 1)?);
+                                added = true;
+                            }
+                        }
+                    }
+                }
+            }
+            if !added {
+                break;
+            }
+        }
+        for (k, v) in o.iter_mut() {
+            if let Some(sub) = props.get(k) {
+                complete(root, sub, v, depth + 1)?;
+            }
+        }
+    }
+    Ok(())
 }
 
 /// Declared types, in order.
@@ -373,7 +448,7 @@ fn check(root: &Value, schema: &Value, inst: &Value, depth: usize) -> Check {
 /// Does a keyword assert anything this checker must account for?
 fn asserts(k: &str) -> bool {
     UNCHECKED.contains(&k)
-        || ["type", "properties", "required", "additionalProperties", "enum", "const", "minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "minLength", "maxLength", "minItems", "maxItems", "items"].contains(&k)
+        || ["type", "properties", "required", "additionalProperties", "enum", "const", "minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "minLength", "maxLength", "minItems", "maxItems", "items", "minProperties", "maxProperties", "uniqueItems", "dependentRequired", "dependencies", "multipleOf"].contains(&k)
 }
 
 fn keyword(root: &Value, s: &Value, k: &str, v: &Value, inst: &Value, depth: usize) -> Check {
@@ -423,6 +498,37 @@ fn keyword(root: &Value, s: &Value, k: &str, v: &Value, inst: &Value, depth: usi
             (Value::Array(_), Some(_)) => Check::Unknown("items".into()),
             (_, Some(a)) => a.iter().fold(Check::Valid, |acc, x| and(acc, check(root, v, x, depth + 1))),
             _ => Check::Valid,
+        },
+        "minProperties" | "maxProperties" => match (v.as_f64(), inst.as_object()) {
+            (Some(b), Some(o)) => ok(if k == "minProperties" { o.len() as f64 >= b } else { o.len() as f64 <= b }),
+            (None, _) => Check::Unknown(k.to_string()),
+            _ => Check::Valid,
+        },
+        "uniqueItems" => match (v.as_bool(), inst.as_array()) {
+            (Some(true), Some(a)) => ok(!a.iter().enumerate().any(|(i, x)| a[i + 1..].iter().any(|y| same(x, y)))),
+            (Some(_), _) | (None, None) => Check::Valid,
+            (None, Some(_)) => Check::Unknown(k.to_string()),
+        },
+        "dependentRequired" | "dependencies" => {
+            let Some(deps) = v.as_object() else { return Check::Unknown(k.to_string()) };
+            // dependencies with a schema value is not read (r1): unknown.
+            if deps.values().any(|d| !d.is_array()) {
+                return Check::Unknown(k.to_string());
+            }
+            match inst.as_object() {
+                Some(o) => ok(deps.iter().filter(|(key, _)| o.contains_key(*key)).all(|(_, d)| {
+                    d.as_array().is_some_and(|names| names.iter().filter_map(Value::as_str).all(|n| o.contains_key(n)))
+                })),
+                None => Check::Valid,
+            }
+        }
+        "multipleOf" => match (v.as_f64(), num) {
+            (Some(m), Some(x)) if m > 0.0 => {
+                let q = x / m;
+                ok((q - q.round()).abs() < 1e-9)
+            }
+            (Some(m), _) if m > 0.0 => Check::Valid,
+            _ => Check::Unknown(k.to_string()),
         },
         "required" => match (v.as_array(), inst.as_object()) {
             (Some(r), Some(o)) => ok(r.iter().filter_map(Value::as_str).all(|n| o.contains_key(n))),
