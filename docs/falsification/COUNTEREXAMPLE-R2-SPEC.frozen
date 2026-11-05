@@ -1,0 +1,13 @@
+# COUNTEREXAMPLE r2 freeze record, written before any implementation.
+# Baseline: COUNTEREXAMPLE r1 as built (721 tests, 52 of 52 mutants), not yet released.
+# Founder ratification in principle 2026-11-03.
+# Measured before implementation: counterexample_r2_test 1 of 10 pass (c_f09, the guard
+#   that if/then/else stays unchecked), 9 fail, each on the unread combinator.
+# Expected instances checked independently at freeze: 6 of 6 confirmed by Python
+#   jsonschema 4.26.0; c_f04 and c_f06 premises checked (the generated instance is invalid at base).
+# Pre-registered: every printed counterexample passes the independent check; confirmed
+#   commits on label-free.py reported as measured; prediction 11 to 12 (codex-hooks 9497fde91).
+blake3(docs/falsification/COUNTEREXAMPLE-R2-SPEC.md) = b2a0650f75d883a5df0d6c514d8d105c403ecb209d5afad8618b22b4b6d87b58
+sha256(docs/falsification/COUNTEREXAMPLE-R2-SPEC.md) = 0e93449b7726581a9f1e7c291f9861145a7711f2efdf19cd21592ba634af759f
+blake3(crates/invar-falsify/tests/counterexample_r2_test.rs) = 5ca286111c2a5885725cd7bf664b50d83051be33a94e8ac729e113dc601c37ed
+sha256(crates/invar-falsify/tests/counterexample_r2_test.rs) = f75bb4c3c45bac6f43a0b86e3a01f2004c39e8ac8d94a3cfb14aa9993d783502
