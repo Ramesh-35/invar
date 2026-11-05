@@ -172,13 +172,15 @@ fn cx_f10_surfaces() {
 }
 
 /// cx_f11: the base check refuses what it cannot check. Kills CX-M1.
+/// COUNTEREXAMPLE r1 amendment: r1 reads `minProperties`, so the root
+/// keyword the checker cannot read is `propertyNames` instead.
 #[test]
 fn cx_f11_unchecked_keyword_at_base_is_stated() {
-    let pre = r#"{"minProperties":1,"additionalProperties":false,"properties":{"name":{"type":"string"},"age":{"type":"integer"}}}"#;
-    let post = r#"{"minProperties":1,"additionalProperties":false,"properties":{"name":{"type":"string"}}}"#;
+    let pre = r#"{"propertyNames":{"maxLength":10},"additionalProperties":false,"properties":{"name":{"type":"string"},"age":{"type":"integer"}}}"#;
+    let post = r#"{"propertyNames":{"maxLength":10},"additionalProperties":false,"properties":{"name":{"type":"string"}}}"#;
     let (cx, why) = one(pre, post, "f11");
     assert_eq!(cx, Value::Null);
-    assert_eq!(why, "minProperties is not checked by this judge");
+    assert_eq!(why, "propertyNames is not checked by this judge");
 }
 
 /// cx_f12: the judge claims a break the post check cannot confirm, so

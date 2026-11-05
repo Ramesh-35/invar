@@ -1,0 +1,17 @@
+# COUNTEREXAMPLE r1 freeze record, written before any implementation.
+# Baseline: v0.2.8 (11b0cca). Founder go 2026-11-03.
+# Measured before implementation: counterexample_r1_test 1 of 13 pass (k_f13, the guard
+#   that schema-valued dependencies stay unchecked), 12 fail; counterexample_test with the
+#   amended cx_f11: 12 of 12 (purpose kept, CX-M1 killer).
+# Expected instances checked independently at freeze: 9 of 9 confirmed by Python
+#   jsonschema 4.26.0 (each valid at base, invalid at post); k_f03 and k_f09 premises
+#   checked (no base instance with the unbuilt key is valid).
+# Pre-registered: every printed counterexample passes the independent check; confirmed
+#   commits on label-free.py reported as measured; prediction 10 to 11 (pnpm 18132a01a).
+# Amended fixture (old hash in JUDGE-R3-SPEC.frozen): counterexample_test.rs.
+blake3(docs/falsification/COUNTEREXAMPLE-R1-SPEC.md) = e8568987c685e99fb1ca2a395cf4e12c8356f89c4d175b023fdc04e17f2068be
+sha256(docs/falsification/COUNTEREXAMPLE-R1-SPEC.md) = 6a83ffad2c4b60152d0d9d586c8897c8307b55064c675dd7e24cb022850c8b27
+blake3(crates/invar-falsify/tests/counterexample_r1_test.rs) = 6a0d2e62a125c1f1ec1e4f0518e00708ef73e590886d940ad5056ccd8a358656
+sha256(crates/invar-falsify/tests/counterexample_r1_test.rs) = 05a561d2b127d604533d63ad2ad642b6303fa1da1586af6507649d838f768d53
+blake3(crates/invar-falsify/tests/counterexample_test.rs) = d25cbc7bc7874b1fa46aa5c038b2c76309c8782ea30803fe1fb68d9eed08018a
+sha256(crates/invar-falsify/tests/counterexample_test.rs) = 4cdc372ad7a7c473e498c30cae1dabf0e37a57eff4368a340640b7bebf6b66d9
