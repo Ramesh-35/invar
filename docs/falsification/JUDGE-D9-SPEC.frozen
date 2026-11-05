@@ -1,0 +1,29 @@
+# JUDGE-D9 r0 freeze record, written before any implementation.
+# Baseline: v0.2.9 candidate (COUNTEREXAMPLE r1 + r2 as built, not yet released). D9 ratified 2026-11-03.
+# Measured before implementation: judge_d9_test 1 of 10 pass (d9_f09, the guard), 9 fail:
+#   the covered cases are still reported retyped; d9_f04 and d9_f05 build no payload
+#   (old enum values are not yet candidates); d9_f10 carries an extra retyped witness.
+# Checked independently at freeze with Python jsonschema 4.26.0: d9_f04 {"f":2} and
+#   d9_f05 {"f":1.5} valid at base, invalid at post (Draft 4 and 2020-12); d9_f01, f03,
+#   f06: every base value valid at post. Iglu sweep: 84 of 84 old enum values in the 7
+#   false-alarm findings validate against the new field schemas.
+# Iglu replay (iglu-replay/replay.py, pinned 7771e92) on the candidate: 146 pairs, ADDITION
+#   VIOLATED 9, confirmed 3, 0 failed, 0 errors. The script was fixed before freezing: it
+#   resolved the binary relative to each temp repository, and it passed on errors; a
+#   missing binary now fails the gate (146 errors, FAIL).
+# Pre-registered: ADDITION VIOLATED 9 to 5; none of the 4 false-alarm pairs VIOLATED;
+#   0 counterexamples fail the independent check; SchemaStore replay PASS.
+blake3(docs/falsification/JUDGE-D9-SPEC.md) = e6741803d5e7142a21da970fc2526d4156eeb4d81be7b5089632f186e3b90ae6
+sha256(docs/falsification/JUDGE-D9-SPEC.md) = fd12b075d22dc205fb5fc1410f4ccb28302247c385b75f8bba781e184575bd70
+blake3(crates/invar-falsify/tests/judge_d9_test.rs) = 1371d8cdf7bdd02446d06378cc99ec3ffaad7ea629648eb38b1ba5762df09b09
+sha256(crates/invar-falsify/tests/judge_d9_test.rs) = f6efcee6ccadb71a30ea0556abf486f4f087845e812cdb7fc79872bdde622ed9
+blake3(crates/invar-falsify/tests/fixtures/judge/iglu-campaign-attribution-1-0-0.json) = 7c40a57a4fac3b5ccd54932d8a154ba82934042e5ee2a78470b646e0f08b4583
+sha256(crates/invar-falsify/tests/fixtures/judge/iglu-campaign-attribution-1-0-0.json) = de97f7e7a8186ecd03c3ffed3ffc2304339d391fb1d66da1d7e16149140f63d9
+blake3(crates/invar-falsify/tests/fixtures/judge/iglu-campaign-attribution-1-0-1.json) = 361c8443fb000fc60d41d7ed31cccc072e3811c2083f0963f2ca30b9934aed38
+sha256(crates/invar-falsify/tests/fixtures/judge/iglu-campaign-attribution-1-0-1.json) = 3840fcc7535323d5bfba0ae93dc2f6da230c8716e46373bcf7681a32adc25458
+blake3(crates/invar-falsify/tests/fixtures/judge/iglu-yauaa-context-1-0-3.json) = f280810ba6283a97b0d86d51a5a000dc7f6d58b22d15f9c221f101d2f7a34248
+sha256(crates/invar-falsify/tests/fixtures/judge/iglu-yauaa-context-1-0-3.json) = d04d36ea3fd6f9c5103a5ebd65945d250da3596be72cdd425412cb4e92d07441
+blake3(crates/invar-falsify/tests/fixtures/judge/iglu-yauaa-context-1-0-4.json) = 10fb53ee530ac4b83e2bb7da16d858c5783c9a366e48ae2909d84b5c5fbc054d
+sha256(crates/invar-falsify/tests/fixtures/judge/iglu-yauaa-context-1-0-4.json) = 7e7ed5675846a3750270652049aaac518d3847f201e87495626278df7b1bedd4
+blake3(docs/falsification/iglu-replay/replay.py) = 4c3de95b72529a4c8224212874afa90ac231b927e41d4d5d0aaa34a88d9fb451
+sha256(docs/falsification/iglu-replay/replay.py) = 944fb93bed79d3fd83b75fda9fc95a63f317aba423ab9b5e0a23b9620ef159a1
