@@ -231,6 +231,11 @@ history this moves 521 of 594 HOLDS to NOT EVALUATED: those HOLDS were
 not earned. In the Action they pass with a warning, never as a silent
 pass; no break that was found before is lost.
 
+From v0.2.14 a draft migration (`$schema` from draft-04, -06 or -07 to
+another of them, the identifier unchanged) is judged, and stated in a
+note, when neither version uses a keyword whose meaning differs between
+those drafts ([JUDGE-DRAFT-SPEC.md](docs/falsification/JUDGE-DRAFT-SPEC.md)).
+
 In the Action, one input:
 
 ```yaml

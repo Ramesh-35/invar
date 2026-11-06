@@ -164,10 +164,12 @@ fn evaluate(read: BaseRead, post_bytes: &str) -> (&'static str, Option<&'static 
                         ROOTS.with(|r| *r.borrow_mut() = Some([pre.clone(), post.clone()]));
                         reach::begin();
                         walk("", &pre, &post, &mut w);
-                        let unchecked = reach::finish(&pre, &post);
+                        let (unchecked, draft_note) = reach::finish(&pre, &post);
                         ROOTS.with(|r| *r.borrow_mut() = None);
                         let mut stated = take_stated(&mut w);
                         stated.unchecked = unchecked;
+                        // JUDGE-DRAFT r0: a covered migration is stated, never silent.
+                        stated.notes.extend(draft_note);
                         w.sort_by(|a, b| (a.path.as_str(), a.kind, a.keyword).cmp(&(b.path.as_str(), b.kind, b.keyword)));
                         for x in &mut w {
                             let last = x.path.rsplit('.').next().unwrap_or(&x.path).to_string();
@@ -1361,6 +1363,8 @@ mod reach {
         whole: Vec<(usize, String)>,
         /// The walk's current node, as pointer chains (site first) per side.
         stack: Vec<(Vec<String>, Vec<String>)>,
+        /// JUDGE-DRAFT r0: the root's draft migration is covered.
+        draft: bool,
     }
 
     thread_local! {
@@ -1528,6 +1532,10 @@ mod reach {
         if c.whole.iter().any(|(_, w)| under(&d.ptr, w)) {
             return true;
         }
+        // JUDGE-DRAFT r0: a draft migration's identity keywords at the root.
+        if d.ptr.is_empty() && c.draft && matches!(d.kw.as_deref(), Some("$schema" | "id" | "$id")) {
+            return true;
+        }
         match &d.kw {
             // Opening an object (false to true or absent) rejects nothing.
             Some(k) if k == "additionalProperties" || k == "unevaluatedProperties" => {
@@ -1579,14 +1587,74 @@ mod reach {
 
     /// After the walk: the shallowest unchecked schema nodes, sorted, an
     /// ancestor standing for its descendants.
-    pub(super) fn finish(pre: &Value, post: &Value) -> Vec<String> {
+    pub(super) fn finish(pre: &Value, post: &Value) -> (Vec<String>, Option<String>) {
         let mut diffs = Vec::new();
         diff("", None, Some(pre), Some(post), &mut diffs);
+        let migration = draft_migration(pre, post);
         let unchecked: BTreeSet<String> = COVER.with(|c| {
-            let c = c.borrow();
+            let mut c = c.borrow_mut();
+            c.draft = migration.is_some();
             diffs.iter().filter(|d| !covered_deep(d, &c)).map(|d| d.ptr.clone()).collect()
         });
         let all: Vec<String> = unchecked.into_iter().collect();
-        all.iter().filter(|p| !all.iter().any(|q| q != *p && under(p, q))).cloned().collect()
+        let shallowest = all.iter().filter(|p| !all.iter().any(|q| q != *p && under(p, q))).cloned().collect();
+        (shallowest, migration)
+    }
+
+    /// The draft a `$schema` URI names, among the three JUDGE-DRAFT r0 reads.
+    fn draft_name(v: Option<&Value>) -> Option<&'static str> {
+        let u = v?.as_str()?;
+        let u = u.strip_suffix('#').unwrap_or(u);
+        let u = u.strip_prefix("https://").or_else(|| u.strip_prefix("http://"))?;
+        match u {
+            "json-schema.org/draft-04/schema" => Some("draft-04"),
+            "json-schema.org/draft-06/schema" => Some("draft-06"),
+            "json-schema.org/draft-07/schema" => Some("draft-07"),
+            _ => None,
+        }
+    }
+
+    /// Keywords whose meaning differs between draft-04, -06 and -07.
+    const DRAFT_GUARDS: [&str; 10] = ["exclusiveMinimum", "exclusiveMaximum", "const", "contains", "propertyNames", "if", "then", "else", "contentMediaType", "contentEncoding"];
+    /// Where draft-04 already allows a boolean in place of a schema.
+    const DRAFT04_BOOLEANS: [&str; 2] = ["additionalProperties", "additionalItems"];
+
+    /// True when nothing in the schema at this position means something
+    /// different between the three drafts: no guard keyword, no boolean
+    /// subschema outside DRAFT04_BOOLEANS, no non-local `$ref`.
+    fn draft_neutral(s: &Value, via: Option<&str>) -> bool {
+        match s {
+            Value::Bool(_) => via.is_some_and(|k| DRAFT04_BOOLEANS.contains(&k)),
+            Value::Object(m) => m.iter().all(|(k, v)| {
+                if DRAFT_GUARDS.contains(&k.as_str()) {
+                    return false;
+                }
+                if k == "$ref" {
+                    return v.as_str().is_some_and(|r| r == "#" || r.starts_with("#/"));
+                }
+                match v {
+                    Value::Object(inner) if NAME_MAPS.contains(&k.as_str()) => inner.values().all(|x| draft_neutral(x, Some(k))),
+                    Value::Object(inner) if k == "dependencies" => inner.values().all(|x| !x.is_object() && !x.is_boolean() || draft_neutral(x, Some(k))),
+                    Value::Object(_) | Value::Bool(_) if SCHEMA_VALUED.contains(&k.as_str()) => draft_neutral(v, Some(k)),
+                    Value::Array(xs) if SCHEMA_ARRAYS.contains(&k.as_str()) => xs.iter().all(|x| draft_neutral(x, Some(k))),
+                    _ => true,
+                }
+            }),
+            _ => true,
+        }
+    }
+
+    /// JUDGE-DRAFT r0: the note for a covered migration, or None.
+    fn draft_migration(pre: &Value, post: &Value) -> Option<String> {
+        let (from, to) = (draft_name(pre.get("$schema"))?, draft_name(post.get("$schema"))?);
+        if pre.get("$schema") == post.get("$schema") {
+            return None;
+        }
+        let ident = |d: &Value| d.get("$id").or_else(|| d.get("id")).cloned();
+        if ident(pre) != ident(post) || !draft_neutral(pre, None) || !draft_neutral(post, None) {
+            return None;
+        }
+        let renamed = if pre.get("id").is_some() && post.get("$id").is_some() { ", with id renamed $id (same value)" } else { "" };
+        Some(format!("draft migration: $schema moves from {from} to {to}{renamed}; no keyword either version uses means something different between those drafts."))
     }
 }

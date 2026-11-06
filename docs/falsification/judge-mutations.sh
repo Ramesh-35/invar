@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -190,6 +190,11 @@ run_one RE-M5 'for kw in ["type", "enum", "pattern", "format"].iter()' 'for kw i
 run_one RE-M6 '(None, Some(_)) => *adds_ok,' '(None, Some(_)) => { let _ = adds_ok; true }' r_f14_open_object_gains_constrained_property judge_reach_test
 run_one RE-M7 'd.base == Some(Value::Bool(false)) && matches!(d.head, None | Some(Value::Bool(true)))' '{ let _ = &d.base; true }' r_f15_object_closed_is_not_evaluated judge_reach_test
 run_one RE-M8 'reach::cover_kw(side, reach::owner(side, chain, "required"), "required");' 'reach::cover_kw(side, reach::owner(side, chain, "required"), "required"); reach::cover_kw(side, reach::owner(side, chain, "type"), "type");' r_f19_root_type_change_is_not_evaluated judge_reach_test
+# JUDGE-DRAFT r0 (docs/falsification/JUDGE-DRAFT-SPEC.md)
+run_one DR-M1 'c.draft = migration.is_some();' 'c.draft = { let _ = &migration; false };' d_f01_plain_migration_holds_and_is_stated judge_draft_test
+run_one DR-M2 'if ident(pre) != ident(post) || !draft_neutral(pre, None) || !draft_neutral(post, None) {' 'if { let _ = ident; false } || !draft_neutral(pre, None) || !draft_neutral(post, None) {' d_f02_identifier_changed_is_not_covered judge_draft_test
+run_one DR-M3 'if DRAFT_GUARDS.contains(&k.as_str()) {' 'if false && DRAFT_GUARDS.contains(&k.as_str()) {' d_f03_const_blocks_the_migration judge_draft_test
+run_one DR-M4 'Value::Bool(_) => via.is_some_and(|k| DRAFT04_BOOLEANS.contains(&k)),' 'Value::Bool(_) => { let _ = via; false }' d_f07_draft04_booleans_do_not_block judge_draft_test
 cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"

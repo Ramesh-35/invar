@@ -17,3 +17,14 @@ blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-webjobs-list-draft0
 sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-webjobs-list-draft04.json) = 3d512a07dccceac74f16fb88864906e371c35d29fad423b40d48a2bc8a743819
 blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-webjobs-list-draft07.json) = 15bd5c1d93b353edfcaee20fe5831b5863211b9a252aa24abad4437972190973
 sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-webjobs-list-draft07.json) = ce47080723bd9079b6e88c961558c59a062eb68931c812f7269b921b8a99c367
+# Measured after implementation (v0.2.14 candidate, 2026-11-06), against the
+#   v0.2.13 release binary:
+#   judge_draft_test 12 of 12; full suite 783 passed; mutants 75 of 75 (DR-M1..M4
+#   each killed by its named fixture); clippy -D warnings silent. Label-free
+#   20/12/28/0, Iglu 5/3/0, SchemaStore replay PASS: unchanged.
+#   Verdict moves, v0.2.13 to v0.2.14 (per pair in draft-moves/): SchemaStore
+#   NOT EVALUATED to HOLDS: 85, as predicted; every one was unchecked only at
+#   the root before, and each now carries exactly one draft-migration note. No
+#   other verdict moved on SchemaStore, Iglu or AsyncAPI.
+#   Interpretation recorded: the rule applies when `$schema` itself changes (a
+#   migration); `id` renamed `$id` under an unchanged `$schema` stays unchecked.
