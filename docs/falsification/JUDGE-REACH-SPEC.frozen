@@ -1,0 +1,33 @@
+# JUDGE-REACH r0 freeze record, written before any implementation.
+# Baseline: v0.2.12 (b99677d, released 2026-11-05). REACH ratified 2026-11-05.
+# Found by the audit suite on asyncapi/spec-json-schemas at eee8d22: AsyncAPI
+#   2.0.0 to 2.1.0, tag neutralized, judged HOLDS (exit 0) while Python jsonschema
+#   4.26.0 (Draft 7) shows a whole 2.0.0 document valid before, rejected after.
+# Measured before implementation: judge_reach_test 1 of 13 pass (r_f06). The
+#   guards r_f02, r_f03, r_f05 already give the right verdict and fail only on
+#   the absent `unchecked` key; r_f11 already leads with unjudged_construct and
+#   fails only on the absent /definitions/U line.
+# SchemaStore corpus: 340 of 594 HOLDS pairs changed definitions or $defs (an
+#   upper bound on the false passes; the exact count is measured after).
+# Pre-registered: all 13 pass; RE-M1..M5 killed; full suite; clippy silent;
+#   label-free 20/12/28/0 and Iglu ADDITION VIOLATED 5/3/0 unchanged; HOLDS to
+#   NOT EVALUATED moves measured and recorded, not predicted.
+blake3(docs/falsification/JUDGE-REACH-SPEC.md) = e126b1671713730420e0b9501bc84f0239165e05a3944aa39da347b05468e3fb
+sha256(docs/falsification/JUDGE-REACH-SPEC.md) = 58f279491f1acbe8a3bd92c36c97a0a41aefe2eb911b6b68b44dbd974692c650
+blake3(crates/invar-falsify/tests/judge_reach_test.rs) = 79d58e01a910384ebb328fcb5bd9907e0521289c6e42c06ae12d972aeb5e7793
+sha256(crates/invar-falsify/tests/judge_reach_test.rs) = a4ad45cf48f05cfa50a29f275aecd6a12e98a5b8d0cb82083ae255ed33e44038
+blake3(crates/invar-falsify/tests/fixtures/judge/asyncapi-2.0.0.json) = a5054a1a97e3e9e1b65935c0cde0bbb046bd95333271bfd24bd11175b30913cb
+sha256(crates/invar-falsify/tests/fixtures/judge/asyncapi-2.0.0.json) = e1380595bf9b854ce25a66c990c2a8aa7ee0698f0db9cad06d3d9ad590f5f60a
+blake3(crates/invar-falsify/tests/fixtures/judge/asyncapi-2.1.0.json) = 9dbf0c397702fdadba63ba90fada3a27bc794da4e6a39085d82daa97566d415a
+sha256(crates/invar-falsify/tests/fixtures/judge/asyncapi-2.1.0.json) = b64a97e70f56a7fbc51b3bc150795997eb6fdd372764d485bf192cc8e431be07
+# Amendment A, 2026-11-05, before any implementation. Probing the covered list
+#   against Python jsonschema found four false passes on v0.2.12 (an open object
+#   gains a typed property; an object is closed; a closed object drops a
+#   patternProperties entry; the root's own type or bounds change). Strict model
+#   ratified by the founder. Scale on SchemaStore HOLDS pairs (structural scan,
+#   refs not followed): 86 add a constrained property to an open object, 7 close
+#   an object. Measured: judge_reach_test 3 of 19 pass (r_f06, r_f16, r_f18).
+amendment-a blake3(docs/falsification/JUDGE-REACH-SPEC.md) = bc5b621d0dd05680b3010eec49ede354d3005bf38b138e07240682e49cc7e9b6
+amendment-a sha256(docs/falsification/JUDGE-REACH-SPEC.md) = e416c9bb9892e05cf5feb648b1ccbc6347e95ec0d23e5475eb685f127742ed1d
+amendment-a blake3(crates/invar-falsify/tests/judge_reach_test.rs) = d60f9807fa331725e8cda124bdd499803e2ecd73c110946eaefc212b8a544567
+amendment-a sha256(crates/invar-falsify/tests/judge_reach_test.rs) = 1ee0f8275e7180c7c9b6179d88dac0b692cfab0f26be48a8afd8bec938e85d93
