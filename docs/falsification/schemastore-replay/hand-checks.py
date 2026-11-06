@@ -29,6 +29,9 @@ BREAKS = [
     ("ec65ccfaf", "ttheme-palette.json", None),
     ("f1b0527c4", "publiccode.json", {"publiccodeYmlVersion": "0.4", "name": "x", "url": "https://example.org/x", "platforms": [], "developmentStatus": "stable", "softwareType": "library", "description": {"en": {"shortDescription": "x"}}, "legal": {"license": "MIT"}, "maintenance": {"type": "none"}, "localisation": {"localisationReady": True, "availableLanguages": []}}),
     ("a83ce6f19", "package.json", {"version": ""}),
+    # JUDGE-ITEMS r0: breaks inside array elements.
+    ("2f74efc3f", "claude-code-keybindings.json", {"bindings": [{"context": "Doctor", "bindings": {}}]}),
+    ("585707189", "linutil-tabs.json", {"directories": ["\t"]}),
 ]
 NOT_BREAKS = [
     ("4836277f2", "pyproject.json", [{"dependency-groups": {"dev": ["x"]}}], "dev still admitted by patternProperties, same schema"),

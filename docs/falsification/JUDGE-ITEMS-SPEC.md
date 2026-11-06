@@ -111,3 +111,56 @@ therefore cargo.json, not tsconfig.json. The rule above is unchanged.
 - IT-M2 an absent `items` is not read as `{}`: i_f04.
 - IT-M3 a tuple `items` judged as one schema: i_f08.
 - IT-M4 the counterexample places the element without its array: i_f06.
+
+## Measured outcome (v0.2.15 candidate, 2026-11-06)
+
+judge_items_test 13 of 13; full suite 796 passed; mutants 79 of 79
+(IT-M1..M4 each killed by its named fixture); clippy `-D warnings` silent.
+
+The pre-registered SchemaStore prediction did not hold, and it failed in
+the prototype, not the engine. Engine verdict moves, v0.2.14 to v0.2.15
+(per pair in items-moves/):
+
+- SchemaStore: 16 to HOLDS (predicted 5), 7 to VIOLATED (predicted 2), 76
+  from unchecked_change to unjudged_construct, 48 with a shorter
+  `unchecked` list. Iglu: 4 to HOLDS as predicted, and 5 to
+  unjudged_construct. AsyncAPI: none. No pair left HOLDS, and no VIOLATED
+  pair changed verdict.
+- Three prototype defects explain every difference: it considered only
+  pairs whose pointer contains `/items`, so a definition reached through
+  an element's `$ref` was never counted (ruff's `RuleSelector`, 9 pairs;
+  claude-code's `permissionRule`); it did not model a witness outranking
+  the unchecked changes left beside it (3 pairs); and it judged the root
+  like a property node (phrase.json, whose root `type` changed, stays
+  unchecked, correctly). Rerun with those fixed, it agrees with the
+  engine; the remaining difference is the reason precedence
+  (unjudged_construct over unchecked_change) for elements that are
+  combinator nodes, which the Gates name.
+- Every counterexample v0.2.15 prints on the three corpora (124, 22 more
+  than v0.2.14) is valid at the base and invalid at the head by Python
+  jsonschema; none is contradicted.
+- Iglu 5/3/0 unchanged. Label-free: PASS, the counts rise with the reach,
+  26 VIOLATED commits (from 20), 14 confirmed by a checked counterexample
+  (from 12), 50 counterexamples printed (from 28), 0 failing the
+  independent check.
+
+## Amendment B (after measurement): six replay labels corrected
+
+The replay corpus was labelled against v0.2.3, which never looked inside
+an array. With elements judged, six commit labels were wrong, each shown
+with evidence in MANIFEST.tsv and hand-checks.py:
+
+- 13e89998e cargo.json ("Add missing enum for crate-type") and 714ea6b79
+  ruff.json (rule `RUF076` removed): holds to real, by the engine's
+  counterexamples, confirmed by jsonschema.
+- 2f74efc3f claude-code-keybindings.json (context `Doctor` removed):
+  false_alarm to real, by the hand-built
+  `{"bindings":[{"context":"Doctor","bindings":{}}]}`.
+- 585707189 linutil-tabs.json (`[^ ]` to `\S`): holds to real, by the
+  hand-built `{"directories":["\t"]}`.
+- 5e44c8eee partial-inwards.json and 5fcc2e0ed claude-code-settings.json:
+  holds to undecided. Each is a pattern change this judge never decides;
+  by hand each widens (an optional leading `=`; a lookahead removed).
+
+With them, SchemaStore replay: PASS (real VIOLATED 21 of 21, false alarms
+VIOLATED 0 of 56, holds newly VIOLATED 0 of 394).

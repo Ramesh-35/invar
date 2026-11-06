@@ -4,6 +4,7 @@
 # Amendment A (2026-11-02): e7373bd3f relabelled real -> false_alarm; its $ref resolves to the same enum (spec, Amendment A).
 # Amendment B (2026-11-02): e7373bd3f real; 929201f41 and 585b21f01 stated (NOT EVALUATED expected); b056a70c8, 51b3fa1a0, 8ae3e0c8c real (found by D4). Evidence: spec, Amendment B.
 # JUDGE-R3 r0 (2026-11-03): 4836277f2, 0091e807a, b514ab55c relabelled real -> false_alarm; no instance valid at base is rejected at post (COUNTEREXAMPLE-SPEC.md Amendment A, hand-checks.py).
+# JUDGE-ITEMS r0 (2026-11-06): with array elements judged, six labels written against v0.2.3 are corrected. 13e89998e, 714ea6b79 holds -> real (engine counterexamples, confirmed by jsonschema); 2f74efc3f false_alarm -> real and 585707189 holds -> real (hand-checks.py); 5e44c8eee, 5fcc2e0ed holds -> undecided (pattern changes; by hand each widens: an optional leading '=', a lookahead removed).
 commit	file	v023_verdict	v023_witnesses	commit_label
 276b087324e60a62492e8c788615268fbdcb44f9	src/schemas/json/cargo-lints-rust.json	HOLDS	0	holds
 d3cbd0bf40e8c45f8b88e87d3bc40fdbf9644500	src/schemas/json/claude-code-settings.json	HOLDS	0	holds
@@ -39,7 +40,7 @@ b44e6d8dc537b163fc8871f6342f992117b98e50	src/schemas/json/pyproject.json	HOLDS	0
 41eeb8e439fbf517de72ef0b3c0d6c823c14936d	src/schemas/json/package.json	HOLDS	0	holds
 41eeb8e439fbf517de72ef0b3c0d6c823c14936d	src/schemas/json/pyproject.json	HOLDS	0	holds
 d21f1ed36cdd07bd0ded9c70e59e18a8d075c3bf	src/schemas/json/tsconfig.json	HOLDS	0	holds
-5fcc2e0edc0bfd4c4b2bf3674eab265f7d938c31	src/schemas/json/claude-code-settings.json	HOLDS	0	holds
+5fcc2e0edc0bfd4c4b2bf3674eab265f7d938c31	src/schemas/json/claude-code-settings.json	HOLDS	0	undecided
 2fd1e927d3daccf568912e94dad48c698c0f269a	src/schemas/json/cargo.json	HOLDS	0	holds
 ca0752272501ff88afbb188abced442b0abb1616	src/schemas/json/ryl.json	HOLDS	0	holds
 ba06047ce1713d3d8fbc8ff24cb99fb223c5638a	src/schemas/json/uv.json	HOLDS	0	holds
@@ -88,7 +89,7 @@ d5b72ee7dfa344801685ab37018cb674864e3055	src/schemas/json/ty.json	HOLDS	0	holds
 bc24ba579d58f066861b4897ba2e37fa62e486a9	src/schemas/json/package.json	HOLDS	0	holds
 95771093cc4ef2158aff9009ef31c11b8af91017	src/schemas/json/tox.json	HOLDS	0	holds
 8e81115a4c2603b799f5c519337f65c8a38d127c	src/schemas/json/package.json	HOLDS	0	holds
-714ea6b793c6a3476d064058d1436e3c4bf0d975	src/schemas/json/ruff.json	HOLDS	0	holds
+714ea6b793c6a3476d064058d1436e3c4bf0d975	src/schemas/json/ruff.json	HOLDS	0	real
 7c910423df8b6b68a9ec85cd7ee5fb5d508c4953	src/schemas/json/github-action.json	HOLDS	0	holds
 7c910423df8b6b68a9ec85cd7ee5fb5d508c4953	src/schemas/json/github-workflow.json	HOLDS	0	holds
 d9d98e69894ebd7a50965dc58d61951e9d7f23a7	src/schemas/json/github-action.json	HOLDS	0	holds
@@ -214,8 +215,8 @@ ac8d192b4b698489ee43f5596025c48f98fceb82	src/schemas/json/cdk.json	HOLDS	0	holds
 2a7fd1cbe653c3d943016e0d5def861855defad1	src/schemas/json/pull-request-labeler.json	HOLDS	0	holds
 65b383d566a6fb90f80cf038d6cd929dac4898c4	src/schemas/json/rumdl.json	HOLDS	0	holds
 144ba338f6931f2678daa7267e1cec6f3b1f21b3	src/schemas/json/prek.json	HOLDS	0	holds
-2f74efc3f937e8ba59f2fbfdaad721930ab14c5c	src/schemas/json/claude-code-keybindings.json	HOLDS	0	false_alarm
-2f74efc3f937e8ba59f2fbfdaad721930ab14c5c	src/schemas/json/claude-code-settings.json	VIOLATED	3	false_alarm
+2f74efc3f937e8ba59f2fbfdaad721930ab14c5c	src/schemas/json/claude-code-keybindings.json	HOLDS	0	real
+2f74efc3f937e8ba59f2fbfdaad721930ab14c5c	src/schemas/json/claude-code-settings.json	VIOLATED	3	real
 3f9f70414f537bfaf57083251b31b19ed1050f64	src/schemas/json/rumdl.json	HOLDS	0	holds
 9022345bd3877b6c57270c237d0b0261d27cba8f	src/schemas/json/ty.json	HOLDS	0	holds
 e02051cf49a8284de9c2eec65436d9bb8d1f2d80	src/schemas/json/cargo-make.json	HOLDS	0	holds
@@ -308,8 +309,8 @@ b65cf6498fa4198344f1b561ce5ed345877a9d18	src/schemas/json/nuget-project.json	HOL
 9b3a4b49db9262a88803885916ff77b97d670961	src/schemas/json/pantsbuild-2.32.0.json	HOLDS	0	holds
 b514ab55c193031891981a470d3e508cbe211f63	src/schemas/json/mkdocs-1.0.json	VIOLATED	1	false_alarm
 b514ab55c193031891981a470d3e508cbe211f63	src/schemas/json/mkdocs-1.6.json	HOLDS	0	false_alarm
-5857071898099235af50efb62a14605414e370cf	src/schemas/json/linutil-tab-data.json	HOLDS	0	holds
-5857071898099235af50efb62a14605414e370cf	src/schemas/json/linutil-tabs.json	HOLDS	0	holds
+5857071898099235af50efb62a14605414e370cf	src/schemas/json/linutil-tab-data.json	HOLDS	0	real
+5857071898099235af50efb62a14605414e370cf	src/schemas/json/linutil-tabs.json	HOLDS	0	real
 4d1152d7e736c5203674f60104e8a3b3153e45a9	src/schemas/json/linkinator-config.json	HOLDS	0	holds
 f0142393eec3bb61dda31b57ed80c6dd6026fff8	src/schemas/json/grpc-api-gateway.json	HOLDS	0	holds
 9acc8080b23bdf293406e150cd764cb51528f2e4	src/schemas/json/global.json	HOLDS	0	holds
@@ -458,7 +459,7 @@ ea1c587846e3f0ddfcbd00c87f0d3391ff28c037	src/schemas/json/pnpm-workspace.json	VI
 52f403f2796a631c2128c1886a9dd59a3f53762c	src/schemas/json/hias-hitf.json	HOLDS	0	holds
 52fc6197e95de31be6d1d8898f99e25fcb8c1c57	src/schemas/json/ruff.json	HOLDS	0	holds
 1ba34fe6a327e56f81223a5cad071e8458fd041e	src/schemas/json/jsone.json	HOLDS	0	holds
-13e89998e23c2458b38c559aede3e97303590693	src/schemas/json/cargo.json	HOLDS	0	holds
+13e89998e23c2458b38c559aede3e97303590693	src/schemas/json/cargo.json	HOLDS	0	real
 09eef28898e2d125763cd453d5bf1f2029e34703	src/schemas/json/aurora-1.0.json	HOLDS	0	holds
 09eef28898e2d125763cd453d5bf1f2029e34703	src/schemas/json/aurora-1.1.json	HOLDS	0	holds
 09eef28898e2d125763cd453d5bf1f2029e34703	src/schemas/json/aurora-1.2.json	HOLDS	0	holds
@@ -781,7 +782,7 @@ c5505fc62681c064b04c5e101f021ce785af51e2	src/schemas/json/bitrise.json	HOLDS	0	h
 bf4e8f7217e7ea78f0f463a7a7c4c2c6d5136491	src/schemas/json/pnpm-workspace.json	HOLDS	0	holds
 3946154519f94405b18a10502e3c4f907c39d43c	src/schemas/json/ryl.json	HOLDS	0	holds
 f5ba2d8609401268415ae2369a7151c65734c304	src/schemas/json/uv.json	HOLDS	0	holds
-5e44c8eee8839250a8f6820aa516961b56ab0cff	src/schemas/json/partial-inwards.json	HOLDS	0	holds
+5e44c8eee8839250a8f6820aa516961b56ab0cff	src/schemas/json/partial-inwards.json	HOLDS	0	undecided
 c95d52cfefb9c544f5bea8424d7c49f7c43bd20b	src/schemas/json/twee-ts.config.json	VIOLATED	19	false_alarm
 49530602c4fa3468788298df66eca0a25c034e64	src/schemas/json/pre-commit-hooks.json	HOLDS	0	holds
 96b28fcf0ae910db5fb97a8eb112f806e167b55f	src/schemas/json/partial-inwards.json	HOLDS	0	holds

@@ -183,7 +183,7 @@ VIOLATED: schemas/media_player.json breaks 6 promises made at origin/main.
   valid before is still valid.
 judged: property presence and type, enum, numeric, length and item-count
 bounds, required, pattern and format, recursively. not judged: $ref, allOf,
-anyOf, oneOf, items (stated, never skipped).
+anyOf, oneOf, tuple items (stated, never skipped).
 ```
 
 A break comes with a counterexample whenever INVAR can build one: a whole
@@ -235,6 +235,14 @@ From v0.2.14 a draft migration (`$schema` from draft-04, -06 or -07 to
 another of them, the identifier unchanged) is judged, and stated in a
 note, when neither version uses a keyword whose meaning differs between
 those drafts ([JUDGE-DRAFT-SPEC.md](docs/falsification/JUDGE-DRAFT-SPEC.md)).
+
+From v0.2.15 an array's element schema is judged like a property, path
+`tags[]`, and a break inside it comes with a counterexample in its array
+([JUDGE-ITEMS-SPEC.md](docs/falsification/JUDGE-ITEMS-SPEC.md)). On
+SchemaStore's history this found breaks no earlier version could see, each
+counterexample confirmed by Python jsonschema: cargo.json's new
+`crate-type` enum rejects `{"lib":{"crate-type":[""]}}`, and ruff.json's
+removal of rule `RUF076` rejects `{"extend-fixable":["RUF076"]}`.
 
 In the Action, one input:
 

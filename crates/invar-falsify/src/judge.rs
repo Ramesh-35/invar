@@ -16,7 +16,7 @@ use std::process::Command;
 /// The constraint classes r0 does not judge, stated in every receipt.
 /// What r1 does not judge, stated in every output (JUDGE-SUBTYPE r1).
 /// `$ref` is a gap r0 had and never stated: references are not followed.
-const UNJUDGED: [&str; 5] = ["$ref", "allOf", "anyOf", "oneOf", "items"];
+const UNJUDGED: [&str; 5] = ["$ref", "allOf", "anyOf", "oneOf", "tuple items"];
 
 /// Lower bounds tighten when raised; upper bounds tighten when lowered.
 const LOWER: [&str; 4] = ["minimum", "exclusiveMinimum", "minLength", "minItems"];
@@ -172,12 +172,13 @@ fn evaluate(read: BaseRead, post_bytes: &str) -> (&'static str, Option<&'static 
                         stated.notes.extend(draft_note);
                         w.sort_by(|a, b| (a.path.as_str(), a.kind, a.keyword).cmp(&(b.path.as_str(), b.kind, b.keyword)));
                         for x in &mut w {
-                            let last = x.path.rsplit('.').next().unwrap_or(&x.path).to_string();
+                            // JUDGE-ITEMS r0: an element (`r[]`) sits on its array's line.
+                            let last = x.path.rsplit('.').next().unwrap_or(&x.path).trim_end_matches("[]").to_string();
                             x.pre_line = find_line(&pre_text, &last);
                             if x.kind != "removed" {
                                 x.post_line = find_line(post_bytes, &last);
                             } else {
-                                let parent = x.path.rsplit('.').nth(1).unwrap_or("properties");
+                                let parent = x.path.rsplit('.').nth(1).unwrap_or("properties").trim_end_matches("[]");
                                 x.anchor_line = find_line(post_bytes, parent);
                             }
                         }
@@ -403,98 +404,137 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
     let patterned = post.get("patternProperties").is_some();
     for (k, pv) in pp {
         let dotted = if prefix.is_empty() { k.clone() } else { format!("{prefix}.{k}") };
-        // D4 (r2 Amendment A): local references resolved before comparing.
-        let (pv_resolved, p_refs) = resolve_ref(0, pv);
-        let pv = &pv_resolved;
-        let q_pair = qp.get(k).map(|q| resolve_ref(1, q));
-        let q_refs = q_pair.as_ref().map(|(_, r)| r.clone()).unwrap_or_default();
-        let qv_resolved = q_pair.map(|(v, _)| v);
-        // The pointers whose merged keywords form this child, site first.
-        let child = |props: &str, refs: &[String]| {
-            let mut c = vec![format!("{props}/properties/{}", reach::escape(k))];
-            c.extend(refs.iter().map(|r| r[1..].to_string()));
-            c
-        };
-        let (p_chain, q_chain) = (child(&p_props, &p_refs), child(&q_props, &q_refs));
-        ACTIVE.with(|a| {
-            let mut a = a.borrow_mut();
-            a[0].extend(p_refs.iter().cloned());
-            a[1].extend(q_refs.iter().cloned());
-        });
-        match qv_resolved.as_ref() {
-            None if closed && patterned => out.push(stated_witness(&dotted, "not_evaluated", pv)),
-            None => out.push(Witness {
-                path: dotted,
-                kind: if closed { "removed" } else { "removed_open" },
-                pre_type: type_str(pv),
-                post_type: None,
-                pre_line: None,
-                post_line: None,
-                keyword: None,
-                pre_value: None,
-                post_value: None,
-                anchor_line: None,
-                counterexample: None,
-                counterexample_reason: None,
-            }),
-            Some(qv) if has_combinator(pv) || has_combinator(qv) => {
-                // D1 (r2): a node under anyOf/oneOf/allOf/$ref is not followed,
-                // so it is never accused: a changed one is stated, not judged.
-                if pv != qv {
-                    out.push(stated_witness(&dotted, "not_evaluated", pv));
-                }
-                // JUDGE-REACH r0: D1 compared these nodes whole.
-                reach::cover_whole(0, &p_chain);
-                reach::cover_whole(1, &q_chain);
+        let site = |props: &str| format!("{props}/properties/{}", reach::escape(k));
+        judge_child(&dotted, pv, qp.get(k), site(&p_props), site(&q_props), closed, patterned, out);
+    }
+}
+
+/// One child of a judged node, a property or (JUDGE-ITEMS r0) an array's
+/// element: `p_site` and `q_site` are its JSON Pointers on each side
+/// before its local `$ref` chain is followed; `qv_raw` None means the
+/// head dropped it, judged by `closed` and `patterned` (D2, J1).
+#[allow(clippy::too_many_arguments)]
+fn judge_child(dotted: &str, pv_raw: &Value, qv_raw: Option<&Value>, p_site: String, q_site: String, closed: bool, patterned: bool, out: &mut Vec<Witness>) {
+    let dotted = dotted.to_string();
+    // D4 (r2 Amendment A): local references resolved before comparing.
+    let (pv_resolved, p_refs) = resolve_ref(0, pv_raw);
+    let pv = &pv_resolved;
+    let q_pair = qv_raw.map(|q| resolve_ref(1, q));
+    let q_refs = q_pair.as_ref().map(|(_, r)| r.clone()).unwrap_or_default();
+    let qv_resolved = q_pair.map(|(v, _)| v);
+    // The pointers whose merged keywords form this child, site first.
+    let child = |site: String, refs: &[String]| {
+        let mut c = vec![site];
+        c.extend(refs.iter().map(|r| r[1..].to_string()));
+        c
+    };
+    let (p_chain, q_chain) = (child(p_site, &p_refs), child(q_site, &q_refs));
+    ACTIVE.with(|a| {
+        let mut a = a.borrow_mut();
+        a[0].extend(p_refs.iter().cloned());
+        a[1].extend(q_refs.iter().cloned());
+    });
+    match qv_resolved.as_ref() {
+        None if closed && patterned => out.push(stated_witness(&dotted, "not_evaluated", pv)),
+        None => out.push(Witness {
+            path: dotted,
+            kind: if closed { "removed" } else { "removed_open" },
+            pre_type: type_str(pv),
+            post_type: None,
+            pre_line: None,
+            post_line: None,
+            keyword: None,
+            pre_value: None,
+            post_value: None,
+            anchor_line: None,
+            counterexample: None,
+            counterexample_reason: None,
+        }),
+        Some(qv) if has_combinator(pv) || has_combinator(qv) => {
+            // D1 (r2): a node under anyOf/oneOf/allOf/$ref is not followed,
+            // so it is never accused: a changed one is stated, not judged.
+            if pv != qv {
+                out.push(stated_witness(&dotted, "not_evaluated", pv));
             }
-            Some(qv) => {
-                // JUDGE-REACH r0: the keywords judged at a property node.
-                for (side, chain) in [(0, &p_chain), (1, &q_chain)] {
-                    for kw in ["type", "enum", "pattern", "format"].iter().chain(LOWER.iter()).chain(UPPER.iter()) {
-                        reach::cover_kw(side, reach::owner(side, chain, kw), kw);
-                    }
-                    reach::cover_refs(side, chain);
-                }
-                if type_str(pv) == "unspecified" && type_made_explicit(pv, qv) {
-                    // D5 (r2 Amendment B): the type its own keywords already
-                    // implied, now written down: a stated note, not a break.
-                    out.push(stated_witness(&dotted, "type_explicit", qv));
-                } else if type_str(pv) == "unspecified" && enum_covered(pv, qv) {
-                    // D9 (JUDGE-D9 r0): the enum (or const) already limited
-                    // the field to values of the new type.
-                    out.push(Witness { post_type: Some(type_str(qv)), ..stated_witness(&dotted, "type_enum_covered", pv) });
-                } else if type_str(pv) != type_str(qv) && widens(pv, qv) {
-                    // D7 (JUDGE-WIDEN r0): every value valid before is still
-                    // valid; a stated note, never a break.
-                    out.push(Witness { kind: "retyped_widened", post_type: Some(type_str(qv)), ..stated_witness(&dotted, "retyped_widened", pv) });
-                } else if type_str(pv) != type_str(qv) {
-                    out.push(Witness {
-                        path: dotted.clone(),
-                        kind: "retyped",
-                        pre_type: type_str(pv),
-                        post_type: Some(type_str(qv)),
-                        pre_line: None,
-                        post_line: None,
-                        keyword: None,
-                        pre_value: None,
-                        post_value: None,
-                        anchor_line: None,
-                        counterexample: None,
-                        counterexample_reason: None,
-                    });
-                }
-                constraints(&dotted, pv, qv, out);
-                reach::push(p_chain.clone(), q_chain.clone());
-                walk(&dotted, pv, qv, out);
-                reach::pop();
-            }
+            // JUDGE-REACH r0: D1 compared these nodes whole.
+            reach::cover_whole(0, &p_chain);
+            reach::cover_whole(1, &q_chain);
         }
-        ACTIVE.with(|a| {
-            let mut a = a.borrow_mut();
-            let (n0, n1) = (a[0].len() - p_refs.len(), a[1].len() - q_refs.len());
-            a[0].truncate(n0);
-            a[1].truncate(n1);
-        });
+        Some(qv) => {
+            // JUDGE-REACH r0: the keywords judged at a property node.
+            for (side, chain) in [(0, &p_chain), (1, &q_chain)] {
+                for kw in ["type", "enum", "pattern", "format"].iter().chain(LOWER.iter()).chain(UPPER.iter()) {
+                    reach::cover_kw(side, reach::owner(side, chain, kw), kw);
+                }
+                reach::cover_refs(side, chain);
+            }
+            if type_str(pv) == "unspecified" && type_made_explicit(pv, qv) {
+                // D5 (r2 Amendment B): the type its own keywords already
+                // implied, now written down: a stated note, not a break.
+                out.push(stated_witness(&dotted, "type_explicit", qv));
+            } else if type_str(pv) == "unspecified" && enum_covered(pv, qv) {
+                // D9 (JUDGE-D9 r0): the enum (or const) already limited
+                // the field to values of the new type.
+                out.push(Witness { post_type: Some(type_str(qv)), ..stated_witness(&dotted, "type_enum_covered", pv) });
+            } else if type_str(pv) != type_str(qv) && widens(pv, qv) {
+                // D7 (JUDGE-WIDEN r0): every value valid before is still
+                // valid; a stated note, never a break.
+                out.push(Witness { kind: "retyped_widened", post_type: Some(type_str(qv)), ..stated_witness(&dotted, "retyped_widened", pv) });
+            } else if type_str(pv) != type_str(qv) {
+                out.push(Witness {
+                    path: dotted.clone(),
+                    kind: "retyped",
+                    pre_type: type_str(pv),
+                    post_type: Some(type_str(qv)),
+                    pre_line: None,
+                    post_line: None,
+                    keyword: None,
+                    pre_value: None,
+                    post_value: None,
+                    anchor_line: None,
+                    counterexample: None,
+                    counterexample_reason: None,
+                });
+            }
+            constraints(&dotted, pv, qv, out);
+            reach::push(p_chain.clone(), q_chain.clone());
+            walk(&dotted, pv, qv, out);
+            reach::pop();
+            walk_items(&dotted, pv, qv, &p_chain, &q_chain, out);
+        }
+    }
+    ACTIVE.with(|a| {
+        let mut a = a.borrow_mut();
+        let (n0, n1) = (a[0].len() - p_refs.len(), a[1].len() - q_refs.len());
+        a[0].truncate(n0);
+        a[1].truncate(n1);
+    });
+}
+
+/// JUDGE-ITEMS r0: the element schema of a judged array node, judged as
+/// its child `[]` by the property-node rules. An object or absent `items`
+/// on each side (absent reads as `{}`), no `prefixItems`, and a type that
+/// admits arrays; anything else stays as it was (unchecked, by pointer).
+fn walk_items(dotted: &str, pv: &Value, qv: &Value, p_chain: &[String], q_chain: &[String], out: &mut Vec<Witness>) {
+    let judged = |v: &Value| matches!(v.get("items"), None | Some(Value::Object(_))) && v.get("prefixItems").is_none() && admits_array(v);
+    if !judged(pv) || !judged(qv) || (pv.get("items").is_none() && qv.get("items").is_none()) {
+        return;
+    }
+    let (p_items, q_items) = (reach::owner(0, p_chain, "items"), reach::owner(1, q_chain, "items"));
+    reach::cover_kw(0, p_items.clone(), "items");
+    reach::cover_kw(1, q_items.clone(), "items");
+    let empty = Value::Object(serde_json::Map::new());
+    let (pi, qi) = (pv.get("items").unwrap_or(&empty), qv.get("items").unwrap_or(&empty));
+    judge_child(&format!("{dotted}[]"), pi, Some(qi), format!("{p_items}/items"), format!("{q_items}/items"), false, false, out);
+}
+
+/// Does this node's `type` admit arrays (no `type` admits every type)?
+fn admits_array(v: &Value) -> bool {
+    match v.get("type") {
+        None => true,
+        Some(Value::String(t)) => t == "array",
+        Some(Value::Array(ts)) => ts.iter().any(|t| t == "array"),
+        Some(_) => false,
     }
 }
 

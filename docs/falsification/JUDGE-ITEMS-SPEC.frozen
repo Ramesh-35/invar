@@ -25,3 +25,13 @@ blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-vsext-3227450c3-bef
 sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-vsext-3227450c3-before.json) = 4cedd3665f73a1e0ebd51263a5b422050c59358ed15f65f891bd00667498018c
 blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-vsext-3227450c3-after.json) = 33469d739b5b659de444f5dbd51e7b30aa5e2922631150965397aad2eee58f5a
 sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-vsext-3227450c3-after.json) = 4e200945a0c16a49458d3fcf3d0bf8f59f6f2f8273f9576ac8a362e252166d07
+# Measured after implementation (v0.2.15 candidate, 2026-11-06), against the
+#   v0.2.14 release binary: judge_items_test 13 of 13; full suite 796 passed;
+#   mutants 79 of 79 (IT-M1..M4 each killed by its named fixture); clippy
+#   -D warnings silent. The SchemaStore prediction did NOT hold: 16 HOLDS and
+#   7 VIOLATED against 5 and 2 predicted. The difference is three prototype
+#   defects, named in the spec's Measured outcome; rerun fixed, the prototype
+#   agrees with the engine. All 124 counterexamples on the three corpora are
+#   confirmed by jsonschema. Iglu 5/3/0 unchanged; label-free PASS at
+#   26/14/50/0 (the reach grew). Replay PASS after Amendment B (six labels
+#   written against v0.2.3, corrected with evidence).

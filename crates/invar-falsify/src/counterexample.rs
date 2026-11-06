@@ -172,68 +172,122 @@ fn number(v: f64) -> Value {
     }
 }
 
+/// One step of a witness path: a property, or (JUDGE-ITEMS r0) an
+/// array's element.
+enum Step {
+    Key(String),
+    Item,
+}
+
 /// Follow a dotted witness path through `properties` (local `$ref`s
-/// resolved). Keys may contain dots: the shortest key that exists wins.
-/// Returns the keys and the schema at each step (root first). With
-/// `allow_missing_leaf`, the last key need not be declared (a newly
-/// required field may be new).
-fn follow(root: &Value, path: &str, allow_missing_leaf: bool) -> Option<(Vec<String>, Vec<Value>)> {
+/// resolved). Keys may contain dots: the shortest key that exists wins. A
+/// segment ending in `[]` that names no property steps into the element
+/// schema (`items`), once per `[]` (JUDGE-ITEMS r0). Returns the steps and
+/// the schema at each step (root first). With `allow_missing_leaf`, the
+/// last key need not be declared (a newly required field may be new).
+fn follow(root: &Value, path: &str, allow_missing_leaf: bool) -> Option<(Vec<Step>, Vec<Value>)> {
     let segs: Vec<&str> = path.split('.').collect();
-    let mut keys = Vec::new();
+    let mut steps = Vec::new();
     let mut nodes = vec![resolve(root, root, 0)?];
     let mut i = 0;
     while i < segs.len() {
-        let props = nodes.last()?.get("properties").and_then(Value::as_object);
         let mut hit = None;
         for j in i + 1..=segs.len() {
             let key = segs[i..j].join(".");
+            let props = nodes.last()?.get("properties").and_then(Value::as_object);
             if let Some(s) = props.and_then(|p| p.get(&key)) {
-                hit = Some((key, s.clone(), j));
+                hit = Some((key, s.clone(), 0, j));
                 break;
+            }
+            // JUDGE-ITEMS r0: `name[]` is name's element, unless a property
+            // bears that literal name (tried first, above).
+            let base = key.trim_end_matches("[]");
+            let depth = (key.len() - base.len()) / 2;
+            if depth > 0 {
+                let target = if base.is_empty() { Some(nodes.last()?.clone()) } else { props.and_then(|p| p.get(base)).cloned() };
+                if let Some(s) = target {
+                    hit = Some((base.to_string(), s, depth, j));
+                    break;
+                }
             }
         }
         match hit {
-            Some((key, s, j)) => {
-                keys.push(key);
-                nodes.push(resolve(root, &s, 0)?);
+            Some((key, s, depth, j)) => {
+                if !key.is_empty() {
+                    steps.push(Step::Key(key));
+                    nodes.push(resolve(root, &s, 0)?);
+                }
+                for _ in 0..depth {
+                    let el = nodes.last()?.get("items").filter(|v| v.is_object()).cloned().unwrap_or_else(|| json!({}));
+                    steps.push(Step::Item);
+                    nodes.push(resolve(root, &el, 0)?);
+                }
                 i = j;
             }
             None if allow_missing_leaf => {
-                keys.push(segs[i..].join("."));
+                steps.push(Step::Key(segs[i..].join(".")));
                 nodes.push(Value::Null);
                 i = segs.len();
             }
             None => return None,
         }
     }
-    Some((keys, nodes))
+    Some((steps, nodes))
 }
 
-/// Put `leaf` at the end of `keys`, building every parent object on the
-/// way from its schema (its required properties); `None` removes it.
-fn place(inst: &mut Value, root: &Value, keys: &[String], nodes: &[Value], leaf: Option<Value>) -> Result<(), String> {
-    let Some((last, parents)) = keys.split_last() else {
+/// Put `leaf` at the end of `steps`, building every parent on the way from
+/// its schema: an object carrying its required properties, or for an
+/// element step a one-element array (JUDGE-ITEMS r0); `None` removes it.
+fn place(inst: &mut Value, root: &Value, steps: &[Step], nodes: &[Value], leaf: Option<Value>) -> Result<(), String> {
+    let Some((last, parents)) = steps.split_last() else {
         return Err("the path could not be followed".into());
     };
     let mut cur = inst;
     if !cur.is_object() {
         *cur = object_of(root, &nodes[0], 0)?;
     }
-    for (k, node) in parents.iter().zip(&nodes[1..]) {
-        let obj = cur.as_object_mut().ok_or("the path could not be followed")?;
-        if !obj.get(k).is_some_and(Value::is_object) {
-            obj.insert(k.clone(), object_of(root, node, 0)?);
+    // The container each step writes into is built from the schema of the
+    // node that step leaves; the next step decides object or array.
+    let shell = |next: &Step, node: &Value| -> Result<Value, String> {
+        match next {
+            Step::Key(_) => object_of(root, node, 0),
+            Step::Item => Ok(Value::Array(Vec::new())),
         }
-        cur = obj.get_mut(k).ok_or("the path could not be followed")?;
+    };
+    let rest: Vec<&Step> = steps.iter().skip(1).collect();
+    for (n, (step, node)) in parents.iter().zip(&nodes[1..]).enumerate() {
+        let next = rest[n];
+        match step {
+            Step::Key(k) => {
+                let obj = cur.as_object_mut().ok_or("the path could not be followed")?;
+                let fits = match next {
+                    Step::Key(_) => obj.get(k).is_some_and(Value::is_object),
+                    Step::Item => obj.get(k).is_some_and(Value::is_array),
+                };
+                if !fits {
+                    obj.insert(k.clone(), shell(next, node)?);
+                }
+                cur = obj.get_mut(k).ok_or("the path could not be followed")?;
+            }
+            Step::Item => {
+                let arr = cur.as_array_mut().ok_or("the path could not be followed")?;
+                arr.truncate(1);
+                if arr.is_empty() {
+                    arr.push(shell(next, node)?);
+                }
+                cur = arr.get_mut(0).ok_or("the path could not be followed")?;
+            }
+        }
     }
-    let obj = cur.as_object_mut().ok_or("the path could not be followed")?;
-    match leaf {
-        Some(v) => {
-            obj.insert(last.clone(), v);
+    match (last, leaf) {
+        (Step::Key(k), Some(v)) => {
+            cur.as_object_mut().ok_or("the path could not be followed")?.insert(k.clone(), v);
         }
-        None => {
-            obj.remove(last);
+        (Step::Key(k), None) => {
+            cur.as_object_mut().ok_or("the path could not be followed")?.remove(k);
         }
+        (Step::Item, Some(v)) => *cur = Value::Array(vec![v]),
+        (Step::Item, None) => return Err("the path could not be followed".into()),
     }
     Ok(())
 }
@@ -396,6 +450,11 @@ fn complete(root: &Value, schema: &Value, inst: &mut Value, depth: usize) -> Res
             if let Some(sub) = props.get(k) {
                 complete(root, sub, v, depth + 1)?;
             }
+        }
+    } else if let (Some(a), Some(el)) = (inst.as_array_mut(), s.get("items").filter(|i| i.is_object())) {
+        // JUDGE-ITEMS r0: a placed element is completed by its own schema.
+        for v in a.iter_mut() {
+            complete(root, el, v, depth + 1)?;
         }
     }
     Ok(())

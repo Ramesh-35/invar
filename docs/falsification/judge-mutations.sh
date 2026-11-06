@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
 # JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4) must first COMPILE (else INVALID), then is
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -195,6 +195,13 @@ run_one DR-M1 'c.draft = migration.is_some();' 'c.draft = { let _ = &migration; 
 run_one DR-M2 'if ident(pre) != ident(post) || !draft_neutral(pre, None) || !draft_neutral(post, None) {' 'if { let _ = ident; false } || !draft_neutral(pre, None) || !draft_neutral(post, None) {' d_f02_identifier_changed_is_not_covered judge_draft_test
 run_one DR-M3 'if DRAFT_GUARDS.contains(&k.as_str()) {' 'if false && DRAFT_GUARDS.contains(&k.as_str()) {' d_f03_const_blocks_the_migration judge_draft_test
 run_one DR-M4 'Value::Bool(_) => via.is_some_and(|k| DRAFT04_BOOLEANS.contains(&k)),' 'Value::Bool(_) => { let _ = via; false }' d_f07_draft04_booleans_do_not_block judge_draft_test
+# JUDGE-ITEMS r0 (docs/falsification/JUDGE-ITEMS-SPEC.md)
+run_one IT-M1 'if !judged(pv) || !judged(qv) || (pv.get("items").is_none() && qv.get("items").is_none()) {' 'if true || !judged(pv) || !judged(qv) || (pv.get("items").is_none() && qv.get("items").is_none()) {' i_f03_element_enum_added_is_a_break judge_items_test
+run_one IT-M2 'let (pi, qi) = (pv.get("items").unwrap_or(&empty), qv.get("items").unwrap_or(&empty));' 'let (Some(pi), Some(qi)) = (pv.get("items"), qv.get("items")) else { let _ = &empty; return };' i_f04_items_added_is_a_break judge_items_test
+run_one IT-M3 'let judged = |v: &Value| matches!(v.get("items"), None | Some(Value::Object(_))) && v.get("prefixItems").is_none() && admits_array(v);' 'let judged = |v: &Value| matches!(v.get("items"), None | Some(Value::Object(_)) | Some(Value::Array(_))) && v.get("prefixItems").is_none() && admits_array(v);
+    let first = |v: &Value| v.get("items").and_then(|i| i.as_array().and_then(|a| a.first()).or(Some(i))).cloned();
+    let (pv, qv) = (&{ let mut x = pv.clone(); if let Some(f) = first(pv) { x["items"] = f; } x }, &{ let mut x = qv.clone(); if let Some(f) = first(qv) { x["items"] = f; } x });' i_f08_tuple_items_stay_unchecked judge_items_test
+run_one IT-M4 'Step::Item => Ok(Value::Array(Vec::new())),' 'Step::Item => Ok(Value::Object(Map::new())),' i_f06_element_property_retyped judge_items_test "$X"
 cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"
