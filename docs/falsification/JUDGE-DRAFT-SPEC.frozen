@@ -1,0 +1,19 @@
+# JUDGE-DRAFT r0 freeze record, written before any implementation.
+# Baseline: v0.2.13 (e2e764d, released 2026-11-06). DRAFT ratified 2026-11-06.
+# Measured before implementation: judge_draft_test 6 of 12 pass. The 6 guard
+#   cases (d_f02 to d_f06, d_f08) already exit 4, as every root change does
+#   today; the 6 that fail are the ones the rule must turn: d_f01, d_f07,
+#   d_f11, d_f12 (migrations that should hold), and d_f09, d_f10 (today the
+#   root pointer hides every other change beneath it).
+# Pre-registered: 12 of 12; DR-M1..M4 killed; full suite; clippy silent;
+#   label-free 20/12/28/0, Iglu 5/3/0, replay PASS unchanged; exactly 85
+#   SchemaStore pairs move NOT EVALUATED to HOLDS, no other verdict moves on
+#   any corpus (Python prototype of the guards, run before engine code).
+blake3(docs/falsification/JUDGE-DRAFT-SPEC.md) = cdd436adccbc6cc64f04dfff135a641a59dc151b48811957b2f169c1b949f133
+sha256(docs/falsification/JUDGE-DRAFT-SPEC.md) = f780a15e59d5dc9acc12d1be681afc4463012bba43ef2115c45069ce8653e50a
+blake3(crates/invar-falsify/tests/judge_draft_test.rs) = 9256082903d3063685e9f88847df0103c9fd5e71478a348f4ca939a732ac1060
+sha256(crates/invar-falsify/tests/judge_draft_test.rs) = a28ed3e406b4d1dd83038907bbad1664aba06c34024bf6d2221bc73b99afe9ef
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-webjobs-list-draft04.json) = 1b711b3972d60e00f8054ea99de73ed43cd81452876a1d6f7b19a389c76af2cb
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-webjobs-list-draft04.json) = 3d512a07dccceac74f16fb88864906e371c35d29fad423b40d48a2bc8a743819
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-webjobs-list-draft07.json) = 15bd5c1d93b353edfcaee20fe5831b5863211b9a252aa24abad4437972190973
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-webjobs-list-draft07.json) = ce47080723bd9079b6e88c961558c59a062eb68931c812f7269b921b8a99c367
