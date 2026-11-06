@@ -164,5 +164,6 @@ fn js_f08_json_witness_fields_and_r1_unjudged_list() {
     assert_eq!(w["pre_value"], "0");
     assert_eq!(w["post_value"], "10");
     let uj: Vec<&str> = v["unjudged_constraints"].as_array().expect("list").iter().filter_map(|x| x.as_str()).collect();
-    assert_eq!(uj, vec!["$ref", "allOf", "anyOf", "oneOf", "items"]);
+    // JUDGE-ITEMS r0 amendment: an object `items` is judged; a tuple is not.
+    assert_eq!(uj, vec!["$ref", "allOf", "anyOf", "oneOf", "tuple items"]);
 }

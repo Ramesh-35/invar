@@ -1,0 +1,27 @@
+# JUDGE-ITEMS r0 freeze record, written before any implementation.
+# Baseline: v0.2.14 (949c06f, released 2026-11-06; main 1a891bb). ITEMS
+#   ratified 2026-11-06; Amendment A (the prediction rebuilt on a
+#   walk-faithful prototype; real-bytes i_f12 is cargo.json, not tsconfig.json)
+#   written before freeze, the rule unchanged.
+# Measured before implementation: judge_items_test 3 of 13 pass. The 3 guards
+#   already hold on v0.2.14: i_f08 (a tuple stays unchecked), i_f09 (a node
+#   under anyOf is D1), i_f11 (a literal `r[]` property). The 10 that fail are
+#   the ones the rule must turn. The JUDGE-SUBTYPE amendment (the unjudged
+#   list names `tuple items`) fails until implementation, as it must.
+# Pre-registered: 13 of 13; IT-M1..M4 killed; full suite; clippy silent;
+#   label-free 20/12/28/0, Iglu 5/3/0, replay PASS unchanged; the moves named
+#   in the spec's Gates, exactly (prototype run before engine code).
+blake3(docs/falsification/JUDGE-ITEMS-SPEC.md) = 365a1cf241293c04e81193750e801c74dbdd3ca6082203d3f1a9648096faefc7
+sha256(docs/falsification/JUDGE-ITEMS-SPEC.md) = 45cab04edbea45981abc5a0db5f7bab4d61d8a251902ccb1909b0394f5fddb7a
+blake3(crates/invar-falsify/tests/judge_items_test.rs) = 4303af55814c8ff422e77a752651221fec38eaf1a8c3ead63db1c5aae9920304
+sha256(crates/invar-falsify/tests/judge_items_test.rs) = 72252f8938da30b6bceae1091fab46de24831fc5536e5934bdfa8a0dc16de486
+blake3(crates/invar-falsify/tests/judge_subtype_test.rs) = b537ad91a0396ed4ea839ce01752adc4930baaea1a10e329c33bec38ea21680c
+sha256(crates/invar-falsify/tests/judge_subtype_test.rs) = d7d149963f09ab78efe3922c02774ca35178408ea8600ee87f3e532871d1eb61
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-cargo-13e89998e-before.json) = 1dc31ab889ad7cb3512ec68c271fa130d2ce8cc4db694ba2f143025d64876162
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-cargo-13e89998e-before.json) = f6268619c1d29b05f78236cf69a8f752b17bde328f6101e0fff591acfd8d3f99
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-cargo-13e89998e-after.json) = f31a40e7f8f3888fa822bbe7d7f83fab4878827a5d31b2f669821c5cb562c035
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-cargo-13e89998e-after.json) = 6ace70b50909ab2e0b8a37157844c7cbd64e8242629d83daff38928b623c2dcc
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-vsext-3227450c3-before.json) = 10b297adc45da9d5027ce7e8722378e2ac22fdf61f50382f66a10aa97f7dd6a1
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-vsext-3227450c3-before.json) = 4cedd3665f73a1e0ebd51263a5b422050c59358ed15f65f891bd00667498018c
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-vsext-3227450c3-after.json) = 33469d739b5b659de444f5dbd51e7b30aa5e2922631150965397aad2eee58f5a
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-vsext-3227450c3-after.json) = 4e200945a0c16a49458d3fcf3d0bf8f59f6f2f8273f9576ac8a362e252166d07
