@@ -31,3 +31,28 @@ amendment-a blake3(docs/falsification/JUDGE-REACH-SPEC.md) = bc5b621d0dd05680b30
 amendment-a sha256(docs/falsification/JUDGE-REACH-SPEC.md) = e416c9bb9892e05cf5feb648b1ccbc6347e95ec0d23e5475eb685f127742ed1d
 amendment-a blake3(crates/invar-falsify/tests/judge_reach_test.rs) = d60f9807fa331725e8cda124bdd499803e2ecd73c110946eaefc212b8a544567
 amendment-a sha256(crates/invar-falsify/tests/judge_reach_test.rs) = 1ee0f8275e7180c7c9b6179d88dac0b692cfab0f26be48a8afd8bec938e85d93
+# Amendment B, 2026-11-05: r_f12's expected pointer contradicted the frozen rule
+#   (shallowest node whose own keywords differ); fixture corrected, rule unchanged.
+amendment-b blake3(docs/falsification/JUDGE-REACH-SPEC.md) = 352542626138863e08c127748f96611d01a95aea7c22b3bb00e604b01d730ccc
+amendment-b sha256(docs/falsification/JUDGE-REACH-SPEC.md) = 7b2c02b42192cc92b184e242b3de8dc0b7bc5a2b46b453de1ae96da7eafab168
+amendment-b blake3(crates/invar-falsify/tests/judge_reach_test.rs) = 68598972b37ebd63b2ff4ad898796cbbdab1125e2eb81ae02591163f41dd7e0e
+amendment-b sha256(crates/invar-falsify/tests/judge_reach_test.rs) = 86454dd9b9562be7ec4b5390ca75307a1805240cffe8e2ea64d979976a664258
+# Measured after implementation (v0.2.13 candidate, 2026-11-05), against the
+#   published v0.2.12 binary from crates.io:
+#   judge_reach_test 19 of 19; full suite 771 passed; mutants 71 of 71 (RE-M1..M8
+#   each killed by its named fixture); clippy -D warnings silent.
+#   Label-free: 20 VIOLATED, 12 confirmed, 28 printed, 0 failed (unchanged).
+#   Iglu: ADDITION VIOLATED 5, 3 confirmed, 0 failed (unchanged). SchemaStore
+#   replay.sh: PASS.
+#   Verdict moves, v0.2.12 to v0.2.13 (full per-pair lists in reach-moves/):
+#     SchemaStore 819 pairs: HOLDS to NOT EVALUATED (unchecked_change) 521; HOLDS
+#       kept 73; VIOLATED kept 41; NOT EVALUATED (unjudged_construct) kept 184.
+#     Iglu 146 pairs: HOLDS to NOT EVALUATED 25; HOLDS kept 69; VIOLATED kept 48;
+#       NOT EVALUATED kept 4.
+#     AsyncAPI 7 minor pairs, tag neutralized: HOLDS to NOT EVALUATED 7.
+#   No witness was added or removed on any corpus: VIOLATED counts identical.
+#   MANIFEST labels are untouched: they record whether a commit breaks, not what
+#   the judge said, and NOT EVALUATED claims neither.
+#   Existing fixtures that encoded a false pass, amended in the engine commit:
+#     judge_contracts_test OPEN_WIDER (a typed property added to an open object,
+#     called a widening; {"nick":1} breaks). Replaced by a true widening.

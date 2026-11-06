@@ -195,3 +195,13 @@ Expected consequence, stated in advance: existing fixtures elsewhere in
 the suite that assert HOLDS for one of these four changes encoded the
 false pass. Each one that fails under the implementation is listed in
 the implementation commit with the case, never silently rewritten.
+
+## Amendment B (2026-11-05, found by the first implementation run)
+
+r_f12 expected `/definitions/messageTrait`. The rule frozen above reports
+the shallowest schema node whose own non-annotation keywords differ;
+messageTrait's own keywords did not change, its `examples` item schema's
+did (it gained `additionalProperties`, `anyOf` and `properties`). The
+fixture contradicted the rule, so the fixture is corrected to
+`/definitions/messageTrait/properties/examples/items`. The rule is
+unchanged.

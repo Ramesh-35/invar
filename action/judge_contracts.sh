@@ -5,7 +5,8 @@
 # origin/<base>, never from the pull request (SIB-3). Exit mapping, stated:
 #   0  every changed contract HOLDS (or is new)          -> pass
 #   1  at least one VIOLATED                             -> fail, unless INVAR_FAIL_ON_VIOLATION=false
-#   4  NOT EVALUATED: unjudged_construct only            -> pass, each one a ::warning
+#   4  NOT EVALUATED: unjudged_construct or
+#      unchecked_change only (JUDGE-REACH r0)            -> pass, each one a ::warning
 #      NOT EVALUATED: unparsable, unreadable_base or
 #      contract_deleted on any contract                  -> fail: never a pass
 #   3  error, including a glob that matches nothing      -> fail

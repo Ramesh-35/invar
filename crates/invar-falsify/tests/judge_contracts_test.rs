@@ -17,7 +17,12 @@ const B1_002_PRE: &str = include_str!("fixtures/judge/b1-002-pre.json");
 const B1_002_POST: &str = include_str!("fixtures/judge/b1-002-post.json");
 
 const OPEN: &str = r#"{"properties":{"name":{"type":"string"}}}"#;
-const OPEN_WIDER: &str = r#"{"properties":{"name":{"type":"string"},"nick":{"type":"string"}}}"#;
+// JUDGE-REACH r0 Amendment A: this fixture was `name` plus an added
+// `"nick":{"type":"string"}` in an open object, called a widening. Under the
+// strict model it is not one: {"nick":1} was valid before and is rejected
+// after, and v0.2.12 passed it unseen. A true widening (the type dropped)
+// keeps the test's intent: one schema widened, one narrowed, one untouched.
+const OPEN_WIDER: &str = r#"{"properties":{"name":{}}}"#;
 const CLOSED: &str = r#"{"additionalProperties":false,"properties":{"name":{"type":"string"},"age":{"type":"integer"}}}"#;
 const CLOSED_NARROWER: &str = r#"{"additionalProperties":false,"properties":{"name":{"type":"string"}}}"#;
 const STILL: &str = r#"{"properties":{"id":{"type":"integer"}}}"#;

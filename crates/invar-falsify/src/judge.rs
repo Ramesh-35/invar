@@ -70,7 +70,7 @@ pub fn run(root: &Path, contract: &str, base: &str, format: &str, receipt_out: O
     match format {
         "json" => println!("{}", serde_json::to_string_pretty(&body).unwrap_or_default()),
         "sarif" => println!("{}", serde_json::to_string_pretty(&render_sarif(verdict, reason, contract, base, &witnesses, &stated)).unwrap_or_default()),
-        "github" => print!("{}", render_github(verdict, reason, contract, base, &witnesses)),
+        "github" => print!("{}", render_github(verdict, reason, contract, base, &witnesses, &stated)),
         _ => print!("{}", render_text(verdict, reason, contract, base, &witnesses, &stated)),
     }
     if let Some(p) = receipt_out {
@@ -110,7 +110,7 @@ pub fn run_files(base_path: &str, head_path: &str, format: &str) -> Result<i32> 
     match format {
         "json" => println!("{}", serde_json::to_string_pretty(&body_json(verdict, reason, c, b, &witnesses, &stated)).unwrap_or_default()),
         "sarif" => println!("{}", serde_json::to_string_pretty(&render_sarif(verdict, reason, c, b, &witnesses, &stated)).unwrap_or_default()),
-        "github" => print!("{}", render_github(verdict, reason, c, b, &witnesses)),
+        "github" => print!("{}", render_github(verdict, reason, c, b, &witnesses, &stated)),
         _ => print!("{}", render_text(verdict, reason, c, b, &witnesses, &stated)),
     }
     Ok(match verdict {
@@ -162,9 +162,12 @@ fn evaluate(read: BaseRead, post_bytes: &str) -> (&'static str, Option<&'static 
                     (Ok(pre), Ok(post)) => {
                         let mut w = Vec::new();
                         ROOTS.with(|r| *r.borrow_mut() = Some([pre.clone(), post.clone()]));
+                        reach::begin();
                         walk("", &pre, &post, &mut w);
+                        let unchecked = reach::finish(&pre, &post);
                         ROOTS.with(|r| *r.borrow_mut() = None);
-                        let stated = take_stated(&mut w);
+                        let mut stated = take_stated(&mut w);
+                        stated.unchecked = unchecked;
                         w.sort_by(|a, b| (a.path.as_str(), a.kind, a.keyword).cmp(&(b.path.as_str(), b.kind, b.keyword)));
                         for x in &mut w {
                             let last = x.path.rsplit('.').next().unwrap_or(&x.path).to_string();
@@ -185,6 +188,9 @@ fn evaluate(read: BaseRead, post_bytes: &str) -> (&'static str, Option<&'static 
                             ("VIOLATED", None)
                         } else if !stated.not_evaluated.is_empty() {
                             ("NOT EVALUATED", Some("unjudged_construct"))
+                        } else if !stated.unchecked.is_empty() {
+                            // JUDGE-REACH r0: HOLDS asserts every change was judged.
+                            ("NOT EVALUATED", Some("unchecked_change"))
                         } else {
                             ("HOLDS", None)
                         };
@@ -352,6 +358,22 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
     let empty = serde_json::Map::new();
     let pp = pre.get("properties").and_then(Value::as_object).unwrap_or(&empty);
     let qp = post.get("properties").and_then(Value::as_object).unwrap_or(&empty);
+    // JUDGE-REACH r0: what this node's judgment covers, by JSON Pointer on
+    // each side: `required` (with the direct allOf members' J3 reads) and
+    // the `properties` key set, whose additions are safe only when the base
+    // node admitted no other key.
+    let (pc, qc) = reach::current();
+    let adds_ok = is_closed(pre) && pre.get("patternProperties").is_none();
+    for (side, chain) in [(0, &pc), (1, &qc)] {
+        reach::cover_kw(side, reach::owner(side, chain, "required"), "required");
+        let all_of = reach::owner(side, chain, "allOf");
+        for i in 0..reach::len_at(side, &format!("{all_of}/allOf")) {
+            reach::cover_kw(side, format!("{all_of}/allOf/{i}"), "required");
+        }
+        reach::cover_props(side, reach::owner(side, chain, "properties"), adds_ok);
+    }
+    let p_props = reach::owner(0, &pc, "properties");
+    let q_props = reach::owner(1, &qc, "properties");
     for name in newly_required(pre, post) {
         let path = if prefix.is_empty() { name.clone() } else { format!("{prefix}.{name}") };
         let ty = pp.get(&name).or_else(|| qp.get(&name)).map(type_str).unwrap_or_default();
@@ -385,6 +407,13 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
         let q_pair = qp.get(k).map(|q| resolve_ref(1, q));
         let q_refs = q_pair.as_ref().map(|(_, r)| r.clone()).unwrap_or_default();
         let qv_resolved = q_pair.map(|(v, _)| v);
+        // The pointers whose merged keywords form this child, site first.
+        let child = |props: &str, refs: &[String]| {
+            let mut c = vec![format!("{props}/properties/{}", reach::escape(k))];
+            c.extend(refs.iter().map(|r| r[1..].to_string()));
+            c
+        };
+        let (p_chain, q_chain) = (child(&p_props, &p_refs), child(&q_props, &q_refs));
         ACTIVE.with(|a| {
             let mut a = a.borrow_mut();
             a[0].extend(p_refs.iter().cloned());
@@ -412,8 +441,18 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
                 if pv != qv {
                     out.push(stated_witness(&dotted, "not_evaluated", pv));
                 }
+                // JUDGE-REACH r0: D1 compared these nodes whole.
+                reach::cover_whole(0, &p_chain);
+                reach::cover_whole(1, &q_chain);
             }
             Some(qv) => {
+                // JUDGE-REACH r0: the keywords judged at a property node.
+                for (side, chain) in [(0, &p_chain), (1, &q_chain)] {
+                    for kw in ["type", "enum", "pattern", "format"].iter().chain(LOWER.iter()).chain(UPPER.iter()) {
+                        reach::cover_kw(side, reach::owner(side, chain, kw), kw);
+                    }
+                    reach::cover_refs(side, chain);
+                }
                 if type_str(pv) == "unspecified" && type_made_explicit(pv, qv) {
                     // D5 (r2 Amendment B): the type its own keywords already
                     // implied, now written down: a stated note, not a break.
@@ -443,7 +482,9 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
                     });
                 }
                 constraints(&dotted, pv, qv, out);
+                reach::push(p_chain.clone(), q_chain.clone());
                 walk(&dotted, pv, qv, out);
+                reach::pop();
             }
         }
         ACTIVE.with(|a| {
@@ -602,6 +643,10 @@ fn stated_witness(path: &str, kind: &'static str, pv: &Value) -> Witness {
 pub struct Stated {
     pub not_evaluated: Vec<String>,
     pub notes: Vec<String>,
+    /// JUDGE-REACH r0: JSON Pointers of the schemas that changed in a way
+    /// the judge does not check, sorted, an ancestor standing for its
+    /// descendants.
+    pub unchecked: Vec<String>,
 }
 
 /// Move the stated findings out of the witness list, sorted.
@@ -851,6 +896,7 @@ fn body_json(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w:
     json!({
         "not_evaluated_paths": st.not_evaluated,
         "notes": st.notes,
+        "unchecked": st.unchecked,
         "verdict": verdict,
         "reason": reason,
         "contract": contract,
@@ -949,6 +995,17 @@ fn counterexample_line(x: &Witness, base: &str) -> String {
 }
 
 /// The NOT EVALUATED sentence for a reason code, shared by every format.
+/// JUDGE-REACH r0: the one sentence every surface carries for a schema that
+/// changed in a way the judge does not check. The root pointer reads as
+/// the document root.
+fn unchecked_sentence(pointer: &str) -> String {
+    if pointer.is_empty() {
+        "not evaluated: the document root changed in a way this judge does not check.".to_string()
+    } else {
+        format!("not evaluated: the schema at {pointer} changed in a way this judge does not check.")
+    }
+}
+
 fn not_evaluated_sentence(reason: Option<&str>, contract: &str, base: &str) -> String {
     match reason {
         Some("new_contract") => format!(
@@ -956,6 +1013,9 @@ fn not_evaluated_sentence(reason: Option<&str>, contract: &str, base: &str) -> S
         ),
         Some("unjudged_construct") => format!(
             "NOT EVALUATED (unjudged_construct): {contract} changed only where this judge does not look (anyOf, oneOf, allOf or $ref). Nothing here was judged a break or a pass; review those fields by hand."
+        ),
+        Some("unchecked_change") => format!(
+            "NOT EVALUATED (unchecked_change): {contract} changed in a way this judge does not check. Nothing there was judged a break or a pass; review those schemas by hand."
         ),
         Some("contract_deleted") => format!(
             "NOT EVALUATED (contract_deleted): {contract} exists at {base} and this change deletes it; everything it promised is withdrawn. Restore it, or version the change."
@@ -988,6 +1048,9 @@ fn render_text(verdict: &str, reason: Option<&str>, contract: &str, base: &str, 
     }
     for p in &st.not_evaluated {
         s.push_str(&format!("  not evaluated: {p} uses anyOf, oneOf, allOf or $ref, which this judge does not follow.\n"));
+    }
+    for p in &st.unchecked {
+        s.push_str(&format!("  {}\n", unchecked_sentence(p)));
     }
     for n in &st.notes {
         s.push_str(&format!("  noted: {n}\n"));
@@ -1027,6 +1090,7 @@ fn render_sarif(verdict: &str, reason: Option<&str>, contract: &str, base: &str,
         json!({
             "unjudged_constraints": UNJUDGED,
             "not_evaluated_paths": st.not_evaluated,
+            "unchecked": st.unchecked,
             "notes": st.notes,
             "verdict": verdict,
             "base": base,
@@ -1101,9 +1165,16 @@ fn gh_prop(s: &str) -> String {
 
 /// JUDGE-SARIF r0: one `::error` per witness, located on the post line;
 /// one `::warning` when NOT EVALUATED. HOLDS prints nothing.
-fn render_github(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w: &[Witness]) -> String {
+fn render_github(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w: &[Witness], st: &Stated) -> String {
     let file = gh_prop(contract);
-    match verdict {
+    // JUDGE-REACH r0: every unchecked schema is its own warning, on every
+    // verdict, so a proven break never hides a change nobody checked.
+    let unchecked: String = st
+        .unchecked
+        .iter()
+        .map(|p| format!("::warning file={file},title=invar.judge.unchecked::{}\n", gh_data(&unchecked_sentence(p))))
+        .collect();
+    let main = match verdict {
         "HOLDS" => String::new(),
         "VIOLATED" => w
             .iter()
@@ -1121,7 +1192,8 @@ fn render_github(verdict: &str, reason: Option<&str>, contract: &str, base: &str
             "::warning file={file},title=invar.judge.not_evaluated::{}\n",
             gh_data(&not_evaluated_sentence(reason, contract, base))
         ),
-    }
+    };
+    main + &unchecked
 }
 
 /// JUDGE-CONTRACTS r0 (docs/falsification/JUDGE-CONTRACTS-SPEC.md): judge
@@ -1198,6 +1270,7 @@ pub fn run_many(root: &Path, globs: &[String], base: &str, format: &str) -> Resu
                     "verdict": o.verdict,
                     "reason": o.reason,
                     "not_evaluated_paths": o.stated.not_evaluated,
+                    "unchecked": o.stated.unchecked,
                     "notes": o.stated.notes,
                 })).collect::<Vec<_>>(),
             });
@@ -1205,7 +1278,7 @@ pub fn run_many(root: &Path, globs: &[String], base: &str, format: &str) -> Resu
         }
         "github" => {
             for o in &ones {
-                print!("{}", render_github(o.verdict, o.reason, &o.contract, base, &o.witnesses));
+                print!("{}", render_github(o.verdict, o.reason, &o.contract, base, &o.witnesses, &o.stated));
             }
         }
         _ => {
@@ -1265,4 +1338,255 @@ fn git_paths(root: &Path, args: &[&str], specs: &[String]) -> Result<Vec<String>
         anyhow::bail!("git {} failed: {}", args.first().unwrap_or(&""), String::from_utf8_lossy(&o.stderr).trim());
     }
     Ok(o.stdout.split(|b| *b == 0).filter(|p| !p.is_empty()).map(|p| String::from_utf8_lossy(p).into_owned()).collect())
+}
+
+/// JUDGE-REACH r0 (docs/falsification/JUDGE-REACH-SPEC.md, Amendment A):
+/// HOLDS asserts every change was judged. The walk records what it covers,
+/// by JSON Pointer on each side; after the walk, the two documents are
+/// diffed schema-aware, and every difference the walk did not cover is
+/// reported as the shallowest schema node that changed.
+mod reach {
+    use super::ROOTS;
+    use serde_json::Value;
+    use std::cell::RefCell;
+    use std::collections::BTreeSet;
+
+    #[derive(Default)]
+    struct Cover {
+        /// (side, node pointer, keyword) the judge read and judged.
+        kw: BTreeSet<(usize, String, String)>,
+        /// (side, node pointer whose `properties` map was judged, additions safe).
+        props: Vec<(usize, String, bool)>,
+        /// (side, node pointer) compared whole by D1.
+        whole: Vec<(usize, String)>,
+        /// The walk's current node, as pointer chains (site first) per side.
+        stack: Vec<(Vec<String>, Vec<String>)>,
+    }
+
+    thread_local! {
+        static COVER: RefCell<Cover> = RefCell::new(Cover::default());
+    }
+
+    pub(super) fn begin() {
+        COVER.with(|c| {
+            *c.borrow_mut() = Cover::default();
+            c.borrow_mut().stack.push((vec![String::new()], vec![String::new()]));
+        });
+    }
+
+    pub(super) fn current() -> (Vec<String>, Vec<String>) {
+        COVER.with(|c| c.borrow().stack.last().cloned().unwrap_or_default())
+    }
+
+    pub(super) fn push(p: Vec<String>, q: Vec<String>) {
+        COVER.with(|c| c.borrow_mut().stack.push((p, q)));
+    }
+
+    pub(super) fn pop() {
+        COVER.with(|c| {
+            c.borrow_mut().stack.pop();
+        });
+    }
+
+    /// RFC 6901 escaping of one reference token.
+    pub(super) fn escape(k: &str) -> String {
+        k.replace('~', "~0").replace('/', "~1")
+    }
+
+    fn node(side: usize, ptr: &str) -> Option<Value> {
+        ROOTS.with(|r| r.borrow().as_ref().and_then(|roots| roots[side].pointer(ptr).cloned()))
+    }
+
+    /// The pointer whose node supplies `kw` to the merged node `chain`
+    /// (the site's keywords override its targets'); the site when none does.
+    pub(super) fn owner(side: usize, chain: &[String], kw: &str) -> String {
+        for p in chain {
+            if node(side, p).is_some_and(|n| n.get(kw).is_some()) {
+                return p.clone();
+            }
+        }
+        chain.first().cloned().unwrap_or_default()
+    }
+
+    pub(super) fn len_at(side: usize, ptr: &str) -> usize {
+        node(side, ptr).and_then(|v| v.as_array().map(Vec::len)).unwrap_or(0)
+    }
+
+    pub(super) fn cover_kw(side: usize, ptr: String, kw: &str) {
+        COVER.with(|c| {
+            c.borrow_mut().kw.insert((side, ptr, kw.to_string()));
+        });
+    }
+
+    pub(super) fn cover_props(side: usize, ptr: String, adds_ok: bool) {
+        COVER.with(|c| c.borrow_mut().props.push((side, ptr, adds_ok)));
+    }
+
+    pub(super) fn cover_whole(side: usize, chain: &[String]) {
+        COVER.with(|c| {
+            let mut c = c.borrow_mut();
+            for p in chain {
+                c.whole.push((side, p.clone()));
+            }
+        });
+    }
+
+    /// Every `$ref` along a resolved chain was followed and judged.
+    pub(super) fn cover_refs(side: usize, chain: &[String]) {
+        for p in chain {
+            if node(side, p).is_some_and(|n| n.get("$ref").is_some()) {
+                cover_kw(side, p.clone(), "$ref");
+            }
+        }
+    }
+
+    /// Keywords no validator asserts. Everything not in KNOWN is also
+    /// ignored: validators ignore keywords no draft defines.
+    const ANNOTATIONS: [&str; 8] = ["title", "description", "$comment", "examples", "default", "deprecated", "readOnly", "writeOnly"];
+    const KNOWN: [&str; 52] = [
+        "$schema", "$id", "id", "$ref", "$anchor", "$dynamicRef", "$dynamicAnchor", "$recursiveRef", "$recursiveAnchor", "$vocabulary",
+        "definitions", "$defs", "type", "enum", "const", "multipleOf", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum",
+        "maxLength", "minLength", "pattern", "maxItems", "minItems", "uniqueItems", "maxContains", "minContains", "maxProperties",
+        "minProperties", "required", "dependentRequired", "properties", "patternProperties", "additionalProperties",
+        "unevaluatedProperties", "propertyNames", "dependencies", "dependentSchemas", "items", "prefixItems", "additionalItems",
+        "unevaluatedItems", "contains", "allOf", "anyOf", "oneOf", "not", "if", "then", "else", "format",
+    ];
+    /// Keywords whose value maps names to schemas: under them, keys are names.
+    const NAME_MAPS: [&str; 5] = ["properties", "patternProperties", "definitions", "$defs", "dependentSchemas"];
+    const SCHEMA_VALUED: [&str; 11] = ["additionalProperties", "unevaluatedProperties", "propertyNames", "contains", "not", "if", "then", "else", "additionalItems", "unevaluatedItems", "items"];
+    const SCHEMA_ARRAYS: [&str; 5] = ["allOf", "anyOf", "oneOf", "prefixItems", "items"];
+
+    /// One difference: a node's own keyword (`kw`), or the node itself
+    /// (`kw` None: present on one side only, or not an object).
+    struct Diff {
+        ptr: String,
+        kw: Option<String>,
+        base: Option<Value>,
+        head: Option<Value>,
+        /// The keyword whose map or array holds this node, when it is a node.
+        via: Option<String>,
+    }
+
+    fn diff(ptr: &str, via: Option<&str>, a: Option<&Value>, b: Option<&Value>, out: &mut Vec<Diff>) {
+        if a == b {
+            return;
+        }
+        let (Some(Value::Object(ma)), Some(Value::Object(mb))) = (a, b) else {
+            out.push(Diff { ptr: ptr.to_string(), kw: None, base: a.cloned(), head: b.cloned(), via: via.map(str::to_string) });
+            return;
+        };
+        let keys: BTreeSet<&String> = ma.keys().chain(mb.keys()).collect();
+        for k in keys {
+            let (va, vb) = (ma.get(k), mb.get(k));
+            if va == vb || ANNOTATIONS.contains(&k.as_str()) || !KNOWN.contains(&k.as_str()) {
+                continue;
+            }
+            let here = format!("{ptr}/{}", escape(k));
+            let own = |out: &mut Vec<Diff>| out.push(Diff { ptr: ptr.to_string(), kw: Some(k.clone()), base: va.cloned(), head: vb.cloned(), via: None });
+            let both_obj = matches!((va, vb), (Some(Value::Object(_)) | None, Some(Value::Object(_)) | None));
+            let both_arr = matches!((va, vb), (Some(Value::Array(_)) | None, Some(Value::Array(_)) | None));
+            if NAME_MAPS.contains(&k.as_str()) && both_obj {
+                let (na, nb) = (va.and_then(Value::as_object), vb.and_then(Value::as_object));
+                let names: BTreeSet<&String> = na.into_iter().flat_map(|m| m.keys()).chain(nb.into_iter().flat_map(|m| m.keys())).collect();
+                for n in names {
+                    diff(&format!("{here}/{}", escape(n)), Some(k), na.and_then(|m| m.get(n)), nb.and_then(|m| m.get(n)), out);
+                }
+            } else if k == "dependencies" && both_obj {
+                let (na, nb) = (va.and_then(Value::as_object), vb.and_then(Value::as_object));
+                let names: BTreeSet<&String> = na.into_iter().flat_map(|m| m.keys()).chain(nb.into_iter().flat_map(|m| m.keys())).collect();
+                for n in names {
+                    let (x, y) = (na.and_then(|m| m.get(n)), nb.and_then(|m| m.get(n)));
+                    if x.is_some_and(Value::is_object) && y.is_some_and(Value::is_object) {
+                        diff(&format!("{here}/{}", escape(n)), Some(k), x, y, out);
+                    } else if x != y {
+                        own(out);
+                    }
+                }
+            } else if SCHEMA_VALUED.contains(&k.as_str()) && matches!((va, vb), (Some(Value::Object(_)), Some(Value::Object(_)))) {
+                diff(&here, Some(k), va, vb, out);
+            } else if SCHEMA_ARRAYS.contains(&k.as_str()) && both_arr && ((va.is_some() && vb.is_some()) || k == "allOf") {
+                // Members are compared one by one. For allOf alone a side
+                // without the array reads as an empty one (each member is a
+                // conjunct of its own); a whole anyOf, oneOf or prefixItems
+                // appearing or vanishing is a change of its node's own keyword.
+                let none = Vec::new();
+                let (xa, xb) = (va.and_then(Value::as_array).unwrap_or(&none), vb.and_then(Value::as_array).unwrap_or(&none));
+                for i in 0..xa.len().max(xb.len()) {
+                    diff(&format!("{here}/{i}"), Some(k), xa.get(i), xb.get(i), out);
+                }
+            } else {
+                own(out);
+            }
+        }
+    }
+
+    fn under(ptr: &str, prefix: &str) -> bool {
+        ptr == prefix || ptr.starts_with(&format!("{prefix}/"))
+    }
+
+    fn covered(d: &Diff, c: &Cover) -> bool {
+        if c.whole.iter().any(|(_, w)| under(&d.ptr, w)) {
+            return true;
+        }
+        match &d.kw {
+            // Opening an object (false to true or absent) rejects nothing.
+            Some(k) if k == "additionalProperties" || k == "unevaluatedProperties" => {
+                d.base == Some(Value::Bool(false)) && matches!(d.head, None | Some(Value::Bool(true)))
+            }
+            Some(k) => c.kw.iter().any(|(_, p, kk)| p == &d.ptr && kk == k),
+            None => {
+                // A property added or removed under a judged `properties` map.
+                let Some((parent, tail)) = d.ptr.rsplit_once('/') else { return false };
+                let Some(owner) = parent.strip_suffix("/properties").or(if parent == "/properties" { Some("") } else { None }) else {
+                    return false;
+                };
+                let _ = tail;
+                c.props.iter().any(|(_, p, adds_ok)| {
+                    p == owner && match (&d.base, &d.head) {
+                        (Some(_), None) => true,
+                        (None, Some(_)) => *adds_ok,
+                        _ => false,
+                    }
+                })
+            }
+        }
+    }
+
+    /// A node on one side only that no property rule covers is read
+    /// keyword by keyword against an empty schema: covered exactly when the
+    /// walk judged every keyword it carries (a definition the walk reached
+    /// through a new `$ref`, an allOf member whose `required` J3 read).
+    fn covered_deep(d: &Diff, c: &Cover) -> bool {
+        if covered(d, c) {
+            return true;
+        }
+        // Expansion is sound only where a node's existence asserts nothing
+        // by itself: a definition (used only through references) and an
+        // allOf member (removing a conjunct only widens). A pattern entry,
+        // an anyOf or oneOf branch or a prefixItems entry is semantic.
+        if d.kw.is_some() || !matches!(d.via.as_deref(), Some("definitions" | "$defs" | "allOf")) {
+            return false;
+        }
+        let empty = Value::Object(serde_json::Map::new());
+        let mut sub = Vec::new();
+        match (&d.base, &d.head) {
+            (Some(b @ Value::Object(_)), None) => diff(&d.ptr, None, Some(b), Some(&empty), &mut sub),
+            (None, Some(h @ Value::Object(_))) => diff(&d.ptr, None, Some(&empty), Some(h), &mut sub),
+            _ => return false,
+        }
+        sub.iter().all(|s| covered_deep(s, c))
+    }
+
+    /// After the walk: the shallowest unchecked schema nodes, sorted, an
+    /// ancestor standing for its descendants.
+    pub(super) fn finish(pre: &Value, post: &Value) -> Vec<String> {
+        let mut diffs = Vec::new();
+        diff("", None, Some(pre), Some(post), &mut diffs);
+        let unchecked: BTreeSet<String> = COVER.with(|c| {
+            let c = c.borrow();
+            diffs.iter().filter(|d| !covered_deep(d, &c)).map(|d| d.ptr.clone()).collect()
+        });
+        let all: Vec<String> = unchecked.into_iter().collect();
+        all.iter().filter(|p| !all.iter().any(|q| q != *p && under(p, q))).cloned().collect()
+    }
 }

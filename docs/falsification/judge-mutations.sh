@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -181,6 +181,15 @@ run_one D9-M3 'let mut c: Vec<Value> = leaf.get("enum").and_then(Value::as_array
 run_one FP-M1 'judge_one(head_path, BaseRead::Found(base_raw), Some(&head_raw))' 'judge_one(head_path, BaseRead::Found(head_raw.clone()), Some(&base_raw))' fp_f01_removed_field_violated_with_file_labels judge_filepair_test
 run_one FP-M2 'let (c, b) = (head_path, base_path);' 'let (c, b) = (head_path, "main");' fp_f01_removed_field_violated_with_file_labels judge_filepair_test
 run_one FP-M3 'let base_raw = std::fs::read(base_path).map_err(|e| anyhow::anyhow!("reading {base_path}: {e}"))?;' 'let base_raw = std::fs::read(head_path).map_err(|e| anyhow::anyhow!("reading {base_path}: {e}"))?;' fp_f10_unjudged_construct_is_not_evaluated judge_filepair_test
+# JUDGE-REACH r0 (docs/falsification/JUDGE-REACH-SPEC.md, Amendments A and B)
+run_one RE-M1 'diffs.iter().filter(|d| !covered_deep(d, &c))' 'diffs.iter().filter(|d| { let _ = d; false })' r_f04_unreferenced_definition_change_is_not_evaluated judge_reach_test
+run_one RE-M2 'if va == vb || ANNOTATIONS.contains(&k.as_str()) || !KNOWN.contains(&k.as_str()) {' 'if va == vb {' r_f05_annotation_only_change_holds judge_reach_test
+run_one RE-M3 'diff(&format!("{here}/{}", escape(n)), Some(k), na.and_then(|m| m.get(n)), nb.and_then(|m| m.get(n)), out);' 'if !ANNOTATIONS.contains(&n.as_str()) { diff(&format!("{here}/{}", escape(n)), Some(k), na.and_then(|m| m.get(n)), nb.and_then(|m| m.get(n)), out); }' r_f08_property_named_like_an_annotation_counts judge_reach_test
+run_one RE-M4 '        if c.whole.iter().any(|(_, w)| under(&d.ptr, w)) {' '        if c.whole.iter().any(|(_, w)| under(&d.ptr, w)) || c.kw.iter().any(|(_, p, _)| under(&d.ptr, p)) {' r_f01_change_behind_pattern_and_oneof_is_not_evaluated judge_reach_test
+run_one RE-M5 'for kw in ["type", "enum", "pattern", "format"].iter()' 'for kw in ["type", "enum", "const", "pattern", "format"].iter()' r_f13_reached_node_unread_keyword_is_not_evaluated judge_reach_test
+run_one RE-M6 '(None, Some(_)) => *adds_ok,' '(None, Some(_)) => { let _ = adds_ok; true }' r_f14_open_object_gains_constrained_property judge_reach_test
+run_one RE-M7 'd.base == Some(Value::Bool(false)) && matches!(d.head, None | Some(Value::Bool(true)))' '{ let _ = &d.base; true }' r_f15_object_closed_is_not_evaluated judge_reach_test
+run_one RE-M8 'reach::cover_kw(side, reach::owner(side, chain, "required"), "required");' 'reach::cover_kw(side, reach::owner(side, chain, "required"), "required"); reach::cover_kw(side, reach::owner(side, chain, "type"), "type");' r_f19_root_type_change_is_not_evaluated judge_reach_test
 cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"

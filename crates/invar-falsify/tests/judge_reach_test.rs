@@ -185,9 +185,11 @@ fn r_f11_unjudged_construct_reason_leads() {
 fn r_f12_real_asyncapi_states_the_unreached_message_trait() {
     let (code, text, v) = both("f12", ASYNC_200, ASYNC_210);
     assert_eq!(code, 1, "{text}");
-    assert!(text.contains(&line("/definitions/messageTrait")), "{text}");
+    // Amendment B: the shallowest node whose own keywords changed is the
+    // examples item schema, as the spec rule says, not messageTrait itself.
+    assert!(text.contains(&line("/definitions/messageTrait/properties/examples/items")), "{text}");
     let u: Vec<&str> = v["unchecked"].as_array().expect("unchecked").iter().filter_map(Value::as_str).collect();
-    assert!(u.contains(&"/definitions/messageTrait"), "{v}");
+    assert!(u.contains(&"/definitions/messageTrait/properties/examples/items"), "{v}");
     let mut sorted = u.clone();
     sorted.sort();
     assert_eq!(u, sorted, "{v}");

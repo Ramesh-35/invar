@@ -218,6 +218,19 @@ version did. INVAR flags 5 ADDITION bumps, 3 of them with an instance
 that Python `jsonschema` confirms, and no printed instance fails that
 check.
 
+From v0.2.13 HOLDS means every change was judged
+([JUDGE-REACH-SPEC.md](docs/falsification/JUDGE-REACH-SPEC.md)). Until
+v0.2.12 it meant only that nothing changed along the paths the judge
+walks: auditing AsyncAPI's schemas found a change behind
+`patternProperties`, `oneOf` and `$ref` that rejects a whole valid
+document, judged HOLDS. Now every change the judge does not check (a
+definition reached only through `items` or `anyOf`, a property added to
+an open object, an object closed, a `$schema` change) makes the verdict
+NOT EVALUATED, naming each schema by its JSON Pointer. On SchemaStore's
+history this moves 521 of 594 HOLDS to NOT EVALUATED: those HOLDS were
+not earned. In the Action they pass with a warning, never as a silent
+pass; no break that was found before is lost.
+
 In the Action, one input:
 
 ```yaml
