@@ -1,0 +1,32 @@
+# JUDGE-TESTS r0 freeze record, written before any implementation.
+# Baseline: v0.2.15 (24034f7, released 2026-11-07); main b06f01c, which removed
+#   a placeholder freeze record that pinned nothing.
+# Ratified 2026-11-07 as scoped: the check lives in the Python harness as one
+#   file, action/tests.py; the Rust judge is unchanged.
+# Measured before implementation: judge_tests_test 0 of 15 pass (action/tests.py
+#   does not exist). The 11 SchemaStore changes the prototype found, each a
+#   base-commit test document the head rejects, by commit and schema:
+#   04da89dcb specmatic, 0b328bf24 global, 2a7fd1cbe pull-request-labeler,
+#   585b21f01 sil-kit-participant-configuration, 8cfea30d1 webjob-publish-settings,
+#   af686ddb1 vtesttree-schema-v2.4.0, cfd4af801 claude-code-keybindings,
+#   d9d98e698 github-action, dd22b5c09 ryl, f9d455e8c es6importsorterrc,
+#   fc3956739 lychee.
+# Pre-registered: 15 of 15; TS-M1..M4 killed; full suite; clippy silent; the
+#   Rust judge's corpus verdicts unchanged; on SchemaStore exactly the 19 changes
+#   named in the spec's Gates carry a witness and no HOLDS change does.
+blake3(docs/falsification/JUDGE-TESTS-SPEC.md) = 99ed0c7c94a626d583ec31b5ec45e270b816f2a96840a7787f8210c40b370258
+sha256(docs/falsification/JUDGE-TESTS-SPEC.md) = 264c1b6197cf4ac9b7d01314d3accb98075ffb0a68e8078f0bf31991c098bb62
+blake3(crates/invar-falsify/tests/judge_tests_test.rs) = bef4c0ca497b377eebc433d0b205362a55cd9671d56f689cce0dba7adf0f6476
+sha256(crates/invar-falsify/tests/judge_tests_test.rs) = 48b113033d1eb43fa78a199985b69d701a780677520248860bccc4e914588424
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-github-action-d9d98e698-before.json) = b1398ee6adf99e71e8805819203fdc4a6572cc13239e6a92e4c9001c4f096190
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-github-action-d9d98e698-before.json) = 0418de152a6e28b06ac6c8a62200a53a178936ab044bb066e8dabd70b4f89d8a
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-github-action-d9d98e698-after.json) = 8937ed3684196f285d479c06aeb9258e8cf9eefb24aefe36b65b74efcbfc0fd1
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-github-action-d9d98e698-after.json) = 83bd3bf0c4122ceb764927bc189d9e3794931306b53cdf89816f6f3472cadf88
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-github-action-d9d98e698-parallel-steps.json) = 7e728eceb64a21dcb5adbd2e5350b606ceb5b18ed7924f747410d4e3effb38e0
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-github-action-d9d98e698-parallel-steps.json) = 9f06f744df0bef19ea43833751bcc91d58fb3f82908064ead1a3e62f7cf9f051
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-ryl-dd22b5c09-before.json) = ccf403675225143e2c93d54d99143651697d6510e98ed63c8c2eb9d5ca44b3ff
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-ryl-dd22b5c09-before.json) = 600bb1d975cb9751eecb05324a38a54194e43afcbc3e9c80e85897509d5db76b
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-ryl-dd22b5c09-after.json) = 06490f67d365b6a45fa286f211f57fef23d639f4c544b1e159ac7186937a3504
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-ryl-dd22b5c09-after.json) = 0ff5005807363abeda6afaf0cbd6bf34355701838a2fcb02857b97c2d6fb0098
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-ryl-dd22b5c09-01-valid.toml) = d47153307d8547756463be94b641aae6bf7439db5e677903ddbb121d28f60d8b
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-ryl-dd22b5c09-01-valid.toml) = b2872471df303a8595fda24f49a68d9cb4d630d15158f55b667d0e70bdb569c6
