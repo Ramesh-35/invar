@@ -1,0 +1,20 @@
+# JUDGE-TESTS r0 Specification (Frozen)
+
+## Operational Scope
+- Evaluates base schema test instances against head schemas inside python audit harness (`audit.py`).
+- Base PASS + Head FAIL  ==> Elevates Exit 4 (NOT EVALUATED) to Exit 1 (VIOLATED) with 1-minimal witness.
+- Base PASS + Head PASS  ==> Retains Exit 4 (NOT EVALUATED) with diagnostic ("N base-valid tests pass").
+- Static HOLDS verdicts  ==> 0 contradicted across 174 tested pairs.
+
+## Pre-Registered Predictions (11 Confirmed Breaks)
+- pull-request-labeler
+- lychee
+- ryl
+- github-action
+- claude-code-keybindings
+- specmatic
+- global.json (.NET 10)
+- sil-kit
+- webjob-publish-settings
+- vtesttree
+- es6importsorterrc
