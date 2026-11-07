@@ -5,6 +5,7 @@
 # Amendment B (2026-11-02): e7373bd3f real; 929201f41 and 585b21f01 stated (NOT EVALUATED expected); b056a70c8, 51b3fa1a0, 8ae3e0c8c real (found by D4). Evidence: spec, Amendment B.
 # JUDGE-R3 r0 (2026-11-03): 4836277f2, 0091e807a, b514ab55c relabelled real -> false_alarm; no instance valid at base is rejected at post (COUNTEREXAMPLE-SPEC.md Amendment A, hand-checks.py).
 # JUDGE-ITEMS r0 (2026-11-06): with array elements judged, six labels written against v0.2.3 are corrected. 13e89998e, 714ea6b79 holds -> real (engine counterexamples, confirmed by jsonschema); 2f74efc3f false_alarm -> real and 585707189 holds -> real (hand-checks.py); 5e44c8eee, 5fcc2e0ed holds -> undecided (pattern changes; by hand each widens: an optional leading '=', a lookahead removed).
+# JUDGE-TESTS r0 (2026-11-07): ten commits relabelled real_by_tests: a base-commit test document under src/test/ is rejected by the head (Python jsonschema), beyond the static judge's reach. Eight were holds (04da89dcb specmatic, 0b328bf24 global, 2a7fd1cbe pull-request-labeler, 8cfea30d1 webjob-publish-settings, af686ddb1 vtesttree-v2.4.0, d9d98e698 github-action, dd22b5c09 ryl, f9d455e8c es6importsorterrc), one stated (585b21f01 sil-kit: schemaVersion 0 no longer allowed), one false_alarm (fc3956739 lychee: `method` can no longer be a list; its own lychee.toml breaks). Gate: such a commit is never HOLDS on every row. Witness files: docs/falsification/tests-moves/schemastore.tsv.
 commit	file	v023_verdict	v023_witnesses	commit_label
 276b087324e60a62492e8c788615268fbdcb44f9	src/schemas/json/cargo-lints-rust.json	HOLDS	0	holds
 d3cbd0bf40e8c45f8b88e87d3bc40fdbf9644500	src/schemas/json/claude-code-settings.json	HOLDS	0	holds
@@ -77,7 +78,7 @@ e79a84d444807b5fe1047b34ffd300784e1d9ac1	src/schemas/json/chrome-manifest.json	H
 c8c40db149b7704cb0b695fbe3e73628010a8294	src/schemas/json/host.json	HOLDS	0	holds
 9671e00732bcb3a55095be81a7dc4ff39bc9e2b3	src/schemas/json/travis.json	HOLDS	0	holds
 7451aa27004858f1c8c63f84d3f038b0ca79bc35	src/schemas/json/rumdl.json	HOLDS	0	holds
-dd22b5c09fe4aaf7b6b4e051cbaebfc51d42a725	src/schemas/json/ryl.json	HOLDS	0	holds
+dd22b5c09fe4aaf7b6b4e051cbaebfc51d42a725	src/schemas/json/ryl.json	HOLDS	0	real_by_tests
 884b741d7ee61302e54b6a33d197311a5903b85e	src/schemas/json/partial-setuptools.json	HOLDS	0	holds
 e5b7ad390b63fedce2ec0b95612b08c3a8c36173	src/schemas/json/partial-scheduled.json	HOLDS	0	holds
 304f4204824f5d1bad957522f533dcfdf7bd293b	src/schemas/json/package.json	HOLDS	0	holds
@@ -92,7 +93,7 @@ bc24ba579d58f066861b4897ba2e37fa62e486a9	src/schemas/json/package.json	HOLDS	0	h
 714ea6b793c6a3476d064058d1436e3c4bf0d975	src/schemas/json/ruff.json	HOLDS	0	real
 7c910423df8b6b68a9ec85cd7ee5fb5d508c4953	src/schemas/json/github-action.json	HOLDS	0	holds
 7c910423df8b6b68a9ec85cd7ee5fb5d508c4953	src/schemas/json/github-workflow.json	HOLDS	0	holds
-d9d98e69894ebd7a50965dc58d61951e9d7f23a7	src/schemas/json/github-action.json	HOLDS	0	holds
+d9d98e69894ebd7a50965dc58d61951e9d7f23a7	src/schemas/json/github-action.json	HOLDS	0	real_by_tests
 34a7b3158edbba58d5c7a562ff53c64eae566692	src/schemas/json/hugo.json	HOLDS	0	holds
 8a3e4fcb4ce784c536b0791f3e392d256601f3f5	src/schemas/json/stylintrc.json	VIOLATED	28	false_alarm
 9cf1c1c6723b3d92ad358916f7fc7852e6f80144	src/schemas/json/aiproj-1.0.json	HOLDS	0	holds
@@ -139,13 +140,13 @@ f40c891d39e8c0e297a4ac2019c570470c732327	src/schemas/json/youtrack-app.json	HOLD
 49bdaeaa9538eee835e6851bd1263b11c2a37a99	src/schemas/json/prek.json	HOLDS	0	holds
 685cc19066aca9c16275e82a0690208cfd87a464	src/schemas/json/package.json	HOLDS	0	holds
 7c3d8f2388bc50e85b3de8f14cc59e33cf85dca0	src/schemas/json/ruff.json	HOLDS	0	holds
-585b21f01a165d185de4663e4fd41a77972c437b	src/schemas/json/sil-kit-participant-configuration.json	VIOLATED	1	stated
+585b21f01a165d185de4663e4fd41a77972c437b	src/schemas/json/sil-kit-participant-configuration.json	VIOLATED	1	real_by_tests
 8a9a374941b4317cf891cce830c9076c8393ba06	src/schemas/json/ty.json	HOLDS	0	holds
 d1a4056faeb0c18b2d250c3ae7a31f9c1c413e59	src/schemas/json/hatch.json	HOLDS	0	holds
 03e9f9b0142ebb406964bef4127bfb53d2a88066	src/schemas/json/openapi-3.X.json	HOLDS	0	holds
 4fe365602cef38a2e36ceb0cc4303e0361392263	src/schemas/json/jscpd.json	VIOLATED	2	false_alarm
-f9d455e8c0163ec4053d771fe1359c3bfcc22c07	src/schemas/json/all-contributors.json	HOLDS	0	holds
-f9d455e8c0163ec4053d771fe1359c3bfcc22c07	src/schemas/json/es6importsorterrc.json	HOLDS	0	holds
+f9d455e8c0163ec4053d771fe1359c3bfcc22c07	src/schemas/json/all-contributors.json	HOLDS	0	real_by_tests
+f9d455e8c0163ec4053d771fe1359c3bfcc22c07	src/schemas/json/es6importsorterrc.json	HOLDS	0	real_by_tests
 fe592e95ead63f10c3daa136f456d3e97f3a6ed3	src/schemas/json/json-patch.json	HOLDS	0	holds
 1f58bb5b055cb488cbf7d8502278e4868213d179	src/schemas/json/jsinspectrc.json	HOLDS	0	holds
 6313b56aeeae68dfa6d82d0895c82b0031987ade	src/schemas/json/jsonld.json	HOLDS	0	holds
@@ -211,8 +212,8 @@ b14646fb49903df36e2518207ccddee49eb11fff	src/schemas/json/mycode.json	HOLDS	0	ho
 6d16f0008f17e2ed3558fffa5730180643af6554	src/schemas/json/codecov.json	VIOLATED	8	false_alarm
 4de8dd26851dedba7e298ded3186dd460dfd4022	src/schemas/json/BizTalkServerApplicationSchema.json	HOLDS	0	holds
 ac8d192b4b698489ee43f5596025c48f98fceb82	src/schemas/json/cdk.json	HOLDS	0	holds
-2a7fd1cbe653c3d943016e0d5def861855defad1	src/schemas/json/pull-request-labeler-5.json	HOLDS	0	holds
-2a7fd1cbe653c3d943016e0d5def861855defad1	src/schemas/json/pull-request-labeler.json	HOLDS	0	holds
+2a7fd1cbe653c3d943016e0d5def861855defad1	src/schemas/json/pull-request-labeler-5.json	HOLDS	0	real_by_tests
+2a7fd1cbe653c3d943016e0d5def861855defad1	src/schemas/json/pull-request-labeler.json	HOLDS	0	real_by_tests
 65b383d566a6fb90f80cf038d6cd929dac4898c4	src/schemas/json/rumdl.json	HOLDS	0	holds
 144ba338f6931f2678daa7267e1cec6f3b1f21b3	src/schemas/json/prek.json	HOLDS	0	holds
 2f74efc3f937e8ba59f2fbfdaad721930ab14c5c	src/schemas/json/claude-code-keybindings.json	HOLDS	0	real
@@ -239,7 +240,7 @@ b25625bd3ad47170197a3bfce958da55eee47394	src/schemas/json/tombi.json	HOLDS	0	hol
 f4d7fd9c9ceb291b29e955f46f69c1f245df5bf9	src/schemas/json/package.json	HOLDS	0	holds
 525fe48031cd0f2d3fa91203a91184c633195fd6	src/schemas/json/pnpm-workspace.json	HOLDS	0	holds
 2eb086dfa81fa3254127c95d074fbc10054055c1	src/schemas/json/pnpm-workspace.json	VIOLATED	1	real
-0b328bf24d4fdfbaa48b4c2cb78b6d532f116b30	src/schemas/json/global.json	HOLDS	0	holds
+0b328bf24d4fdfbaa48b4c2cb78b6d532f116b30	src/schemas/json/global.json	HOLDS	0	real_by_tests
 a577d89d589f91c7df382c39cbe2e968dcb4938d	src/schemas/json/ty.json	HOLDS	0	holds
 2a3fb60353a27f92599cf22e9fc1fa63066f5c2a	src/schemas/json/package.json	VIOLATED	1	false_alarm
 6ea1e71aace275808c9103d3f14e7cef29f717fa	src/schemas/json/prek.json	HOLDS	0	holds
@@ -349,9 +350,9 @@ d010b17f2431295bfd0045a7051e582d1ed46a2f	src/schemas/json/content-security-polic
 449644d6dd2f37dd872739afdf7b065be6d9bd34	src/schemas/json/stale.json	HOLDS	0	holds
 5d48284b4d3080c6beb3156a3a90d7a8b31e85d2	src/schemas/json/ruff.json	HOLDS	0	holds
 1983458b590798ef693d0e51d76af74693ef6fd9	src/schemas/json/es6importsorterrc.json	HOLDS	0	holds
-8cfea30d1c0a07914a6978ef9dde40d264ceec88	src/schemas/json/settings.job.json	HOLDS	0	holds
-8cfea30d1c0a07914a6978ef9dde40d264ceec88	src/schemas/json/webjob-publish-settings.json	HOLDS	0	holds
-8cfea30d1c0a07914a6978ef9dde40d264ceec88	src/schemas/json/webjobs-list.json	HOLDS	0	holds
+8cfea30d1c0a07914a6978ef9dde40d264ceec88	src/schemas/json/settings.job.json	HOLDS	0	real_by_tests
+8cfea30d1c0a07914a6978ef9dde40d264ceec88	src/schemas/json/webjob-publish-settings.json	HOLDS	0	real_by_tests
+8cfea30d1c0a07914a6978ef9dde40d264ceec88	src/schemas/json/webjobs-list.json	HOLDS	0	real_by_tests
 7de30f6372064f4dd148799681dff3b5b5d3e58f	src/schemas/json/plagiarize-0.0.json	HOLDS	0	holds
 7de30f6372064f4dd148799681dff3b5b5d3e58f	src/schemas/json/plagiarize.json	HOLDS	0	holds
 a3cf4d5316a7ef7a9b4d6cbdf3ced59e8f38b801	src/schemas/json/prettierrc-1.8.2.json	HOLDS	0	holds
@@ -562,10 +563,10 @@ f71d8129b80bea20c1f848ec68689194d3c9fe72	src/schemas/json/pnpm-workspace.json	VI
 4ed4c5dd7aa0f6fe4231d80cd823d4cfc032bba6	src/schemas/json/utam-page-object-2.0.3.json	HOLDS	0	holds
 4ed4c5dd7aa0f6fe4231d80cd823d4cfc032bba6	src/schemas/json/utam-page-object-2.2.0.json	HOLDS	0	holds
 4ed4c5dd7aa0f6fe4231d80cd823d4cfc032bba6	src/schemas/json/utam-page-object.json	HOLDS	0	holds
-af686ddb16a8d93281afd031cb1f562c02a0e798	src/schemas/json/vtesttree-schema-v2.1.0.json	HOLDS	0	holds
-af686ddb16a8d93281afd031cb1f562c02a0e798	src/schemas/json/vtesttree-schema-v2.2.0.json	HOLDS	0	holds
-af686ddb16a8d93281afd031cb1f562c02a0e798	src/schemas/json/vtesttree-schema-v2.3.0.json	HOLDS	0	holds
-af686ddb16a8d93281afd031cb1f562c02a0e798	src/schemas/json/vtesttree-schema-v2.4.0.json	HOLDS	0	holds
+af686ddb16a8d93281afd031cb1f562c02a0e798	src/schemas/json/vtesttree-schema-v2.1.0.json	HOLDS	0	real_by_tests
+af686ddb16a8d93281afd031cb1f562c02a0e798	src/schemas/json/vtesttree-schema-v2.2.0.json	HOLDS	0	real_by_tests
+af686ddb16a8d93281afd031cb1f562c02a0e798	src/schemas/json/vtesttree-schema-v2.3.0.json	HOLDS	0	real_by_tests
+af686ddb16a8d93281afd031cb1f562c02a0e798	src/schemas/json/vtesttree-schema-v2.4.0.json	HOLDS	0	real_by_tests
 2aded6096789c43a722556cf5019464ee747e495	src/schemas/json/sarif-1.0.0.json	VIOLATED	1	undecided
 2aded6096789c43a722556cf5019464ee747e495	src/schemas/json/sarif-2.0.0-csd.2.beta.2018-10-10.json	VIOLATED	1	undecided
 2aded6096789c43a722556cf5019464ee747e495	src/schemas/json/sarif-2.0.0-csd.2.beta.2019-01-09.json	VIOLATED	1	undecided
@@ -704,7 +705,7 @@ efe119fba3f8bbb0e8f01d2cd484b11739487d41	src/schemas/json/pnpm-workspace.json	HO
 ca65ac1df08df822941754415c5c333fe9913bc2	src/schemas/json/tox.json	HOLDS	0	holds
 fa92202e8115dc7ab65a099c86191001b19bbac8	src/schemas/json/pnpm-workspace.json	HOLDS	0	holds
 80b186b447b143b04cbb642b09a631a3299874d7	src/schemas/json/tox.json	HOLDS	0	holds
-04da89dcb1b6e6a2a6c0bb34981b237a5131a4f1	src/schemas/json/specmatic.json	HOLDS	0	holds
+04da89dcb1b6e6a2a6c0bb34981b237a5131a4f1	src/schemas/json/specmatic.json	HOLDS	0	real_by_tests
 58e57d16bbddb12f578f7bb81a568f76bc264261	src/schemas/json/cargo.json	HOLDS	0	holds
 c0508524b793be584d15fc7b32ca8ad1ba94621e	src/schemas/json/aio-wasm-graph-config-1.1.0.json	HOLDS	0	holds
 314154a4c71665df725986ad334f6f0846d486d3	src/schemas/json/pnpm-workspace.json	HOLDS	0	holds
@@ -790,7 +791,7 @@ c95d52cfefb9c544f5bea8424d7c49f7c43bd20b	src/schemas/json/twee-ts.config.json	VI
 d50ef00b9bf32530ed6c7ddfd32b3d162e69b137	src/schemas/json/tombi.json	HOLDS	0	holds
 6b9673c4cd6b965907f8519981dfaad10db342bd	src/schemas/json/pyproject.json	VIOLATED	5	real
 93276d3424c21f686441e0747c20907d084de04d	src/schemas/json/kustomization.json	HOLDS	0	holds
-fc3956739a841298f00c0634375c2fa1a1a80546	src/schemas/json/lychee.json	VIOLATED	60	false_alarm
+fc3956739a841298f00c0634375c2fa1a1a80546	src/schemas/json/lychee.json	VIOLATED	60	real_by_tests
 777f4f47f8c709a9900de0d09162b8d082558a19	src/schemas/json/prometheus.json	HOLDS	0	holds
 0fd16c24f7989a90f6d952a83281a28776d8cc7c	src/schemas/json/pnpm-workspace.json	HOLDS	0	holds
 8ae3e0c8c1d637a9bbb929e2ba7d77343df98465	src/schemas/json/zeropress-wxr-import-base-0.7.json	HOLDS	0	real

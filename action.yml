@@ -73,6 +73,25 @@ inputs:
       matches nothing fails.
     required: false
     default: ''
+  judge_tests:
+    description: >-
+      JUDGE-TESTS r0: the directory of instance documents for a contract, as
+      a pattern with {name} for the contract's file stem (for example
+      'src/test/{name}'), read from the base ref. For every contract the
+      judge_contracts globs match and this change modifies, each document
+      valid at the base is validated at the head with Python jsonschema; a
+      document rejected fails the job (unless fail_on_violation is 'false')
+      with one annotation per document. Passing documents prove nothing and
+      say so. Needs judge_contracts.
+    required: false
+    default: ''
+  tests_timeout:
+    description: >-
+      Seconds allowed per contract for judge_tests (Python jsonschema can take
+      minutes on a large schema). A contract over budget is NOT EVALUATED with
+      a warning, never a pass.
+    required: false
+    default: '120'
 
 outputs:
   exit_code:
@@ -93,6 +112,9 @@ outputs:
   judge_contracts_summary:
     description: The one-line summary of a judge_contracts run (empty when judge_contracts is unset).
     value: ${{ steps.judge_contracts.outputs.judge_contracts_summary }}
+  judge_tests_summary:
+    description: The one-line summary of a judge_tests run (empty when judge_tests is unset).
+    value: ${{ steps.judge_tests.outputs.judge_tests_summary }}
 
 runs:
   using: composite
@@ -183,6 +205,19 @@ runs:
         INVAR_FAIL_ON_VIOLATION: ${{ inputs.fail_on_violation }}
         INVAR_ACTION_PATH: ${{ github.action_path }}
       run: bash "$INVAR_ACTION_PATH/action/judge_contracts.sh"
+
+    - name: Run invar tests (base instances against the head contract)
+      id: judge_tests
+      if: inputs.judge_tests != '' && inputs.judge_contracts != ''
+      shell: bash
+      env:
+        INVAR_JUDGE_CONTRACTS: ${{ inputs.judge_contracts }}
+        INVAR_JUDGE_TESTS: ${{ inputs.judge_tests }}
+        INVAR_TESTS_TIMEOUT: ${{ inputs.tests_timeout }}
+        INVAR_BASE_REF: ${{ inputs.base_ref }}
+        INVAR_FAIL_ON_VIOLATION: ${{ inputs.fail_on_violation }}
+        INVAR_ACTION_PATH: ${{ github.action_path }}
+      run: bash "$INVAR_ACTION_PATH/action/judge_tests.sh"
 
     - name: Gate
       if: inputs.check == 'true'

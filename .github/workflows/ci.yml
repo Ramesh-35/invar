@@ -3,7 +3,7 @@ name: invar-falsify CI
 # Phase-1 CI: build and test the falsification instrument, validate the corpus
 # manifest, and run the harness with Semgrep genuinely installed so the static
 # leg executes. A run whose required leg is SKIPPED is honest (UNKNOWN), not a
-# failure — CI does not force verdicts.
+# failure; CI does not force verdicts.
 
 on:
   push:
@@ -57,6 +57,9 @@ jobs:
         with:
           toolchain: stable
           components: clippy
+
+      - name: Python packages the JUDGE-TESTS fixtures run against
+        run: python3 -m pip install -q 'jsonschema==4.26.0' 'PyYAML==6.0.3'
 
       - name: Cache cargo
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4

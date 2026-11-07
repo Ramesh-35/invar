@@ -30,3 +30,11 @@ blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-ryl-dd22b5c09-after
 sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-ryl-dd22b5c09-after.json) = 0ff5005807363abeda6afaf0cbd6bf34355701838a2fcb02857b97c2d6fb0098
 blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-ryl-dd22b5c09-01-valid.toml) = d47153307d8547756463be94b641aae6bf7439db5e677903ddbb121d28f60d8b
 sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-ryl-dd22b5c09-01-valid.toml) = b2872471df303a8595fda24f49a68d9cb4d630d15158f55b667d0e70bdb569c6
+# Measured after implementation (v0.2.16 candidate, 2026-11-07): judge_tests_test
+#   15 of 15; full suite 811; mutants 83 of 83; clippy silent. The first run of
+#   the script over SchemaStore found 18 of the 19, with 3 changes exited 3 and
+#   2 timed out: two harness defects (metaschema format assertion on `pattern`;
+#   every error enumerated instead of the first), fixed without touching a
+#   fixture and recorded as Amendment A. The rerun finds exactly the 19 and no
+#   HOLDS change; the two azure-iot-edge changes exceed a 120 s budget and are
+#   stated, never passed.

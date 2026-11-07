@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M4) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -9,7 +9,8 @@
 set -uo pipefail
 J=crates/invar-falsify/src/judge.rs
 X=crates/invar-falsify/src/counterexample.rs
-cp "$J" "$J.orig"; cp "$X" "$X.orig"
+P=action/tests.py
+cp "$J" "$J.orig"; cp "$X" "$X.orig"; cp "$P" "$P.orig"
 pass=0; fail=0
 
 mutate() { python3 - "${3:-$J}" "$1" "$2" <<'EOF'
@@ -23,7 +24,7 @@ EOF
 
 run_one() { # name old new killer_test [test_target] [file]
   name=$1; old=$2; new=$3; killer=$4; target=${5:-judge_test}; file=${6:-$J}
-  cp "$J.orig" "$J"; cp "$X.orig" "$X"
+  cp "$J.orig" "$J"; cp "$X.orig" "$X"; cp "$P.orig" "$P"
   # An anchor that no longer matches mutates nothing: INVALID, never a verdict.
   if ! mutate "$old" "$new" "$file"; then
     echo "$name: INVALID (anchor does not match exactly once)"; fail=$((fail+1)); return
@@ -202,7 +203,18 @@ run_one IT-M3 'let judged = |v: &Value| matches!(v.get("items"), None | Some(Val
     let first = |v: &Value| v.get("items").and_then(|i| i.as_array().and_then(|a| a.first()).or(Some(i))).cloned();
     let (pv, qv) = (&{ let mut x = pv.clone(); if let Some(f) = first(pv) { x["items"] = f; } x }, &{ let mut x = qv.clone(); if let Some(f) = first(qv) { x["items"] = f; } x });' i_f08_tuple_items_stay_unchecked judge_items_test
 run_one IT-M4 'Step::Item => Ok(Value::Array(Vec::new())),' 'Step::Item => Ok(Value::Object(Map::new())),' i_f06_element_property_retyped judge_items_test "$X"
-cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"
+# JUDGE-TESTS r0 (docs/falsification/JUDGE-TESTS-SPEC.md), mutating action/tests.py
+run_one TS-M1 'witnesses.append({"file": name, "pointer": pointer(eh[0].absolute_path), "message": eh[0].message})' 'passes += 1' t_f01_rejected_instance_is_a_break judge_tests_test "$P"
+run_one TS-M2 'sys.exit(1 if witnesses else 4)' 'sys.exit(1 if witnesses else 0)' t_f02_passing_instances_are_not_evaluated judge_tests_test "$P"
+run_one TS-M3 '        if eb:
+            not_promises += 1
+            continue' '        if eb:
+            pass' t_f03_base_invalid_instance_is_not_a_promise judge_tests_test "$P"
+run_one TS-M4 '            unreadable += 1
+            not_checked.append({"file": name, "reason": why})
+            continue' '            passes += 1
+            continue' t_f06_unparsable_file_is_not_checked judge_tests_test "$P"
+cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"; cp "$P.orig" "$P"; rm "$P.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"
 [ "$fail" -eq 0 ]

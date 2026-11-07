@@ -3,7 +3,8 @@
 # SchemaStore schema changes pinned in MANIFEST.tsv. Acceptance (spec,
 # Amendment B): every real commit VIOLATED; every stated commit NOT
 # EVALUATED; no false_alarm commit VIOLATED; no holds commit newly
-# VIOLATED. Anything else fails, listed with its witnesses.
+# VIOLATED; no real_by_tests commit (JUDGE-TESTS r0) HOLDS on every row.
+# Anything else fails, listed with its witnesses.
 # Whatever false alarms remain are listed with their witnesses, never
 # hidden. Needs network once (clones SchemaStore into a cache dir).
 # Usage, from the repo root:
@@ -43,21 +44,25 @@ violated = {c for c, v in verdicts.items() if 'VIOLATED' in v}
 count = collections.Counter(label.values())
 by = lambda l: [c for c, x in label.items() if x == l]
 real, stated, fa, holds, und = by('real'), by('stated'), by('false_alarm'), by('holds'), by('undecided')
+rbt = by('real_by_tests')
+rbt_bad = [c for c in rbt if all(v == 'HOLDS' for v in verdicts[c])]
 missed = [c for c in real if c not in violated]
 stated_bad = [c for c in stated if 'NOT EVALUATED' not in verdicts[c] or c in violated]
 left = [c for c in fa if c in violated]
 newly = [c for c in holds if c in violated]
 print(f"commits {len(label)}: real {len(real)}, stated {len(stated)}, false_alarm {len(fa)}, holds {len(holds)}, undecided {len(und)}")
 print(f"real VIOLATED: {len(real) - len(missed)} of {len(real)}")
+print(f"real by tests (beyond static reach), never all HOLDS: {len(rbt) - len(rbt_bad)} of {len(rbt)}")
 print(f"stated NOT EVALUATED: {len(stated) - len(stated_bad)} of {len(stated)}")
 print(f"false alarms VIOLATED: {len(left)} of {len(fa)}")
 print(f"holds newly VIOLATED: {len(newly)} of {len(holds)}")
 print(f"undecided (pattern/format) flagged: {sum(1 for c in und if c in violated)} of {len(und)}")
 for c in missed: print(f"  MISSED real {c[:9]}: verdicts {sorted(set(verdicts[c]))}")
+for c in rbt_bad: print(f"  real by tests judged HOLDS {c[:9]}: verdicts {sorted(set(verdicts[c]))}")
 for c in stated_bad: print(f"  stated not NOT EVALUATED {c[:9]}: verdicts {sorted(set(verdicts[c]))}")
 for c in left: print(f"  false alarm {c[:9]}: " + "; ".join(detail[c][:3]))
 for c in newly: print(f"  newly VIOLATED {c[:9]}: " + "; ".join(detail[c][:3]))
-ok = not missed and not stated_bad and not left and not newly
+ok = not missed and not stated_bad and not left and not newly and not rbt_bad
 print("REPLAY: PASS" if ok else "REPLAY: FAIL")
 sys.exit(0 if ok else 1)
 EOF

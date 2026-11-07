@@ -278,6 +278,22 @@ everything it promised is withdrawn. A glob that matches nothing is an
 error, never a pass. The sentences state what changed in the contract and
 what that does to validity, never a guess about who reads it.
 
+A repository that keeps example documents beside its contracts can name
+them, and every document the base accepted is validated at the head:
+
+```yaml
+    judge_contracts: 'src/schemas/json/*.json'
+    judge_tests: 'src/test/{name}'
+```
+
+A document rejected is a break with the file, the pointer and the
+validator's message, whatever the static judge could reach. Documents
+that pass prove nothing and the step says so: there is no HOLDS from a
+corpus ([JUDGE-TESTS-SPEC.md](docs/falsification/JUDGE-TESTS-SPEC.md)).
+On SchemaStore's own test files this found 11 breaks in six months that
+the static judge could not reach, among them `pull-request-labeler`,
+`lychee` and `ryl`, and contradicted none of its HOLDS.
+
 The judged set is stated and narrow, on purpose: property presence and
 `type` (a type change that keeps every value valid, such as `boolean` to
 `boolean|null`, is a stated note, not a break), enum narrowing, tightened bounds, newly required fields, and

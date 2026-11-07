@@ -130,3 +130,48 @@ Each runs `python3 action/tests.py` from the crate's test binary.
 - TS-M2 passing instances exit 0: t_f02.
 - TS-M3 base validity is not checked: t_f03.
 - TS-M4 an unreadable file is counted as passing: t_f06.
+
+## Amendment A (after measurement, fixtures unchanged): three harness facts
+
+Running the script over SchemaStore before release found three things the
+ruling did not say, each now stated:
+
+- The schema is checked against its metaschema without format assertion.
+  A `pattern` Python's `re` cannot compile (`(?<name>...)`, `\p{...}`) is a
+  valid schema; each document it guards is `unverifiable`, never the
+  whole change an error. The first run turned global.json, circleciconfig
+  and appsettings into exit 3 and missed global.json's break.
+- One validation error is enough on either side: a document is a promise
+  or not, a break or not. Enumerating every error timed out on large
+  schemas where the prototype, which stopped at the first, did not. The
+  witness carries the first error in the validator's own order.
+- The Action gives each contract a time budget (`tests_timeout`, 120
+  seconds). Over budget is NOT EVALUATED with a warning, never a pass.
+  azure-iot-edge-deployment-template 2.0 and 4.0 at 03ace7195 take about
+  350 seconds a side in Python jsonschema, every document valid on both.
+
+## Measured outcome (v0.2.16 candidate, 2026-11-07)
+
+judge_tests_test 15 of 15; full suite 811 passed; mutants 83 of 83
+(TS-M1..M4 each killed by its named fixture); clippy `-D warnings` silent;
+the Rust judge unchanged, so every corpus verdict is unchanged.
+
+The prediction holds after Amendment A: on SchemaStore at v0.2.15,
+exactly the 19 named changes carry a witness, 11 from NOT EVALUATED and 8
+from VIOLATED, and no HOLDS change does. The rest: 551 `instances_pass`,
+16 `no_base_valid_instance`, 12 `unverifiable`, 219 with no test
+directory, 2 over the time budget. Witness files per change are in
+tests-moves/schemastore.tsv.
+
+## Amendment B (after measurement): ten replay labels corrected
+
+The replay corpus labels commits by what the static judge should say.
+Ten commits now carry a break the static judge cannot reach, proven by
+the commit's own test documents: eight labelled holds (specmatic, global,
+pull-request-labeler, webjob-publish-settings, vtesttree-v2.4.0,
+github-action, ryl, es6importsorterrc), one stated (sil-kit), and one
+false_alarm (lychee, whose own lychee.toml the head rejects: the hand
+label had excused a real break). They are relabelled `real_by_tests`,
+with its own gate line: such a commit is never HOLDS on every row. With
+it, SchemaStore replay: PASS (real VIOLATED 21 of 21, real by tests 10 of
+10, false alarms VIOLATED 0 of 55, holds newly VIOLATED 0 of 386).
