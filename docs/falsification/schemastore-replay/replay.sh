@@ -3,7 +3,8 @@
 # SchemaStore schema changes pinned in MANIFEST.tsv. Acceptance (spec,
 # Amendment B): every real commit VIOLATED; every stated commit NOT
 # EVALUATED; no false_alarm commit VIOLATED; no holds commit newly
-# VIOLATED; no real_by_tests commit (JUDGE-TESTS r0) HOLDS on every row.
+# VIOLATED; no real_by_tests commit (JUDGE-TESTS r0, two validators) HOLDS on
+# every row; disputed commits are counted, nothing asserted.
 # Anything else fails, listed with its witnesses.
 # Whatever false alarms remain are listed with their witnesses, never
 # hidden. Needs network once (clones SchemaStore into a cache dir).
@@ -45,6 +46,7 @@ count = collections.Counter(label.values())
 by = lambda l: [c for c, x in label.items() if x == l]
 real, stated, fa, holds, und = by('real'), by('stated'), by('false_alarm'), by('holds'), by('undecided')
 rbt = by('real_by_tests')
+disputed = by('disputed')
 rbt_bad = [c for c in rbt if all(v == 'HOLDS' for v in verdicts[c])]
 missed = [c for c in real if c not in violated]
 stated_bad = [c for c in stated if 'NOT EVALUATED' not in verdicts[c] or c in violated]
@@ -53,6 +55,7 @@ newly = [c for c in holds if c in violated]
 print(f"commits {len(label)}: real {len(real)}, stated {len(stated)}, false_alarm {len(fa)}, holds {len(holds)}, undecided {len(und)}")
 print(f"real VIOLATED: {len(real) - len(missed)} of {len(real)}")
 print(f"real by tests (beyond static reach), never all HOLDS: {len(rbt) - len(rbt_bad)} of {len(rbt)}")
+print(f"disputed between validators (no assertion): {len(disputed)}")
 print(f"stated NOT EVALUATED: {len(stated) - len(stated_bad)} of {len(stated)}")
 print(f"false alarms VIOLATED: {len(left)} of {len(fa)}")
 print(f"holds newly VIOLATED: {len(newly)} of {len(holds)}")

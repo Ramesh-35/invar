@@ -175,3 +175,18 @@ label had excused a real break). They are relabelled `real_by_tests`,
 with its own gate line: such a commit is never HOLDS on every row. With
 it, SchemaStore replay: PASS (real VIOLATED 21 of 21, real by tests 10 of
 10, false alarms VIOLATED 0 of 55, holds newly VIOLATED 0 of 386).
+
+## Amendment C (after release, v0.2.17): one validator's word is one validator's word
+
+Every witness file of the 19 changes was run through a second validator,
+Ajv 8 (SchemaStore's own CI validator; strict off, formats not asserted).
+Ajv agrees on 21 of 28 files, covering 15 changes: 7 beyond the static
+judge's reach and the 8 it already judged VIOLATED. For webjob-publish-
+settings (8cfea30d1), vtesttree-v2.4.0 (af686ddb1) and es6importsorterrc
+(f9d455e8c) Ajv accepts at the head the document jsonschema rejects; for
+lychee (fc3956739) Ajv cannot compile the head, which `$ref`s a remote
+URL. Those four are `disputed`, counted and never asserted; `real_by_tests`
+now means two validators agree. The v0.2.16 README's "11 breaks" was the
+single-validator count and is corrected. The Action's check still uses
+jsonschema alone and says so; a second validator in the Action is r1
+work, not assumed.

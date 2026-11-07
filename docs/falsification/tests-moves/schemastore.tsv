@@ -1,23 +1,23 @@
-change	v0.2.15 static verdict	witness files (base-commit test documents the head rejects)
-04da89dcb_specmatic.json	NOT EVALUATED	specmatic-uber-v3.json
-0b328bf24_global.json	NOT EVALUATED	valid-rollfoward.json
-18132a01a_pnpm-workspace.json	VIOLATED	pnpm-workspace.yaml
-2a7fd1cbe_pull-request-labeler.json	NOT EVALUATED	dockstarter.json, freecodecamp.json, tidb.json
-2f74efc3f_claude-code-keybindings.json	VIOLATED	all-contexts.json, current-actions.json
-582d198b3_crucible-code-schema.json	VIOLATED	config.json
-585b21f01_sil-kit-participant-configuration.json	NOT EVALUATED	full.silkit.json, full.silkit.yaml
-64a83f4a0_crucible-code-schema.json	VIOLATED	config.json
-8cfea30d1_webjob-publish-settings.json	NOT EVALUATED	continuous.json, on-demand.json, scheduled.json
-9497fde91_codex-hooks.json	VIOLATED	hooks.json
-af686ddb1_vtesttree-schema-v2.4.0.json	NOT EVALUATED	test-case-list.vtesttree.yaml, test-sequence-list.vtesttree.yaml
-b056a70c8_traefik-v3.json	VIOLATED	example.json
-cfd4af801_claude-code-keybindings.json	NOT EVALUATED	current-actions.json
-cfd4af801_claude-code-settings.json	VIOLATED	modern-complete-config.json
-d9d98e698_github-action.json	NOT EVALUATED	parallel-steps.json
-dd22b5c09_ryl.json	NOT EVALUATED	01-valid.toml
-ec65ccfaf_ttheme-palette.json	VIOLATED	gojo.toml, neutral.toml, rasis.toml
-f9d455e8c_es6importsorterrc.json	NOT EVALUATED	es6importsorterrc-test.json
-fc3956739_lychee.json	NOT EVALUATED	lychee.toml
+change	v0.2.15 static verdict	witness files (base-commit test documents the head rejects)	Ajv 8 agrees (valid before, invalid after)
+04da89dcb_specmatic.json	NOT EVALUATED	specmatic-uber-v3.json	yes
+0b328bf24_global.json	NOT EVALUATED	valid-rollfoward.json	yes
+18132a01a_pnpm-workspace.json	VIOLATED	pnpm-workspace.yaml	yes
+2a7fd1cbe_pull-request-labeler.json	NOT EVALUATED	dockstarter.json, freecodecamp.json, tidb.json	yes
+2f74efc3f_claude-code-keybindings.json	VIOLATED	all-contexts.json, current-actions.json	yes
+582d198b3_crucible-code-schema.json	VIOLATED	config.json	yes
+585b21f01_sil-kit-participant-configuration.json	NOT EVALUATED	full.silkit.json, full.silkit.yaml	yes
+64a83f4a0_crucible-code-schema.json	VIOLATED	config.json	yes
+8cfea30d1_webjob-publish-settings.json	NOT EVALUATED	continuous.json, on-demand.json, scheduled.json	no: Ajv accepts the document at the head
+9497fde91_codex-hooks.json	VIOLATED	hooks.json	yes
+af686ddb1_vtesttree-schema-v2.4.0.json	NOT EVALUATED	test-case-list.vtesttree.yaml, test-sequence-list.vtesttree.yaml	no: Ajv accepts the document at the head
+b056a70c8_traefik-v3.json	VIOLATED	example.json	yes
+cfd4af801_claude-code-keybindings.json	NOT EVALUATED	current-actions.json	yes
+cfd4af801_claude-code-settings.json	VIOLATED	modern-complete-config.json	yes
+d9d98e698_github-action.json	NOT EVALUATED	parallel-steps.json	yes
+dd22b5c09_ryl.json	NOT EVALUATED	01-valid.toml	yes
+ec65ccfaf_ttheme-palette.json	VIOLATED	gojo.toml, neutral.toml, rasis.toml	yes
+f9d455e8c_es6importsorterrc.json	NOT EVALUATED	es6importsorterrc-test.json	no: Ajv accepts the document at the head
+fc3956739_lychee.json	NOT EVALUATED	lychee.toml	no: Ajv cannot compile the head (remote $ref)
 
 # outcome counts, static verdict x tests verdict
 # 116	HOLDS	NOT EVALUATED/instances_pass
