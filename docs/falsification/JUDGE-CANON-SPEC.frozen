@@ -1,0 +1,91 @@
+# JUDGE-CANON r0 freeze record, written before any implementation.
+# Baseline: v0.2.18 candidate (JUDGE-TESTS r1), on main 4fda9bf (v0.2.17).
+# Ratified 2026-11-07.
+# Measured before implementation: judge_canon_test 3 of 10 pass, the three guards
+#   (c_f04, c_f05, c_f08: nothing is covered that the rule excludes). The 7
+#   that fail are the ones the rule must turn.
+# Pre-registered: 10 of 10; CN-M1..M3 killed with every earlier mutant; full
+#   suite; clippy silent; label-free 26/14/50/0, Iglu 5/3/0, replay PASS
+#   unchanged; on SchemaStore at v0.2.15 exactly these 68 changes move from NOT
+#   EVALUATED to HOLDS, 19 more keep NOT EVALUATED with a shorter list, and no
+#   other verdict moves on any corpus:
+#   b65cf6498_nuget-project-3.3.0.json	unchecked_change
+#   b65cf6498_nuget-project.json	unchecked_change
+#   a0b8327b0_esquio.json	unjudged_construct
+#   7de30f637_plagiarize-0.0.json	unchecked_change
+#   7de30f637_plagiarize.json	unchecked_change
+#   03ace7195_azure-iot-edge-deployment-1.0.json	unchecked_change
+#   03ace7195_azure-iot-edgeagent-deployment-1.0.json	unchecked_change
+#   1aa2bfe5e_sprite.json	unchecked_change
+#   7cd4ffa43_project-1.0.0-beta3.json	unjudged_construct
+#   7cd4ffa43_project-1.0.0-beta4.json	unjudged_construct
+#   7cd4ffa43_project-1.0.0-beta5.json	unjudged_construct
+#   897f5028b_abc-supply-plan-10.0.0.json	unjudged_construct
+#   897f5028b_abc-supply-plan-10.1.0.json	unjudged_construct
+#   897f5028b_abc-supply-plan-11.0.0.json	unjudged_construct
+#   897f5028b_abc-supply-plan-11.1.0.json	unjudged_construct
+#   897f5028b_abc-supply-plan-11.2.0.json	unjudged_construct
+#   897f5028b_abc-supply-plan-11.3.0.json	unjudged_construct
+#   897f5028b_abc-supply-plan-11.4.0.json	unjudged_construct
+#   897f5028b_abc-supply-plan-12.0.0.json	unjudged_construct
+#   897f5028b_abc-supply-plan-4.0.0.json	unchecked_change
+#   897f5028b_abc-supply-plan-5.0.0.json	unchecked_change
+#   897f5028b_abc-supply-plan-6.0.0.json	unchecked_change
+#   897f5028b_abc-supply-plan-7.0.0.json	unjudged_construct
+#   897f5028b_abc-supply-plan-8.0.0.json	unjudged_construct
+#   897f5028b_abc-supply-plan-9.0.0.json	unjudged_construct
+#   897f5028b_devup.json	unchecked_change
+#   897f5028b_docker-bake.json	unchecked_change
+#   897f5028b_dotnet-tools.json	unchecked_change
+#   897f5028b_github-cli-hosts.json	unchecked_change
+#   831a1d518_abc-clinical-demand-forecast-1.0.0.json	unjudged_construct
+#   831a1d518_abc-clinical-demand-forecast-2.0.0.json	unjudged_construct
+#   831a1d518_abc-clinical-demand-forecast-3.0.0.json	unjudged_construct
+#   831a1d518_abc-clinical-demand-forecast-4.0.0.json	unjudged_construct
+#   831a1d518_abc-inventory-module-data-1.0.0.json	unchecked_change
+#   831a1d518_abc-inventory-module-data-2.0.0.json	unchecked_change
+#   831a1d518_abc-inventory-module-data-3.0.0.json	unchecked_change
+#   831a1d518_abc-inventory-module-data-4.0.0.json	unchecked_change
+#   831a1d518_abc-inventory-module-data-5.1.0.json	unchecked_change
+#   831a1d518_abc-inventory-module-data-5.2.0.json	unchecked_change
+#   831a1d518_abc-inventory-module-data-5.3.0.json	unchecked_change
+#   831a1d518_abc-inventory-module-data-5.4.0.json	unchecked_change
+#   831a1d518_abc-supply-plan-13.0.0.json	unjudged_construct
+#   831a1d518_abc-supply-plan-14.0.0.json	unchecked_change
+#   831a1d518_aio-wasm-graph-config-1.0.0.json	unjudged_construct
+#   831a1d518_aio-wasm-graph-config-1.1.0.json	unjudged_construct
+#   831a1d518_base-04.json	unchecked_change
+#   831a1d518_base.json	unchecked_change
+#   831a1d518_cfgd-configsource-0.10.0.json	unjudged_construct
+#   831a1d518_cfgd-configsource-0.5.0.json	unjudged_construct
+#   831a1d518_cfgd-module-0.10.0.json	unjudged_construct
+#   831a1d518_cfgd-module-0.5.0.json	unjudged_construct
+#   831a1d518_cfgd-profile-0.5.0.json	unjudged_construct
+#   831a1d518_tfpowershell-datasource.json	unchecked_change
+#   831a1d518_tfpowershell-provider.json	unchecked_change
+#   831a1d518_tfpowershell-resource.json	unchecked_change
+#   831a1d518_tombi.json	unjudged_construct
+#   831a1d518_ty.json	unchecked_change
+#   831a1d518_vespertide-migration.json	unjudged_construct
+#   c6c2d035d_behat.json	unchecked_change
+#   c6c2d035d_cinnamon-spice-settings.json	unchecked_change
+#   c6c2d035d_cloudify.json	unjudged_construct
+#   c6c2d035d_electron-builder.json	unjudged_construct
+#   c6c2d035d_helmfile.json	unchecked_change
+#   c6c2d035d_lintstagedrc.schema.json	unchecked_change
+#   c6c2d035d_metaschema-draft-07-unofficial-strict.json	unchecked_change
+#   c6c2d035d_metricshub-connector.json	unchecked_change
+#   c6c2d035d_minecraft-advancement.json	unjudged_construct
+#   6abdd657e_expo-39.0.0.json	unjudged_construct
+blake3(docs/falsification/JUDGE-CANON-SPEC.md) = 8194b992dc1590d2c14d5103e9df5b61d7b53ad232be2d8544d8860e5aedb5f8
+sha256(docs/falsification/JUDGE-CANON-SPEC.md) = 1344b5746bc19f25811c0314fbe8418b6628620e7a8f01af6205152c7380d376
+blake3(crates/invar-falsify/tests/judge_canon_test.rs) = 05fd2e0e10453246ed94f6fadf3db800587272aeb8ceedee7f4c05fac63371a4
+sha256(crates/invar-falsify/tests/judge_canon_test.rs) = fb8397119f67998a90d542e144a48bbddde4b810fcc3abbedfe27766dfbf6bfa
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-plagiarize-7de30f637-before.json) = 3b3667e8bc8b7f375dec253e08b7e2f57374fc9b7ddcb2f07360ffb543cdc87c
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-plagiarize-7de30f637-before.json) = 090019dd98a1687587e2e8fe9b5f598c6f99b9d6151ba541d031d2ad25806517
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-plagiarize-7de30f637-after.json) = 86e95e152b4d3ae6b93c909fed4ae02ff211dbe87b61d140dacd85e18a90c530
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-plagiarize-7de30f637-after.json) = eac6bcda1ee1d49a29144c4ea8c91c1682472a2565033ba7edeb2bf092095a0a
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-esquio-a0b8327b0-before.json) = 45d090587ed1bf092cf9a7d1a26589e9ba313fb38ba3c09cc008a65c3d24a901
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-esquio-a0b8327b0-before.json) = b2a9b1328b879d6e45d41518513b65bd28ac28460fdc6c72828346fc3fd6698e
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-esquio-a0b8327b0-after.json) = 202104835b2b6e8b9d76cdf4b3cf3b7ba02866051adde19bc77734a84160474f
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-esquio-a0b8327b0-after.json) = da8c2a26156bef35e3e8aaf3658335ecdf91ede51f182de24ef3a49d9e5bb203
