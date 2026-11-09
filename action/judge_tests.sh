@@ -4,7 +4,7 @@
 # schema. INVAR_JUDGE_TESTS names the instance directory with {name} for the
 # contract's file stem, read from origin/<base>, never from the pull request.
 # Exit mapping, stated:
-#   1  a document valid at the base is rejected by the head  -> fail, unless INVAR_FAIL_ON_VIOLATION=false; one ::error per document
+#   1  a document valid at the base is rejected by the head, by both jsonschema and Ajv (r1) -> fail, unless INVAR_FAIL_ON_VIOLATION=false; one ::error per document
 #   4  NOT EVALUATED                                          -> pass; `unverifiable` is one ::warning, the rest a summary line
 #  124  the per-contract time budget (INVAR_TESTS_TIMEOUT, 120s) ran out -> pass with a ::warning; nothing judged, stated
 #   3  error (a schema unreadable, jsonschema missing)        -> fail
@@ -20,6 +20,9 @@ fi
 case "$INVAR_JUDGE_TESTS" in *'{name}'*) ;; *) echo "::error title=invar.tests::judge_tests must contain {name}"; exit 1 ;; esac
 
 python3 -c 'import jsonschema' 2>/dev/null || python3 -m pip install -q 'jsonschema==4.26.0' 'PyYAML==6.0.3' || { echo "::error title=invar.tests::could not install jsonschema"; exit 1; }
+# JUDGE-TESTS r1: the second validator. A break needs both; without Ajv the step is an error, not a quieter pass.
+command -v node >/dev/null || { echo "::error title=invar.tests::node is not on the PATH; the two-validator check needs it"; exit 1; }
+npm ci --prefix "$INVAR_ACTION_PATH/action" --silent --no-audit --no-fund 2>/dev/null || { echo "::error title=invar.tests::could not install the Ajv packages (action/package-lock.json)"; exit 1; }
 
 set -f
 globs=()

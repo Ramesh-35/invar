@@ -1,0 +1,45 @@
+change	v0.2.15 static verdict	tests r1 verdict	witness files (both validators reject at the head)	disputed files (the validators answer differently)
+04da89dcb_specmatic.json	NOT EVALUATED	VIOLATED	specmatic-uber-v3.json	
+0b328bf24_global.json	NOT EVALUATED	VIOLATED	valid-rollfoward.json	
+18132a01a_pnpm-workspace.json	VIOLATED	VIOLATED	pnpm-workspace.yaml	
+1983458b5_es6importsorterrc.json	NOT EVALUATED	disputed		es6importsorterrc-test.json
+2a7fd1cbe_pull-request-labeler.json	NOT EVALUATED	VIOLATED	dockstarter.json, freecodecamp.json, tidb.json	
+2f74efc3f_claude-code-keybindings.json	VIOLATED	VIOLATED	all-contexts.json, current-actions.json	
+2fbc78141_web-manifest.json	NOT EVALUATED	disputed		W3C Example 1.json
+32af9a900_web-manifest.json	NOT EVALUATED	disputed		W3C Example 1.json
+3a9b1ff55_host.json	NOT EVALUATED	disputed		host.v2.json
+4682cfafb_host.json	NOT EVALUATED	disputed		host.v2.json
+582d198b3_crucible-code-schema.json	VIOLATED	VIOLATED	config.json	
+585b21f01_sil-kit-participant-configuration.json	NOT EVALUATED	VIOLATED	full.silkit.json, full.silkit.yaml	
+64a83f4a0_crucible-code-schema.json	VIOLATED	VIOLATED	config.json	
+75a53f101_web-manifest.json	NOT EVALUATED	disputed		Full content.json, W3C Example 1.json, W3C Example 2.json
+8cd5ed422_function.json	NOT EVALUATED	disputed		BlobTrigger.json, EventHubTrigger.json, ExternalFileTrigger.json, ExternalTable.json, FaceLocator.json, GenericWebHook.json, GitHubCommenter.json, GitHubWebHook.json, HttpGET(CRUD).json, HttpPOST(CRUD).json, HttpPUT(CRUD).json, HttpTrigger.json, ImageResizer.json, Kusto.json, ManualTrigger.json, MySql.json, QueueTrigger.json, SasToken.json, ScheduledMail.json, SendGrid.json, ServiceBusQueueTrigger.json, ServiceBusTopicTrigger.json, Sql.json, TimerTrigger.json, function.json
+8cfea30d1_webjob-publish-settings.json	NOT EVALUATED	disputed		continuous.json, on-demand.json, scheduled.json
+9497fde91_codex-hooks.json	VIOLATED	VIOLATED	hooks.json	
+af686ddb1_vtesttree-schema-v2.4.0.json	NOT EVALUATED	disputed		test-case-list.vtesttree.yaml, test-sequence-list.vtesttree.yaml
+b056a70c8_traefik-v3.json	VIOLATED	VIOLATED	example.json	
+b37ff9eed_webjob-publish-settings.json	NOT EVALUATED	disputed		continuous.json, on-demand.json, scheduled.json
+c8c40db14_host.json	NOT EVALUATED	disputed		host.v2.json
+cfd4af801_claude-code-keybindings.json	NOT EVALUATED	VIOLATED	current-actions.json	
+cfd4af801_claude-code-settings.json	VIOLATED	VIOLATED	modern-complete-config.json	
+d9d98e698_github-action.json	NOT EVALUATED	VIOLATED	parallel-steps.json	
+dd22b5c09_ryl.json	NOT EVALUATED	VIOLATED	01-valid.toml	
+e6fa09104_host.json	NOT EVALUATED	disputed		host.v2.json
+ec65ccfaf_ttheme-palette.json	VIOLATED	VIOLATED	gojo.toml, neutral.toml, rasis.toml	
+f5797ba57_web-manifest.json	NOT EVALUATED	disputed		W3C Example 1.json
+f9d455e8c_es6importsorterrc.json	NOT EVALUATED	disputed		es6importsorterrc-test.json
+
+# outcome counts, static verdict x tests r1 verdict (two validators, offline)
+# 114	HOLDS	NOT EVALUATED/instances_pass
+# 3	HOLDS	NOT EVALUATED/unverifiable
+# 57	HOLDS	no tests
+# 14	NOT EVALUATED	NOT EVALUATED/disputed
+# 324	NOT EVALUATED	NOT EVALUATED/instances_pass
+# 11	NOT EVALUATED	NOT EVALUATED/no_base_valid_instance
+# 106	NOT EVALUATED	NOT EVALUATED/unverifiable
+# 7	NOT EVALUATED	VIOLATED
+# 135	NOT EVALUATED	no tests
+# 9	VIOLATED	NOT EVALUATED/instances_pass
+# 4	VIOLATED	NOT EVALUATED/unverifiable
+# 8	VIOLATED	VIOLATED
+# 27	VIOLATED	no tests

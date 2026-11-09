@@ -286,16 +286,17 @@ them, and every document the base accepted is validated at the head:
     judge_tests: 'src/test/{name}'
 ```
 
-A document rejected is a break with the file, the pointer and the
-validator's message, whatever the static judge could reach. Documents
-that pass prove nothing and the step says so: there is no HOLDS from a
-corpus ([JUDGE-TESTS-SPEC.md](docs/falsification/JUDGE-TESTS-SPEC.md)).
-On SchemaStore's own test files, Python jsonschema rejects a base-valid
-document at the head in 11 changes the static judge could not reach; Ajv 8
-agrees on 7 of them (`pull-request-labeler`, `ryl`, `github-action` and
-`global.json` among them) and accepts the document in the other 4, so those
-four are listed as disputed, not as breaks. No HOLDS verdict is
-contradicted by any test document.
+A document rejected is a break only when two validators agree, Python
+jsonschema and Ajv 8: the file, the pointer and both messages, whatever
+the static judge could reach. A document the two validators answer
+differently is listed as disputed, never a break and never a pass, and
+documents that pass prove nothing: there is no HOLDS from a corpus
+([JUDGE-TESTS-SPEC.md](docs/falsification/JUDGE-TESTS-SPEC.md),
+[JUDGE-TESTS-R1-SPEC.md](docs/falsification/JUDGE-TESTS-R1-SPEC.md)). On
+SchemaStore's own test files this finds 15 changes that break a document
+of their own, 7 of them beyond the static judge's reach
+(`pull-request-labeler`, `ryl`, `github-action` and `global.json` among
+them), lists 4 as disputed, and contradicts no HOLDS verdict.
 
 The judged set is stated and narrow, on purpose: property presence and
 `type` (a type change that keeps every value valid, such as `boolean` to

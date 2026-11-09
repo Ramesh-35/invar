@@ -24,3 +24,4 @@ venv/
 .semgrep/
 mutants.out/
 mutants.out.old/
+node_modules

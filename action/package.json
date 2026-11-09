@@ -1,0 +1,10 @@
+{
+  "name": "invar-action-tests",
+  "private": true,
+  "description": "JUDGE-TESTS r1: the Ajv side of the two-validator check (action/tests-ajv.mjs). Pinned; installed by the Action and by CI with npm ci.",
+  "dependencies": {
+    "ajv": "8.20.0",
+    "ajv-draft-04": "1.0.0",
+    "ajv-formats": "3.0.1"
+  }
+}

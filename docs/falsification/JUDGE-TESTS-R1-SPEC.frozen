@@ -19,3 +19,9 @@ blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-es6importsorterrc-f
 sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-es6importsorterrc-f9d455e8c-after.json) = 775c41d8c5df53bd7ce03c833d9cb63d663ed184259ac07967754996f7617b23
 blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-es6importsorterrc-f9d455e8c-test.json) = e199d60b5996aac34bd9e0d4c5e1fe19ffcbfd3ead31953b196f8388fec683eb
 sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-es6importsorterrc-f9d455e8c-test.json) = 427f412c76d61f767f9625ab17a49db56d25b4b263857fb9f89489db0c5aa718
+# Measured after implementation (v0.2.18 candidate, 2026-11-07): 18 of 18; full
+#   suite 814; mutants 86 of 86; clippy silent. Prediction: 15 VIOLATED (the named
+#   set) and 0 HOLDS held; disputed is 14, not 4, explained in the spec (base-side
+#   splits on draft-04 schemas that Amendment C never examined). Two defects fixed
+#   before release and recorded: remote $ref retrieval (now offline), and Ajv's
+#   whole-schema compile raising unverifiable from 12 to 113 changes.

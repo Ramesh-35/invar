@@ -80,3 +80,36 @@ and `ajv_message` on each witness; `instances` gains `disputed`.
 
 A third validator; resolving sibling `$ref`s; cross-checking the static
 judge's counterexamples with Ajv (its own ruling).
+
+## Measured outcome (v0.2.18 candidate, 2026-11-07)
+
+judge_tests_test 18 of 18; full suite 814 passed; mutants 86 of 86
+(TS-M5..M7 each killed by its named fixture); clippy `-D warnings` silent;
+the Rust judge unchanged.
+
+Two defects found by running the script over SchemaStore before release,
+fixed without touching a fixture:
+
+- jsonschema was retrieving remote `$ref`s over the network by default,
+  against the frozen rule that nothing outside a schema document is
+  resolved. Validation now runs against an offline registry; an
+  unresolvable reference is `unverifiable`, on either validator. Amendment
+  C's lychee verdict ("jsonschema rejects at the head") was reached after
+  such a fetch; offline, lychee is unverifiable by both validators.
+- Ajv compiles the whole schema before validating, so one unresolvable
+  reference anywhere makes every document of that change `unverifiable`
+  under Ajv, where jsonschema errors only when the reference is reached.
+  Stated, not hidden: `unverifiable` rose from 12 changes to 113.
+
+The prediction held on both counts that bear on soundness and failed on
+the third: exactly the 15 named changes are VIOLATED and no HOLDS change
+has a witness; `disputed` is 14 changes, not 4. The 10 unpredicted ones
+(function.json, host.json and web-manifest across several commits,
+webjob-publish-settings at b37ff9eed, es6importsorterrc at 1983458b5) are
+documents jsonschema rejects at the base while Ajv accepts them, on
+draft-04 schemas. r0 had filed those as "not promises" on one validator's
+word and said nothing; Amendment C could not see them, because it ran Ajv
+only on documents jsonschema had rejected at the head. r1 surfaces them,
+which is the point of a second validator. Per change: tests-moves/
+schemastore-r1.tsv. Remaining counts, measured: 447 `instances_pass`, 11
+`no_base_valid_instance`, 219 with no test directory.

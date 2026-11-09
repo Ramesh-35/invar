@@ -60,6 +60,8 @@ jobs:
 
       - name: Python packages the JUDGE-TESTS fixtures run against
         run: python3 -m pip install -q 'jsonschema==4.26.0' 'PyYAML==6.0.3'
+      - name: The Ajv adapter's packages (JUDGE-TESTS r1)
+        run: npm ci --prefix action --no-audit --no-fund
 
       - name: Cache cargo
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
