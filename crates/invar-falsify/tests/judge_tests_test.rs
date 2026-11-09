@@ -10,6 +10,12 @@
 //! - TS-M2 passing instances exit 0                      -> t_f02
 //! - TS-M3 base validity is not checked                  -> t_f03
 //! - TS-M4 an unreadable file is counted as passing      -> t_f06
+//!
+//! JUDGE-TESTS r1 (docs/falsification/JUDGE-TESTS-R1-SPEC.md):
+//!
+//! - TS-M5 Ajv's answer is ignored                       -> t_f16
+//! - TS-M6 a split between validators is a witness       -> t_f16
+//! - TS-M7 single-validator mode exits 1                 -> t_f17
 
 use serde_json::{json, Value};
 use std::path::{Path, PathBuf};
@@ -22,6 +28,9 @@ const GA_TEST: &str = include_str!("fixtures/judge/schemastore-github-action-d9d
 const RYL_BEFORE: &str = include_str!("fixtures/judge/schemastore-ryl-dd22b5c09-before.json");
 const RYL_AFTER: &str = include_str!("fixtures/judge/schemastore-ryl-dd22b5c09-after.json");
 const RYL_TEST: &str = include_str!("fixtures/judge/schemastore-ryl-dd22b5c09-01-valid.toml");
+const ES6_BEFORE: &str = include_str!("fixtures/judge/schemastore-es6importsorterrc-f9d455e8c-before.json");
+const ES6_AFTER: &str = include_str!("fixtures/judge/schemastore-es6importsorterrc-f9d455e8c-after.json");
+const ES6_TEST: &str = include_str!("fixtures/judge/schemastore-es6importsorterrc-f9d455e8c-test.json");
 
 /// A temp dir holding base.json, head.json and an `instances` directory
 /// of the named files.
@@ -209,4 +218,56 @@ fn t_f15_real_ryl_toml_break() {
     assert_eq!(code, 1, "{text}");
     assert_eq!(v["witnesses"][0]["pointer"], json!(""), "{v}");
     assert!(v["witnesses"][0]["message"].as_str().is_some_and(|m| m.contains("yaml-files")), "{v}");
+}
+
+/// Like `run`, with extra arguments after DIR.
+fn run_with(d: &Path, format: &str, extra: &[&str]) -> (i32, String) {
+    let mut args = vec![SCRIPT, "base.json", "head.json", "instances", "--format", format];
+    args.extend_from_slice(extra);
+    let o = Command::new("python3").args(&args).current_dir(d).output().expect("python3 on the PATH");
+    let mut s = String::from_utf8_lossy(&o.stdout).into_owned();
+    s.push_str(&String::from_utf8_lossy(&o.stderr));
+    (o.status.code().unwrap_or(-1), s)
+}
+
+/// t_f16 (r1): real bytes where the two validators disagree at the head.
+/// Kills TS-M5 and TS-M6.
+#[test]
+fn t_f16_validators_disagree_is_disputed() {
+    let d = setup("f16", ES6_BEFORE, ES6_AFTER, &[("es6importsorterrc-test.json", ES6_TEST)]);
+    let (code, text, v) = both(&d);
+    assert_eq!(code, 4, "{text}");
+    assert_eq!(v["reason"], json!("disputed"), "{v}");
+    assert_eq!(v["witnesses"], json!([]), "{v}");
+    assert_eq!(v["disputed"][0]["file"], json!("es6importsorterrc-test.json"), "{v}");
+    assert_eq!(v["disputed"][0]["jsonschema"], json!("invalid"), "{v}");
+    assert_eq!(v["disputed"][0]["ajv"], json!("valid"), "{v}");
+    assert!(text.contains("  disputed: es6importsorterrc-test.json: jsonschema invalid, ajv valid"), "{text}");
+    assert_eq!(v["validators"], json!(["jsonschema", "ajv"]), "{v}");
+}
+
+/// t_f17 (r1): one validator cannot say VIOLATED. Kills TS-M7.
+#[test]
+fn t_f17_single_validator_is_unconfirmed() {
+    let d = setup("f17", STRING_A, STRING_A_MIN1, &[("empty.json", r#"{"a":""}"#)]);
+    let (code, text) = run_with(&d, "text", &["--validators", "jsonschema"]);
+    assert_eq!(code, 4, "{text}");
+    assert!(text.starts_with("NOT EVALUATED (unconfirmed): 1 document(s) rejected by jsonschema alone; a break needs two validators.\n"), "{text}");
+    let (_, j) = run_with(&d, "json", &["--validators", "jsonschema"]);
+    let v: Value = serde_json::from_str(&j).unwrap();
+    assert_eq!(v["validators"], json!(["jsonschema"]), "{v}");
+    assert_eq!(v["witnesses"], json!([]), "{v}");
+}
+
+/// t_f18 (r1): both validators reject: a witness, with both messages.
+#[test]
+fn t_f18_both_reject_is_a_witness_with_both_messages() {
+    let d = setup("f18", STRING_A, STRING_A_MIN1, &[("empty.json", r#"{"a":""}"#)]);
+    let (code, text, v) = both(&d);
+    assert_eq!(code, 1, "{text}");
+    assert_eq!(v["witnesses"][0]["file"], json!("empty.json"), "{v}");
+    assert!(v["witnesses"][0]["ajv_message"].as_str().is_some_and(|m| !m.is_empty()), "{v}");
+    assert!(text.contains("  rejected: empty.json at /a: ") && text.contains(" | ajv: "), "{text}");
+    assert_eq!(v["validators"], json!(["jsonschema", "ajv"]), "{v}");
+    assert_eq!(v["instances"]["disputed"], json!(0), "{v}");
 }

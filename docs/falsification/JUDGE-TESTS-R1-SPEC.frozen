@@ -1,0 +1,21 @@
+# JUDGE-TESTS r1 freeze record, written before any implementation.
+# Baseline: v0.2.17 (4fda9bf). Ratified 2026-11-07.
+# Measured before implementation: judge_tests_test 15 of 18 pass; t_f16, t_f17
+#   and t_f18 fail, as they must (no second validator, no --validators flag,
+#   no ajv_message). A doc-comment line in the fixture file was re-wrapped for
+#   clippy before freezing; no test changed, and the measurement was repeated
+#   against the r0 script: 15 of 18, the same three failing.
+# Pre-registered: 18 of 18; TS-M5..M7 killed with every earlier mutant; full
+#   suite; clippy silent; the Rust judge unchanged; on SchemaStore at v0.2.15
+#   exactly 15 changes VIOLATED and 4 disputed (the sets in JUDGE-TESTS-SPEC.md
+#   Amendment C), no HOLDS change with a witness.
+blake3(docs/falsification/JUDGE-TESTS-R1-SPEC.md) = 6f259972d581a23f70dd16ad27f3735fb9439c362f12db6fdda09b5e764bc6db
+sha256(docs/falsification/JUDGE-TESTS-R1-SPEC.md) = fbc7b557df102f43869d84080a0b5a677888c5026d5685ff98e9b89a8f7564f7
+blake3(crates/invar-falsify/tests/judge_tests_test.rs) = efaf7aecea60fee508f2c05b4323193d0f60cfb5bf6537bd48c162dc001592eb
+sha256(crates/invar-falsify/tests/judge_tests_test.rs) = dd0e49c6285ffc7e8b35f3555520ecddf3b6d3a1c88bcc7e918f5e55f3ca676c
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-es6importsorterrc-f9d455e8c-before.json) = 638545d0ab041ca504704ba066026f743ed644cfb1a5875a0225113b66bf0cf0
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-es6importsorterrc-f9d455e8c-before.json) = abeca0b9ae5b6a29d04e18e45e4509dc48287c9b0ac5f44cd7cc76ebf1a4c9a1
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-es6importsorterrc-f9d455e8c-after.json) = 26cdd83aa6aa91e4089a122252e2188d7f615b36fb6d91a2eaae1e1d0b6ecc39
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-es6importsorterrc-f9d455e8c-after.json) = 775c41d8c5df53bd7ce03c833d9cb63d663ed184259ac07967754996f7617b23
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-es6importsorterrc-f9d455e8c-test.json) = e199d60b5996aac34bd9e0d4c5e1fe19ffcbfd3ead31953b196f8388fec683eb
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-es6importsorterrc-f9d455e8c-test.json) = 427f412c76d61f767f9625ab17a49db56d25b4b263857fb9f89489db0c5aa718
