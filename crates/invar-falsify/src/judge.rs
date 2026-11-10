@@ -164,12 +164,12 @@ fn evaluate(read: BaseRead, post_bytes: &str) -> (&'static str, Option<&'static 
                         ROOTS.with(|r| *r.borrow_mut() = Some([pre.clone(), post.clone()]));
                         reach::begin();
                         walk("", &pre, &post, &mut w);
-                        let (unchecked, draft_note) = reach::finish(&pre, &post);
+                        let (unchecked, notes) = reach::finish(&pre, &post);
                         ROOTS.with(|r| *r.borrow_mut() = None);
                         let mut stated = take_stated(&mut w);
                         stated.unchecked = unchecked;
-                        // JUDGE-DRAFT r0: a covered migration is stated, never silent.
-                        stated.notes.extend(draft_note);
+                        // JUDGE-DRAFT r0 and JUDGE-CANON r0: what was covered is stated, never silent.
+                        stated.notes.extend(notes);
                         w.sort_by(|a, b| (a.path.as_str(), a.kind, a.keyword).cmp(&(b.path.as_str(), b.kind, b.keyword)));
                         for x in &mut w {
                             // JUDGE-ITEMS r0: an element (`r[]`) sits on its array's line.
@@ -453,7 +453,9 @@ fn judge_child(dotted: &str, pv_raw: &Value, qv_raw: Option<&Value>, p_site: Str
         Some(qv) if has_combinator(pv) || has_combinator(qv) => {
             // D1 (r2): a node under anyOf/oneOf/allOf/$ref is not followed,
             // so it is never accused: a changed one is stated, not judged.
-            if pv != qv {
+            // JUDGE-CANON r0: the same meaning in another spelling is no
+            // witness; `reach::finish` notes the rewritten node.
+            if pv != qv && !reach::equivalent(pv, qv) {
                 out.push(stated_witness(&dotted, "not_evaluated", pv));
             }
             // JUDGE-REACH r0: D1 compared these nodes whole.
@@ -1405,6 +1407,8 @@ mod reach {
         stack: Vec<(Vec<String>, Vec<String>)>,
         /// JUDGE-DRAFT r0: the root's draft migration is covered.
         draft: bool,
+        /// JUDGE-CANON r0: pointers covered by the type-list rewrite.
+        canon: BTreeSet<String>,
     }
 
     thread_local! {
@@ -1511,9 +1515,116 @@ mod reach {
         via: Option<String>,
     }
 
+    /// JUDGE-CANON r0: keywords that apply only to instances of one type.
+    const TYPED_STRING: [&str; 6] = ["minLength", "maxLength", "pattern", "format", "contentMediaType", "contentEncoding"];
+    const TYPED_NUMBER: [&str; 5] = ["minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "multipleOf"];
+    const TYPED_ARRAY: [&str; 7] = ["items", "minItems", "maxItems", "uniqueItems", "additionalItems", "contains", "prefixItems"];
+    const TYPED_OBJECT: [&str; 11] = ["properties", "required", "additionalProperties", "patternProperties", "minProperties", "maxProperties", "dependencies", "dependentRequired", "dependentSchemas", "propertyNames", "unevaluatedProperties"];
+
+    fn typed_for(t: &str) -> &'static [&'static str] {
+        match t {
+            "string" => &TYPED_STRING,
+            "number" | "integer" => &TYPED_NUMBER,
+            "array" => &TYPED_ARRAY,
+            "object" => &TYPED_OBJECT,
+            _ => &[],
+        }
+    }
+
+    fn is_typed(k: &str) -> bool {
+        TYPED_STRING.contains(&k) || TYPED_NUMBER.contains(&k) || TYPED_ARRAY.contains(&k) || TYPED_OBJECT.contains(&k)
+    }
+
+    /// JUDGE-CANON r0: the normal form. Annotations and keywords the judge
+    /// does not know are set aside (the diff ignores them too); a node whose
+    /// `type` is a list of two or more names, with no `anyOf` of its own,
+    /// becomes the `anyOf` of one node per name, each typed keyword following
+    /// its type and every other keyword shared beside the `anyOf`.
+    pub(super) fn normal(v: &Value) -> Value {
+        form(v, true)
+    }
+
+    /// The node with annotations and unknown keywords set aside, and with
+    /// its type lists rewritten when `rewrite` is set. Subschemas are found
+    /// where `diff` finds them: under name maps, schema-valued keywords and
+    /// schema arrays; every other keyword's value is kept as written.
+    fn form(v: &Value, rewrite: bool) -> Value {
+        match v {
+            Value::Object(m) => {
+                let sub = |x: &Value| form(x, rewrite);
+                let kept: serde_json::Map<String, Value> = m.iter()
+                    .filter(|(k, _)| !ANNOTATIONS.contains(&k.as_str()) && KNOWN.contains(&k.as_str()))
+                    .map(|(k, x)| {
+                        let kw = k.as_str();
+                        let y = match x {
+                            Value::Object(names) if NAME_MAPS.contains(&kw) || kw == "dependencies" => {
+                                Value::Object(names.iter().map(|(n, s)| (n.clone(), if s.is_object() { sub(s) } else { s.clone() })).collect())
+                            }
+                            Value::Object(_) if SCHEMA_VALUED.contains(&kw) => sub(x),
+                            Value::Array(xs) if SCHEMA_ARRAYS.contains(&kw) => Value::Array(xs.iter().map(sub).collect()),
+                            _ => x.clone(),
+                        };
+                        (k.clone(), y)
+                    })
+                    .collect();
+                let names: Option<Vec<&str>> = match kept.get("type") {
+                    Some(Value::Array(ts)) if rewrite && ts.len() > 1 && !kept.contains_key("anyOf") => ts.iter().map(Value::as_str).collect(),
+                    _ => None,
+                };
+                let Some(names) = names else { return Value::Object(kept) };
+                let mut out: serde_json::Map<String, Value> = kept.iter()
+                    .filter(|(k, _)| k.as_str() != "type" && !is_typed(k))
+                    .map(|(k, x)| (k.clone(), x.clone()))
+                    .collect();
+                let branches = names.iter().map(|t| {
+                    let mut b = serde_json::Map::new();
+                    b.insert("type".to_string(), Value::String((*t).to_string()));
+                    for (k, x) in &kept {
+                        if typed_for(t).contains(&k.as_str()) {
+                            b.insert(k.clone(), x.clone());
+                        }
+                    }
+                    Value::Object(b)
+                }).collect();
+                out.insert("anyOf".to_string(), Value::Array(branches));
+                Value::Object(out)
+            }
+            _ => v.clone(),
+        }
+    }
+
+    /// JUDGE-CANON r0: two nodes that differ once annotations are set
+    /// aside, but not in normal form. A difference only in annotations is
+    /// not this ruling's: it is judged exactly as before.
+    pub(super) fn equivalent(a: &Value, b: &Value) -> bool {
+        a.is_object() && b.is_object() && form(a, false) != form(b, false) && normal(a) == normal(b)
+    }
+
+    /// JUDGE-CANON r0: the rewrite happened at this very node, one side
+    /// spelling a type list and the other its `anyOf`.
+    fn rewritten_here(a: &Value, b: &Value) -> bool {
+        let lists = |v: &Value| matches!(v.get("type"), Some(Value::Array(ts)) if ts.len() > 1);
+        (lists(a) && b.get("anyOf").is_some()) || (lists(b) && a.get("anyOf").is_some())
+    }
+
+    /// JUDGE-CANON r0: record a covered equivalence at `ptr`.
+    pub(super) fn note_canon(ptr: &str) {
+        COVER.with(|c| {
+            c.borrow_mut().canon.insert(ptr.to_string());
+        });
+    }
+
     fn diff(ptr: &str, via: Option<&str>, a: Option<&Value>, b: Option<&Value>, out: &mut Vec<Diff>) {
         if a == b {
             return;
+        }
+        // JUDGE-CANON r0: the same meaning in another spelling is covered,
+        // noted at the node that was rewritten; above it the walk descends.
+        if let (Some(x), Some(y)) = (a, b) {
+            if rewritten_here(x, y) && equivalent(x, y) {
+                note_canon(ptr);
+                return;
+            }
         }
         let (Some(Value::Object(ma)), Some(Value::Object(mb))) = (a, b) else {
             out.push(Diff { ptr: ptr.to_string(), kw: None, base: a.cloned(), head: b.cloned(), via: via.map(str::to_string) });
@@ -1627,7 +1738,7 @@ mod reach {
 
     /// After the walk: the shallowest unchecked schema nodes, sorted, an
     /// ancestor standing for its descendants.
-    pub(super) fn finish(pre: &Value, post: &Value) -> (Vec<String>, Option<String>) {
+    pub(super) fn finish(pre: &Value, post: &Value) -> (Vec<String>, Vec<String>) {
         let mut diffs = Vec::new();
         diff("", None, Some(pre), Some(post), &mut diffs);
         let migration = draft_migration(pre, post);
@@ -1638,7 +1749,14 @@ mod reach {
         });
         let all: Vec<String> = unchecked.into_iter().collect();
         let shallowest = all.iter().filter(|p| !all.iter().any(|q| q != *p && under(p, q))).cloned().collect();
-        (shallowest, migration)
+        let canon: Vec<String> = COVER.with(|c| c.borrow().canon.iter().cloned().collect());
+        let mut notes: Vec<String> = migration.into_iter().collect();
+        notes.extend(
+            canon.iter()
+                .filter(|p| !canon.iter().any(|q| q != *p && under(p, q)))
+                .map(|p| format!("equivalent after rewriting type lists as anyOf at {}", if p.is_empty() { "the document root" } else { p.as_str() })),
+        );
+        (shallowest, notes)
     }
 
     /// The draft a `$schema` URI names, among the three JUDGE-DRAFT r0 reads.

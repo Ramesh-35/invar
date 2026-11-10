@@ -244,6 +244,18 @@ counterexample confirmed by Python jsonschema: cargo.json's new
 `crate-type` enum rejects `{"lib":{"crate-type":[""]}}`, and ruff.json's
 removal of rule `RUF076` rejects `{"extend-fixable":["RUF076"]}`.
 
+From v0.2.19 a node that spells its type list as the `anyOf` of its types
+(`{"type":["string","null"]}` to `{"anyOf":[{"type":"string"},{"type":"null"}]}`,
+the common draft-07 migration) is judged equal, with a note naming the
+node, when the two spellings are the same in a normal form: each keyword
+that applies to one type follows that type, the rest stay shared,
+annotations aside ([JUDGE-CANON-SPEC.md](docs/falsification/JUDGE-CANON-SPEC.md)).
+Equality only, never inclusion: a branch that also narrows, a shared
+keyword moved inside one branch, or `oneOf` in place of `anyOf` stays NOT
+EVALUATED. On SchemaStore's history this earns HOLDS for 109 changes that
+were NOT EVALUATED, each checked independently in Python, and changes no
+VIOLATED or HOLDS verdict.
+
 In the Action, one input:
 
 ```yaml

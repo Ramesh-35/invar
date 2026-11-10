@@ -8,6 +8,9 @@
 //! - CN-M1 the normal form is never applied                       -> c_f01
 //! - CN-M2 a typed keyword shared instead of following its type   -> c_f02
 //! - CN-M3 annotations compared instead of set aside              -> c_f06
+//! - CN-M4 property names filtered as if they were keywords       -> c_f11
+//!   (c_f11 was added after the freeze, when the prediction gate caught
+//!   the first build doing exactly that; see the spec's Measured outcome)
 
 use serde_json::{json, Value};
 use std::path::{Path, PathBuf};
@@ -139,4 +142,16 @@ fn c_f10_real_esquio_holds() {
     assert_eq!(code, 0, "{text}");
     assert!(text.contains("noted: equivalent after rewriting type lists as anyOf at "), "{text}");
     assert_eq!(v["unchecked"], json!([]), "{v}");
+}
+
+/// c_f11 guard (Amendment A): a property named like no keyword changes
+/// inside the rewritten node; the rewrite does not hide it. Kills CN-M4.
+#[test]
+fn c_f11_change_under_a_property_name_is_not_hidden() {
+    let pre = doc(r#"{"type":["object","null"],"properties":{"x":{"type":"string"}}}"#);
+    let post = doc(r#"{"anyOf":[{"type":"object","properties":{"x":{"type":"integer"}}},{"type":"null"}]}"#);
+    let (code, text, v) = both("f11", &pre, &post);
+    assert_eq!(code, 4, "{text}");
+    assert_eq!(v["reason"], json!("unjudged_construct"), "{v}");
+    assert!(!text.contains("noted: equivalent"), "{text}");
 }

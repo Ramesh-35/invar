@@ -91,3 +91,43 @@ exactly as before.
 - CN-M1 the normal form is never applied: c_f01.
 - CN-M2 a typed keyword is shared instead of following its type: c_f02.
 - CN-M3 annotations are compared instead of set aside: c_f06.
+
+## Measured outcome (after implementation, 2026-11-07)
+
+- Fixtures 10 of 10, then 11 of 11 with c_f11 (Amendment A below). Full
+  suite 825 tests. Mutants 90 of 90 killed (CN-M1..M4). Clippy silent.
+- Label-free 26/14/50/0, Iglu 5/3/0, SchemaStore replay PASS: unchanged.
+  No VIOLATED or HOLDS verdict and no witness changed on any corpus.
+- Prediction FAILED on the count, in both directions, and the engine is
+  right in each case checked:
+  - 109 changes moved from NOT EVALUATED to HOLDS, not 68
+    ([canon-moves/schemastore.tsv](canon-moves/schemastore.tsv)). An
+    independent Python check (local `$ref`s inlined, annotations set
+    aside, type lists rewritten on both sides, then compared) finds 104
+    of the 109 equal; the other 5 differ only by a type made
+    explicit that the node's own keywords implied (JUDGE-SUBTYPE r2 D5,
+    stated as a note: stale, chutzpah, devinit), one definition left
+    unreferenced (codeclimate), and `contentMediaType` beside the `anyOf`
+    instead of in its branch (azure-iot-edge-deployment-template-1.0;
+    `contentMediaType` and `contentEncoding` are not keywords this judge
+    knows, so it sets them aside before comparing, and their place in the
+    typed list above has no effect in r0). The prototype compared the
+    nodes at the reported pointers as written; the judge follows local
+    `$ref`s, so a definition rewritten once covers every property that
+    refers to it. That is the whole gap of 43.
+  - 2 predicted changes did not move, correctly: expo-39.0.0 rewrites a
+    single-name list `["string"]` to `"string"`, and
+    minecraft-advancement keeps `properties` beside the `anyOf` where the
+    normal form puts it in the `object` branch. Both are exclusions the
+    ruling names; the prototype counted them anyway.
+  - 45 changes keep NOT EVALUATED with a shorter list, not 19; none grew.
+- Amendment A (defect found by this gate, fixed before any count above).
+  The first build set aside every key the judge does not know, including
+  the names under `properties`, `definitions` and the other name maps,
+  so a change under a property named like no keyword vanished from the
+  normal form: 20 of the 68 did not move and 40 others moved wrongly.
+  The normal form now finds subschemas exactly where `diff` finds them.
+  Fixture c_f11 (a property's type changes inside the rewritten node:
+  NOT EVALUATED, no note) and mutant CN-M4 (property names filtered as
+  keywords) were added after the freeze; the freeze record keeps the
+  original hashes and adds the new ones.

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -229,6 +229,27 @@ run_one TS-M7 '        if ah is not None:
             unconfirmed.append(w)' '        if ah is not None:
             w["ajv_message"] = ah["invalid"]["message"]
         witnesses.append(w)' t_f17_single_validator_is_unconfirmed judge_tests_test "$P"
+
+# CN-M1 the normal form is never applied (JUDGE-CANON r0)
+run_one CN-M1 '        a.is_object() && b.is_object() && form(a, false) != form(b, false) && normal(a) == normal(b)' '        a.is_object() && b.is_object() && form(a, false) != form(b, false) && form(a, false) == form(b, false)' c_f01_type_list_as_anyof_holds_and_is_stated judge_canon_test
+# CN-M2 a typed keyword is shared instead of following its type
+run_one CN-M2 '    fn is_typed(k: &str) -> bool {
+        TYPED_STRING.contains(&k) || TYPED_NUMBER.contains(&k) || TYPED_ARRAY.contains(&k) || TYPED_OBJECT.contains(&k)
+    }' '    fn is_typed(_k: &str) -> bool {
+        false
+    }' c_f02_typed_keyword_follows_its_type judge_canon_test
+# CN-M3 annotations are compared instead of set aside
+run_one CN-M3 '                    .filter(|(k, _)| !ANNOTATIONS.contains(&k.as_str()) && KNOWN.contains(&k.as_str()))
+                    .map(|(k, x)| {
+                        let kw = k.as_str();' '                    .filter(|(k, _)| ANNOTATIONS.contains(&k.as_str()) || KNOWN.contains(&k.as_str()))
+                    .map(|(k, x)| {
+                        let kw = k.as_str();' c_f06_annotations_are_set_aside judge_canon_test
+# CN-M4 property names filtered as if they were keywords (Amendment A)
+run_one CN-M4 '                            Value::Object(names) if NAME_MAPS.contains(&kw) || kw == "dependencies" => {
+                                Value::Object(names.iter().map(|(n, s)| (n.clone(), if s.is_object() { sub(s) } else { s.clone() })).collect())
+                            }' '                            Value::Object(names) if NAME_MAPS.contains(&kw) || kw == "dependencies" => {
+                                Value::Object(names.iter().filter(|(n, _)| KNOWN.contains(&n.as_str())).map(|(n, s)| (n.clone(), if s.is_object() { sub(s) } else { s.clone() })).collect())
+                            }' c_f11_change_under_a_property_name_is_not_hidden judge_canon_test
 cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"; cp "$P.orig" "$P"; rm "$P.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"

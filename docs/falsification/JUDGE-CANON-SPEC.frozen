@@ -89,3 +89,9 @@ blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-esquio-a0b8327b0-be
 sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-esquio-a0b8327b0-before.json) = b2a9b1328b879d6e45d41518513b65bd28ac28460fdc6c72828346fc3fd6698e
 blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-esquio-a0b8327b0-after.json) = 202104835b2b6e8b9d76cdf4b3cf3b7ba02866051adde19bc77734a84160474f
 sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-esquio-a0b8327b0-after.json) = da8c2a26156bef35e3e8aaf3658335ecdf91ede51f182de24ef3a49d9e5bb203
+# Amendment A (after the measured outcome): crates/invar-falsify/tests/judge_canon_test.rs
+blake3(crates/invar-falsify/tests/judge_canon_test.rs) = 765ad5a501cd7c577f96392f9e97ef1c05eff8689fd008634886d743bb82570e
+sha256(crates/invar-falsify/tests/judge_canon_test.rs) = 39ea16ee56d9c59bc2d5b1b9e7d5c4a74f26e2580b608db61f0b74338edcb0a3
+# Amendment A (after the measured outcome): docs/falsification/JUDGE-CANON-SPEC.md
+blake3(docs/falsification/JUDGE-CANON-SPEC.md) = 60b9c8098eb45a1e55503eabf2b0f7591c5abf4f6d3493f149c0a08504c7e025
+sha256(docs/falsification/JUDGE-CANON-SPEC.md) = f03501e50043b47e7208a3fdd8f9eef0add4e9365da4d8c4c887e88af3d5cbec
