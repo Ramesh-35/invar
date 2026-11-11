@@ -275,6 +275,18 @@ no change in SchemaStore, Iglu or AsyncAPI history triggered it, so a
 fixture found it, not a corpus. The enum rule also leaves out values the
 base's own `type` never admitted, so losing one is no narrowing.
 
+From v0.2.22 `invar witness BASE HEAD --name NAME --out DIR` writes each
+counterexample the judge carries as a SchemaStore test file,
+`src/negative_test/NAME/invar-NN-<path>.json` (or `src/test/NAME/` with
+`--positive`, for a pull request that restores what the base accepted),
+pretty-printed the way SchemaStore's CI expects
+([WITNESS-SPEC.md](docs/falsification/WITNESS-SPEC.md)). A finding then
+arrives upstream as the file their CI already runs, not as an issue to
+act on. On the 15 breaks of SchemaStore's own test documents, it writes 7
+files for the 6 the static judge reaches, each confirmed by both
+validators; the other 9 are the instance check's, and are not
+pretended into documents.
+
 In the Action, one input:
 
 ```yaml

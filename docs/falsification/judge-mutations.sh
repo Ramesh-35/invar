@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1, JUDGE-CONST r0). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5, K-R1..R2) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1, JUDGE-CONST r0, WITNESS r0). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5, K-R1..R2, W0-M1..M3) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -275,6 +275,13 @@ run_one K-R1 '        (None, Some(c)) => vec![c.clone()],
         _ => return None,' k_f01_const_to_equal_enum_holds judge_const_test
 # K-R2 const not counted as read at a reached node
 run_one K-R2 'for kw in ["type", "enum", "const", "pattern", "format"].iter().chain(LOWER.iter())' 'for kw in ["type", "enum", "pattern", "format"].iter().chain(LOWER.iter())' k_f04_enum_to_const_subset_is_violated judge_const_test
+
+# W0-M1 the negative directory written under src/test (WITNESS r0)
+run_one W0-M1 '    let kind_dir = if positive { "src/test" } else { "src/negative_test" };' '    let kind_dir = if positive { "src/test" } else { "src/test" };' w_f01_one_break_one_negative_file witness_test
+# W0-M2 a witness without a counterexample written as null
+run_one W0-M2 '            None => without.push(format!("{} {}: {}", w.kind, w.path, w.counterexample_reason.as_deref().unwrap_or("no document"))),' '            None => { let n = planned.len() + 1; planned.push((format!("invar-{n:02}-{}.json", witness_slug(&w.path)), b"null\n".to_vec(), format!("{} {}", w.kind, w.path))); }' w_f04_witness_without_document_is_stated witness_test
+# W0-M3 the slug not applied
+run_one W0-M3 '                let file = format!("invar-{n:02}-{}.json", witness_slug(&w.path));' '                let file = format!("invar-{n:02}-{}.json", w.path);' w_f05_two_breaks_numbered_and_slugged witness_test
 cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"; cp "$P.orig" "$P"; rm "$P.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"

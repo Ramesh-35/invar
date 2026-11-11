@@ -104,6 +104,10 @@ enum Command {
     /// base ref: a property removed or retyped is VIOLATED with a dotted
     /// path witness; what r0 does not judge is stated, never skipped.
     Judge(JudgeArgs),
+    /// WITNESS r0: write each counterexample a change carries as a
+    /// SchemaStore test file (src/negative_test/NAME/, or src/test/NAME/
+    /// with --positive). A generator, not a verdict: exit 0 when it ran.
+    Witness(WitnessArgs),
     /// Research harness: evaluate the falsification corpus and persist the run.
     Run(RunArgs),
     /// Research harness: structurally validate a corpus manifest.
@@ -415,6 +419,24 @@ struct JudgeArgs {
 }
 
 #[derive(Parser)]
+struct WitnessArgs {
+    /// The base (the promise), then the head (the change).
+    #[arg(value_name = "FILE", num_args = 2)]
+    files: Vec<String>,
+    /// The schema's SchemaStore name: the directory under src/test or
+    /// src/negative_test. One path component.
+    #[arg(long)]
+    name: String,
+    /// The directory that holds src/ (a SchemaStore checkout, or any dir).
+    #[arg(long)]
+    out: String,
+    /// Write under src/test/NAME/ instead: for a pull request that restores
+    /// what the base accepted, the same document is a positive test.
+    #[arg(long)]
+    positive: bool,
+}
+
+#[derive(Parser)]
 struct McpArgs {
     #[arg(long, default_value = "invar.toml")]
     config: String,
@@ -501,6 +523,7 @@ fn main() {
         Command::Mcp(a) => dispatch_r2(cmd_mcp(a)),
         Command::Hook(a) => dispatch_r2(cmd_hook(a)),
         Command::Judge(a) => dispatch_r2(cmd_judge(a)),
+        Command::Witness(a) => dispatch_r2(invar_falsify::judge::run_witness(&a.files[0], &a.files[1], &a.name, &a.out, a.positive)),
         Command::Fix(a) => dispatch_r2(cmd_fix(a)),
         Command::Explain(a) => {
             let (out, code) = invar_falsify::explain::explain(a.code.as_deref());

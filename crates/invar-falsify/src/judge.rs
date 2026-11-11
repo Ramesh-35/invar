@@ -98,14 +98,7 @@ pub fn run(root: &Path, contract: &str, base: &str, format: &str, receipt_out: O
 /// judge_one, the same renderers. Only how the base bytes arrive
 /// differs, so the two modes cannot diverge on the same bytes.
 pub fn run_files(base_path: &str, head_path: &str, format: &str) -> Result<i32> {
-    let base_raw = std::fs::read(base_path).map_err(|e| anyhow::anyhow!("reading {base_path}: {e}"))?;
-    let head_raw = std::fs::read(head_path).map_err(|e| anyhow::anyhow!("reading {head_path}: {e}"))?;
-    // Ad-hoc files that do not parse are operator errors (exit 3), unlike
-    // a repository contract, whose unparsable bytes are a change under
-    // judgment (NOT EVALUATED, exit 4). Ruled in JUDGE-FILEPAIR r0.
-    serde_json::from_slice::<Value>(&base_raw).map_err(|e| anyhow::anyhow!("{base_path} is not JSON: {e}"))?;
-    serde_json::from_slice::<Value>(&head_raw).map_err(|e| anyhow::anyhow!("{head_path} is not JSON: {e}"))?;
-    let One { verdict, reason, witnesses, stated, .. } = judge_one(head_path, BaseRead::Found(base_raw), Some(&head_raw));
+    let One { verdict, reason, witnesses, stated, .. } = judge_pair(base_path, head_path)?;
     let (c, b) = (head_path, base_path);
     match format {
         "json" => println!("{}", serde_json::to_string_pretty(&body_json(verdict, reason, c, b, &witnesses, &stated)).unwrap_or_default()),
@@ -118,6 +111,81 @@ pub fn run_files(base_path: &str, head_path: &str, format: &str) -> Result<i32> 
         "VIOLATED" => 1,
         _ => 4,
     })
+}
+
+/// WITNESS r0 (docs/falsification/WITNESS-SPEC.md): judge BASE and HEAD as
+/// `invar judge` does and write each witness that carries a counterexample
+/// as one SchemaStore test file. A generator: exit 0 when it ran, 3 on an
+/// unreadable file, a NAME that is not one path component, or an
+/// unwritable OUT; nothing is written on 3.
+pub fn run_witness(base_path: &str, head_path: &str, name: &str, out: &str, positive: bool) -> Result<i32> {
+    if name.is_empty() || name.contains('/') || name.contains('\\') || name == "." || name == ".." {
+        anyhow::bail!("--name must be one path component (the schema's directory under src/test), not {name:?}");
+    }
+    let One { verdict, witnesses, .. } = judge_pair(base_path, head_path)?;
+    let kind_dir = if positive { "src/test" } else { "src/negative_test" };
+    let dir = Path::new(out).join(kind_dir).join(name);
+    let mut planned: Vec<(String, Vec<u8>, String)> = Vec::new();
+    let mut without: Vec<String> = Vec::new();
+    for w in &witnesses {
+        match &w.counterexample {
+            Some(doc) => {
+                let n = planned.len() + 1;
+                let file = format!("invar-{n:02}-{}.json", witness_slug(&w.path));
+                let mut bytes = serde_json::to_vec_pretty(doc).unwrap_or_default();
+                bytes.push(b'\n');
+                planned.push((file, bytes, format!("{} {}", w.kind, w.path)));
+            }
+            None => without.push(format!("{} {}: {}", w.kind, w.path, w.counterexample_reason.as_deref().unwrap_or("no document"))),
+        }
+    }
+    if !planned.is_empty() {
+        std::fs::create_dir_all(&dir).map_err(|e| anyhow::anyhow!("creating {}: {e}", dir.display()))?;
+    }
+    for (file, bytes, what) in &planned {
+        let path = dir.join(file);
+        std::fs::write(&path, bytes).map_err(|e| anyhow::anyhow!("writing {}: {e}", path.display()))?;
+        println!("wrote {kind_dir}/{name}/{file}: {what}, valid at {base_path}, rejected at {head_path}");
+    }
+    for line in &without {
+        println!("no document for {line}");
+    }
+    println!("verdict {verdict}: {} document(s) written, {} witness(es) without one", planned.len(), without.len());
+    Ok(0)
+}
+
+/// The file-name slug of a witness path: `[]` reads `items`, every run of
+/// characters outside `[A-Za-z0-9]` becomes one `-`, trimmed, at most 60.
+fn witness_slug(path: &str) -> String {
+    let readable = path.replace("[]", ".items");
+    let mut slug = String::new();
+    let mut dash = false;
+    for c in readable.chars() {
+        if c.is_ascii_alphanumeric() {
+            slug.push(c);
+            dash = false;
+        } else if !dash && !slug.is_empty() {
+            slug.push('-');
+            dash = true;
+        }
+    }
+    let slug = slug.trim_end_matches('-').to_string();
+    let mut slug: String = slug.chars().take(60).collect();
+    while slug.ends_with('-') {
+        slug.pop();
+    }
+    if slug.is_empty() { "root".to_string() } else { slug }
+}
+
+/// JUDGE-FILEPAIR r0: two ad-hoc files judged directly. Files that do not
+/// parse are operator errors (exit 3), unlike a repository contract, whose
+/// unparsable bytes are a change under judgment (NOT EVALUATED, exit 4).
+fn judge_pair(base_path: &str, head_path: &str) -> Result<One> {
+    let base_raw = std::fs::read(base_path).map_err(|e| anyhow::anyhow!("reading {base_path}: {e}"))?;
+    let head_raw = std::fs::read(head_path).map_err(|e| anyhow::anyhow!("reading {head_path}: {e}"))?;
+    serde_json::from_slice::<Value>(&base_raw).map_err(|e| anyhow::anyhow!("{base_path} is not JSON: {e}"))?;
+    serde_json::from_slice::<Value>(&head_raw).map_err(|e| anyhow::anyhow!("{head_path} is not JSON: {e}"))?;
+    Ok(judge_one(head_path, BaseRead::Found(base_raw), Some(&head_raw)))
 }
 
 /// One contract's judgment, as every surface renders it.

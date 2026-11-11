@@ -10,3 +10,6 @@ blake3(docs/falsification/WITNESS-SPEC.md) = 7bf06b3a0e40f7645f903300551d58b9365
 sha256(docs/falsification/WITNESS-SPEC.md) = 8ea6106c27a54efcb36e57510367806dcda7d6b10498c515f8278127bb1f1af1
 blake3(crates/invar-falsify/tests/witness_test.rs) = 99cfafaae5718a42877b09e396fd75619be7db02b434cf9b587f7967d8b0e13a
 sha256(crates/invar-falsify/tests/witness_test.rs) = 51d78b53728a928db1f66505b1ac2cd767b94253e3c2dc3b11b68ca33b06d90e
+# After the measured outcome: docs/falsification/WITNESS-SPEC.md
+blake3(docs/falsification/WITNESS-SPEC.md) = 0595e63dc0c713fa22ae03ecd1c22863e58c1506366020bedc8bc0274f64834d
+sha256(docs/falsification/WITNESS-SPEC.md) = db2da23e04b189cddf654bf9ab21050b2b3c13bca91d583258b0a9911caa41bd

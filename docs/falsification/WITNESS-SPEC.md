@@ -1,6 +1,6 @@
 # WITNESS r0: `invar witness` writes counterexamples as SchemaStore test files (r0, FROZEN)
 
-Drafted 2026-11-08 for ratification. Frozen with
+Drafted and implemented 2026-11-08; ratification of the surface as measured is requested with the v0.2.22 bundle. Frozen with
 crates/invar-falsify/tests/witness_test.rs BEFORE implementation; freeze
 record: WITNESS-SPEC.frozen. No judge ruling changes: this is a surface
 over verdicts the judge already gives.
@@ -77,3 +77,21 @@ two-validator breaks in SchemaStore's history, `invar witness` writes
 every counterexample the judge carries for them; the count is reported
 in the Measured outcome, not predicted, because it depends on which
 witnesses carry a document.
+
+## Measured outcome (after implementation, 2026-11-08)
+
+- Fixtures 7 of 7. Full suite 850 tests. Mutants 100 of 100 killed
+  (W0-M1..M3 new; FP-M1..M3 re-anchored after the two-file read moved
+  into one `judge_pair`, same operators). Clippy silent. No verdict moved
+  on any corpus; label-free 26/14/50/0, Iglu 5/3/0, replay PASS unchanged.
+- On the 15 two-validator breaks in SchemaStore's history: the static judge
+  carries a document for 6 of them and `invar witness` wrote 7 files
+  (codex-hooks 9497fde9 carries two: `$schema` and `description`). Every
+  one of the 7 is valid at the base and rejected at the head under both
+  Python jsonschema and Ajv 8. The other 9 breaks were found by the
+  instance check (JUDGE-TESTS), not by the static judge, so they carry
+  no counterexample of the judge's own: 7 are NOT EVALUATED statically
+  and 2 are VIOLATED on a witness without a document (claude-code-
+  keybindings: `propertyNames`; ttheme-palette: a pattern). Those nine are
+  exactly the work the branch and runtime rulings are for; this surface
+  does not pretend otherwise.
