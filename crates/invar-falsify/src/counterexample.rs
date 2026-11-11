@@ -56,9 +56,6 @@ pub fn build(w: &Witness, base: &Value, post: &Value) -> (Option<Value>, Option<
 }
 
 fn try_build(w: &Witness, base: &Value, post: &Value) -> Result<Value, String> {
-    if w.kind == "constraint_changed" {
-        return Err("pattern and format changes are not decided".into());
-    }
     let (keys, nodes) = follow(base, &w.path, w.kind == "escalated").ok_or("the path could not be followed")?;
     let leaf_schema = nodes.last().cloned().unwrap_or(Value::Null);
     let mut unknown: Option<String> = None;
@@ -127,7 +124,9 @@ fn tightened(w: &Witness, root: &Value, leaf: &Value) -> Vec<Option<Value>> {
     };
     let step = |b_int: Option<i64>, b: f64, up: bool| -> Value {
         match (integer_only, b_int) {
-            (true, Some(i)) => json!(if up { i + 1 } else { i - 1 }),
+            // cx_f14: a bound at the i64 edge saturates; the candidate then
+            // fails the violation check and is stated, never a crash.
+            (true, Some(i)) => json!(if up { i.saturating_add(1) } else { i.saturating_sub(1) }),
             (true, None) => number(if up { b + 1.0 } else { b - 1.0 }),
             (false, _) => number(if up { b + 0.5 } else { b - 0.5 }),
         }

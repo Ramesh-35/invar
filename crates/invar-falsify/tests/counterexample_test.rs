@@ -128,12 +128,16 @@ fn cx_f06_nested_path_builds_required_parents() {
     assert_eq!(cx, json!({"payload": {"user": {"zipcode": ""}}}));
 }
 
-/// cx_f07: a pattern change is flagged, never proven.
+/// cx_f07 (amended by JUDGE-CC r0): a pattern change produces no witness
+/// at all, so there is nothing for the builder to answer: NOT EVALUATED.
 #[test]
 fn cx_f07_pattern_change_has_no_counterexample() {
-    let (cx, why) = one(&field(r#"{"type":"string","pattern":"^a"}"#), &field(r#"{"type":"string","pattern":"^b"}"#), "f07");
-    assert_eq!(cx, Value::Null);
-    assert_eq!(why, "pattern and format changes are not decided");
+    let d = repo("f07", &field(r#"{"type":"string","pattern":"^a"}"#), &field(r#"{"type":"string","pattern":"^b"}"#));
+    let (code, out) = judge(&d, "json");
+    assert_eq!(code, 4, "{out}");
+    let v: Value = serde_json::from_str(&out).unwrap_or_else(|e| panic!("not JSON ({e}): {out}"));
+    assert_eq!(v["witnesses"], serde_json::json!([]), "{v}");
+    assert_eq!(v["reason"], serde_json::json!("undecided_constraint"), "{v}");
 }
 
 /// cx_f08: a required sibling the checker cannot judge: no guess.
@@ -159,10 +163,12 @@ fn cx_f09_b1_001_every_break_has_a_counterexample() {
     assert_eq!(judge(&d, "json"), judge(&d, "json"));
 }
 
-/// cx_f10: the JSON keys exist on every witness; GitHub carries the line.
+/// cx_f10 (amended by JUDGE-CC r0): the JSON keys exist on every witness
+/// (a decided one; pattern changes no longer carry witnesses); GitHub
+/// carries the line.
 #[test]
 fn cx_f10_surfaces() {
-    let w = witnesses(&field(r#"{"type":"string","pattern":"^a"}"#), &field(r#"{"type":"string","pattern":"^b"}"#), "f10");
+    let w = witnesses(&field(r#"{"enum":["x","y"]}"#), &field(r#"{"enum":["x"]}"#), "f10");
     let keys: Vec<&String> = w[0].as_object().expect("object").keys().collect();
     assert!(keys.iter().any(|k| *k == "counterexample") && keys.iter().any(|k| *k == "counterexample_reason"), "{keys:?}");
     let d = repo("f10g", CLOSED, CLOSED_NARROWER);
@@ -202,4 +208,31 @@ fn cx_f12_unconfirmed_rejection_is_stated() {
     let (cx, why) = one(pre, post, "f12");
     assert_eq!(cx, Value::Null);
     assert_eq!(why, "$ref is not checked by this judge");
+}
+
+/// cx_f14 (added with JUDGE-CC r0's corpus run, 2026-11-09): a bound at the
+/// i64 edge must not crash the builder. Found on Iglu
+/// com.snowplowanalytics.mobile/remote_config 1-0-0 -> 1-0-1, where the head
+/// adds `maximum: 9223372036854775807` and the step above it overflowed
+/// (panic, exit 101) in every debug build since the step was written. The
+/// verdict is VIOLATED (tightened); whether a counterexample can be built at
+/// the edge is stated, never a crash.
+#[test]
+fn cx_f14_i64_edge_bound_never_panics() {
+    let pre = r#"{"properties":{"n":{"type":"integer"}}}"#;
+    let post = r#"{"properties":{"n":{"type":"integer","maximum":9223372036854775807}}}"#;
+    let d = repo("f14", pre, post);
+    let (code, out) = judge(&d, "json");
+    assert_eq!(code, 1, "{out}");
+    let v: Value = serde_json::from_str(&out).unwrap_or_else(|e| panic!("not JSON ({e}): {out}"));
+    assert_eq!(v["witnesses"][0]["kind"], serde_json::json!("tightened"), "{v}");
+    // The down direction: a minimum added at the i64 edge; the step below
+    // it saturates. (A one-step raise at the edge is not used here: the
+    // bound comparison is f64, where MIN and MIN+1 are equal — the parked
+    // numeric-precision class, stated, not decided by this fixture.)
+    let pre2 = r#"{"properties":{"n":{"type":"integer"}}}"#;
+    let post2 = r#"{"properties":{"n":{"type":"integer","minimum":-9223372036854775808}}}"#;
+    let d2 = repo("f14b", pre2, post2);
+    let (code2, out2) = judge(&d2, "json");
+    assert_eq!(code2, 1, "{out2}");
 }

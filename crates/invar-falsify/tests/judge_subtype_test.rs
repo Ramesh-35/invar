@@ -119,20 +119,23 @@ fn js_f05_optional_promoted_to_required_is_escalated() {
     assert!(out.contains("email is now required"), "out: {out}");
 }
 
-/// js_f06: a pattern changed. Containment of ECMA-262 patterns is not
-/// decided, so the change is VIOLATED as constraint_changed, and the
-/// sentence says it is not decided: never claimed as a proven narrowing.
-/// Kills JS-M4.
+/// js_f06 (amended by JUDGE-CC r0): a pattern changed. Containment of
+/// ECMA-262 patterns is not decided, so the change is NOT EVALUATED
+/// (undecided_constraint), stated with both values: never claimed as a
+/// narrowing, never VIOLATED without a decided witness. Kills JS-M4
+/// (under it the change vanishes entirely: HOLDS, no sentence).
 #[test]
 fn js_f06_pattern_change_is_flagged_not_proven() {
     let pre = r#"{"properties":{"code":{"type":"string","pattern":"^[A-Z]{3}$"}}}"#;
     let post = r#"{"properties":{"code":{"type":"string","pattern":"^[A-Z]{2}$"}}}"#;
     let d = repo("f06", pre, post);
     let (code, out) = judge(&d, &[]);
-    assert_eq!(code, 1, "out: {out}");
+    assert_eq!(code, 4, "out: {out}");
+    assert!(out.contains("undecided_constraint"), "out: {out}");
     assert!(out.contains("code pattern was"), "out: {out}");
-    assert!(out.contains("not decided here"), "out: {out}");
+    assert!(out.contains("not decided"), "out: {out}");
     assert!(!out.contains("narrowed"), "a pattern change must never be called a narrowing: {out}");
+    assert!(!out.contains("VIOLATED"), "out: {out}");
 }
 
 /// js_f07: the real b1-001 bytes. r0 stated `maximum` as not judged on

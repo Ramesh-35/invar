@@ -379,9 +379,13 @@ them), lists 4 as disputed, and contradicts no HOLDS verdict.
 The judged set is stated and narrow, on purpose: property presence and
 `type` (a type change that keeps every value valid, such as `boolean` to
 `boolean|null`, is a stated note, not a break), enum narrowing, tightened bounds, newly required fields, and
-changes to `pattern` or `format` (flagged as changed; whether a regex
-change narrows what is accepted is not decided, and the verdict says so),
-recursed with dotted-path witnesses. Not judged yet, and printed in every
+recursed with dotted-path witnesses. A change to `pattern` or `format`
+is one this judge detects but does not decide, so from v0.2.27 it is NOT
+EVALUATED (`undecided_constraint`), stated with both values, exit 4: it
+still blocks a gate, and it is never a VIOLATED without a decidable
+witness ([JUDGE-CC-SPEC.md](docs/falsification/JUDGE-CC-SPEC.md); before
+v0.2.27 such changes were VIOLATED with a "not decided" sentence, which
+on SchemaStore made 29 of 67 VIOLATED verdicts rest on undecided claims). Not judged yet, and printed in every
 output: `$ref`, `allOf`, `anyOf`, `oneOf`, `items`. Specs, fixtures and
 the mutation record:
 [docs/falsification/JUDGE-SPEC.md](docs/falsification/JUDGE-SPEC.md),

@@ -104,18 +104,21 @@ fn cc_f03_enum_narrowing_stays_violated() {
     assert!(out.contains("narrowed"), "out: {out}");
 }
 
-/// cc_f04: a removal and a pattern change in one diff. The removal is a
-/// decided break, so VIOLATED stands, and the pattern change is stated as
-/// undecided beside it: neither silenced by the other.
+/// cc_f04 (Amendment A): an enum narrowing and a pattern change in one
+/// diff. The narrowing is a decided break, so VIOLATED stands, and the
+/// pattern change is stated as undecided beside it: neither silenced by
+/// the other. As frozen, the decided break was a property removal from an
+/// open object, which D2 states rather than accuses, so the fixture held
+/// no decided witness at all; the narrowing restores its purpose.
 #[test]
 fn cc_f04_mixed_change_keeps_violated_and_states_undecided() {
-    let pre = r#"{"properties":{"name":{"type":"string"},"code":{"type":"string","pattern":"^[A-Z]{3}$"}}}"#;
-    let post = r#"{"properties":{"code":{"type":"string","pattern":"^[A-Z]{2}$"}}}"#;
+    let pre = r#"{"properties":{"status":{"enum":["a","b"]},"code":{"type":"string","pattern":"^[A-Z]{3}$"}}}"#;
+    let post = r#"{"properties":{"status":{"enum":["a"]},"code":{"type":"string","pattern":"^[A-Z]{2}$"}}}"#;
     let d = repo("f04", pre, post);
     let (code, out) = judge(&d, &[]);
     assert_eq!(code, 1, "out: {out}");
     assert!(out.contains("VIOLATED"), "out: {out}");
-    assert!(out.contains("removed"), "out: {out}");
+    assert!(out.contains("narrowed"), "out: {out}");
     assert!(out.contains("not evaluated: code pattern was"), "out: {out}");
     let (_, v) = json(&d);
     assert_eq!(v["verdict"], serde_json::json!("VIOLATED"), "{v}");

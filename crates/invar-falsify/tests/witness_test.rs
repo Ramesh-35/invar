@@ -78,14 +78,31 @@ fn w_f03_holds_writes_nothing() {
     assert!(text.contains("verdict HOLDS: 0 document(s) written, 0 witness(es) without one\n"), "{text}");
 }
 
-/// w_f04: a witness without a counterexample is stated, never written. Kills W0-M2.
+/// w_f04 (amended by JUDGE-CC r0): a pattern-change pair is NOT EVALUATED,
+/// so witness writes nothing and states the verdict. The original purpose
+/// (a witness without a counterexample is stated, never written) moved to
+/// w_f04b, which still kills W0-M2.
 #[test]
 fn w_f04_witness_without_document_is_stated() {
     let d = dir("f04");
     let (code, text) = witness(&d, &doc(r#"{"type":"string","pattern":"^a"}"#), &doc(r#"{"type":"string","pattern":"^b"}"#), &[]);
     assert_eq!(code, 0, "{text}");
     assert!(files(&d).is_empty(), "{text}");
-    assert!(text.contains("no document for constraint_changed a: "), "{text}");
+    assert!(text.contains("verdict NOT EVALUATED: 0 document(s) written, 0 witness(es) without one\n"), "{text}");
+}
+
+/// w_f04b: a decided witness whose counterexample cannot be built is
+/// stated, never written. Kills W0-M2. The root keyword `propertyNames`
+/// is one the builder cannot read, so the minimal instance is refused.
+#[test]
+fn w_f04b_witness_without_document_is_stated() {
+    let d = dir("f04b");
+    let pre = r#"{"type":"object","propertyNames":{"minLength":1},"properties":{"a":{"enum":["x","y"]}}}"#;
+    let post = r#"{"type":"object","propertyNames":{"minLength":1},"properties":{"a":{"enum":["x"]}}}"#;
+    let (code, text) = witness(&d, &doc(pre), &doc(post), &[]);
+    assert_eq!(code, 0, "{text}");
+    assert!(files(&d).is_empty(), "{text}");
+    assert!(text.contains("no document for narrowed a.a: "), "{text}");
     assert!(text.contains("0 document(s) written, 1 witness(es) without one\n"), "{text}");
 }
 

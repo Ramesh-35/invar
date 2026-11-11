@@ -169,13 +169,15 @@ fn fp_f09_json_labels_and_undecided_pattern() {
     let post = r#"{"properties":{"f":{"type":"string","pattern":"^a"}}}"#;
     let d = pair("f09", pre, post);
     let (code, out) = judge(&d, &["a.json", "b.json", "--format", "json"]);
-    assert_eq!(code, 1, "{out}");
+    assert_eq!(code, 4, "{out}");
     let v: Value = serde_json::from_str(&out).unwrap_or_else(|e| panic!("not JSON ({e}): {out}"));
     assert_eq!(v["base"], json!("a.json"), "{v}");
     assert_eq!(v["contract"], json!("b.json"), "{v}");
-    assert_eq!(v["witnesses"][0]["kind"], json!("constraint_changed"), "{v}");
-    assert_eq!(v["witnesses"][0]["counterexample"], Value::Null, "{v}");
-    assert_eq!(v["witnesses"][0]["counterexample_reason"], json!("pattern and format changes are not decided"), "{v}");
+    // Amended by JUDGE-CC r0: the pattern change is stated, not accused.
+    assert_eq!(v["verdict"], json!("NOT EVALUATED"), "{v}");
+    assert_eq!(v["reason"], json!("undecided_constraint"), "{v}");
+    assert_eq!(v["witnesses"], json!([]), "{v}");
+    assert_eq!(v["undecided_paths"], json!(["f"]), "{v}");
 }
 
 /// fp_f10: exit 4 parity, a change only where the judge does not look is

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1, JUDGE-CONST r0, WITNESS r0, JUDGE-D5 r1, REF-SIBLINGS r0, JUDGE-TESTS r2 and r3). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5, K-R1..R2, W0-M1..M3, D5R1-M1..M2, RS-M1..M5, TS2-M1..M2, TS3-M1..M4 with M3b) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1, JUDGE-CONST r0, WITNESS r0, JUDGE-D5 r1, REF-SIBLINGS r0, JUDGE-TESTS r2 and r3, JUDGE-CC r0). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5, K-R1..R2, W0-M1..M3, D5R1-M1..M2, RS-M1..M5, TS2-M1..M2, TS3-M1..M4 with M3b, CC-M1..M3) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -145,8 +145,8 @@ run_one CX-M2 '        match check(post, post, &inst, 0) {
             Check::Invalid => return Ok(inst),' cx_f12_unconfirmed_rejection_is_stated counterexample_test "$X"
 # CX-M3 the kept enum value used instead of the lost one
 run_one CX-M3 'a.into_iter().filter(|v| !b.contains(v)).map(Some).collect()' 'a.into_iter().filter(|v| b.contains(v)).map(Some).collect()' cx_f03_narrowed_carries_the_lost_value counterexample_test "$X"
-# CX-M4 tightened value on the bound instead of past it
-run_one CX-M4 '(true, Some(i)) => json!(if up { i + 1 } else { i - 1 }),' '(true, Some(i)) => json!(i),' cx_f04_tightened_steps_past_the_new_bound counterexample_test "$X"
+# CX-M4 tightened value on the bound instead of past it (re-anchored by JUDGE-CC r0: the step saturates since cx_f14)
+run_one CX-M4 '(true, Some(i)) => json!(if up { i.saturating_add(1) } else { i.saturating_sub(1) }),' '(true, Some(i)) => json!(i),' cx_f04_tightened_steps_past_the_new_bound counterexample_test "$X"
 # CX-M5 required properties not built (Amendment A: killed by cx_f09, not cx_f06)
 run_one CX-M5 'for name in req.iter().map(String::as_str) {' 'for name in req.iter().map(String::as_str).take(0) {' cx_f09_b1_001_every_break_has_a_counterexample counterexample_test "$X"
 # JUDGE-R3 r0 (docs/falsification/JUDGE-R3-SPEC.md)
@@ -283,7 +283,7 @@ run_one K-R2 'for kw in ["type", "enum", "const", "pattern", "format"].iter().ch
 # W0-M1 the negative directory written under src/test (WITNESS r0)
 run_one W0-M1 '    let kind_dir = if positive { "src/test" } else { "src/negative_test" };' '    let kind_dir = if positive { "src/test" } else { "src/test" };' w_f01_one_break_one_negative_file witness_test
 # W0-M2 a witness without a counterexample written as null
-run_one W0-M2 '            None => without.push(format!("{} {}: {}", w.kind, w.path, w.counterexample_reason.as_deref().unwrap_or("no document"))),' '            None => { let n = planned.len() + 1; planned.push((format!("invar-{n:02}-{}.json", witness_slug(&w.path)), b"null\n".to_vec(), format!("{} {}", w.kind, w.path))); }' w_f04_witness_without_document_is_stated witness_test
+run_one W0-M2 '            None => without.push(format!("{} {}: {}", w.kind, w.path, w.counterexample_reason.as_deref().unwrap_or("no document"))),' '            None => { let n = planned.len() + 1; planned.push((format!("invar-{n:02}-{}.json", witness_slug(&w.path)), b"null\n".to_vec(), format!("{} {}", w.kind, w.path))); }' w_f04b_witness_without_document_is_stated witness_test
 # W0-M3 the slug not applied
 run_one W0-M3 '                let file = format!("invar-{n:02}-{}.json", witness_slug(&w.path));' '                let file = format!("invar-{n:02}-{}.json", w.path);' w_f05_two_breaks_numbered_and_slugged witness_test
 
@@ -340,6 +340,16 @@ run_one TS3-M3 '    for candidate in ([name, name + ".json"] if not name.endswit
 run_one TS3-M3b '  const candidates = name.endsWith(".json") ? [name] : [name, name + ".json"];' '  const candidates = [name];' t3_f03_extensionless_ref_finds_the_json_sibling judge_tests_test "$A"
 # TS3-M4 head siblings read from the base directory
 run_one TS3-M4 '    head_siblings = a.head_siblings or (os.path.dirname(os.path.abspath(a.head)))' '    head_siblings = base_siblings' t3_f06_each_side_resolves_against_its_own_siblings judge_tests_test "$P"
+
+# JUDGE-CC r0 (docs/falsification/JUDGE-CC-SPEC.md): undecided constraint changes stated, not accused
+# CC-M1 the undecided branch dropped from the verdict
+run_one CC-M1 '                        } else if !stated.undecided.is_empty() {' '                        } else if false && !stated.undecided.is_empty() {' cc_f01_pattern_change_alone_is_not_evaluated judge_cc_test
+# CC-M2 undecided changes left in the witness list
+run_one CC-M2 '        "undecided_constraint" => {
+            st.undecided.push(x.path.clone());' '        "undecided_constraint_never" => {
+            st.undecided.push(x.path.clone());' cc_f01_pattern_change_alone_is_not_evaluated judge_cc_test
+# CC-M3 enum narrowing also demoted to undecided
+run_one CC-M3 'out.push(constraint_witness(path, "narrowed", "enum", pv, a.as_ref(), b.as_ref()));' 'out.push(constraint_witness(path, "undecided_constraint", "enum", pv, a.as_ref(), b.as_ref()));' cc_f03_enum_narrowing_stays_violated judge_cc_test
 cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"; cp "$P.orig" "$P"; rm "$P.orig"; cp "$A.orig" "$A"; rm "$A.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"

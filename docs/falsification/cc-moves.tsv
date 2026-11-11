@@ -1,0 +1,32 @@
+corpus	change	v0.2.26	v0.2.27
+ss	2aded6096_sarif-1.0.0.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-2.0.0-csd.2.beta.2018-10-10.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-2.0.0-csd.2.beta.2019-01-09.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-2.0.0-csd.2.beta.2019-01-24.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-2.0.0.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-2.1.0-rtm.0.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-2.1.0-rtm.1.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-2.1.0-rtm.2.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-2.1.0-rtm.3.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-2.1.0-rtm.4.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-2.1.0-rtm.5.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-2.1.0-rtm.6.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-2.1.0.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-external-property-file-2.1.0-rtm.0.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-external-property-file-2.1.0-rtm.1.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-external-property-file-2.1.0-rtm.2.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-external-property-file-2.1.0-rtm.3.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-external-property-file-2.1.0-rtm.4.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-external-property-file-2.1.0-rtm.5.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-external-property-file-2.1.0.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif-external-property-file.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2aded6096_sarif.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	2f74efc3f_claude-code-settings.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	585707189_linutil-tabs.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	5e44c8eee_partial-inwards.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	5fcc2e0ed_claude-code-settings.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	6b9673c4c_pyproject.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	b825b8297_openapi-overlay-1.X.json	VIOLATED	NOT EVALUATED/undecided_constraint
+ss	efb814231_openapi-arazzo-1.X.json	VIOLATED	NOT EVALUATED/undecided_constraint
+iglu	com.marketo/event 1-0-0->2-0-0	VIOLATED	NOT EVALUATED/undecided_constraint
+iglu	com.snowplowanalytics.snowplow/elasticsearch_enriched_event 1-0-1->2-0-0	VIOLATED	NOT EVALUATED/undecided_constraint

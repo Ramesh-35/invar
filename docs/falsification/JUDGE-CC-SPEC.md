@@ -72,6 +72,15 @@ their counterexamples.
   If W0-M2's killer no longer fails, W0-M2 is re-anchored and recorded.
 - judge_sarif_test: the static rule list drops constraint_changed.
 
+## Amendment A (2026-11-09, during the build)
+
+cc_f04 as frozen paired the pattern change with a property removal from an
+OPEN object, which JUDGE r2 (D2) states as a loosening rather than accusing
+— the fixture held no decided witness and the whole change was rightly NOT
+EVALUATED. The fixture's decided break is corrected to an enum narrowing;
+its purpose (a decided witness and an undecided change in one diff, neither
+silenced) is unchanged. A fixture defect, not a ruling change.
+
 ## Mutation operators
 
 - CC-M1 the undecided branch dropped from the verdict (falls to HOLDS) -> cc_f01
@@ -88,3 +97,43 @@ expected (measured, not assumed); no HOLDS gained. WG gate (76 pairs):
 still 0 HOLDS — some VIOLATED may become NOT EVALUATED and the counts are
 recorded. The test-document harness and the Rust fixtures corpus do not
 read these kinds and do not move.
+
+## Measured outcome (2026-11-09, after implementation)
+
+6 of 6 fixtures pass; CC-M1, CC-M2, CC-M3 killed; JS-M4 and W0-M2 still
+killed by their amended or successor fixtures (w_f04b). Suite 882, clippy
+silent. On the corpora, against the v0.2.26 judge (`cc-moves.tsv`):
+
+- SchemaStore (819): VIOLATED 67 -> 38; exactly the 29 changes frozen in
+  cc-predicted.txt moved, every one to NOT EVALUATED
+  (undecided_constraint); HOLDS 270 unchanged; nothing became HOLDS.
+- Iglu (146): VIOLATED 48 -> 46; two moved (marketo/event 1-0-0->2-0-0:
+  `format` date -> date-time; snowplow elasticsearch_enriched_event
+  1-0-1->2-0-0: patterns added), both to NOT EVALUATED; nothing became
+  HOLDS. One pair (snowplowanalytics.mobile/remote_config 1-0-0->1-0-1)
+  crashed every debug judge since the step was written (`maximum` at the
+  i64 edge, add overflow, exit 101): found by this corpus run, guarded by
+  cx_f14 (measured failing first) and fixed with a saturating step; the
+  pair now judges VIOLATED (tightened), as the v0.2.24 moves table
+  recorded from a release build, where the overflow wrapped silently
+  instead of crashing. That silent wrap could in principle have produced
+  a wrong counterexample candidate at the edge; the candidate check
+  (accepted at base, rejected at head) stands between that and any false
+  claim, and cx_f14 now pins both directions.
+- AsyncAPI (7): unchanged.
+- WG gate (76 ground-truth breaks): 0 HOLDS, PASS; the split moves from
+  31 VIOLATED / 45 NOT EVALUATED to 28 / 48. Three known breaks the judge
+  used to accuse on an undecided constraint alone it now states honestly
+  as undecided: a loss of apparent recall, bought by making every
+  remaining VIOLATED carry a decided witness.
+
+Mutant run: two registered operators tripped on this ruling's own changes
+and were re-anchored, each recorded in judge-mutations.sh: CX-M4's anchor
+line now saturates (cx_f14), same mutation; W0-M2's killer moved with its
+purpose to w_f04b. After re-anchoring, all operators killed (the full run
+is the release gate).
+
+Amendment A (cc_f04's decided witness corrected to an enum narrowing) is
+recorded above; cx_f07, cx_f10 joined the declared amendments (same
+class: they asserted the retired constraint_changed surface), and w_f04's
+original purpose moved to w_f04b, which kills W0-M2.

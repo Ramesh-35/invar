@@ -79,7 +79,9 @@ fn start_line(r: &serde_json::Value) -> u64 {
     r["locations"][0]["physicalLocation"]["region"]["startLine"].as_u64().expect("startLine")
 }
 
-/// sf_f01: a SARIF 2.1.0 log with the invar driver and the six rules.
+/// sf_f01 (amended by JUDGE-CC r0): a SARIF 2.1.0 log with the invar
+/// driver and the five rules; constraint_changed is retired, nothing can
+/// fire it, so it is not declared.
 #[test]
 fn sf_f01_sarif_shape() {
     // JUDGE-WIDEN r0 amendment (D7): b1-002 swapped, the narrowing direction.
@@ -93,7 +95,8 @@ fn sf_f01_sarif_shape() {
     assert_eq!(runs[0]["tool"]["driver"]["name"], "invar");
     let ids: Vec<&str> = runs[0]["tool"]["driver"]["rules"].as_array().expect("rules")
         .iter().filter_map(|r| r["id"].as_str()).collect();
-    for k in ["removed", "retyped", "narrowed", "tightened", "escalated", "constraint_changed"] {
+    assert!(!ids.contains(&"constraint_changed"), "{ids:?}");
+    for k in ["removed", "retyped", "narrowed", "tightened", "escalated"] {
         assert!(ids.contains(&format!("invar.judge.{k}").as_str()), "missing rule {k}: {ids:?}");
     }
 }

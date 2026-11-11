@@ -24,7 +24,7 @@ const UPPER: [&str; 4] = ["maximum", "exclusiveMaximum", "maxLength", "maxItems"
 
 pub struct Witness {
     pub path: String,
-    /// removed | retyped | narrowed | tightened | escalated | constraint_changed
+    /// removed | retyped | narrowed | tightened | escalated
     pub kind: &'static str,
     pub pre_type: String,
     pub post_type: Option<String>,
@@ -267,6 +267,8 @@ fn evaluate(read: BaseRead, post_bytes: &str) -> (&'static str, Option<&'static 
                             ("VIOLATED", None)
                         } else if !stated.ref_siblings.is_empty() {
                             ("NOT EVALUATED", Some("ref_siblings"))
+                        } else if !stated.undecided.is_empty() {
+                            ("NOT EVALUATED", Some("undecided_constraint"))
                         } else if !stated.not_evaluated.is_empty() {
                             ("NOT EVALUATED", Some("unjudged_construct"))
                         } else if !stated.unchecked.is_empty() {
@@ -835,6 +837,12 @@ pub struct Stated {
     /// The sibling keywords of each path in `ref_siblings`, same order.
     pub ref_sibling_keywords: Vec<String>,
     pub notes: Vec<String>,
+    /// JUDGE-CC r0: paths whose pattern, format or non-numeric bound
+    /// changed; containment is not decided, so nothing here is a witness.
+    pub undecided: Vec<String>,
+    /// One sentence per path in `undecided`, same order:
+    /// "PATH KEYWORD was A, is now B".
+    pub undecided_changes: Vec<String>,
     /// JUDGE-REACH r0: JSON Pointers of the schemas that changed in a way
     /// the judge does not check, sorted, an ancestor standing for its
     /// descendants.
@@ -852,6 +860,17 @@ fn take_stated(w: &mut Vec<Witness>) -> Stated {
         "ref_siblings" => {
             st.ref_siblings.push(x.path.clone());
             st.ref_sibling_keywords.push(x.pre_value.clone().unwrap_or_default());
+            false
+        }
+        "undecided_constraint" => {
+            st.undecided.push(x.path.clone());
+            st.undecided_changes.push(format!(
+                "{} {} was {}, is now {}",
+                if x.path.is_empty() { "the document root" } else { &x.path },
+                x.keyword.unwrap_or("constraint"),
+                x.pre_value.as_deref().unwrap_or("absent"),
+                x.post_value.as_deref().unwrap_or("absent")
+            ));
             false
         }
         "retyped_widened" => {
@@ -1063,12 +1082,12 @@ fn constraints(path: &str, pv: &Value, qv: &Value, out: &mut Vec<Witness>) {
             }
             // A non-numeric bound (draft-04 boolean exclusiveMinimum, say)
             // changed: flagged as changed, never silently passed.
-            _ => out.push(constraint_witness(path, "constraint_changed", kw, pv, ra, rb)),
+            _ => out.push(constraint_witness(path, "undecided_constraint", kw, pv, ra, rb)),
         }
     }
     for kw in ["pattern", "format"] {
         if pv.get(kw) != qv.get(kw) && qv.get(kw).is_some() {
-            out.push(constraint_witness(path, "constraint_changed", kw, pv, pv.get(kw), qv.get(kw)));
+            out.push(constraint_witness(path, "undecided_constraint", kw, pv, pv.get(kw), qv.get(kw)));
         }
     }
 }
@@ -1109,6 +1128,8 @@ fn body_json(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w:
     json!({
         "not_evaluated_paths": st.not_evaluated,
         "ref_siblings_paths": st.ref_siblings,
+        "undecided_paths": st.undecided,
+        "undecided_changes": st.undecided_changes,
         "notes": st.notes,
         "unchecked": st.unchecked,
         "verdict": verdict,
@@ -1182,13 +1203,6 @@ fn witness_sentence(x: &Witness, base: &str) -> String {
             "escalated: {} is now required. Instances that omit it, valid before, are now rejected; keep it optional, or version the change.",
             x.path
         ),
-        "constraint_changed" => format!(
-            "changed: {} {} was {}, is now {}. Whether this narrows what is accepted is not decided here; review it, or version the change.",
-            x.path,
-            x.keyword.unwrap_or("constraint"),
-            x.pre_value.as_deref().unwrap_or("absent"),
-            x.post_value.as_deref().unwrap_or("absent")
-        ),
         _ => {
             let to = x.post_type.as_deref().unwrap_or("unspecified");
             format!(
@@ -1224,6 +1238,9 @@ fn not_evaluated_sentence(reason: Option<&str>, contract: &str, base: &str) -> S
     match reason {
         Some("new_contract") => format!(
             "NOT EVALUATED (new_contract): {contract} does not exist at {base}; nothing was promised before. The next change to this contract will be judged against this version."
+        ),
+        Some("undecided_constraint") => format!(
+            "NOT EVALUATED (undecided_constraint): {contract} changed a pattern, format or non-numeric bound; whether the new constraint accepts less is not decided by this judge, and no counterexample is claimed. Review the change by hand, or version it."
         ),
         Some("unjudged_construct") => format!(
             "NOT EVALUATED (unjudged_construct): {contract} changed only where this judge does not look (anyOf, oneOf, allOf or $ref). Nothing here was judged a break or a pass; review those fields by hand."
@@ -1270,6 +1287,9 @@ fn render_text(verdict: &str, reason: Option<&str>, contract: &str, base: &str, 
         let at = if p.is_empty() { "the document root" } else { p.as_str() };
         s.push_str(&format!("  not evaluated: {at} carries $ref beside {kws}; under draft-07 jsonschema ignores those keywords and Ajv applies them, so no single reading exists to judge.\n"));
     }
+    for c in &st.undecided_changes {
+        s.push_str(&format!("  not evaluated: {c}; whether this narrows what is accepted is not decided.\n"));
+    }
     for p in &st.unchecked {
         s.push_str(&format!("  {}\n", unchecked_sentence(p)));
     }
@@ -1289,13 +1309,12 @@ fn location_line(x: &Witness) -> u64 {
     x.post_line.or(x.anchor_line).unwrap_or(1)
 }
 
-const RULES: [(&str, &str); 6] = [
+const RULES: [(&str, &str); 5] = [
     ("removed", "A property the base ref declared is gone."),
     ("retyped", "A property's declared type changed."),
     ("narrowed", "An enum accepts fewer values than at the base ref."),
     ("tightened", "A numeric, length or item-count bound rejects values valid at the base ref."),
     ("escalated", "A property became required."),
-    ("constraint_changed", "A pattern, format or non-numeric bound changed; whether it narrows is not decided."),
 ];
 
 /// JUDGE-SARIF r0: a SARIF 2.1.0 log. Sorted keys, no timestamps, no
@@ -1312,6 +1331,8 @@ fn render_sarif(verdict: &str, reason: Option<&str>, contract: &str, base: &str,
             "unjudged_constraints": UNJUDGED,
             "not_evaluated_paths": st.not_evaluated,
             "ref_siblings_paths": st.ref_siblings,
+            "undecided_paths": st.undecided,
+            "undecided_changes": st.undecided_changes,
             "unchecked": st.unchecked,
             "notes": st.notes,
             "verdict": verdict,
