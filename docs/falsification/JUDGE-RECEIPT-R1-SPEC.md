@@ -103,3 +103,17 @@ reproduces. A base commit missing from the repository is exit 3.
 
 No corpus moves: receipts record, they do not judge. Suite, clippy and
 mutants as before, plus the three above.
+
+## Measured outcome (2026-11-09, after implementation)
+
+Freeze rebased byte-identically onto v0.2.27 (both .frozen hashes verify;
+CC r0 touched neither file). Measured on the frozen tree: 1 of 6 (the
+guard). After implementation: 6 of 6, and the ten r0 fixtures untouched
+and green, so single-contract receipts are byte-identical. RM1-1, RM1-2,
+RM1-3 killed. One detail the spec shape left open is now stated: a
+contract DELETED by the change has no head bytes, so its
+`post_contract_blake3` is null, and verification requires the file to be
+absent; nothing is hashed as empty. The recorded `globs` and
+`summary.unchanged` are the write-time selection, carried as recorded;
+every verdict, witness and summary count is re-derived on verify. No
+corpus moves: receipts record, they do not judge.

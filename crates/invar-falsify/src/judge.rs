@@ -324,6 +324,115 @@ fn receipt_body(i: &ReceiptInputs, result: Value) -> Value {
     })
 }
 
+/// JUDGE-RECEIPT r1 (A3-RECEIPT) body: one receipt per judged change.
+/// `result` is the `--contracts --format json` document unchanged; every
+/// judged contract is named by its bytes on both sides, in path order.
+fn change_receipt_body(base_ref: &str, base_commit: Option<String>, head_commit: Option<String>, contracts: &[Value], result: Value) -> Value {
+    json!({
+        "engine": {"version": env!("CARGO_PKG_VERSION")},
+        "inputs": {
+            "base_commit": base_commit,
+            "base_ref": base_ref,
+            "contracts": contracts,
+            "head_commit": head_commit,
+        },
+        "receipt_format": crate::receipt::RECEIPT_FORMAT,
+        "receipt_kind": "judge-change",
+        "result": result,
+    })
+}
+
+/// HEAD's commit, recorded only when every judged contract's working-tree
+/// bytes are HEAD's bytes (a deleted contract must be absent at HEAD too);
+/// otherwise null, and the receipt says the working tree was judged.
+fn head_commit_if_clean(root: &Path, contracts: &[String]) -> Option<String> {
+    let head = resolve_commit(root, "HEAD")?;
+    for c in contracts {
+        let work = std::fs::read(root.join(c)).ok();
+        let at_head = match base_bytes(root, &head, c).ok()? {
+            BaseRead::Found(b) => Some(b),
+            _ => None,
+        };
+        if work != at_head {
+            return None;
+        }
+    }
+    Some(head)
+}
+
+/// JUDGE-RECEIPT r1 verification of a change receipt: every listed
+/// contract must be the recorded bytes on both sides (drift names the
+/// contract), and re-judging the recorded contracts must reproduce the
+/// recorded body byte for byte. The recorded `globs` and `unchanged`
+/// are the write-time selection, carried as recorded: the verdicts,
+/// witnesses and summary counts are all re-derived.
+pub fn verify_change_receipt(root: &Path, body: &Value, body_text: &str) -> Result<i32> {
+    let inputs = body.get("inputs").cloned().unwrap_or_default();
+    let base_ref = inputs.get("base_ref").and_then(Value::as_str).map(str::to_string).ok_or_else(|| anyhow::anyhow!("change receipt has no inputs.base_ref"))?;
+    let base_commit = inputs.get("base_commit").and_then(Value::as_str).map(str::to_string);
+    let head_commit = inputs.get("head_commit").and_then(Value::as_str).map(str::to_string);
+    let entries = inputs.get("contracts").and_then(Value::as_array).cloned().ok_or_else(|| anyhow::anyhow!("change receipt has no inputs.contracts"))?;
+    let result = body.get("result").cloned().unwrap_or_default();
+    let globs = result.get("globs").cloned().unwrap_or_else(|| json!([]));
+    let unchanged = result.pointer("/summary/unchanged").cloned().unwrap_or(json!(0));
+
+    let mut ones = Vec::new();
+    let mut contracts = Vec::new();
+    for e in &entries {
+        let c = e.get("contract").and_then(Value::as_str).unwrap_or_default().to_string();
+        let recorded_post = e.get("post_contract_blake3").and_then(Value::as_str).map(str::to_string);
+        let recorded_base = e.get("base_contract_blake3").and_then(Value::as_str).map(str::to_string);
+        let post = std::fs::read(root.join(&c)).ok();
+        let post_b3 = post.as_ref().map(|b| blake3::hash(b).to_hex().to_string());
+        if post_b3 != recorded_post {
+            println!("input drift: {c} is not the contract the receipt judged");
+            println!("result: receipt NOT reproduced");
+            return Ok(1);
+        }
+        let read = match base_commit.as_deref() {
+            Some(bc) => match base_bytes(root, bc, &c)? {
+                BaseRead::NoRef => anyhow::bail!("base commit {bc} is not in this repository; fetch it, then verify"),
+                other => other,
+            },
+            None => BaseRead::NoRef,
+        };
+        let base_b3 = match &read {
+            BaseRead::Found(b) => Some(blake3::hash(b).to_hex().to_string()),
+            _ => None,
+        };
+        if base_b3 != recorded_base {
+            println!("input drift: the base of {c} at {} is not the one the receipt judged", base_commit.as_deref().unwrap_or("(no commit)"));
+            println!("result: receipt NOT reproduced");
+            return Ok(1);
+        }
+        ones.push(judge_one(&c, read, post.as_deref()));
+        contracts.push(e.clone());
+    }
+    let count = |f: &dyn Fn(&One) -> bool| ones.iter().filter(|o| f(o)).count();
+    let rederived_result = json!({
+        "base": base_ref,
+        "globs": globs,
+        "contracts": ones.iter().map(|o| body_json(o.verdict, o.reason, &o.contract, &base_ref, &o.witnesses, &o.stated)).collect::<Vec<_>>(),
+        "summary": {
+            "violated": count(&|o| o.verdict == "VIOLATED"),
+            "holds": count(&|o| o.verdict == "HOLDS"),
+            "not_evaluated": count(&|o| o.verdict == "NOT EVALUATED"),
+            "new": count(&|o| o.reason == Some("new_contract")),
+            "unchanged": unchanged,
+        },
+    });
+    let rederived = change_receipt_body(&base_ref, base_commit.clone(), head_commit, &contracts, rederived_result);
+    let rendered = serde_json::to_string_pretty(&rederived).unwrap_or_default();
+    if rendered != body_text {
+        println!("re-judging the recorded contracts gives a different result");
+        println!("result: receipt NOT reproduced");
+        return Ok(1);
+    }
+    println!("inputs ok: {} contract(s) and their base at {}", contracts.len(), base_commit.as_deref().unwrap_or("(no commit)"));
+    println!("result: receipt reproduced");
+    Ok(0)
+}
+
 /// JUDGE-RECEIPT r0 verification, after the footer, format, engine version
 /// and optional signature have been checked upstream: the inputs must be
 /// the recorded bytes, and re-judging them must reproduce the recorded
@@ -1444,7 +1553,7 @@ fn render_github(verdict: &str, reason: Option<&str>, contract: &str, base: &str
 /// pathspec globs (M-D1), files that differ between the base tree and the
 /// working tree plus untracked files git does not ignore (M-D2). A glob
 /// set matching nothing at either side is an error (M-D4), never a pass.
-pub fn run_many(root: &Path, globs: &[String], base: &str, format: &str) -> Result<i32> {
+pub fn run_many(root: &Path, globs: &[String], base: &str, format: &str, receipt_out: Option<&str>) -> Result<i32> {
     let specs: Vec<String> = globs.iter().map(|g| format!(":(glob){g}")).collect();
     let base_ok = git_ok(root, &["rev-parse", "--verify", "--quiet", &format!("{base}^{{commit}}")])?;
 
@@ -1490,15 +1599,15 @@ pub fn run_many(root: &Path, globs: &[String], base: &str, format: &str) -> Resu
     let not_evaluated = count(&|o| o.verdict == "NOT EVALUATED");
     let new = count(&|o| o.reason == Some("new_contract"));
 
+    let result_body = json!({
+        "base": base,
+        "globs": globs,
+        "contracts": ones.iter().map(|o| body_json(o.verdict, o.reason, &o.contract, base, &o.witnesses, &o.stated)).collect::<Vec<_>>(),
+        "summary": { "violated": violated, "holds": holds, "not_evaluated": not_evaluated, "new": new, "unchanged": unchanged },
+    });
     match format {
         "json" => {
-            let body = json!({
-                "base": base,
-                "globs": globs,
-                "contracts": ones.iter().map(|o| body_json(o.verdict, o.reason, &o.contract, base, &o.witnesses, &o.stated)).collect::<Vec<_>>(),
-                "summary": { "violated": violated, "holds": holds, "not_evaluated": not_evaluated, "new": new, "unchanged": unchanged },
-            });
-            println!("{}", serde_json::to_string_pretty(&body).unwrap_or_default());
+            println!("{}", serde_json::to_string_pretty(&result_body).unwrap_or_default());
         }
         "sarif" => {
             let results = ones.iter().flat_map(|o| sarif_results(&o.contract, base, &o.witnesses)).collect();
@@ -1534,6 +1643,29 @@ pub fn run_many(root: &Path, globs: &[String], base: &str, format: &str) -> Resu
                 globs.join(" ")
             );
         }
+    }
+
+    if let Some(p) = receipt_out {
+        // JUDGE-RECEIPT r1 (A3-RECEIPT): one receipt for the whole change,
+        // every judged contract named by its bytes.
+        let entries: Vec<Value> = changed
+            .iter()
+            .map(|c| {
+                let post = std::fs::read(root.join(c)).ok();
+                let base_b3 = match base_bytes(root, base, c)? {
+                    BaseRead::Found(b) => Some(blake3::hash(&b).to_hex().to_string()),
+                    _ => None,
+                };
+                Ok(json!({
+                    // A deleted contract has no head bytes: null, stated.
+                    "base_contract_blake3": base_b3,
+                    "contract": c,
+                    "post_contract_blake3": post.map(|b| blake3::hash(&b).to_hex().to_string()),
+                }))
+            })
+            .collect::<Result<_>>()?;
+        let receipt = change_receipt_body(base, resolve_commit(root, base), head_commit_if_clean(root, &changed), &entries, result_body.clone());
+        std::fs::write(p, crate::receipt::render(&receipt)).with_context(|| format!("writing receipt {p}"))?;
     }
 
     // M-D5, with Amendment A: the worst verdict decides; a new contract

@@ -1386,10 +1386,9 @@ fn cmd_judge(args: JudgeArgs) -> Result<i32> {
         (Some(_), false) => anyhow::bail!("--contract and --contracts cannot be combined: judge one contract, or every contract a glob selects"),
         (Some(c), true) => invar_falsify::judge::run(&root, &c, base, &args.format, args.receipt.as_deref()),
         (None, false) => {
-            if args.receipt.is_some() {
-                anyhow::bail!("--receipt with --contracts is not supported in r0: receipts are written one contract at a time (use --contract)");
-            }
-            invar_falsify::judge::run_many(&root, &args.contracts, base, &args.format)
+            // JUDGE-RECEIPT r1 (A3-RECEIPT): --contracts writes one change
+            // receipt naming every judged contract by its bytes.
+            invar_falsify::judge::run_many(&root, &args.contracts, base, &args.format, args.receipt.as_deref())
         }
         (None, true) => anyhow::bail!("pass --contract <path> or --contracts '<glob>'"),
     }
@@ -1615,6 +1614,10 @@ fn cmd_verify_receipt(args: VerifyReceiptArgs) -> Result<i32> {
     if body.get("receipt_kind").and_then(|v| v.as_str()) == Some("judge") {
         let root = std::env::current_dir().context("reading the current directory")?;
         return invar_falsify::judge::verify_receipt(&root, body, &parsed.body_text);
+    }
+    if body.get("receipt_kind").and_then(|v| v.as_str()) == Some("judge-change") {
+        let root = std::env::current_dir().context("reading the current directory")?;
+        return invar_falsify::judge::verify_change_receipt(&root, body, &parsed.body_text);
     }
 
     // Inputs: the config and lock must be the recorded bytes.

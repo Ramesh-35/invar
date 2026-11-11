@@ -409,7 +409,14 @@ way, nothing merges until the judge has passed against the current base.
 
 **A receipt anyone can check.** `--receipt` records the exact base
 commit, a BLAKE3 hash of both contract versions, and the full result.
-Sign it with your own key (INVAR never holds one):
+With `--contracts` it writes one receipt for the whole change
+([JUDGE-RECEIPT-R1-SPEC.md](docs/falsification/JUDGE-RECEIPT-R1-SPEC.md),
+v0.2.28): every judged contract named by its bytes on both sides, the
+head commit named only when the judged bytes are committed, and
+`verify-receipt` re-judges every listed contract and must reproduce the
+body byte for byte, so a change touching five schemas is accepted or
+disputed as one record. Sign it with your own key (INVAR never holds
+one):
 
 ```sh
 ssh-keygen -Y sign -n invar-receipt -f ~/.ssh/id_ed25519 receipt.json

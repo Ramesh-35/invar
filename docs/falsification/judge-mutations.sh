@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1, JUDGE-CONST r0, WITNESS r0, JUDGE-D5 r1, REF-SIBLINGS r0, JUDGE-TESTS r2 and r3, JUDGE-CC r0). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5, K-R1..R2, W0-M1..M3, D5R1-M1..M2, RS-M1..M5, TS2-M1..M2, TS3-M1..M4 with M3b, CC-M1..M3) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1, JUDGE-CONST r0, WITNESS r0, JUDGE-D5 r1, REF-SIBLINGS r0, JUDGE-TESTS r2 and r3, JUDGE-CC r0, JUDGE-RECEIPT r1). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5, K-R1..R2, W0-M1..M3, D5R1-M1..M2, RS-M1..M5, TS2-M1..M2, TS3-M1..M4 with M3b, CC-M1..M3, RM1-1..3) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -83,11 +83,15 @@ run_one SF-M3 'x.post_line.or(x.anchor_line).unwrap_or(1)' 'x.pre_line.unwrap_or
 
 # JUDGE-RECEIPT r0 (docs/falsification/JUDGE-RECEIPT-SPEC.md)
 # RM-1 re-derived body not compared
-run_one RM-1 'if rendered != body_text {' 'if false && rendered != body_text {' jr_f03_forged_verdict_with_recomputed_footer_fails judge_receipt_test
+run_one RM-1 'if rendered != body_text {
+        println!("re-judging the recorded inputs gives a different result ({verdict})");' 'if false && rendered != body_text {
+        println!("re-judging the recorded inputs gives a different result ({verdict})");' jr_f03_forged_verdict_with_recomputed_footer_fails judge_receipt_test
 # RM-2 base read from base_ref instead of the recorded commit
 run_one RM-2 'Some(base_commit) => match base_bytes(root, base_commit, &contract)? {' 'Some(base_commit) => match base_bytes(root, { let _ = base_commit; base_ref.as_str() }, &contract)? {' jr_f05_base_is_pinned_to_the_commit_not_the_ref judge_receipt_test
 # RM-3 post contract hash not checked
-run_one RM-3 'if post_b3 != recorded_post {' 'if false && post_b3 != recorded_post {' jr_f06_post_substitution_is_input_drift judge_receipt_test
+run_one RM-3 'if post_b3 != recorded_post {
+        println!("input drift: {contract} is not the contract the receipt judged");' 'if false && post_b3 != recorded_post {
+        println!("input drift: {contract} is not the contract the receipt judged");' jr_f06_post_substitution_is_input_drift judge_receipt_test
 # RM-4 base contract hash not checked
 run_one RM-4 'if base_b3.as_deref() != recorded_base.as_deref() {' 'if false && base_b3.as_deref() != recorded_base.as_deref() {' jr_f07_forged_base_hash_is_input_drift judge_receipt_test
 
@@ -350,6 +354,22 @@ run_one CC-M2 '        "undecided_constraint" => {
             st.undecided.push(x.path.clone());' cc_f01_pattern_change_alone_is_not_evaluated judge_cc_test
 # CC-M3 enum narrowing also demoted to undecided
 run_one CC-M3 'out.push(constraint_witness(path, "narrowed", "enum", pv, a.as_ref(), b.as_ref()));' 'out.push(constraint_witness(path, "undecided_constraint", "enum", pv, a.as_ref(), b.as_ref()));' cc_f03_enum_narrowing_stays_violated judge_cc_test
+
+# JUDGE-RECEIPT r1 / A3-RECEIPT (docs/falsification/JUDGE-RECEIPT-R1-SPEC.md)
+# RM1-1 head_commit written as HEAD even when a contract is dirty
+run_one RM1-1 '        if work != at_head {
+            return None;
+        }' '        if false && work != at_head {
+            return None;
+        }' jr1_f04_head_commit_only_when_the_judged_bytes_are_committed judge_receipt_test
+# RM1-2 one contract's post hash not checked on verify
+run_one RM1-2 '        if post_b3 != recorded_post {
+            println!("input drift: {c} is not the contract the receipt judged");' '        if false && post_b3 != recorded_post {
+            println!("input drift: {c} is not the contract the receipt judged");' jr1_f03_editing_one_contract_is_drift_naming_it judge_receipt_test
+# RM1-3 re-derived body not compared for change receipts
+run_one RM1-3 '    if rendered != body_text {
+        println!("re-judging the recorded contracts gives a different result");' '    if false && rendered != body_text {
+        println!("re-judging the recorded contracts gives a different result");' jr1_f06_forged_change_verdict_with_recomputed_footer_fails judge_receipt_test
 cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"; cp "$P.orig" "$P"; rm "$P.orig"; cp "$A.orig" "$A"; rm "$A.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"
