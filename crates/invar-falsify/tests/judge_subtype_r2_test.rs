@@ -256,17 +256,20 @@ fn r2_f14_external_reference_is_not_evaluated() {
     assert_eq!(strs(&v["not_evaluated_paths"]), vec!["x"], "{v}");
 }
 
-/// r2_f15 D5: a type made explicit that the field's own keywords already
-/// implied is a stated note, not a break. Kills R2-M6.
+/// r2_f15 D5, amended by JUDGE-D5 r1: a type written where none was is a
+/// narrowing (a validator accepted a string there before), VIOLATED with a
+/// counterexample, not a note. Kills R2-M6 (the note reintroduced).
 #[test]
 fn r2_f15_implied_type_made_explicit_is_a_note() {
     let pre = r#"{"properties":{"header":{"properties":{"title":{"type":"string"}}}}}"#;
     let post = r#"{"properties":{"header":{"type":"object","properties":{"title":{"type":"string"}}}}}"#;
     let d = repo("f15", pre, post);
     let (code, v) = json(&d);
-    assert_eq!(code, 0, "{v}");
-    assert_eq!(v["verdict"], "HOLDS", "{v}");
-    assert!(strs(&v["notes"]).iter().any(|n| n.contains("header") && n.contains("type made explicit")), "{v}");
+    assert_eq!(code, 1, "{v}");
+    assert_eq!(v["verdict"], "VIOLATED", "{v}");
+    assert_eq!(v["witnesses"][0]["kind"], "retyped", "{v}");
+    assert!(v["witnesses"][0]["counterexample"].is_object(), "{v}");
+    assert!(!strs(&v["notes"]).iter().any(|n| n.contains("type made explicit")), "{v}");
 }
 
 /// r2_f16 D5: a new type that contradicts the implied one is a break.

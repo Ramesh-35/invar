@@ -1,0 +1,30 @@
+# JUDGE-D5 r1 freeze record, written before any implementation.
+# Baseline: v0.2.22 candidate (WITNESS r0). Ratified 2026-11-08.
+# Measured before implementation: judge_d5_r1_test 2 of 6 pass (the guards
+#   d5_f03, d5_f04); d5_f01, d5_f02, d5_f05, d5_f06 fail with HOLDS and the
+#   withdrawn note. r2_f15 as amended fails (it asserts the fix). The WG gate
+#   FAILS: 76 pairs, VIOLATED 30, NOT EVALUATED 45, HOLDS 1
+#   (schema-catalog_v12_not_v13.json). Clippy silent.
+# Pre-registered: 6 of 6 and r2_f15 as amended; D5R1-M1..M2 and every earlier
+#   mutant killed; full suite; clippy silent; WG gate PASS (0 HOLDS); the corpus
+#   moves and the validator check of every new counterexample as stated in the
+#   spec's prediction.
+blake3(docs/falsification/JUDGE-D5-R1-SPEC.md) = d22aef1fcf8789dcecef9229a698937c4a9cfb096c34a60e1d1dcc275c64280a
+sha256(docs/falsification/JUDGE-D5-R1-SPEC.md) = 4f75f038384d89935940d29687ed74f574a5636fec48084c7b7845c3bc59c18d
+blake3(crates/invar-falsify/tests/judge_d5_r1_test.rs) = 2b3454d65a40763b365e1eb710128b0259e8d1d7b04e9c3182ebc5cffd8677de
+sha256(crates/invar-falsify/tests/judge_d5_r1_test.rs) = 2b29df494cfeb28ab20fa5a25401cd813ca960f7b2b8ddbccfa4eb5e2518b48f
+blake3(crates/invar-falsify/tests/judge_subtype_r2_test.rs) = 445359badf6b7128b8be20670bc5faeb35b5e9bc2a57a8742a5ef00afd30b67b
+sha256(crates/invar-falsify/tests/judge_subtype_r2_test.rs) = b56166af2abe5642fde0256e156afefcfeeb912889d22b34ccbe2a1151106d1f
+blake3(docs/falsification/wg-bench/MANIFEST.tsv) = ae4add878269050f48b1c2bb3e2230d30c63d90301378e847f1982661a3b6d77
+sha256(docs/falsification/wg-bench/MANIFEST.tsv) = edd363ec6ee4782171bdf804599a43448f91ce1a8794aee981bddcb214388071
+blake3(docs/falsification/wg-bench/replay.py) = a72ad4ca7468feb9dffe40bb1f166c25dbce63a7e3480f9da76d79796ef3b68a
+sha256(docs/falsification/wg-bench/replay.py) = e1a4618feb5a8d9df6a7a5316836e7611be8a952214bb32c879d2c7ecdc072f7
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-schema-catalog-v12.json) = 71b11252b933283e8aceecb8295bb69a9bb113ddd0b900056ec054ade86a3240
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-schema-catalog-v12.json) = 9b2e2e9c16d7333218d69f65a4a143afa2829cccf1663343d668ad9f76197217
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-schema-catalog-v13.json) = 0c27a1392aa99f5bbd30acbdeffc93b54538d9151ab8a20d3f40a13a60297139
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-schema-catalog-v13.json) = f785cbf71715a1e5e210ed62dfc1b3c344c34869febe07f127b330423ffe5456
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-devinit-2.0-cc3c8b16c-before.json) = 4d0d07b1239740a92f4d544d5158339bcd0f2b0991444f0321f77312d9b6b1e1
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-devinit-2.0-cc3c8b16c-before.json) = 671af56bd5585774601ef3c458865c33e27ce431411bad799f8efdb784655d37
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-devinit-2.0-cc3c8b16c-after.json) = 4b5265b9afe96a2231e3417c429534edf6a16531462983c9b36f038284e1c63b
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-devinit-2.0-cc3c8b16c-after.json) = 2f8652204310db5957ad259eea3db270270f96758f17345ed16e0d39453cb930
+blake3(docs/falsification/wg-bench/pairs, 152 files, sorted) = 27b1fa216d819c07ba2644892dada043078b047fa7707361e09b00a08a06aefd
