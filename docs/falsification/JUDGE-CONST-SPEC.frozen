@@ -1,0 +1,17 @@
+# JUDGE-CONST r0 freeze record, written before any implementation.
+# Baseline: v0.2.20 candidate (JUDGE-CANON r1). Drafted 2026-11-08, awaiting ratification.
+# Measured before implementation: judge_const_test 2 of 6 pass (k_f03: the
+#   counterexample builder already reads const; k_f06: an unchanged const).
+#   k_f01 and k_f02 FAIL with a false VIOLATED (the defect), k_f04 and k_f05
+#   FAIL with NOT EVALUATED (const unread). r_f13 as amended passes. Clippy silent.
+# Pre-registered: 6 of 6; K-R1, K-R2 and every earlier mutant killed (RE-M5
+#   as amended); full suite; clippy silent; label-free 26/14/50/0, Iglu 5/3/0,
+#   replay PASS unchanged; exactly one corpus change moves: AsyncAPI
+#   "3.0.0->3.1.0 (tag neutral)" NOT EVALUATED -> VIOLATED, narrowed at
+#   asyncapi, counterexample {"asyncapi":"3.0.0"}; nothing else moves.
+blake3(docs/falsification/JUDGE-CONST-SPEC.md) = 3e3846f7daec51c650d8d67d18a2e10548c64aa28c6e45f0c0514ef4dcc9f23c
+sha256(docs/falsification/JUDGE-CONST-SPEC.md) = 7ecf8036119efa24586b483ef0ad16cf6bcb4bd3912883b43f945caf6877e042
+blake3(crates/invar-falsify/tests/judge_const_test.rs) = c355d54b012738cae1165a4294968b4618214d8bc11627ff7436972523e34987
+sha256(crates/invar-falsify/tests/judge_const_test.rs) = ecbb8ddf1a852b0c0f5484eb4076b2f1e420ac92e8c7693f801f07bc04d5f58b
+blake3(crates/invar-falsify/tests/judge_reach_test.rs) = f34972abef3958d840b83a86408cb603013b210dbb65955abf73e174bb3947a6
+sha256(crates/invar-falsify/tests/judge_reach_test.rs) = 95815f2a10ef3e1ea2c5e6f1d15cba17cdb4a76f6418a0646cfb1b10eadf27a9

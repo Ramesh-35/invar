@@ -210,9 +210,11 @@ fn r_f12_real_asyncapi_states_the_unreached_message_trait() {
 /// r_f13: a reached node, at a keyword the judge does not read: `const`
 /// is not judged, so its change is stated, never covered. Kills RE-M5.
 #[test]
+/// Amended by JUDGE-CONST r0: `const` is read since then, so the unread
+/// keyword here is `multipleOf`.
 fn r_f13_reached_node_unread_keyword_is_not_evaluated() {
-    let pre = r#"{"properties":{"a":{"type":"string","const":"x"}}}"#;
-    let post = r#"{"properties":{"a":{"type":"string","const":"y"}}}"#;
+    let pre = r#"{"properties":{"a":{"type":"integer","multipleOf":2}}}"#;
+    let post = r#"{"properties":{"a":{"type":"integer","multipleOf":3}}}"#;
     let (code, text, v) = both("f13", pre, post);
     assert_eq!(code, 4, "{text}");
     assert!(text.contains(&line("/properties/a")), "{text}");
