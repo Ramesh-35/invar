@@ -5,7 +5,32 @@
 // in tests.py; this file only answers. Strict mode off; formats not
 // asserted, as in the judge.
 import { createRequire } from "node:module";
+import { readFileSync, statSync } from "node:fs";
+import { basename, join } from "node:path";
 const require = createRequire(import.meta.url);
+
+// JUDGE-TESTS r3: a $ref to another file is read from that side's siblings
+// directory by the last segment of the URI, then with ".json" added. Only
+// that directory is read; nothing is fetched.
+function siblingPath(siblings, uri) {
+  const target = uri.split("#")[0].split("?")[0].replace(/\/+$/, "");
+  const name = basename(target.replace(/\\/g, "/"));
+  if (!name || name === "." || name === "..") return null;
+  const candidates = name.endsWith(".json") ? [name] : [name, name + ".json"];
+  for (const c of candidates) {
+    const p = join(siblings, c);
+    try { if (statSync(p).isFile()) return p; } catch (_) { /* not there */ }
+  }
+  return null;
+}
+
+function loader(siblings) {
+  return async (uri) => {
+    const p = siblingPath(siblings, uri);
+    if (p === null) throw new Error(`no file for ${uri} in the schema's directory`);
+    return JSON.parse(readFileSync(p, "utf8"));
+  };
+}
 
 // JUDGE-TESTS r2: the class follows the schema's $schema, as the Python
 // side does. draft-04 -> ajv-draft-04; draft-06 -> Ajv with the draft-06
@@ -22,9 +47,9 @@ function draftOf(uri) {
   return u ? "unknown" : "07";
 }
 
-function compile(schema) {
+async function compile(schema, siblings) {
   const draft = draftOf(schema.$schema);
-  const opts = { strict: false, allErrors: false, validateFormats: false };
+  const opts = { strict: false, allErrors: false, validateFormats: false, loadSchema: loader(siblings) };
   let ajv;
   if (draft === "04") ajv = new (require("ajv-draft-04"))(opts);
   else if (draft === "2019") ajv = new (require("ajv/dist/2019"))(opts);
@@ -38,7 +63,7 @@ function compile(schema) {
     }
   }
   require("ajv-formats")(ajv);
-  return ajv.compile(schema);
+  return ajv.compileAsync(schema);
 }
 
 function answer(validate, doc) {
@@ -50,12 +75,12 @@ function answer(validate, doc) {
 let input = "";
 process.stdin.setEncoding("utf8");
 process.stdin.on("data", (c) => (input += c));
-process.stdin.on("end", () => {
-  const { base, head, instances } = JSON.parse(input);
+process.stdin.on("end", async () => {
+  const { base, head, instances, base_siblings, head_siblings } = JSON.parse(input);
   const sides = {};
-  for (const [name, schema] of [["base", base], ["head", head]]) {
+  for (const [name, schema, siblings] of [["base", base, base_siblings], ["head", head, head_siblings]]) {
     try {
-      sides[name] = compile(schema);
+      sides[name] = await compile(schema, siblings || ".");
     } catch (e) {
       sides[name] = { error: `${e.name}: ${String(e.message).slice(0, 160)}` };
     }

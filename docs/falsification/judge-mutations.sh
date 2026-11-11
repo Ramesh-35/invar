@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1, JUDGE-CONST r0, WITNESS r0, JUDGE-D5 r1, REF-SIBLINGS r0, JUDGE-TESTS r2). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5, K-R1..R2, W0-M1..M3, D5R1-M1..M2, RS-M1..M5, TS2-M1..M2) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1, JUDGE-CONST r0, WITNESS r0, JUDGE-D5 r1, REF-SIBLINGS r0, JUDGE-TESTS r2 and r3). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5, K-R1..R2, W0-M1..M3, D5R1-M1..M2, RS-M1..M5, TS2-M1..M2, TS3-M1..M4 with M3b) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -324,6 +324,22 @@ run_one RS-M5 '                        if ref_siblings(&pre, &pre) || ref_siblin
 run_one TS2-M1 '  const draft = draftOf(schema.$schema);' '  const draft = "07"; void draftOf(schema.$schema);' t2_f01_draft_2019_09_is_checked_by_both_validators judge_tests_test "$A"
 # TS2-M2 2020-12 read with the 2019-09 class
 run_one TS2-M2 '  else if (draft === "2020") ajv = new (require("ajv/dist/2020"))(opts);' '  else if (draft === "2020") ajv = new (require("ajv/dist/2019"))(opts);' t2_f02_draft_2020_12_prefix_items_is_checked judge_tests_test "$A"
+
+# JUDGE-TESTS r3 (docs/falsification/JUDGE-TESTS-R3-SPEC.md): hermetic local $ref resolution
+# TS3-M1 the jsonschema side resolves nothing (the r0 offline registry back)
+run_one TS3-M1 '            path = sibling_path(siblings, uri)
+            if path is None:' '            path = None
+            if path is None:' t3_f01_relative_sibling_ref_is_resolved_by_both_validators judge_tests_test "$P"
+# TS3-M2 the Ajv side loads no sibling
+run_one TS3-M2 '    const p = siblingPath(siblings, uri);
+    if (p === null) throw' '    const p = null;
+    if (p === null) throw' t3_f01_relative_sibling_ref_is_resolved_by_both_validators judge_tests_test "$A"
+# TS3-M3 the .json fallback dropped (Python side; the Ajv side then disputes nothing, both error)
+run_one TS3-M3 '    for candidate in ([name, name + ".json"] if not name.endswith(".json") else [name]):' '    for candidate in [name]:' t3_f03_extensionless_ref_finds_the_json_sibling judge_tests_test "$P"
+# TS3-M3b the .json fallback dropped on the Ajv side
+run_one TS3-M3b '  const candidates = name.endsWith(".json") ? [name] : [name, name + ".json"];' '  const candidates = [name];' t3_f03_extensionless_ref_finds_the_json_sibling judge_tests_test "$A"
+# TS3-M4 head siblings read from the base directory
+run_one TS3-M4 '    head_siblings = a.head_siblings or (os.path.dirname(os.path.abspath(a.head)))' '    head_siblings = base_siblings' t3_f06_each_side_resolves_against_its_own_siblings judge_tests_test "$P"
 cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"; cp "$P.orig" "$P"; rm "$P.orig"; cp "$A.orig" "$A"; rm "$A.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"

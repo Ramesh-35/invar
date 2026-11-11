@@ -4,6 +4,7 @@ JUDGE-TESTS-R1-SPEC.md): a document the base schema accepted and the head
 schema rejects is a break, whoever wrote it, when two validators say so.
 
     tests.py BASE HEAD DIR [--format text|json|github] [--validators jsonschema|jsonschema,ajv]
+             [--base-siblings DIR] [--head-siblings DIR]
 
 Every file in DIR is an instance document (.json, .toml, .yaml, .yml). A
 document both validators accept at the base and both reject at the head is
@@ -13,7 +14,9 @@ its reason. A split between the validators is `disputed`, never a witness
 and never a pass. With one validator only, nothing is VIOLATED: rejections
 are `unconfirmed`. Exit 3 is an error, not a verdict. Python jsonschema and
 Ajv 8 (through tests-ajv.mjs) on the schema's own draft; format is never
-asserted; nothing outside a schema document is resolved.
+asserted. JUDGE-TESTS r3: a `$ref` to another file is read from that
+side's siblings directory (default: the schema file's own directory) by the
+last segment of the URI, then with `.json` added; nothing is ever fetched.
 """
 import json
 import os
@@ -70,13 +73,29 @@ def kind(opinion):
     return "invalid" if "invalid" in opinion else "error"
 
 
-def ajv_opinions(base_doc, head_doc, instances):
+def sibling_path(siblings, uri):
+    """The file a `$ref` URI names in `siblings`, or None: the last path
+    segment of the URI (no fragment, no query), then that with `.json`.
+    Only the directory itself is read."""
+    target = uri.split("#", 1)[0].split("?", 1)[0].rstrip("/")
+    name = os.path.basename(target.replace("\\", "/"))
+    if not name or name in (".", ".."):
+        return None
+    for candidate in ([name, name + ".json"] if not name.endswith(".json") else [name]):
+        path = os.path.join(siblings, candidate)
+        if os.path.isfile(path):
+            return path
+    return None
+
+
+def ajv_opinions(base_doc, head_doc, instances, base_siblings, head_siblings):
     """Ajv's answers per file and side, or a string saying why Ajv did not run."""
     node = shutil.which("node")
     if node is None:
         return "node is not on the PATH"
     adapter = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tests-ajv.mjs")
-    payload = json.dumps({"base": base_doc, "head": head_doc, "instances": instances})
+    payload = json.dumps({"base": base_doc, "head": head_doc, "instances": instances,
+                          "base_siblings": os.path.abspath(base_siblings), "head_siblings": os.path.abspath(head_siblings)})
     try:
         p = subprocess.run([node, adapter], input=payload, capture_output=True, text=True,
                            cwd=os.path.dirname(adapter), timeout=600)
@@ -95,7 +114,7 @@ def main(argv):
 
     class Usage(argparse.ArgumentParser):
         def error(self, message):
-            fail("usage: tests.py BASE HEAD DIR [--format text|json|github] [--validators jsonschema|jsonschema,ajv]")
+            fail("usage: tests.py BASE HEAD DIR [--format text|json|github] [--validators jsonschema|jsonschema,ajv] [--base-siblings DIR] [--head-siblings DIR]")
 
     p = Usage(add_help=False)
     p.add_argument("base")
@@ -103,25 +122,40 @@ def main(argv):
     p.add_argument("dir")
     p.add_argument("--format", default="text", choices=["text", "json", "github"])
     p.add_argument("--validators", default="jsonschema,ajv", choices=["jsonschema", "jsonschema,ajv"])
+    p.add_argument("--base-siblings", default=None)
+    p.add_argument("--head-siblings", default=None)
     a = p.parse_args(argv)
+    base_siblings = a.base_siblings or (os.path.dirname(os.path.abspath(a.base)))
+    head_siblings = a.head_siblings or (os.path.dirname(os.path.abspath(a.head)))
     base_path, head_path, d, fmt = a.base, a.head, a.dir, a.format
     validators_wanted = a.validators.split(",")
 
     try:
         import jsonschema
         from jsonschema import validators
-        from referencing import Registry
+        from referencing import Registry, Resource
         from referencing.exceptions import NoSuchResource
+        from referencing.jsonschema import DRAFT7
     except ImportError:
         fail("python packages jsonschema and referencing are not installed")
 
-    def no_retrieval(uri):
-        # Nothing outside a schema document is resolved: no network, no files.
-        raise NoSuchResource(ref=uri)
+    def local_registry(siblings):
+        # r3: a reference to another file is read from `siblings`, never fetched.
+        def retrieve(uri):
+            path = sibling_path(siblings, uri)
+            if path is None:
+                raise NoSuchResource(ref=uri)
+            try:
+                with open(path, "rb") as f:
+                    # A sibling without $schema is read as draft-07, as the schema itself would be.
+                    return Resource.from_contents(json.load(f), default_specification=DRAFT7)
+            except NoSuchResource:
+                raise
+            except Exception as e:
+                raise NoSuchResource(ref=f"{uri} ({type(e).__name__})")
+        return Registry(retrieve=retrieve)
 
-    offline = Registry(retrieve=no_retrieval)
-
-    def schema(path):
+    def schema(path, siblings):
         try:
             with open(path, "rb") as f:
                 s = json.load(f)
@@ -135,9 +169,9 @@ def main(argv):
             cls.check_schema(s, format_checker=None)
         except Exception as e:
             fail(f"{path} is not a valid schema: {str(e)[:160]}")
-        return s, cls(s, registry=offline)
+        return s, cls(s, registry=local_registry(siblings))
 
-    (base_doc, base), (head_doc, head) = schema(base_path), schema(head_path)
+    (base_doc, base), (head_doc, head) = schema(base_path, base_siblings), schema(head_path, head_siblings)
 
     def opinion(v, inst):
         """jsonschema's answer: valid, {invalid: {pointer, message}} or {error}.
@@ -167,7 +201,7 @@ def main(argv):
     ajv = None
     ajv_unavailable = None
     if "ajv" in validators_wanted:
-        ajv = ajv_opinions(base_doc, head_doc, docs)
+        ajv = ajv_opinions(base_doc, head_doc, docs, base_siblings, head_siblings)
         if isinstance(ajv, str):
             ajv_unavailable, ajv = ajv, None
     ran = ["jsonschema", "ajv"] if ajv is not None else ["jsonschema"]

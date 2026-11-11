@@ -1,0 +1,71 @@
+judge	change	r2	r3	still_not_checked
+HOLDS	2fd1e927d_cargo.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+HOLDS	9acc8080b_global.json	NOT EVALUATED/unverifiable	NOT EVALUATED/unverifiable	PatternError: unknown extension ?<m at position 2;PatternError: unknown extension ?<m at position 2
+HOLDS	dbb687d78_cargo.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	03ace7195_azure-iot-edge-deployment-template-1.0.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	03ace7195_azure-iot-edge-deployment-template-2.0.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	03ace7195_azure-iot-edge-deployment-template-3.0.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	03ace7195_azure-iot-edge-deployment-template-4.0.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	142dde599_vs-2017.3.host.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	15df70842_foundryvtt-module-manifest.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	15df70842_foundryvtt-system-manifest.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	15df70842_foundryvtt-world-manifest.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	1aadbc182_djlint.json	NOT EVALUATED/unverifiable	NOT EVALUATED/unverifiable	RecursionError: maximum recursion depth exceeded
+NOT EVALUATED	1f5a671a7_tsoa.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	24eb48915_anywork-ac-1.0.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	2a3fb6035_package.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	304f42048_package.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	32af9a900_web-manifest-app-info.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	41eeb8e43_cargo.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	41eeb8e43_package.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	41eeb8e43_pyproject.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	4836277f2_pre-commit-config.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	4836277f2_pyproject.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	4dd722547_appsettings.json	NOT EVALUATED/unverifiable	NOT EVALUATED/unverifiable	ss/4dd722547_appsettings.json.base.json: PatternError: unknown extension ?<A at position 2;ss/4dd722547_appsettings.json.base.json: PatternError: unknown extension ?<A at position 2
+NOT EVALUATED	57dbae09f_compilerconfig.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	58e57d16b_cargo.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	5b30da8c6_grunt-clean-task.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	5b30da8c6_grunt-copy-task.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	5b30da8c6_grunt-cssmin-task.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	5b30da8c6_grunt-jshint-task.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	5d5ed6cb0_package.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	5f7f4ac58_gematik-test-hcpis.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	6313b56ae_schema-org-action.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	6313b56ae_schema-org-contact-point.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	6313b56ae_schema-org-place.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	6313b56ae_schema-org-thing.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	68029e620_declarative-automation-bundles.json	NOT EVALUATED/unverifiable	NOT EVALUATED/unverifiable	: Unresolvable: https://github.com/databricks/cli/releases/latest/download/jsonschema.json
+NOT EVALUATED	685cc1906_package.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	6a08f5c86_cargo.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	6ae72b035_pyproject.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	7388f7a26_package.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	773fe876b_circleciconfig.json	NOT EVALUATED/unverifiable	NOT EVALUATED/unverifiable	busercontent.com/CircleCI-Public/circleci-yaml-language-server/refs/heads/main/schema.json;busercontent.com/CircleCI-Public/circleci-yaml-language-server/refs/heads/main/schema.json
+NOT EVALUATED	778278bb9_bitrise.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	897f5028b_jekyll.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	8e81115a4_package.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	8f564734e_mdxlintrc.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	8f564734e_rehyperc.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	9174b49f1_package.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	929201f41_clasp.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	9ce810409_cargo.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	a4fa6aca7_package.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	a8f255459_pyproject.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	b44e6d8dc_pyproject.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	bc24ba579_package.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	c5505fc62_bitrise.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	c6c2d035d_minecraft-advancement.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	c95d52cfe_twee-ts.config.json	NOT EVALUATED/unverifiable	NOT EVALUATED/unverifiable	Error: Unresolvable: https://unpkg.com/@rohal12/twee-ts/schemas/twee-ts.config.schema.json
+NOT EVALUATED	d037e4276_pyproject.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	d65180589_package.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	d8555f581_package.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	d8c448564_pyproject.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	e44768a60_pyproject.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	ec65ccfaf_ttheme-market.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	ed615703b_pyproject.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	ee05618f7_feed.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	f4d7fd9c9_package.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+NOT EVALUATED	fc3956739_lychee.json	NOT EVALUATED/unverifiable	NOT EVALUATED/unverifiable	: Unresolvable: https://github.com/lycheeverse/lychee/releases/latest/download/schema.json
+VIOLATED	13e89998e_cargo.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+VIOLATED	6b9673c4c_pyproject.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	
+VIOLATED	8ae3e0c8c_zeropress-wxr-import-base-0.7.json	NOT EVALUATED/unverifiable	NOT EVALUATED/unverifiable	c_zeropress-wxr-import-base-0.7.json.base.json: PatternError: bad escape \p at position 60;c_zeropress-wxr-import-base-0.7.json.base.json: PatternError: bad escape \p at position 60
+VIOLATED	a83ce6f19_package.json	NOT EVALUATED/unverifiable	NOT EVALUATED/instances_pass	

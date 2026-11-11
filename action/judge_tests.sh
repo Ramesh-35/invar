@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# JUDGE-TESTS r0: for every contract this change modifies (the judge_contracts
+# JUDGE-TESTS r0 (r1: two validators; r2: every draft; r3: sibling $ref from the contract's directory): for every contract this change modifies (the judge_contracts
 # globs), run the base ref's own instance documents against the head
 # schema. INVAR_JUDGE_TESTS names the instance directory with {name} for the
 # contract's file stem, read from origin/<base>, never from the pull request.
@@ -43,8 +43,16 @@ for c in "${contracts[@]}"; do
   done < <(git ls-tree -r --name-only "$ref" -- "$dir" 2>/dev/null)
   if [ "$n" -eq 0 ]; then lines+=("$c: no instance documents under $dir at $ref"); continue; fi
   git show "$ref:$c" > "$tmp/$stem.base.json" 2>/dev/null || { lines+=("$c: unreadable at $ref"); worst=3; continue; }
+  # JUDGE-TESTS r3: a $ref to another file resolves from the contract's own directory,
+  # at the base ref for the base side (exported once per directory) and the working tree for the head.
+  cdir="$(dirname "$c")"; sibs="$tmp/sibs/$cdir"
+  if [ ! -d "$sibs" ]; then
+    mkdir -p "$sibs"
+    git archive --format=tar "$ref" -- "$cdir" 2>/dev/null | tar -x -C "$tmp/sibs" 2>/dev/null || true
+  fi
   budget="${INVAR_TESTS_TIMEOUT:-120}"
-  text="$(timeout "$budget" python3 "$INVAR_ACTION_PATH/action/tests.py" "$tmp/$stem.base.json" "$c" "$inst" 2>&1)"; code=$?
+  args=(--base-siblings "$sibs" --head-siblings "$cdir")
+  text="$(timeout "$budget" python3 "$INVAR_ACTION_PATH/action/tests.py" "$tmp/$stem.base.json" "$c" "$inst" "${args[@]}" 2>&1)"; code=$?
   if [ "$code" -eq 124 ]; then
     # A schema too costly to validate within the budget is stated, never passed.
     lines+=("$c: not checked: the time budget of ${budget}s was exceeded (NOT EVALUATED)")
@@ -52,7 +60,7 @@ for c in "${contracts[@]}"; do
     continue
   fi
   lines+=("$c:" "$text")
-  timeout "$budget" python3 "$INVAR_ACTION_PATH/action/tests.py" "$tmp/$stem.base.json" "$c" "$inst" --format github 2>/dev/null || true
+  timeout "$budget" python3 "$INVAR_ACTION_PATH/action/tests.py" "$tmp/$stem.base.json" "$c" "$inst" "${args[@]}" --format github 2>/dev/null || true
   case "$code" in 1) [ "$worst" -eq 3 ] || worst=1 ;; 3) worst=3 ;; esac
 done
 

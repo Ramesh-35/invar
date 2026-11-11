@@ -59,7 +59,8 @@ Classification in `tests.py` is unchanged. No new dependency.
 
 - TS3-M1 the jsonschema side resolves nothing            -> t3_f01
 - TS3-M2 the Ajv side loads no sibling                   -> t3_f01
-- TS3-M3 the `.json` fallback dropped                    -> t3_f03
+- TS3-M3 the `.json` fallback dropped, Python side         -> t3_f03
+- TS3-M3b the `.json` fallback dropped, Ajv side           -> t3_f03
 - TS3-M4 head siblings read from the base directory      -> t3_f06
 
 ## Pre-registered prediction
@@ -75,3 +76,31 @@ no document of theirs has been checked before. Changes whose sibling
 `unpkg.com`) resolve only if a file of that name happens to sit in the
 directory; otherwise they stay. Nothing else in the corpus moves; the
 Rust judge's gates do not move.
+
+## Measured outcome (2026-11-08, after implementation)
+
+6 of 6 fixtures pass; TS3-M1, M2, M3, M3b, M4 killed. On the 70 changes
+`unverifiable` after r2, each side resolving against `src/schemas/json`
+at its own commit (`tests-r3-moves.tsv`):
+
+| r2 reason     | r3 reason        | changes |
+|---------------|------------------|--------:|
+| unverifiable  | instances_pass   | 62      |
+| unverifiable  | unverifiable     | 8       |
+
+`unverifiable` falls from 70 to 8 (113 before r2). No change became
+VIOLATED or disputed: every SchemaStore test document behind a sibling
+`$ref` is valid at its head in both validators. Nothing else in the
+corpus can move, and the Rust judge is untouched.
+
+The 8 left, each stated by the harness: 4 refer to a URL outside the
+repository (GitHub release downloads for `declarative-automation-bundles`
+and `lychee`, a raw.githubusercontent file for `circleciconfig`, unpkg
+for `twee-ts.config`) and are not fetched, by design; 3 use regex
+syntax Python `re` lacks (`(?<name>`, `\p{...}`: `global.json`,
+`appsettings.json`, `zeropress-wxr-import-base-0.7`); 1 (`djlint`) refers
+to `https://djlint.com/schema/djlint.json`, whose last segment is the
+file itself under a different URI, and the Python side recurses without
+end (the Ajv side does not). That self-reference under a foreign URI is
+an r4 candidate (resolve a sibling to the document itself when the bytes
+are the document's own); it moves one change and is not built here.
