@@ -190,10 +190,15 @@ fn cx_f11_unchecked_keyword_at_base_is_stated() {
 /// the judge merges the two (r2 D4) and claims `maxLength` tightened, but
 /// drafts disagree on whether a keyword beside `$ref` applies (draft-07
 /// ignores it), so the checker cannot confirm the rejection.
+/// Amended by REF-SIBLINGS r0: under draft-07 the bound beside `$ref` is no
+/// longer judged at all. Under 2019-09 siblings apply and the node is
+/// judged, so the same guard moves there: the judge claims `maxLength`
+/// tightened, the checker does not follow `$ref` and cannot confirm the
+/// rejection, and no counterexample is claimed. Kills CX-M2.
 #[test]
 fn cx_f12_unconfirmed_rejection_is_stated() {
-    let pre = r#"{"properties":{"f":{"type":"string","maxLength":10}}}"#;
-    let post = r##"{"definitions":{"s":{"type":"string"}},"properties":{"f":{"$ref":"#/definitions/s","maxLength":3}}}"##;
+    let pre = r#"{"$schema":"https://json-schema.org/draft/2019-09/schema","properties":{"f":{"type":"string","maxLength":10}}}"#;
+    let post = r##"{"$schema":"https://json-schema.org/draft/2019-09/schema","$defs":{"s":{"type":"string"}},"properties":{"f":{"$ref":"#/$defs/s","maxLength":3}}}"##;
     let (cx, why) = one(pre, post, "f12");
     assert_eq!(cx, Value::Null);
     assert_eq!(why, "$ref is not checked by this judge");

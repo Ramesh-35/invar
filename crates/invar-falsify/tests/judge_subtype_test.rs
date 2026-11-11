@@ -165,5 +165,6 @@ fn js_f08_json_witness_fields_and_r1_unjudged_list() {
     assert_eq!(w["post_value"], "10");
     let uj: Vec<&str> = v["unjudged_constraints"].as_array().expect("list").iter().filter_map(|x| x.as_str()).collect();
     // JUDGE-ITEMS r0 amendment: an object `items` is judged; a tuple is not.
-    assert_eq!(uj, vec!["$ref", "allOf", "anyOf", "oneOf", "tuple items"]);
+    // REF-SIBLINGS r0 amendment: a `$ref` with siblings under draft-07 and earlier is stated.
+    assert_eq!(uj, vec!["$ref", "$ref with siblings (draft-07 and earlier)", "allOf", "anyOf", "oneOf", "tuple items"]);
 }

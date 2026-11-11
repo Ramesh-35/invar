@@ -16,7 +16,7 @@ use std::process::Command;
 /// The constraint classes r0 does not judge, stated in every receipt.
 /// What r1 does not judge, stated in every output (JUDGE-SUBTYPE r1).
 /// `$ref` is a gap r0 had and never stated: references are not followed.
-const UNJUDGED: [&str; 5] = ["$ref", "allOf", "anyOf", "oneOf", "tuple items"];
+const UNJUDGED: [&str; 6] = ["$ref", "$ref with siblings (draft-07 and earlier)", "allOf", "anyOf", "oneOf", "tuple items"];
 
 /// Lower bounds tighten when raised; upper bounds tighten when lowered.
 const LOWER: [&str; 4] = ["minimum", "exclusiveMinimum", "minLength", "minItems"];
@@ -231,7 +231,15 @@ fn evaluate(read: BaseRead, post_bytes: &str) -> (&'static str, Option<&'static 
                         let mut w = Vec::new();
                         ROOTS.with(|r| *r.borrow_mut() = Some([pre.clone(), post.clone()]));
                         reach::begin();
-                        walk("", &pre, &post, &mut w);
+                        if ref_siblings(&pre, &pre) || ref_siblings(&post, &post) {
+                            // REF-SIBLINGS r0: the document root itself is read two ways.
+                            let two_way = if ref_siblings(&pre, &pre) { &pre } else { &post };
+                            w.push(Witness { pre_value: Some(ref_sibling_keywords(two_way)), ..stated_witness("", "ref_siblings", &pre) });
+                            reach::cover_whole(0, &["".to_string()]);
+                            reach::cover_whole(1, &["".to_string()]);
+                        } else {
+                            walk("", &pre, &post, &mut w);
+                        }
                         let (unchecked, notes) = reach::finish(&pre, &post);
                         ROOTS.with(|r| *r.borrow_mut() = None);
                         let mut stated = take_stated(&mut w);
@@ -257,6 +265,8 @@ fn evaluate(read: BaseRead, post_bytes: &str) -> (&'static str, Option<&'static 
                         }
                         let (v, r) = if !w.is_empty() {
                             ("VIOLATED", None)
+                        } else if !stated.ref_siblings.is_empty() {
+                            ("NOT EVALUATED", Some("ref_siblings"))
                         } else if !stated.not_evaluated.is_empty() {
                             ("NOT EVALUATED", Some("unjudged_construct"))
                         } else if !stated.unchecked.is_empty() {
@@ -484,10 +494,28 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
 #[allow(clippy::too_many_arguments)]
 fn judge_child(dotted: &str, pv_raw: &Value, qv_raw: Option<&Value>, p_site: String, q_site: String, closed: bool, patterned: bool, out: &mut Vec<Witness>) {
     let dotted = dotted.to_string();
-    // D4 (r2 Amendment A): local references resolved before comparing.
+    // REF-SIBLINGS r0: a `$ref` with sibling validation keywords is read two
+    // ways by the validators this judge trusts; the node is stated, not judged.
+    HOP_SIBLINGS.with(|h| h.set(false));
     let (pv_resolved, p_refs) = resolve_ref(0, pv_raw);
-    let pv = &pv_resolved;
     let q_pair = qv_raw.map(|q| resolve_ref(1, q));
+    let hop = HOP_SIBLINGS.with(|h| h.get());
+    if hop || ref_siblings_side(0, pv_raw) || qv_raw.is_some_and(|q| ref_siblings_side(1, q)) {
+        let (pr, qr) = (resolve_hop_node(0, pv_raw), qv_raw.map(|q| resolve_hop_node(1, q)));
+        let kws = [Some(pr), qr].into_iter().flatten().map(|n| ref_sibling_keywords(&n)).find(|k| !k.is_empty()).unwrap_or_default();
+        out.push(Witness { pre_value: Some(kws), ..stated_witness(&dotted, "ref_siblings", pv_raw) });
+        let child = |site: String, refs: &[String]| {
+            let mut c = vec![site];
+            c.extend(refs.iter().map(|r| r[1..].to_string()));
+            c
+        };
+        reach::cover_whole(0, &child(p_site, &p_refs));
+        if let Some((_, qr)) = &q_pair {
+            reach::cover_whole(1, &child(q_site, qr));
+        }
+        return;
+    }
+    let pv = &pv_resolved;
     let q_refs = q_pair.as_ref().map(|(_, r)| r.clone()).unwrap_or_default();
     let qv_resolved = q_pair.map(|(v, _)| v);
     // The pointers whose merged keywords form this child, site first.
@@ -645,6 +673,9 @@ fn deref(root: &Value, v: &Value, on_path: Vec<String>) -> (Value, Vec<String>) 
         let Some(mut merged) = root.pointer(&r[1..]).cloned() else {
             return (cur, followed);
         };
+        if ref_siblings(root, &merged) {
+            HOP_SIBLINGS.with(|h| h.set(true));
+        }
         let (Some(m), Some(o)) = (merged.as_object_mut(), cur.as_object()) else {
             return (cur, followed);
         };
@@ -658,6 +689,64 @@ fn deref(root: &Value, v: &Value, on_path: Vec<String>) -> (Value, Vec<String>) 
         cur = merged;
     }
     (cur, followed)
+}
+
+thread_local! {
+    /// REF-SIBLINGS r0: set by `deref` when a hop lands on a node whose
+    /// `$ref` has sibling validation keywords.
+    static HOP_SIBLINGS: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+
+/// REF-SIBLINGS r0: keywords beside a `$ref` that are not validation
+/// keywords, so their presence changes no verdict under any reading.
+const REF_NEUTRAL: [&str; 16] = ["$ref", "$schema", "$id", "id", "$comment", "title", "description", "default", "examples", "deprecated", "readOnly", "writeOnly", "definitions", "$defs", "$anchor", "$vocabulary"];
+
+/// REF-SIBLINGS r0: under draft-04, -06, -07 (or no `$schema`), a `$ref`
+/// with a sibling validation keyword is read two ways: Python jsonschema
+/// ignores the siblings, Ajv 8 applies them. Such a node is not judged.
+fn ref_siblings(root: &Value, v: &Value) -> bool {
+    let Some(m) = v.as_object() else { return false };
+    if !m.get("$ref").is_some_and(Value::is_string) {
+        return false;
+    }
+    let draft = root.get("$schema").and_then(Value::as_str).unwrap_or("draft-07");
+    if draft.contains("2019-09") || draft.contains("2020-12") {
+        return false;
+    }
+    m.keys().any(|k| !REF_NEUTRAL.contains(&k.as_str()) && reach::is_known(k))
+}
+
+/// The two-way node a child's `$ref` chain reaches first: the child itself
+/// when it is two-way, else the first hop target that is. Falls back to the
+/// child so the text always has a node to name.
+fn resolve_hop_node(side: usize, v: &Value) -> Value {
+    ROOTS.with(|r| {
+        let Some(roots) = r.borrow().as_ref().cloned() else { return v.clone() };
+        let root = &roots[side];
+        if ref_siblings(root, v) {
+            return v.clone();
+        }
+        let mut cur = v.clone();
+        for _ in 0..8 {
+            let Some(target) = cur.get("$ref").and_then(Value::as_str).filter(|t| t.starts_with('#')).and_then(|t| root.pointer(&t[1..]).cloned()) else { break };
+            if ref_siblings(root, &target) {
+                return target;
+            }
+            cur = target;
+        }
+        v.clone()
+    })
+}
+
+/// The sibling validation keywords of a two-way node, sorted, for the text.
+fn ref_sibling_keywords(v: &Value) -> String {
+    let mut kws: Vec<&str> = v.as_object().map(|m| m.keys().map(String::as_str).filter(|k| !REF_NEUTRAL.contains(k) && reach::is_known(k)).collect()).unwrap_or_default();
+    kws.sort_unstable();
+    kws.join(", ")
+}
+
+fn ref_siblings_side(side: usize, v: &Value) -> bool {
+    ROOTS.with(|r| r.borrow().as_ref().is_some_and(|roots| ref_siblings(&roots[side], v)))
 }
 
 /// D1 (r2): does this node carry a construct the judge does not follow?
@@ -740,6 +829,11 @@ fn stated_witness(path: &str, kind: &'static str, pv: &Value) -> Witness {
 #[derive(Default)]
 pub struct Stated {
     pub not_evaluated: Vec<String>,
+    /// REF-SIBLINGS r0: paths of nodes whose `$ref` has sibling validation
+    /// keywords under draft-07 or earlier; validators disagree, not judged.
+    pub ref_siblings: Vec<String>,
+    /// The sibling keywords of each path in `ref_siblings`, same order.
+    pub ref_sibling_keywords: Vec<String>,
     pub notes: Vec<String>,
     /// JUDGE-REACH r0: JSON Pointers of the schemas that changed in a way
     /// the judge does not check, sorted, an ancestor standing for its
@@ -753,6 +847,11 @@ fn take_stated(w: &mut Vec<Witness>) -> Stated {
     w.retain(|x| match x.kind {
         "not_evaluated" => {
             st.not_evaluated.push(x.path.clone());
+            false
+        }
+        "ref_siblings" => {
+            st.ref_siblings.push(x.path.clone());
+            st.ref_sibling_keywords.push(x.pre_value.clone().unwrap_or_default());
             false
         }
         "retyped_widened" => {
@@ -1009,6 +1108,7 @@ fn find_line(text: &str, key: &str) -> Option<u64> {
 fn body_json(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w: &[Witness], st: &Stated) -> Value {
     json!({
         "not_evaluated_paths": st.not_evaluated,
+        "ref_siblings_paths": st.ref_siblings,
         "notes": st.notes,
         "unchecked": st.unchecked,
         "verdict": verdict,
@@ -1131,6 +1231,9 @@ fn not_evaluated_sentence(reason: Option<&str>, contract: &str, base: &str) -> S
         Some("unchecked_change") => format!(
             "NOT EVALUATED (unchecked_change): {contract} changed in a way this judge does not check. Nothing there was judged a break or a pass; review those schemas by hand."
         ),
+        Some("ref_siblings") => format!(
+            "NOT EVALUATED (ref_siblings): {contract} has a $ref with sibling keywords that validators read differently under its draft; nothing there was judged a break or a pass. Move the siblings into the referenced schema, or migrate to draft 2019-09 or later, where siblings apply."
+        ),
         Some("contract_deleted") => format!(
             "NOT EVALUATED (contract_deleted): {contract} exists at {base} and this change deletes it; everything it promised is withdrawn. Restore it, or version the change."
         ),
@@ -1162,6 +1265,10 @@ fn render_text(verdict: &str, reason: Option<&str>, contract: &str, base: &str, 
     }
     for p in &st.not_evaluated {
         s.push_str(&format!("  not evaluated: {p} uses anyOf, oneOf, allOf or $ref, which this judge does not follow.\n"));
+    }
+    for (p, kws) in st.ref_siblings.iter().zip(&st.ref_sibling_keywords) {
+        let at = if p.is_empty() { "the document root" } else { p.as_str() };
+        s.push_str(&format!("  not evaluated: {at} carries $ref beside {kws}; under draft-07 jsonschema ignores those keywords and Ajv applies them, so no single reading exists to judge.\n"));
     }
     for p in &st.unchecked {
         s.push_str(&format!("  {}\n", unchecked_sentence(p)));
@@ -1204,6 +1311,7 @@ fn render_sarif(verdict: &str, reason: Option<&str>, contract: &str, base: &str,
         json!({
             "unjudged_constraints": UNJUDGED,
             "not_evaluated_paths": st.not_evaluated,
+            "ref_siblings_paths": st.ref_siblings,
             "unchecked": st.unchecked,
             "notes": st.notes,
             "verdict": verdict,
@@ -1613,6 +1721,12 @@ mod reach {
     /// its type and every other keyword shared beside the `anyOf`.
     pub(super) fn normal(v: &Value) -> Value {
         form(v, true)
+    }
+
+    /// REF-SIBLINGS r0: is `k` a keyword this judge knows (so a sibling
+    /// of `$ref` that changes what validators accept)?
+    pub(super) fn is_known(k: &str) -> bool {
+        KNOWN.contains(&k)
     }
 
     /// JUDGE-CANON r1: the JSON types a literal value has (an integral

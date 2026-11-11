@@ -1,6 +1,6 @@
 # REF-SIBLINGS r0: a `$ref` with sibling keywords is read two ways, and is not judged (r0, FROZEN)
 
-Drafted 2026-11-08 for ratification. Frozen with
+Drafted and implemented 2026-11-08; ratification as measured is requested with the v0.2.24 bundle. Frozen with
 crates/invar-falsify/tests/ref_siblings_test.rs and one real SchemaStore
 change BEFORE implementation; freeze record: REF-SIBLINGS-SPEC.frozen.
 Every earlier ruling stays frozen as written.
@@ -107,3 +107,24 @@ NOT EVALUATED (other reasons), 1 from VIOLATED (stale.json, the disputed
 one). Iglu and AsyncAPI: no move. WG gate PASS unchanged (31/45/0);
 SchemaStore replay PASS; label-free VIOLATED count 39 (stale leaves it);
 Iglu 5/3/0.
+
+## Measured outcome (after implementation, 2026-11-08)
+
+- Fixtures 8 of 8. Full suite 864 tests. Mutants: the full run killed 106
+  of 107 with CX-M2 surviving, because its killer cx_f12 (a bound beside
+  `$ref` under draft-07) is exactly the shape this ruling withdraws from
+  judgment; cx_f12 is re-aimed at the same shape under 2019-09, where the
+  node is judged and the checker still cannot follow `$ref`, and a re-run
+  of CX-M2 with RS-M1..M5 kills 6 of 6. Clippy silent.
+- Prediction met exactly: the 70 listed changes moved, no other
+  ([ref-siblings-moves/schemastore.tsv](ref-siblings-moves/schemastore.tsv));
+  Iglu and AsyncAPI none. WG gate PASS 31/45/0. Replay, label-free and
+  Iglu as recorded in the land log.
+- Amendments, each with its reason in the file: cx_f12 (above); the
+  `unjudged_constraints` list fixture in judge_subtype_test gains the new
+  entry.
+- Stated, not solved: the 28 former HOLDS are not wrong under both
+  readings, they are unproven under one. r1 can judge the change under
+  both readings and keep the HOLDS when they agree; whether 28 changes
+  are worth that machinery is a question for the corpus, not for this
+  release.

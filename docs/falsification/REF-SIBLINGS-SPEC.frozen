@@ -87,3 +87,12 @@ blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-stale-449644d6d-bef
 sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-stale-449644d6d-before.json) = a252ebcfa7a36df2f3a9bb3bbb31e93506605a49f51725cc09bebe4d694dfc2f
 blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-stale-449644d6d-after.json) = 9c10a63fc0261611eb8cbd662a174594057f90416d33e81d1209eb3786377831
 sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-stale-449644d6d-after.json) = 51eb9388e42b83bec816b03110a6a469f859186c1a380cad4a6ea5521edaf4a4
+# After the measured outcome: docs/falsification/REF-SIBLINGS-SPEC.md
+blake3(docs/falsification/REF-SIBLINGS-SPEC.md) = f4674b0e38bb9c542bba75cdcec2a21cdb3988cd02b223cb9c71d7077e07c958
+sha256(docs/falsification/REF-SIBLINGS-SPEC.md) = 393128c13956349a59f8332c7da1a8ab97eabb0b99e895f2d059fd336320d897
+# After the measured outcome: crates/invar-falsify/tests/counterexample_test.rs
+blake3(crates/invar-falsify/tests/counterexample_test.rs) = 12955232f8851d430e4a1db42302d4b1b8c782985fc0fd22c666d5c482942085
+sha256(crates/invar-falsify/tests/counterexample_test.rs) = feb14d808682ad622cebc0e90f507c3b331fcc64bc9f6bc776ec048ac681520c
+# After the measured outcome: crates/invar-falsify/tests/judge_subtype_test.rs
+blake3(crates/invar-falsify/tests/judge_subtype_test.rs) = 5b238bcc16e3938102203c807164f13af3123a00c6c8d9d30acfe187744a1651
+sha256(crates/invar-falsify/tests/judge_subtype_test.rs) = fdb9eb3ac1762cdedcaab9bcacd46b3cb3dd3d2d697c06eaa33ceda600fe0976

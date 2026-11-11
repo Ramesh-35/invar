@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1, JUDGE-CONST r0, WITNESS r0, JUDGE-D5 r1). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5, K-R1..R2, W0-M1..M3, D5R1-M1..M2) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1, JUDGE-CONST r0, WITNESS r0, JUDGE-D5 r1, REF-SIBLINGS r0). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5, K-R1..R2, W0-M1..M3, D5R1-M1..M2, RS-M1..M5) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -298,6 +298,25 @@ run_one D5R1-M2 '            } else if type_str(pv) != type_str(qv) {
                 out.push(Witness {
                     path: dotted.clone(),
                     kind: "retyped",' d5_f01_object_type_written_where_none_was_is_violated judge_d5_r1_test
+
+# RS-M1 two-way nodes judged anyway (REF-SIBLINGS r0)
+run_one RS-M1 '    if hop || ref_siblings_side(0, pv_raw) || qv_raw.is_some_and(|q| ref_siblings_side(1, q)) {' '    if false && (hop || ref_siblings_side(0, pv_raw) || qv_raw.is_some_and(|q| ref_siblings_side(1, q))) {' rs_f01_two_way_node_is_stated_not_judged ref_siblings_test
+# RS-M2 2019-09 treated as two-way
+run_one RS-M2 '    if draft.contains("2019-09") || draft.contains("2020-12") {
+        return false;
+    }' '    if draft.contains("never") {
+        return false;
+    }' rs_f02_under_2019_09_siblings_are_judged ref_siblings_test
+# RS-M3 annotations counted as siblings
+run_one RS-M3 '    m.keys().any(|k| !REF_NEUTRAL.contains(&k.as_str()) && reach::is_known(k))' '    m.keys().any(|k| k != "$ref")' rs_f03_annotation_siblings_are_not_two_way ref_siblings_test
+# RS-M4 the hop not checked
+run_one RS-M4 '        if ref_siblings(root, &merged) {
+            HOP_SIBLINGS.with(|h| h.set(true));
+        }' '        if false && ref_siblings(root, &merged) {
+            HOP_SIBLINGS.with(|h| h.set(true));
+        }' rs_f05_two_way_node_through_a_hop_is_stated ref_siblings_test
+# RS-M5 the root not checked
+run_one RS-M5 '                        if ref_siblings(&pre, &pre) || ref_siblings(&post, &post) {' '                        if false && (ref_siblings(&pre, &pre) || ref_siblings(&post, &post)) {' rs_f04_two_way_root_is_stated ref_siblings_test
 cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"; cp "$P.orig" "$P"; rm "$P.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"

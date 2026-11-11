@@ -300,6 +300,17 @@ one. Those 76 pairs are now a release gate (`docs/falsification/wg-bench`),
 the first whose labels INVAR did not produce: HOLDS on any of them fails
 the release.
 
+From v0.2.24 a `$ref` with sibling keywords under draft-07 or earlier is
+stated and not judged ([REF-SIBLINGS-SPEC.md](docs/falsification/REF-SIBLINGS-SPEC.md)).
+Those drafts say the siblings are ignored; Python jsonschema ignores them
+and Ajv 8 applies them, so a document there is valid in one validator and
+invalid in the other, and no verdict can hold for both. One sixth of the
+SchemaStore files in INVAR's corpus carry such a node; 70 changes that
+were judged are now NOT EVALUATED with the reason `ref_siblings`, 28 of
+them former HOLDS, because a HOLDS one validator would contradict is
+not one. Under 2019-09 and 2020-12 siblings apply by the specification
+and nothing changes.
+
 In the Action, one input:
 
 ```yaml
