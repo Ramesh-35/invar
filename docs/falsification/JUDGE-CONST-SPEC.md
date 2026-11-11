@@ -1,6 +1,6 @@
 # JUDGE-CONST r0: `const` is an enum of one value, everywhere the judge reads enums (r0, FROZEN)
 
-Drafted 2026-11-08 for ratification. Frozen with
+Drafted and implemented 2026-11-08; ratification of the ruling as measured is requested with the v0.2.21 bundle. Frozen with
 crates/invar-falsify/tests/judge_const_test.rs BEFORE implementation;
 freeze record: JUDGE-CONST-SPEC.frozen. Every earlier ruling stays frozen
 as written, except the one fixture amended below, with its reason.
@@ -71,3 +71,31 @@ The corpus builder neutralises the version tag when it is an `enum`
 and missed `const`; that is a harness gap to fix separately, and the
 verdict on the pair as given is right. No other verdict or witness moves;
 label-free 26/14/50/0, Iglu 5/3/0, replay PASS unchanged.
+
+## Measured outcome (after implementation, 2026-11-08)
+
+- Fixtures 6 of 6; r_f13 as amended passes. Full suite 843 tests. Mutants
+  97 of 97 killed (K-R1, K-R2 new; RE-M5 and R3-M2 re-anchored to the new
+  text, same operators). Clippy silent.
+- Label-free 26/14/50/0, Iglu 5/3/0, SchemaStore replay PASS: unchanged.
+- Prediction: exactly the one predicted change moved, AsyncAPI 3.0.0 to
+  3.1.0 (tag neutral), NOT EVALUATED to VIOLATED, narrowed at `asyncapi`
+  ([const-moves/asyncapi.tsv](const-moves/asyncapi.tsv)); no other verdict
+  or witness moved on any corpus. The predicted counterexample
+  `{"asyncapi":"3.0.0"}` was NOT built: the builder reports "no candidate
+  value was valid at the base", because a document valid at the AsyncAPI
+  root needs more than that one field and the builder does not complete
+  the rest. The witness stands on the schemas as written; the builder's
+  limit is stated in the output, as it always was.
+- Amendment A (found by a frozen fixture of JUDGE-CANON r1, c1_f09, which
+  regressed in the first build): once `const` is read, a head
+  `{"const":"a"}` against a base `{"type":"string","enum":["a",null]}`
+  looked like a lost `null`. `null` was never admitted there: the base's
+  `type` excluded it. The enum rule now leaves out, on both sides, the
+  values the BASE node's own `type` never admitted; what the head's type
+  excludes stays the type rule's verdict (JUDGE-D9 d9_f04 fixed the order:
+  one witness, `retyped`, not two). This is the walk reading enums the way
+  CANON r1's normal form already does, and it also removes a quieter
+  imprecision: `{"type":"string","enum":["a",null]}` to
+  `{"type":"string","enum":["a"]}` was a VIOLATED with no counterexample
+  before this release; it is HOLDS now.

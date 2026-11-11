@@ -465,7 +465,7 @@ fn judge_child(dotted: &str, pv_raw: &Value, qv_raw: Option<&Value>, p_site: Str
         Some(qv) => {
             // JUDGE-REACH r0: the keywords judged at a property node.
             for (side, chain) in [(0, &p_chain), (1, &q_chain)] {
-                for kw in ["type", "enum", "pattern", "format"].iter().chain(LOWER.iter()).chain(UPPER.iter()) {
+                for kw in ["type", "enum", "const", "pattern", "format"].iter().chain(LOWER.iter()).chain(UPPER.iter()) {
                     reach::cover_kw(side, reach::owner(side, chain, kw), kw);
                 }
                 reach::cover_refs(side, chain);
@@ -817,11 +817,30 @@ fn same_value(a: &Value, b: &Value) -> bool {
     }
 }
 
+/// JUDGE-CONST r0: the values a node's `enum` allows, a `const` read as an
+/// enum of one value. Amendment A: values the BASE node's own `type` never
+/// admitted are left out on both sides (`{"type":"string","enum":["a",null]}`
+/// allows exactly "a", so losing null is no narrowing); what the head's
+/// type excludes is the type rule's verdict, not the enum rule's.
+fn enum_values(v: &Value, admitted_by: &Value) -> Option<Vec<Value>> {
+    let vals: Vec<Value> = match (v.get("enum").and_then(Value::as_array), v.get("const")) {
+        (Some(e), _) => e.clone(),
+        (None, Some(c)) => vec![c.clone()],
+        _ => return None,
+    };
+    let types: Vec<&str> = match admitted_by.get("type") {
+        Some(Value::String(t)) => vec![t.as_str()],
+        Some(Value::Array(ts)) => ts.iter().filter_map(Value::as_str).collect(),
+        _ => return Some(vals),
+    };
+    Some(vals.into_iter().filter(|x| reach::value_types(x).iter().any(|t| types.contains(t))).collect())
+}
+
 fn narrowed_enum(pv: &Value, qv: &Value) -> bool {
-    match (pv.get("enum").and_then(Value::as_array), qv.get("enum").and_then(Value::as_array)) {
+    match (enum_values(pv, pv), enum_values(qv, pv)) {
         (_, None) => false,
         (None, Some(_)) => true,
-        (Some(a), Some(b)) => a.iter().any(|x| !b.contains(x)),
+        (Some(a), Some(b)) => a.iter().any(|x| !b.iter().any(|y| same_value(x, y))),
     }
 }
 
@@ -851,14 +870,16 @@ fn constraint_witness(path: &str, kind: &'static str, keyword: &'static str, pv:
 /// enum narrowing, bound tightening, pattern and format changes. A schema
 /// is read as a validation contract: narrowing what it accepts is VIOLATED.
 fn constraints(path: &str, pv: &Value, qv: &Value, out: &mut Vec<Witness>) {
-    match (pv.get("enum").is_none(), finite_domain(pv), qv.get("enum").and_then(Value::as_array)) {
+    let q_enum = enum_values(qv, pv);
+    let p_enum = enum_values(pv, pv);
+    match (p_enum.is_none(), finite_domain(pv), q_enum.as_ref()) {
         // J2 (JUDGE-R3 r0): an enum added over a finite base domain is
         // judged as an enum narrowing of that domain.
         (true, Some(dom), Some(new)) => {
             let lost = dom.iter().any(|v| !new.iter().any(|n| same_value(n, v)));
             if lost {
                 let dom = Value::Array(dom);
-                out.push(constraint_witness(path, "narrowed", "enum", pv, Some(&dom), qv.get("enum")));
+                out.push(constraint_witness(path, "narrowed", "enum", pv, Some(&dom), qv.get("enum").or(qv.get("const"))));
             } else {
                 let mut w = stated_witness(path, "enum_covered", pv);
                 w.pre_value = Some(dom.iter().map(Value::to_string).collect::<Vec<_>>().join(", "));
@@ -866,12 +887,14 @@ fn constraints(path: &str, pv: &Value, qv: &Value, out: &mut Vec<Witness>) {
             }
         }
         _ if narrowed_enum(pv, qv) => {
-            out.push(constraint_witness(path, "narrowed", "enum", pv, pv.get("enum"), qv.get("enum")));
+            let (a, b) = (p_enum.clone().map(Value::Array), q_enum.clone().map(Value::Array));
+            out.push(constraint_witness(path, "narrowed", "enum", pv, a.as_ref(), b.as_ref()));
         }
         _ => {}
     }
     // D3 (r2): an enum dropped at the post ref is judged by its old values.
-    let old_enum = if qv.get("enum").is_none() { pv.get("enum").and_then(Value::as_array) } else { None };
+    let old_enum_owned = if q_enum.is_none() { p_enum.clone() } else { None };
+    let old_enum = old_enum_owned.as_ref();
     let bounds = LOWER.iter().map(|k| (*k, true)).chain(UPPER.iter().map(|k| (*k, false)));
     for (kw, is_lower) in bounds {
         let (ra, rb) = (pv.get(kw), qv.get(kw));
@@ -1547,7 +1570,7 @@ mod reach {
 
     /// JUDGE-CANON r1: the JSON types a literal value has (an integral
     /// number is both `integer` and `number`).
-    fn value_types(v: &Value) -> &'static [&'static str] {
+    pub(super) fn value_types(v: &Value) -> &'static [&'static str] {
         match v {
             Value::Null => &["null"],
             Value::Bool(_) => &["boolean"],

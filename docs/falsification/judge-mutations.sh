@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1, JUDGE-CONST r0). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5, K-R1..R2) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -149,7 +149,7 @@ run_one CX-M5 'for name in req.iter().map(String::as_str) {' 'for name in req.it
 # R3-M1 patternProperties check dropped
 run_one R3-M1 'None if closed && patterned => out.push(stated_witness(&dotted, "not_evaluated", pv)),' 'None if false && closed && patterned => out.push(stated_witness(&dotted, "not_evaluated", pv)),' r3_f01_removal_under_pattern_properties_is_not_evaluated judge_r3_test
 # R3-M2 finite domain not compared
-run_one R3-M2 'match (pv.get("enum").is_none(), finite_domain(pv),' 'match (pv.get("enum").is_none() && false, finite_domain(pv),' r3_f03_enum_over_finite_domain_that_keeps_every_value_holds judge_r3_test
+run_one R3-M2 'match (p_enum.is_none(), finite_domain(pv),' 'match (p_enum.is_none() && false, finite_domain(pv),' r3_f03_enum_over_finite_domain_that_keeps_every_value_holds judge_r3_test
 # R3-M3 allOf members ignored at base
 run_one R3-M3 'let before = names(pre);' 'let before = own(pre);' r3_f07_required_moved_out_of_all_of_holds judge_r3_test
 # R3-M4 allOf members ignored at post
@@ -268,6 +268,13 @@ run_one CR1-M4 '                Some(Value::String(t)) => {
 run_one CR1-M5 '        a.is_object() && b.is_object() && normal(a) == normal(b)
     }' '        a.is_object() && b.is_object() && form(a, false) != form(b, false) && normal(a) == normal(b)
     }' c1_f08_annotation_only_difference_at_a_combinator_holds_silently judge_canon_r1_test
+
+# K-R1 const not read as an enum by the narrowing rule (JUDGE-CONST r0)
+run_one K-R1 '        (None, Some(c)) => vec![c.clone()],
+        _ => return None,' '        (None, Some(_c)) => return None,
+        _ => return None,' k_f01_const_to_equal_enum_holds judge_const_test
+# K-R2 const not counted as read at a reached node
+run_one K-R2 'for kw in ["type", "enum", "const", "pattern", "format"].iter().chain(LOWER.iter())' 'for kw in ["type", "enum", "pattern", "format"].iter().chain(LOWER.iter())' k_f04_enum_to_const_subset_is_violated judge_const_test
 cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"; cp "$P.orig" "$P"; rm "$P.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"

@@ -266,6 +266,15 @@ construct it carries. On SchemaStore's history this earns HOLDS for 28
 more changes (every prettierrc option written `const` among them) and
 changes no VIOLATED or HOLDS verdict.
 
+From v0.2.21 `const` is read wherever the judge reads an enum: `const: v`
+is `enum: [v]`, so a changed or narrowed `const` is a break with its
+counterexample, and a `const` rewritten as the same one-value enum is not
+([JUDGE-CONST-SPEC.md](docs/falsification/JUDGE-CONST-SPEC.md)). Before
+this, the judge did not read `const` and could call that rewrite a break;
+no change in SchemaStore, Iglu or AsyncAPI history triggered it, so a
+fixture found it, not a corpus. The enum rule also leaves out values the
+base's own `type` never admitted, so losing one is no narrowing.
+
 In the Action, one input:
 
 ```yaml

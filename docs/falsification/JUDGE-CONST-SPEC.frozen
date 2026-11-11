@@ -15,3 +15,6 @@ blake3(crates/invar-falsify/tests/judge_const_test.rs) = c355d54b012738cae1165a4
 sha256(crates/invar-falsify/tests/judge_const_test.rs) = ecbb8ddf1a852b0c0f5484eb4076b2f1e420ac92e8c7693f801f07bc04d5f58b
 blake3(crates/invar-falsify/tests/judge_reach_test.rs) = f34972abef3958d840b83a86408cb603013b210dbb65955abf73e174bb3947a6
 sha256(crates/invar-falsify/tests/judge_reach_test.rs) = 95815f2a10ef3e1ea2c5e6f1d15cba17cdb4a76f6418a0646cfb1b10eadf27a9
+# Amendment A (after the measured outcome): docs/falsification/JUDGE-CONST-SPEC.md
+blake3(docs/falsification/JUDGE-CONST-SPEC.md) = 0f94892905b9820fa8ba5b278949c74fea4500538e4b63bd1f9f932060f0da41
+sha256(docs/falsification/JUDGE-CONST-SPEC.md) = 216fc1359dd79748d71a87a31f8b90dd4b8b31c5bd045539074d60236ace1312
