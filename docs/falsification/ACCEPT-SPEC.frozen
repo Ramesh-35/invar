@@ -1,0 +1,11 @@
+# A3-ACCEPT freeze record, written before any implementation.
+# Baseline: v0.2.29 release (PROGRAM r0). Drafted 2026-11-10 on the user's directive
+#   ("Begin drafting A3-ACCEPT (v0.2.30)... Output the draft when ready").
+# Measured before implementation: ac_f01..ac_f07 all FAIL (the accept subcommand
+#   does not exist; clap exits 2). 0 of 7. Clippy silent on the baseline.
+# Pre-registered: 7 of 7; AC-M1..M4 killed with every earlier mutant; no corpus
+#   moves; WG gate unchanged; full suite.
+blake3(docs/falsification/ACCEPT-SPEC.md) = 19596b14d9397626694da3c31e91355cf5c2e9dc5d06e0955d5503fe49485022
+sha256(docs/falsification/ACCEPT-SPEC.md) = 4ba1743a7f9c7e88d92f6c05b4abe49c2783b8a699c94aec9e1aaad6f69197c7
+blake3(crates/invar-falsify/tests/accept_test.rs) = 445e0c8fac601b848154f30bdf98503eea00eb4c8934d4aa5c3e8a47e7e52577
+sha256(crates/invar-falsify/tests/accept_test.rs) = ab0f3e57e481001c1d8d171d99c62fab6e8dfd5e31f618ffb361439457379c87
