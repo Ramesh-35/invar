@@ -1,0 +1,62 @@
+# JUDGE-CANON r1 freeze record, written before any implementation.
+# Baseline: v0.2.19 candidate (JUDGE-CANON r0), on the v0.2.18 candidate.
+# Drafted 2026-11-08, awaiting ratification.
+# Measured before implementation: judge_canon_r1_test 3 of 11 pass, the three
+#   guards (c1_f04, c1_f05, c1_f07: nothing is covered that the rule excludes,
+#   and a narrowed enum is still a break). The 8 that fail are the ones the
+#   rule must turn. Amended fixtures c_f04 (r0) and r2_f13 (r2) pass as
+#   amended under v0.2.19: the amendment changes what they test, not whether
+#   the current judge satisfies them. Clippy silent.
+# Pre-registered: 11 of 11; CR1-M1..M5 killed with every earlier mutant; full
+#   suite; clippy silent; label-free 26/14/50/0, Iglu 5/3/0, replay PASS
+#   unchanged; on SchemaStore at v0.2.19 exactly these 33 changes move from
+#   NOT EVALUATED to HOLDS and no other verdict or witness moves on any corpus:
+#   d8c448564_pyproject.json	unjudged_construct
+#   5d5ed6cb0_package.json	unjudged_construct
+#   41eeb8e43_package.json	unjudged_construct
+#   a8f255459_pyproject.json	unjudged_construct
+#   304f42048_package.json	unjudged_construct
+#   bc24ba579_package.json	unjudged_construct
+#   5b30da8c6_jshintrc.json	unjudged_construct
+#   f10fa6348_specif-1.1.json	unjudged_construct
+#   a3cf4d531_prettierrc.json	unchecked_change
+#   66c06da92_swa-cli.config.json	unchecked_change
+#   c8cfb07d7_lsdlschema-0.7.json	unchecked_change
+#   c8cfb07d7_lsdlschema-1.0.json	unchecked_change
+#   c8cfb07d7_lsdlschema-2.0.json	unchecked_change
+#   c8cfb07d7_lsdlschema-3.0.json	unchecked_change
+#   c8cfb07d7_lsdlschema-3.1.json	unchecked_change
+#   c8cfb07d7_lsdlschema-3.2.json	unchecked_change
+#   c8cfb07d7_lsdlschema-3.3.json	unchecked_change
+#   c8cfb07d7_lsdlschema-3.4.json	unchecked_change
+#   c8cfb07d7_lsdlschema-3.5.json	unchecked_change
+#   c8cfb07d7_lsdlschema-4.0.json	unchecked_change
+#   c8cfb07d7_lsdlschema-4.1.json	unchecked_change
+#   52f403f27_hias-hitf.json	unjudged_construct
+#   29ef6d663_sarif-external-property-file-2.1.0-rtm.0.json	unchecked_change
+#   29ef6d663_sarif-external-property-file-2.1.0-rtm.1.json	unchecked_change
+#   29ef6d663_sarif-external-property-file-2.1.0-rtm.2.json	unchecked_change
+#   29ef6d663_sarif-external-property-file-2.1.0-rtm.3.json	unchecked_change
+#   29ef6d663_sarif-external-property-file-2.1.0-rtm.4.json	unchecked_change
+#   29ef6d663_sarif-external-property-file-2.1.0-rtm.5.json	unchecked_change
+#   29ef6d663_sarif-external-property-file-2.1.0.json	unchecked_change
+#   29ef6d663_sarif-external-property-file.json	unchecked_change
+#   4836277f2_pnpm-workspace.json	unjudged_construct
+#   897f5028b_solarxy-config.json	unjudged_construct
+#   bf4e8f721_pnpm-workspace.json	unjudged_construct
+blake3(docs/falsification/JUDGE-CANON-R1-SPEC.md) = bc1dfa7db72d1130b434c408d58baf6c6fa364a73c153f05e5486019f066b3c5
+sha256(docs/falsification/JUDGE-CANON-R1-SPEC.md) = 0216630e48f1622c4e15a8d5a2ae80b66208905eda5009b8ce3971724bf066bb
+blake3(crates/invar-falsify/tests/judge_canon_r1_test.rs) = f09b33d43ba0d62484aed80fd50baccd13e5b838413e7bf33997e46005aeaffe
+sha256(crates/invar-falsify/tests/judge_canon_r1_test.rs) = 26fc9f4acf220f75a8f3d3d7d547143e8ef61110da74b57a147e8a3a34a05750
+blake3(crates/invar-falsify/tests/judge_canon_test.rs) = dc7f36496872a666c015f585e606d82a188f5013b6eaa6a4b351219180431e3b
+sha256(crates/invar-falsify/tests/judge_canon_test.rs) = 135406189190a94d41e0b543ec1236911a5b93346a4133c3dee43cc9d4a80887
+blake3(crates/invar-falsify/tests/judge_subtype_r2_test.rs) = 2b355ff6f38964cee602dc47eb1c15a3ed36504edc4aad38ee66427f2811ae41
+sha256(crates/invar-falsify/tests/judge_subtype_r2_test.rs) = ef40e342d95f617c3725b9d5abbc199cf7d9d82fd2e3a2eb916b964289ad4b07
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-htmlhint-8a87ed47d-before.json) = 8ec20f1c77875ef83c36796e4fad0ef90f02d4486f3d71cb6a62238f6aebfae7
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-htmlhint-8a87ed47d-before.json) = 468dce76d67cf76d74739a93f855311fd5c93a7b7ac526a77273ac003307cc89
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-htmlhint-8a87ed47d-after.json) = 40b8f0a9a44a7387e51f3d732b3785563f87a7327350794ed3a698a0d2e8f355
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-htmlhint-8a87ed47d-after.json) = 9706b9273802e7ca88d00a7d89e62bc4793dc03395875af80440a937e047323e
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-prettierrc-a3cf4d531-before.json) = fa867a621cb71e31bd5adc5988848db60616a952f9ddda90911b9dafe52d01c6
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-prettierrc-a3cf4d531-before.json) = 297c04f47ef41685f5955138224cc0e9fd3c046c7b9854e3343a31c34578e35d
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-prettierrc-a3cf4d531-after.json) = 0bf30c143efd5326840af73badb8ff0ab0ac78d596bee0e61f29d177b0d61e53
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-prettierrc-a3cf4d531-after.json) = a5f9c7ed250e12c1b5fb7f0a2ae1b03e064513b40be96688cd2517925f42a6f0

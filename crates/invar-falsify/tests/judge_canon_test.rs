@@ -80,9 +80,11 @@ fn c_f03_shared_keyword_beside_anyof_holds() {
 }
 
 /// c_f04 guard: the shared keyword moved inside one branch is not the rewrite.
+/// Amended by JUDGE-CANON r1: `null` became `integer`, because with `null`
+/// the two spellings admit the same documents and r1 proves it.
 #[test]
 fn c_f04_keyword_inside_a_branch_is_not_covered() {
-    let (code, text, v) = both("f04", &doc(r#"{"type":["string","null"],"enum":["x",null]}"#), &doc(r#"{"anyOf":[{"type":"string","enum":["x",null]},{"type":"null"}]}"#));
+    let (code, text, v) = both("f04", &doc(r#"{"type":["string","integer"],"enum":["x",1]}"#), &doc(r#"{"anyOf":[{"type":"string","enum":["x",1]},{"type":"integer"}]}"#));
     assert_eq!(code, 4, "{text}");
     assert_eq!(v["reason"], json!("unjudged_construct"), "{v}");
     assert!(!text.contains("noted: equivalent"), "{text}");

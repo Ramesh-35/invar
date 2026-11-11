@@ -233,9 +233,11 @@ fn r2_f12_tightened_defs_target_is_violated() {
 
 /// r2_f13 D4: a reference cycle is cut, stated, and the judge returns.
 #[test]
+/// Amended by JUDGE-CANON r1: the change is now the reference target inside
+/// the cycle, not a `description` (annotation-only differences are covered).
 fn r2_f13_reference_cycle_is_not_evaluated() {
-    let pre = r##"{"definitions":{"Node":{"$ref":"#/definitions/Node"}},"properties":{"n":{"$ref":"#/definitions/Node"}}}"##;
-    let post = r##"{"definitions":{"Node":{"$ref":"#/definitions/Node"}},"properties":{"n":{"$ref":"#/definitions/Node","description":"x"}}}"##;
+    let pre = r##"{"definitions":{"Node":{"$ref":"#/definitions/Node"},"Other":{"$ref":"#/definitions/Other"}},"properties":{"n":{"$ref":"#/definitions/Node"}}}"##;
+    let post = r##"{"definitions":{"Node":{"$ref":"#/definitions/Node"},"Other":{"$ref":"#/definitions/Other"}},"properties":{"n":{"$ref":"#/definitions/Other"}}}"##;
     let d = repo("f13", pre, post);
     let (code, v) = json(&d);
     assert_eq!(code, 4, "{v}");
