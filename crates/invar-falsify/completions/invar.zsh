@@ -17,7 +17,7 @@ _invar() {
     verify-receipt) compadd -- --config --artifacts --signers --principal --help;;
     gate)           compadd -- --config --proof;;
     hook)           compadd -- claude-code --settings --help;;
-    judge)          compadd -- --contract --base --format --receipt --help;;
+    judge)          compadd -- --contract --contracts --base --format --receipt --acceptances --signers --help;;
     witness)        compadd -- --name --out --positive --help;;
     reader)         compadd -- --cmd --timeout --env --out --format --help;;
     accept)         compadd -- --prepare --out --acceptance --signers --help;;

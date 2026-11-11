@@ -434,7 +434,16 @@ invar-acceptance`), and `invar accept RECEIPT --acceptance FILE
 ([ACCEPT-SPEC.md](docs/falsification/ACCEPT-SPEC.md), v0.2.30): the
 named receipt reproduces, the signature verifies against keys the
 repository lists, every finding is listed or nothing is accepted, and
-the verdict matches, HOLDS having nothing to accept. Git is the ledger;
+the verdict matches, HOLDS having nothing to accept. The gate is the
+same judge with two flags: `invar judge --contracts GLOB --acceptances
+DIR --signers FILE` exits 0 only when the change HOLDS or a listed
+person signed for exactly these contract bytes and this verdict, and
+otherwise keeps the judge's exit code and says how to accept
+([ACCEPT-GATE-SPEC.md](docs/falsification/ACCEPT-GATE-SPEC.md),
+v0.2.31). The signed files are committed in the pull request itself, so
+the gate matches on what was judged, not on commit hashes; one more
+changed byte needs a new acceptance. Take the signers file from the base
+branch: a pull request can edit its own tree. Git is the ledger;
 there is no server:
 
 ```sh

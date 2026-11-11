@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1, JUDGE-CONST r0, WITNESS r0, JUDGE-D5 r1, REF-SIBLINGS r0, JUDGE-TESTS r2 and r3, JUDGE-CC r0, JUDGE-RECEIPT r1, PROGRAM r0, A3-ACCEPT). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5, K-R1..R2, W0-M1..M3, D5R1-M1..M2, RS-M1..M5, TS2-M1..M2, TS3-M1..M4 with M3b, CC-M1..M3, RM1-1..3, RD-M1..M4, AC-M1..M4) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1, JUDGE-CONST r0, WITNESS r0, JUDGE-D5 r1, REF-SIBLINGS r0, JUDGE-TESTS r2 and r3, JUDGE-CC r0, JUDGE-RECEIPT r1, PROGRAM r0, A3-ACCEPT, A3-GATE). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5, K-R1..R2, W0-M1..M3, D5R1-M1..M2, RS-M1..M5, TS2-M1..M2, TS3-M1..M4 with M3b, CC-M1..M3, RM1-1..3, RD-M1..M4, AC-M1..M4, AG-M1..M3) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -390,6 +390,15 @@ run_one AC-M2 '    if listed != want {' '    if false && listed != want {' ac_f0
 run_one AC-M3 '    if named != receipt_hash {' '    if false && named != receipt_hash {' ac_f04_new_receipt_needs_a_new_acceptance accept_test
 # AC-M4 the signature result ignored
 run_one AC-M4 '    let signed = sig.exists()' '    let signed = true || sig.exists()' ac_f05_unlisted_key_or_tampered_acceptance_is_refused accept_test
+# A3-GATE (docs/falsification/ACCEPT-GATE-SPEC.md): the one CI command
+# AG-M1 the judged identity not compared
+run_one AG-M1 '        if judged_identity(&committed.body) != fresh {' '        if false && judged_identity(&committed.body) != fresh {' ag_f03_further_change_voids_the_acceptance accept_gate_test
+# AG-M2 the acceptance rules (signature first) not checked at the gate
+run_one AG-M2 '        if let Some(why) = rules_2_to_4(&committed.body, &acceptance, &accept_bytes, &acceptance_path, signers)? {' '        if let Some(why) = None::<String> {' ag_f05_unlisted_signature_opens_nothing accept_gate_test
+# AG-M3 the gate passes with no standing acceptance
+run_one AG-M3 '    say(format!("gate: to accept: invar judge --contracts ... --receipt R, then invar accept R --prepare, complete, sign, and commit the three files under {acceptances}"));
+    Ok(code)' '    say(format!("gate: to accept: invar judge --contracts ... --receipt R, then invar accept R --prepare, complete, sign, and commit the three files under {acceptances}"));
+    Ok(0)' ag_f01_unaccepted_break_blocks_and_says_how_to_accept accept_gate_test
 cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"; cp "$P.orig" "$P"; rm "$P.orig"; cp "$A.orig" "$A"; rm "$A.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"

@@ -424,6 +424,16 @@ struct JudgeArgs {
     /// Also write a canonical, byte-deterministic receipt here.
     #[arg(long)]
     receipt: Option<String>,
+    /// A3-GATE: with --contracts, a directory of committed
+    /// NAME.receipt.json, NAME.acceptance.json and its .sig. A break a
+    /// listed person signed for exits 0; anything else keeps the judge's
+    /// exit code.
+    #[arg(long, requires = "signers")]
+    acceptances: Option<String>,
+    /// A3-GATE: the allowed-signers file. Take it from the base branch,
+    /// never from the pull request's own tree.
+    #[arg(long, requires = "acceptances")]
+    signers: Option<String>,
 }
 
 #[derive(Parser)]
@@ -1447,6 +1457,9 @@ fn cmd_judge(args: JudgeArgs) -> Result<i32> {
         if args.receipt.is_some() {
             anyhow::bail!("--receipt needs a repository; judge two files without it.");
         }
+        if args.acceptances.is_some() {
+            anyhow::bail!("--acceptances needs a repository and --contracts; two files have no gate.");
+        }
         if args.files.len() != 2 {
             anyhow::bail!("judge takes two files: the base (the promise), then the head (the change)");
         }
@@ -1456,11 +1469,15 @@ fn cmd_judge(args: JudgeArgs) -> Result<i32> {
     let base = args.base.as_deref().unwrap_or("origin/main");
     match (args.contract, args.contracts.is_empty()) {
         (Some(_), false) => anyhow::bail!("--contract and --contracts cannot be combined: judge one contract, or every contract a glob selects"),
+        (Some(_), true) if args.acceptances.is_some() => anyhow::bail!("--acceptances gates a change: use it with --contracts '<glob>'"),
         (Some(c), true) => invar_falsify::judge::run(&root, &c, base, &args.format, args.receipt.as_deref()),
         (None, false) => {
             // JUDGE-RECEIPT r1 (A3-RECEIPT): --contracts writes one change
             // receipt naming every judged contract by its bytes.
-            invar_falsify::judge::run_many(&root, &args.contracts, base, &args.format, args.receipt.as_deref())
+            match (&args.acceptances, &args.signers) {
+                (Some(dir), Some(signers)) => invar_falsify::judge::run_gate(&root, &args.contracts, base, &args.format, args.receipt.as_deref(), dir, signers),
+                _ => invar_falsify::judge::run_many(&root, &args.contracts, base, &args.format, args.receipt.as_deref()),
+            }
         }
         (None, true) => anyhow::bail!("pass --contract <path> or --contracts '<glob>'"),
     }

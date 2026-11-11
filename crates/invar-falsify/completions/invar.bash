@@ -17,7 +17,7 @@ _invar() {
     verify-receipt) COMPREPLY=( $(compgen -W "--config --artifacts --signers --principal --help" -- "$cur") );;
     gate)           COMPREPLY=( $(compgen -W "--config --proof --help" -- "$cur") );;
     hook)           COMPREPLY=( $(compgen -W "claude-code --settings --help" -- "$cur") );;
-    judge)          COMPREPLY=( $(compgen -W "--contract --base --format --receipt --help" -- "$cur") );;
+    judge)          COMPREPLY=( $(compgen -W "--contract --contracts --base --format --receipt --acceptances --signers --help" -- "$cur") );;
     witness)        COMPREPLY=( $(compgen -W "--name --out --positive --help" -- "$cur") );;
     reader)         COMPREPLY=( $(compgen -W "--cmd --timeout --env --out --format --help" -- "$cur") );;
     accept)         COMPREPLY=( $(compgen -W "--prepare --out --acceptance --signers --help" -- "$cur") );;

@@ -20,7 +20,7 @@ complete -c invar -n "__fish_seen_subcommand_from fix" -l config -l suggest
 complete -c invar -n "__fish_seen_subcommand_from verify-receipt" -l config -l artifacts -l signers -l principal
 complete -c invar -n "__fish_seen_subcommand_from gate" -l config -l proof
 complete -c invar -n "__fish_seen_subcommand_from hook" -a "claude-code" -l settings
-complete -c invar -n "__fish_seen_subcommand_from judge" -l contract -l base -l format -l receipt
+complete -c invar -n "__fish_seen_subcommand_from judge" -l contract -l contracts -l base -l format -l receipt -l acceptances -l signers
 complete -c invar -n "__fish_seen_subcommand_from witness" -l name -l out -l positive
 complete -c invar -n "__fish_seen_subcommand_from reader" -l cmd -l timeout -l env -l out -l format
 complete -c invar -n "__fish_seen_subcommand_from accept" -l prepare -l out -l acceptance -l signers
