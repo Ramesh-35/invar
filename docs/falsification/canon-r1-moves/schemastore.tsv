@@ -1,0 +1,820 @@
+pair	v0.2.19	v0.2.20	reason	unchecked pointers
+276b08732_cargo-lints-rust.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/const_item_interior_mutations;/properties/function_casts_as_integer;/properties/unused_visibilities
+d3cbd0bf4_claude-code-settings.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/env
+1c907b4e5_ryl.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/FixRuleName;/definitions/FixableRuleSelector
+c2a7af6a2_tunnelhub.json	VIOLATED	VIOLATED		
+b0bfd76eb_youtrack-app.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/permissions
+eb7cf20e8_prek.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/AutoUpdateOptions;/properties/auto_update
+71b24fdd7_tox.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+5118d9cba_jsconfig.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/compilerOptionsDefinition/properties/compilerOptions/properties/target/anyOf/0;/definitions/compilerOptionsDefinition/properties/compilerOptions/properties/target/anyOf/1
+28c403c49_dependabot-2.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/package-ecosystem-values
+de06f909c_rumdl.json	HOLDS	HOLDS		
+68029e620_databricks-asset-bundles.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+68029e620_declarative-automation-bundles.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+673565744_uv.json	HOLDS	HOLDS		
+cb9cdced4_pnpm-workspace.json	HOLDS	HOLDS		
+f06daf3dd_github-workflow.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/concurrency/properties/queue
+6debd6cb6_tox.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/definitions/factor_labeled_dict;/definitions/factor_range_dict;/definitions/product_factor_group;/definitions/replace_env;/definitions/replace_glob;/definitions/replace_if;/definitions/replace_object;/definitions/replace_posargs;/definitions/replace_ref;/properties/labels/additionalProperties/items
+d037e4276_pyproject.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/tool/properties/scheduled
+d8c448564_pyproject.json	NOT EVALUATED	HOLDS		
+fb989d4d1_bunfig.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/serve
+3a542e764_dependabot-2.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+b5a375a88_partial-pytest.json	HOLDS	HOLDS		
+5d5ed6cb0_package.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+d78daa37c_ruff.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/LineLength
+e357bce7a_ty.json	HOLDS	HOLDS		
+a87cfdad0_jsconfig.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/compilerOptionsDefinition/properties/compilerOptions/properties/ignoreDeprecations;/definitions/compilerOptionsDefinition/properties/compilerOptions/properties/lib/items/anyOf/0;/definitions/compilerOptionsDefinition/properties/compilerOptions/properties/lib/items/anyOf/13;/definitions/compilerOptionsDefinition/properties/compilerOptions/properties/lib/items/anyOf/3
+a87cfdad0_tsconfig.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/compilerOptionsDefinition/properties/compilerOptions/properties/ignoreDeprecations;/definitions/compilerOptionsDefinition/properties/compilerOptions/properties/lib/items/anyOf/0;/definitions/compilerOptionsDefinition/properties/compilerOptions/properties/lib/items/anyOf/1;/definitions/compilerOptionsDefinition/properties/compilerOptions/properties/lib/items/anyOf/10;/definitions/compilerOptionsDefinition/properties/compilerOptions/properties/lib/items/anyOf/13;/definitions/compilerOptionsDefinition/properties/compilerOptions/properties/lib/items/anyOf/3
+194d9521c_ruff.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/PylintOptions/properties/max-statements-in-try
+97182e530_rumdl.json	HOLDS	HOLDS		
+e21ef0b29_claude-code-settings.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/properties/env/properties/ANTHROPIC_WORKSPACE_ID;/properties/env/properties/CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN;/properties/env/properties/CLAUDE_CODE_ENABLE_FEEDBACK_SURVEY_FOR_OTEL;/properties/env/properties/CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY;/properties/env/properties/CLAUDE_CODE_FORCE_SYNC_OUTPUT;/properties/env/properties/CLAUDE_CODE_OPUS_4_6_FAST_MODE_OVERRIDE;/properties/env/properties/CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE;/properties/env/properties/CLAUDE_CODE_PLUGIN_PREFER_HTTPS;/properties/env/properties/CLAUDE_CODE_POWERSHELL_RESPECT_EXECUTION_POLICY;/properties/env/properties/CLAUDE_CODE_STOP_HOOK_BLOCK_CAP;/properties/parentSettingsBehavior;/properties/skillOverrides;/properties/subagentStatusLine
+b44e6d8dc_pyproject.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+41eeb8e43_cargo.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/Package/properties/metadata/properties/quikrun
+41eeb8e43_package.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+41eeb8e43_pyproject.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/tool/properties/quikrun
+d21f1ed36_tsconfig.json	HOLDS	HOLDS		
+5fcc2e0ed_claude-code-settings.json	VIOLATED	VIOLATED		
+2fd1e927d_cargo.json	HOLDS	HOLDS		
+ca0752272_ryl.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/FixRuleName;/definitions/FixableRuleSelector
+ba06047ce_uv.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/AuditOptions;/definitions/ExcludeNewerOverride;/definitions/ExcludeNewerPackage/additionalProperties;/definitions/Index/properties/exclude-newer;/definitions/PackageExcludeNewer;/definitions/Source/anyOf/0/properties/path;/definitions/TorchMode/oneOf/28;/definitions/TorchMode/oneOf/29;/definitions/TorchMode/oneOf/30;/definitions/TorchMode/oneOf/31;/definitions/TorchMode/oneOf/32;/definitions/TorchMode/oneOf/33;/definitions/TorchMode/oneOf/34;/definitions/TorchMode/oneOf/35;/definitions/TorchMode/oneOf/36;/definitions/TorchMode/oneOf/37;/definitions/TorchMode/oneOf/38;/definitions/TorchMode/oneOf/39;/definitions/TorchMode/oneOf/40;/definitions/TorchMode/oneOf/41;/definitions/TorchMode/oneOf/42;/definitions/TorchMode/oneOf/43;/definitions/TorchMode/oneOf/44;/definitions/TorchMode/oneOf/45;/definitions/TorchMode/oneOf/46;/definitions/TorchMode/oneOf/47;/definitions/TorchMode/oneOf/48
+dbc0fd17b_github-workflow.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/permissions-event/properties/code-quality
+a8f255459_pyproject.json	NOT EVALUATED	HOLDS		
+6f2e0a123_pnpm-workspace.json	HOLDS	HOLDS		
+bc1a40196_pnpm-workspace.json	HOLDS	HOLDS		
+2d7d28fe3_claude-code-keybindings.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/builtinAction
+61ef5c60e_pnpm-workspace.json	HOLDS	HOLDS		
+bd4878f12_ryl.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/FilesTable;/definitions/MarkdownTable;/properties/files;/properties/markdown
+0091e807a_partial-poe.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/definitions/args_item;/definitions/args_item_no_name;/definitions/args_option;/definitions/capture_stdout_option;/definitions/cmd_task;/definitions/cmd_task_with_case;/definitions/env_default;/definitions/env_option;/definitions/envfile_full;/definitions/executor_auto;/definitions/executor_auto_partial;/definitions/executor_partial;/definitions/executor_poetry;/definitions/executor_poetry_partial;/definitions/executor_simple;/definitions/executor_simple_partial;/definitions/executor_task_option;/definitions/executor_uv;/definitions/executor_uv_partial;/definitions/executor_virtualenv;/definitions/executor_virtualenv_partial;/definitions/expr_task;/definitions/expr_task_with_case;/definitions/groups_map;/definitions/ignore_fail_exec_option;/definitions/ignore_fail_tasks_option;/definitions/include_script_item;/definitions/one_of_tasks;/definitions/parallel_task;/definitions/parallel_task_with_case;/definitions/ref_task;/definitions/ref_task_with_case;/definitions/script_task;/definitions/script_task_with_case;/definitions/sequence_task;/definitions/sequence_task_with_case;/definitions/shell_task;/definitions/shell_task_with_case;/definitions/standard_options;/definitions/switch_task;/definitions/switch_task_with_case;/definitions/task_def;/definitions/task_def_with_case;/definitions/task_group;/definitions/tasks_array;/definitions/tasks_map;/definitions/use_exec_option;/properties/groups/patternProperties/^\w[\w\d\-_]*$;/properties/tasks/patternProperties/^\w[\w\d\-_\+:]*$
+803561f5f_pnpm-workspace.json	HOLDS	HOLDS		
+3a9b1ff55_host.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/connector-extension
+469df8549_claude-code-settings.json	HOLDS	HOLDS		
+d3fa3c8cf_prek.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/BuiltinHook/properties/groups;/definitions/LocalHook/properties/groups;/definitions/MetaHook/properties/groups;/definitions/RemoteHook/properties/groups
+b1d4e7710_ruff.json	HOLDS	HOLDS		
+480ec7f0f_ryl.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/RuleEntryForTagsOptions;/definitions/RuleName;/definitions/RuleOptionsForTagsOptions;/definitions/RulesTable/properties/tags
+c6dc52856_ryl.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/RuleEntryForAnchorsOptions;/definitions/RuleEntryForKeyDuplicatesOptions;/definitions/RuleEntryForTomlAnchorsOptions;/definitions/RuleEntryForTomlKeyDuplicatesOptions;/definitions/RuleName;/definitions/RuleOptionsForAnchorsOptions;/definitions/RuleOptionsForKeyDuplicatesOptions;/definitions/RuleOptionsForTomlAnchorsOptions;/definitions/RuleOptionsForTomlKeyDuplicatesOptions;/definitions/RulesTable/properties/anchors/anyOf/0;/definitions/RulesTable/properties/key-duplicates/anyOf/0;/definitions/RulesTable/properties/merge-keys;/definitions/RulesTable/properties/unicode-line-breaks
+25b50ebc9_pnpm-workspace.json	HOLDS	HOLDS		
+3dccfc0ce_pnpm-workspace.json	HOLDS	HOLDS		
+27baba394_ty.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/Rules/properties/missing-override-decorator;/definitions/Rules/properties/missing-type-argument;/definitions/Rules/properties/subclass-of-dataclass-with-order
+1efe0dfb3_ryl.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/RuleName;/definitions/RulesTable/properties/block-scalar-chomping
+00e9d3a73_launchsettings.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/profileContent/properties/commandName
+ac756c263_prometheus.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+4682cfafb_host.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/version-2/properties/extensions/properties/eventHubs/oneOf/0/properties/maxWaitTime;/definitions/version-2/properties/extensions/properties/eventHubs/oneOf/0/properties/minEventBatchSize
+e79a84d44_chrome-manifest.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/command/else/properties/suggested_key/patternProperties/^(default|mac|windows|linux|chromeos)$;/definitions/command/then/properties/suggested_key/patternProperties/^(default|mac|windows|linux|chromeos)$
+19bcf33a6_ruff.json	HOLDS	HOLDS		
+775f14798_ryl.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/AllRulesSelector;/definitions/PerLineIgnore;/definitions/PerLineRule;/definitions/RuleEntryForCommentsIndentationOptions;/definitions/RuleEntryForHyphensOptions;/definitions/RuleEntryForTomlHyphensOptions;/definitions/RuleOptionsForCommentsIndentationOptions;/definitions/RuleOptionsForHyphensOptions;/definitions/RuleOptionsForTomlHyphensOptions;/definitions/RulesTable/properties/comments-indentation/anyOf/0;/definitions/RulesTable/properties/hyphens/anyOf/0;/properties/per-line-ignores
+5009520ac_traefik-v3.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/staticForwardedHeaders/properties/notAppendXForwardedFor
+3eed17cb3_partial-cibuildwheel.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/enable
+3fdf6895c_github-workflow.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+198b2e15a_partial-poetry.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/poetry-long-dependency
+6a08f5c86_cargo.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/DetailedDependency/properties/artifact;/definitions/DetailedDependency/properties/lib;/definitions/DetailedDependency/properties/target
+c8c40db14_host.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/version-2/properties/extensions/properties/serviceBus/oneOf/1/properties/minMessageBatchSize
+9671e0073_travis.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/job/properties/os/oneOf/0;/definitions/job/properties/os/oneOf/1/items
+7451aa270_rumdl.json	HOLDS	HOLDS		
+dd22b5c09_ryl.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+884b741d7_partial-setuptools.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/ext-module
+e5b7ad390_partial-scheduled.json	HOLDS	HOLDS		
+304f42048_package.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+9497fde91_codex-hooks.json	VIOLATED	VIOLATED		
+857eaa9f5_tunnelhub.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+01ddd95ec_ruff.json	HOLDS	HOLDS		
+d5b72ee7d_ty.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/Rules/properties/conflicting-argument-forms;/definitions/Rules/properties/experimental-syntax
+063f7f207_partial-mypy.json	HOLDS	HOLDS		
+bc24ba579_package.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+95771093c_tox.json	HOLDS	HOLDS		
+8e81115a4_package.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+714ea6b79_ruff.json	VIOLATED	VIOLATED		
+7c910423d_github-action.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/runs-composite/properties/steps/items/oneOf/2;/definitions/runs-composite/properties/steps/items/oneOf/3;/definitions/runs-composite/properties/steps/items/oneOf/4;/definitions/runs-composite/properties/steps/items/oneOf/5;/definitions/runs-composite/properties/steps/items/properties/background;/definitions/runs-composite/properties/steps/items/properties/cancel;/definitions/runs-composite/properties/steps/items/properties/parallel;/definitions/runs-composite/properties/steps/items/properties/wait;/definitions/runs-composite/properties/steps/items/properties/wait-all
+7c910423d_github-workflow.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/step/oneOf/2;/definitions/step/oneOf/3;/definitions/step/oneOf/4;/definitions/step/oneOf/5;/definitions/step/properties/background;/definitions/step/properties/cancel;/definitions/step/properties/parallel;/definitions/step/properties/wait;/definitions/step/properties/wait-all
+d9d98e698_github-action.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/runs-composite/properties/steps/items/oneOf/2;/definitions/runs-composite/properties/steps/items/oneOf/3;/definitions/runs-composite/properties/steps/items/oneOf/4;/definitions/runs-composite/properties/steps/items/oneOf/5;/definitions/runs-composite/properties/steps/items/properties/background;/definitions/runs-composite/properties/steps/items/properties/cancel;/definitions/runs-composite/properties/steps/items/properties/parallel;/definitions/runs-composite/properties/steps/items/properties/wait;/definitions/runs-composite/properties/steps/items/properties/wait-all
+34a7b3158_hugo.json	HOLDS	HOLDS		
+8a3e4fcb4_stylintrc.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+9cf1c1c67_aiproj-1.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+9cf1c1c67_aiproj-1.1.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+9cf1c1c67_aiproj-1.10.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+9cf1c1c67_aiproj-1.2.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+9cf1c1c67_aiproj-1.3.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+9cf1c1c67_aiproj-1.4.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+9cf1c1c67_aiproj-1.5.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+9cf1c1c67_aiproj-1.6.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+9cf1c1c67_aiproj-1.7.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+9cf1c1c67_aiproj-1.8.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+9cf1c1c67_aiproj-1.9.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+98d27ebb2_all-contributors.json	HOLDS	HOLDS		
+bb45ad1d4_codex-hooks.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/commandHandler/properties/commandWindows;/definitions/commandHandler/properties/timeout;/properties/hooks/properties/PostCompact;/properties/hooks/properties/PreCompact;/properties/hooks/properties/SubagentStart;/properties/hooks/properties/SubagentStop
+009ae4b77_problem_package_generators.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+8d32356d3_jsconfig.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/compilerOptionsDefinition/properties/compilerOptions/properties/jsxImportSource
+8d32356d3_tsconfig.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/compilerOptionsDefinition/properties/compilerOptions/properties/jsxImportSource
+9c67f5136_partial-poe.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/args_item/allOf/0;/definitions/args_item_no_name/allOf/0;/definitions/parallel_task/properties/output_mode;/definitions/parallel_task_with_case/properties/output_mode;/definitions/script_task;/definitions/script_task_with_case
+bcedcea6a_hugo.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+6101df580_paper-plugin.json	HOLDS	HOLDS		
+cfd4af801_claude-code-keybindings.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/builtinAction
+cfd4af801_claude-code-settings.json	VIOLATED	VIOLATED		/properties/advisorModel;/properties/agentPushNotifEnabled;/properties/allowAllClaudeAiMcps;/properties/allowedChannelPlugins/items;/properties/autoCompactEnabled;/properties/autoScrollEnabled;/properties/awaySummaryEnabled;/properties/axScreenReader;/properties/claudeMd;/properties/disableAgentView;/properties/disableArtifact;/properties/disableAutoMode;/properties/disableBundledSkills;/properties/disableClaudeAiConnectors;/properties/disableRemoteControl;/properties/disableWorkflows;/properties/editorMode;/properties/enforceAvailableModels;/properties/env/properties/ANTHROPIC_AWS_API_KEY;/properties/env/properties/ANTHROPIC_AWS_BASE_URL;/properties/env/properties/ANTHROPIC_AWS_WORKSPACE_ID;/properties/env/properties/ANTHROPIC_DEFAULT_FABLE_MODEL;/properties/env/properties/ANTHROPIC_DEFAULT_FABLE_MODEL_DESCRIPTION;/properties/env/properties/ANTHROPIC_DEFAULT_FABLE_MODEL_NAME;/properties/env/properties/ANTHROPIC_DEFAULT_FABLE_MODEL_SUPPORTED_CAPABILITIES;/properties/env/properties/ANTHROPIC_DEFAULT_HAIKU_MODEL_DESCRIPTION;/properties/env/properties/ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME;/properties/env/properties/ANTHROPIC_DEFAULT_HAIKU_MODEL_SUPPORTED_CAPABILITIES;/properties/env/properties/ANTHROPIC_DEFAULT_OPUS_MODEL_DESCRIPTION;/properties/env/properties/ANTHROPIC_DEFAULT_OPUS_MODEL_NAME;/properties/env/properties/ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES;/properties/env/properties/ANTHROPIC_DEFAULT_SONNET_MODEL_DESCRIPTION;/properties/env/properties/ANTHROPIC_DEFAULT_SONNET_MODEL_NAME;/properties/env/properties/ANTHROPIC_DEFAULT_SONNET_MODEL_SUPPORTED_CAPABILITIES;/properties/env/properties/ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION;/properties/env/properties/API_FORCE_IDLE_TIMEOUT;/properties/env/properties/AWS_REGION;/properties/env/properties/BETA_TRACING_ENDPOINT;/properties/env/properties/CLAUDECODE;/properties/env/properties/CLAUDE_ASYNC_AGENT_STALL_TIMEOUT_MS;/properties/env/properties/CLAUDE_AX_SCREEN_READER;/properties/env/properties/CLAUDE_CLIENT_PRESENCE_FILE;/properties/env/properties/CLAUDE_CODE_ALT_SCREEN_FULL_REPAINT;/properties/env/properties/CLAUDE_CODE_ALWAYS_ENABLE_EFFORT;/properties/env/properties/CLAUDE_CODE_ARTIFACT_AUTO_OPEN;/properties/env/properties/CLAUDE_CODE_CHILD_SESSION;/properties/env/properties/CLAUDE_CODE_DISABLE_ADVISOR_TOOL;/properties/env/properties/CLAUDE_CODE_DISABLE_AGENT_VIEW;/properties/env/properties/CLAUDE_CODE_DISABLE_ARTIFACT;/properties/env/properties/CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP;/properties/env/properties/CLAUDE_CODE_DISABLE_BUNDLED_SKILLS;/properties/env/properties/CLAUDE_CODE_DISABLE_MOUSE_CLICKS;/properties/env/properties/CLAUDE_CODE_DISABLE_WORKFLOWS;/properties/env/properties/CLAUDE_CODE_ENABLE_AUTO_MODE;/properties/env/properties/CLAUDE_CODE_ENHANCED_TELEMETRY_BETA;/properties/env/properties/CLAUDE_CODE_FORCE_SESSION_PERSISTENCE;/properties/env/properties/CLAUDE_CODE_FORCE_STRIKETHROUGH;/properties/env/properties/CLAUDE_CODE_MAX_TURNS;/properties/env/properties/CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT;/properties/env/properties/CLAUDE_CODE_NATIVE_CURSOR;/properties/env/properties/CLAUDE_CODE_OTEL_DIAG_STDERR;/properties/env/properties/CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS;/properties/env/properties/CLAUDE_CODE_PROPAGATE_TRACEPARENT;/properties/env/properties/CLAUDE_CODE_RESUME_PROMPT;/properties/env/properties/CLAUDE_CODE_RETRY_WATCHDOG;/properties/env/properties/CLAUDE_CODE_SAFE_MODE;/properties/env/properties/CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS;/properties/env/properties/CLAUDE_CODE_SESSION_ID;/properties/env/properties/CLAUDE_CODE_SKIP_ANTHROPIC_AWS_AUTH;/properties/env/properties/CLAUDE_CODE_SYNC_SKILLS;/properties/env/properties/CLAUDE_CODE_SYNC_SKILLS_INSTALL_TIMEOUT_MS;/properties/env/properties/CLAUDE_CODE_SYNC_SKILLS_WAIT_TIMEOUT_MS;/properties/env/properties/CLAUDE_CODE_USE_ANTHROPIC_AWS;/properties/env/properties/CLAUDE_CODE_USE_BEDROCK;/properties/env/properties/CLAUDE_CODE_USE_FOUNDRY;/properties/env/properties/CLAUDE_CODE_USE_MANTLE;/properties/env/properties/CLAUDE_CODE_USE_NATIVE_FILE_SEARCH;/properties/env/properties/CLAUDE_CODE_USE_VERTEX;/properties/env/properties/CLAUDE_CONFIG_DIR;/properties/env/properties/CLAUDE_EFFORT;/properties/env/properties/CLAUDE_ENABLE_BYTE_WATCHDOG;/properties/env/properties/CLAUDE_ENABLE_BYTE_WATCHDOG_BEDROCK;/properties/env/properties/CLAUDE_ENABLE_STREAM_WATCHDOG;/properties/env/properties/CLAUDE_REMOTE_CONTROL_SESSION_NAME_PREFIX;/properties/env/properties/CLAUDE_STREAM_IDLE_TIMEOUT_MS;/properties/env/properties/CLOUD_ML_REGION;/properties/env/properties/DEBUG;/properties/env/properties/DISABLE_AUTO_COMPACT;/properties/env/properties/DISABLE_COMPACT;/properties/env/properties/DISABLE_COST_WARNINGS;/properties/env/properties/DISABLE_DOCTOR_COMMAND;/properties/env/properties/DISABLE_EXTRA_USAGE_COMMAND;/properties/env/properties/DISABLE_GROWTHBOOK;/properties/env/properties/DISABLE_INSTALLATION_CHECKS;/properties/env/properties/DISABLE_INSTALL_GITHUB_APP_COMMAND;/properties/env/properties/DISABLE_INTERLEAVED_THINKING;/properties/env/properties/DISABLE_LOGIN_COMMAND;/properties/env/properties/DISABLE_LOGOUT_COMMAND;/properties/env/properties/DISABLE_PROMPT_CACHING;/properties/env/properties/DISABLE_PROMPT_CACHING_FABLE;/properties/env/properties/DISABLE_PROMPT_CACHING_HAIKU;/properties/env/properties/DISABLE_PROMPT_CACHING_OPUS;/properties/env/properties/DISABLE_PROMPT_CACHING_SONNET;/properties/env/properties/DISABLE_UPGRADE_COMMAND;/properties/env/properties/DO_NOT_TRACK;/properties/env/properties/ENABLE_BETA_TRACING_DETAILED;/properties/env/properties/ENABLE_PROMPT_CACHING_1H;/properties/env/properties/ENABLE_TOOL_SEARCH;/properties/env/properties/FALLBACK_FOR_ALL_PRIMARY_MODELS;/properties/env/properties/FORCE_AUTOUPDATE_PLUGINS;/properties/env/properties/FORCE_PROMPT_CACHING_5M;/properties/env/properties/GOOGLE_APPLICATION_CREDENTIALS;/properties/env/properties/IS_DEMO;/properties/env/properties/MAX_MCP_OUTPUT_TOKENS;/properties/env/properties/MAX_STRUCTURED_OUTPUT_RETRIES;/properties/env/properties/MAX_THINKING_TOKENS;/properties/env/properties/MCP_CLIENT_SECRET;/properties/env/properties/MCP_CONNECTION_NONBLOCKING;/properties/env/properties/MCP_CONNECT_TIMEOUT_MS;/properties/env/properties/MCP_OAUTH_CALLBACK_PORT;/properties/env/properties/MCP_REMOTE_SERVER_CONNECTION_BATCH_SIZE;/properties/env/properties/MCP_SERVER_CONNECTION_BATCH_SIZE;/properties/env/properties/MCP_TIMEOUT;/properties/env/properties/MCP_TOOL_TIMEOUT;/properties/env/properties/OTEL_EXPORTER_OTLP_CERTIFICATE;/properties/env/properties/OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE;/properties/env/properties/OTEL_EXPORTER_OTLP_CLIENT_KEY;/properties/env/properties/OTEL_EXPORTER_OTLP_ENDPOINT;/properties/env/properties/OTEL_EXPORTER_OTLP_HEADERS;/properties/env/properties/OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;/properties/env/properties/OTEL_EXPORTER_OTLP_LOGS_PROTOCOL;/properties/env/properties/OTEL_EXPORTER_OTLP_METRICS_ENDPOINT;/properties/env/properties/OTEL_EXPORTER_OTLP_METRICS_PROTOCOL;/properties/env/properties/OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE;/properties/env/properties/OTEL_EXPORTER_OTLP_PROTOCOL;/properties/env/properties/OTEL_EXPORTER_OTLP_TRACES_ENDPOINT;/properties/env/properties/OTEL_EXPORTER_OTLP_TRACES_PROTOCOL;/properties/env/properties/OTEL_LOGS_EXPORTER;/properties/env/properties/OTEL_LOGS_EXPORT_INTERVAL;/properties/env/properties/OTEL_LOG_ASSISTANT_RESPONSES;/properties/env/properties/OTEL_LOG_RAW_API_BODIES;/properties/env/properties/OTEL_LOG_TOOL_CONTENT;/properties/env/properties/OTEL_LOG_TOOL_DETAILS;/properties/env/properties/OTEL_LOG_USER_PROMPTS;/properties/env/properties/OTEL_METRICS_INCLUDE_ACCOUNT_UUID;/properties/env/properties/OTEL_METRICS_INCLUDE_ENTRYPOINT;/properties/env/properties/OTEL_METRICS_INCLUDE_RESOURCE_ATTRIBUTES;/properties/env/properties/OTEL_METRICS_INCLUDE_SESSION_ID;/properties/env/properties/OTEL_METRICS_INCLUDE_VERSION;/properties/env/properties/OTEL_METRIC_EXPORT_INTERVAL;/properties/env/properties/OTEL_RESOURCE_ATTRIBUTES;/properties/env/properties/OTEL_TRACES_EXPORTER;/properties/env/properties/OTEL_TRACES_EXPORT_INTERVAL;/properties/env/properties/SLASH_COMMAND_TOOL_CHAR_BUDGET;/properties/env/properties/TASK_MAX_OUTPUT_LENGTH;/properties/env/properties/VERTEX_REGION_CLAUDE_3_5_HAIKU;/properties/env/properties/VERTEX_REGION_CLAUDE_3_5_SONNET;/properties/env/properties/VERTEX_REGION_CLAUDE_3_7_SONNET;/properties/env/properties/VERTEX_REGION_CLAUDE_4_0_OPUS;/properties/env/properties/VERTEX_REGION_CLAUDE_4_0_SONNET;/properties/env/properties/VERTEX_REGION_CLAUDE_4_1_OPUS;/properties/env/properties/VERTEX_REGION_CLAUDE_4_5_OPUS;/properties/env/properties/VERTEX_REGION_CLAUDE_4_5_SONNET;/properties/env/properties/VERTEX_REGION_CLAUDE_4_6_OPUS;/properties/env/properties/VERTEX_REGION_CLAUDE_4_6_SONNET;/properties/env/properties/VERTEX_REGION_CLAUDE_4_7_OPUS;/properties/env/properties/VERTEX_REGION_CLAUDE_4_8_OPUS;/properties/env/properties/VERTEX_REGION_CLAUDE_FABLE_5;/properties/env/properties/VERTEX_REGION_CLAUDE_HAIKU_4_5;/properties/fallbackModel;/properties/fileCheckpointingEnabled;/properties/footerLinksRegexes;/properties/gcpAuthRefresh;/properties/inputNeededNotifEnabled;/properties/leftArrowOpensAgents;/properties/managedMcpServers;/properties/maxSkillDescriptionChars;/properties/pluginSuggestionMarketplaces;/properties/policyHelper;/properties/preferredNotifChannel;/properties/remoteControlAtStartup;/properties/requiredMaximumVersion;/properties/requiredMinimumVersion;/properties/respondToBashCommands;/properties/skillListingBudgetFraction;/properties/sshConfigs;/properties/sshHostAllowlist;/properties/syntaxHighlightingDisabled;/properties/theme;/properties/verbose;/properties/voice;/properties/wheelScrollAccelerationEnabled;/properties/workflowKeywordTriggerEnabled
+d0ec28c34_prek.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/UpdateOptions;/properties/default_env;/properties/update
+3859a5821_quikrun.json	HOLDS	HOLDS		
+635411fa9_gitversion.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+75a53f101_web-manifest.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/localized_value;/properties/color_scheme_dark;/properties/icons_localized;/properties/name_localized;/properties/short_name_localized
+c344f05eb_traefik-v3.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/staticHTTPConfig/properties/underscoreHeadersStrategy
+5a02e765d_partial-eslint-plugins.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+b3f8099cd_webextension.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/else/properties/web_accessible_resources;/then/properties/web_accessible_resources
+afd1bdb88_jsconfig.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/referencesDefinition/properties/references/items/properties/path
+afd1bdb88_tsconfig.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/referencesDefinition/properties/references/items/properties/path
+d8740b915_hatch.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/definitions/BuildTargets;/definitions/CustomTargets;/definitions/WheelTarget
+f5797ba57_web-manifest-app-info.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/properties/description_localized
+f5797ba57_web-manifest.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/localized_image_resource_map;/definitions/localized_text_map;/definitions/localized_text_object;/definitions/localized_text_value;/definitions/shortcut_item/properties/description_localized;/definitions/shortcut_item/properties/icons_localized;/definitions/shortcut_item/properties/name_localized;/definitions/shortcut_item/properties/short_name_localized
+32af9a900_web-manifest-app-info.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+32af9a900_web-manifest.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/localized_image_resource_map;/definitions/localized_text_map;/definitions/localized_text_object;/definitions/localized_text_value
+b056a70c8_traefik-v3.json	VIOLATED	VIOLATED		
+03afb205b_youtrack-app.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/permissions
+f40c891d3_youtrack-app.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+2bddc5b46_specmatic.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/OpenApiSpecificationRuntimeDefinition/properties/swaggerUrl
+01e00802b_specmatic.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/OpenApiSpecificationRuntimeDefinition/properties/actuatorUrl;/definitions/OpenApiSpecificationRuntimeDefinition/properties/swaggerUiBaseUrl
+773fe876b_circleciconfig.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+49bdaeaa9_prek.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/Language;/definitions/RepoTagFilterOptions;/definitions/StringOrList;/definitions/UpdateOptions/properties/exclude_tags;/definitions/UpdateOptions/properties/freeze;/definitions/UpdateOptions/properties/include_tags;/definitions/UpdateOptions/properties/repos
+685cc1906_package.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/madge
+7c3d8f238_ruff.json	HOLDS	HOLDS		
+585b21f01_sil-kit-participant-configuration.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+8a9a37494_ty.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/AnalysisOptions/properties/strict-literal-narrowing;/definitions/Rules/properties/blanket-ignore-comment
+d1a4056fa_hatch.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/Version/properties/expression;/definitions/Version/properties/search-paths;/oneOf/1/properties/version/properties/source;/oneOf/2/properties/version/properties/path;/oneOf/2/properties/version/properties/source;/oneOf/3;/oneOf/4
+03e9f9b01_openapi-3.X.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/allOf/1/then;/allOf/2/then
+4fe365602_jscpd.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/definitions/format
+f9d455e8c_all-contributors.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+f9d455e8c_es6importsorterrc.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+fe592e95e_json-patch.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+1f58bb5b0_jsinspectrc.json	HOLDS	HOLDS		
+6313b56ae_jsonld.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+6313b56ae_schema-org-action.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+6313b56ae_schema-org-contact-point.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+6313b56ae_schema-org-place.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+6313b56ae_schema-org-thing.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+25d11b330_kong_json_schema.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/definitions/ActiveHealthcheck/properties/healthy;/definitions/ActiveHealthcheck/properties/unhealthy;/definitions/FConsumerGroupObject/properties/plugins/items;/definitions/FPlugin/properties/ordering;/definitions/FRBACEndpointPermission/properties/role;/definitions/FRBACRole/properties/endpoint_permissions/items;/definitions/FServicePackage/properties/versions/items;/definitions/FServiceVersion/properties/document;/definitions/FServiceVersion/properties/implementation;/definitions/FUpstream/properties/targets/items;/definitions/Healthcheck/properties/active;/definitions/Healthcheck/properties/passive;/definitions/Implementation/properties/kong;/definitions/Info/properties/defaults;/definitions/KongDefaults/properties/route;/definitions/KongDefaults/properties/service;/definitions/KongDefaults/properties/target;/definitions/KongDefaults/properties/upstream;/definitions/MTLSAuth/properties/ca_certificate;/definitions/Route/properties/sources/items;/definitions/Service/properties/client_certificate;/definitions/Upstream/properties/healthchecks;/properties/_info;/properties/_konnect;/properties/ca_certificates/items;/properties/certificates/items;/properties/consumer_groups/items;/properties/rbac_roles/items;/properties/service_packages/items;/properties/upstreams/items;/properties/vaults/items
+0f72e19c6_appveyor.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/jobScalars
+1eb1b5de9_jasmine.json	HOLDS	HOLDS		
+8a87ed47d_htmlhint.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+aacc89a1c_importmap.json	HOLDS	HOLDS		
+f81743024_jsconfig.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/buildOptionsDefinition;/definitions/compileOnSaveDefinition;/definitions/compilerOptionsDefinition;/definitions/excludeDefinition;/definitions/extendsDefinition;/definitions/filesDefinition;/definitions/includeDefinition;/definitions/referencesDefinition;/definitions/typeAcquisitionDefinition;/definitions/watchOptionsDefinition
+b0f2444c4_imageoptimizer.json	HOLDS	HOLDS		
+003915d23_imgbotconfig.json	HOLDS	HOLDS		
+a5d4308cb_jasonette.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+3d382e475_jsbeautifyrc-nested.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+3d382e475_jsbeautifyrc.json	HOLDS	HOLDS		
+02817d67b_hws-config.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+5b30da8c6_grunt-clean-task.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+5b30da8c6_grunt-copy-task.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+5b30da8c6_grunt-cssmin-task.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+5b30da8c6_grunt-jshint-task.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+5b30da8c6_grunt-task.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/fileFormat
+5b30da8c6_grunt-watch-task.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/optionsWithEvents;/definitions/target
+5b30da8c6_jshintrc.json	NOT EVALUATED	HOLDS		
+68cda3af9_gpc.json	HOLDS	HOLDS		
+142dde599_ide.host.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+142dde599_vs-2017.3.host.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+629566321_host-meta.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/property/additionalProperties
+a1e41dd55_apibuilder.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+35722d88d_artifacthub-repo.json	HOLDS	HOLDS		
+ee8746890_asconfig-schema.json	HOLDS	HOLDS		
+3e160f8f0_babelrc.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+f17c2b8b1_band-manifest.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+9a42b216e_partial-mypy.json	HOLDS	HOLDS		
+21e214517_uv.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+6d7a695e4_glazewm.json	VIOLATED	VIOLATED		/definitions/binding;/definitions/bindings;/definitions/commands;/definitions/match-criterion;/properties/binding_modes;/properties/gaps/properties/inner_gap;/properties/keybindings;/properties/window_behavior;/properties/window_effects
+5eb8f2928_bootstraprc.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+58f7b31b5_bower.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+9b4c1c094_bowerrc.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+aae26627e_dependabot-2.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/allOf/0/else/properties/updates;/definitions/multi-ecosystem-group/properties/commit-message/anyOf/0/properties/prefix;/definitions/multi-ecosystem-group/properties/commit-message/anyOf/1/properties/prefix-development;/definitions/multi-ecosystem-group/properties/commit-message/anyOf/2/properties/include;/definitions/multi-ecosystem-group/properties/schedule
+aae26627e_dependabot.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+6ba479a65_jdt.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+4b5c7772d_dependabot-2.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/package-ecosystem-values
+331847776_dependabot-2.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/registry/additionalProperties/properties/scope
+942f03be2_markdown-link-check.json	HOLDS	HOLDS		
+154fce007_json-api-1.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/attributes/patternProperties/^(?!relationships$|links$)\w[-\w_]*$;/definitions/relationships/patternProperties/^\w[-\w_]*$
+ba8c74e46_kustomization.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+9666a6810_bundleconfig.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/ajaxminBaseSettings;/definitions/bundle;/definitions/cssBundle;/definitions/htmlBundle;/definitions/jsBundle
+3f75099da_bozr.json	HOLDS	HOLDS		
+28a2cdfea_chutzpah.json	HOLDS	HOLDS		
+e6fa09104_host.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+e158e1921_jscsrc.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+e940f8cb8_typo3.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/staticRoutes/else/properties/content;/definitions/staticRoutes/then/properties/source
+4f2fc7413_lgtm.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/properties/extraction/additionalProperties/properties/index/properties/filetypes
+5452b6352_csslintrc.json	HOLDS	HOLDS		
+8bf436a31_licenses.1.json	HOLDS	HOLDS		
+8bf436a31_toolinfo.1.1.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+0cd8ed0d1_modernizrrc.json	HOLDS	HOLDS		
+809ac4830_lego.json	HOLDS	HOLDS		
+b14646fb4_mycode.json	HOLDS	HOLDS		
+6d16f0008_codecov.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/definitions/default
+4de8dd268_BizTalkServerApplicationSchema.json	HOLDS	HOLDS		
+ac8d192b4_cdk.json	HOLDS	HOLDS		
+2a7fd1cbe_pull-request-labeler-5.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/match;/$defs/stringOrStringArray;/additionalProperties;/definitions/globRule;/definitions/label;/definitions/match;/definitions/nonNegativeInteger;/definitions/stringOrStringArray;/properties/changed-files-labels-limit;/properties/max-files-changed
+2a7fd1cbe_pull-request-labeler.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/additionalProperties;/definitions/globRule;/definitions/label;/definitions/match;/definitions/nonNegativeInteger;/definitions/stringOrStringArray;/properties/changed-files-labels-limit;/properties/max-files-changed
+65b383d56_rumdl.json	HOLDS	HOLDS		
+144ba338f_prek.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/BuiltinHook/properties/priority;/definitions/BuiltinHooks;/definitions/LocalHook/properties/priority;/definitions/MetaHook/properties/priority;/definitions/Priority;/definitions/PriorityAlias;/definitions/RemoteHook/properties/priority;/properties/priorities
+2f74efc3f_claude-code-keybindings.json	VIOLATED	VIOLATED		/$defs/builtinAction
+2f74efc3f_claude-code-settings.json	VIOLATED	VIOLATED		/properties/askUserQuestionTimeout;/properties/autoConnectIde;/properties/autoInstallIdeExtension;/properties/browserExternalPageTools;/properties/diffTool;/properties/disableBrowserExternalNavigation;/properties/disableMobileSimulatorTools;/properties/disableSideloadFlags;/properties/emojiCompletionEnabled;/properties/enableArtifact;/properties/env/properties/ANTHROPIC_FOUNDRY_AUTH_TOKEN;/properties/env/properties/CLAUDE_AFK_COUNTDOWN_MS;/properties/env/properties/CLAUDE_AFK_TIMEOUT_MS;/properties/env/properties/CLAUDE_CODE_AWS_CHAIN_RESOLVE_TIMEOUT_MS;/properties/env/properties/CLAUDE_CODE_BRIDGE_SESSION_ID;/properties/env/properties/CLAUDE_CODE_DISABLE_BEDROCK_CONTENT_TYPE_GUARD;/properties/env/properties/CLAUDE_CODE_DISABLE_BG_EXIT_HANDOFF;/properties/env/properties/CLAUDE_CODE_DISABLE_EXPLORE_PLAN_AGENTS;/properties/env/properties/CLAUDE_CODE_DISABLE_NOTIFICATION_PRESENCE_CHECK;/properties/env/properties/CLAUDE_CODE_ENABLE_APPEND_SUBAGENT_PROMPT;/properties/env/properties/CLAUDE_CODE_ENABLE_SDK_FILE_CHECKPOINTING;/properties/env/properties/CLAUDE_CODE_FORWARD_SUBAGENT_TEXT;/properties/env/properties/CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS;/properties/env/properties/CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION;/properties/env/properties/CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH;/properties/env/properties/CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION;/properties/env/properties/CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS;/properties/env/properties/CLAUDE_CODE_OTEL_CONTENT_MAX_LENGTH;/properties/env/properties/CLAUDE_CODE_PROCESS_WRAPPER;/properties/env/properties/CLAUDE_CODE_RESUME_INTERRUPTED_TURN_MAX_AGE_MS;/properties/env/properties/CLAUDE_CODE_SKIP_AWS_CRED_CACHE;/properties/env/properties/CLAUDE_CODE_SKIP_FAST_MODE_NETWORK_ERRORS;/properties/env/properties/CLAUDE_CODE_SKIP_FAST_MODE_ORG_CHECK;/properties/env/properties/CLAUDE_CODE_TEAM_TEARDOWN_PARK_TIMEOUT_MS;/properties/env/properties/CLAUDE_DISABLE_ADOPT;/properties/env/properties/CLAUDE_PID;/properties/env/properties/FORCE_HYPERLINK;/properties/env/properties/OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT;/properties/env/properties/OTEL_EXPORTER_OTLP_LOGS_CLIENT_CERTIFICATE;/properties/env/properties/OTEL_EXPORTER_OTLP_LOGS_CLIENT_KEY;/properties/env/properties/OTEL_EXPORTER_OTLP_METRICS_CLIENT_CERTIFICATE;/properties/env/properties/OTEL_EXPORTER_OTLP_METRICS_CLIENT_KEY;/properties/env/properties/OTEL_EXPORTER_OTLP_TRACES_CLIENT_CERTIFICATE;/properties/env/properties/OTEL_EXPORTER_OTLP_TRACES_CLIENT_KEY;/properties/env/properties/VERTEX_REGION_CLAUDE_5_OPUS;/properties/env/properties/VERTEX_REGION_CLAUDE_5_SONNET;/properties/externalEditorContext;/properties/extraKnownMarketplaces/additionalProperties/properties/source/anyOf/2/properties/skipLfs;/properties/extraKnownMarketplaces/additionalProperties/properties/source/anyOf/3/properties/skipLfs;/properties/extraKnownMarketplaces/additionalProperties/properties/source/anyOf/7;/properties/forceLoginGatewayUrl;/properties/permissionExplainerEnabled;/properties/processWrapper;/properties/requireCoworkFullVmSandbox;/properties/skillListingMaxDescChars;/properties/teammateDefaultModel;/properties/vimInsertModeRemaps;/properties/workflowSizeGuideline
+3f9f70414_rumdl.json	HOLDS	HOLDS		
+9022345bd_ty.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/AnalysisOptions/properties/strict-equality-semantics;/definitions/AnalysisOptions/properties/strict-literal-narrowing;/definitions/Rules/properties/invalid-type-guard-call;/definitions/Rules/properties/pydantic-discarded-extra-argument
+e02051cf4_cargo-make.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/task/properties/install_crate/oneOf/2
+d4341c362_ruff.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/Flake8GetTextOptions/properties/extend-function-names/items;/definitions/Flake8GetTextOptions/properties/function-names/items;/definitions/Flake8SelfOptions/properties/extend-ignore-names/items;/definitions/Flake8SelfOptions/properties/ignore-names/items;/definitions/Name
+9174b49f1_package.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+55d1bc21e_hugo.json	HOLDS	HOLDS		
+e52aafa4e_maestro-flow.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+3f006f030_partial-pytest.json	HOLDS	HOLDS		
+4e44b86b7_partial-cibuildwheel.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+7388f7a26_package.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/allowScripts
+8a7f1de10_kustomization.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/HelmChart/properties/valuesInline
+bd00a0821_pnpm-workspace.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+b8ef41271_rumdl.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/GlobalConfig/properties/editorconfig
+c6da236f2_ruff.json	HOLDS	HOLDS		
+d2cbdcde9_claude-code-settings.json	HOLDS	HOLDS		
+8b8c3a0bb_pnpm-workspace.json	HOLDS	HOLDS		
+5f7f4ac58_gematik-test-hcpis.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+f619bbab9_pnpm-workspace.json	HOLDS	HOLDS		
+b25625bd3_tombi.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/BlankLines;/definitions/BlankLinesLimit;/definitions/CargoCodeActionFeatureTree/properties/update-dependency-to-latest-version;/definitions/CargoGotoDeclarationFeatureTree;/definitions/CargoGotoDeclarationFeatures;/definitions/CargoGotoDefinitionFeatureTree;/definitions/CargoGotoDefinitionFeatures;/definitions/CargoHoverFeatureTree/properties/default-features;/definitions/CargoHoverFeatureTree/properties/feature-dependencies;/definitions/CargoLspFeatureTree/properties/goto-declaration/anyOf/0;/definitions/CargoLspFeatureTree/properties/goto-definition/anyOf/0;/definitions/CargoLspFeatureTree/properties/references;/definitions/CargoNavigationFeatureTree;/definitions/CargoNavigationFeatures;/definitions/CargoReferencesFeatureTree;/definitions/CargoReferencesFeatures;/definitions/FilesOptions/properties/exclude;/definitions/FilesOptions/properties/include/items;/definitions/FilesOptions/properties/respect-ignore-files;/definitions/FormatRules/properties/group-blank-lines-limit;/definitions/FormatRules/properties/key-quote-style;/definitions/FormatRules/properties/table-blank-lines;/definitions/GlobPattern;/definitions/LspOptions/properties/references;/definitions/LspReferences;/definitions/OverrideFilesOptions/properties/exclude;/definitions/OverrideFilesOptions/properties/include/items;/definitions/PyprojectCodeActionFeatureTree/properties/update-dependency-to-latest-version;/definitions/PyprojectGotoDeclarationFeatureTree;/definitions/PyprojectGotoDeclarationFeatures;/definitions/PyprojectGotoDefinitionFeatureTree;/definitions/PyprojectGotoDefinitionFeatures;/definitions/PyprojectLspFeatureTree/properties/goto-declaration/anyOf/0;/definitions/PyprojectLspFeatureTree/properties/goto-definition/anyOf/0;/definitions/PyprojectLspFeatureTree/properties/references;/definitions/PyprojectNavigationFeatureTree;/definitions/PyprojectNavigationFeatures;/definitions/PyprojectReferencesFeatureTree;/definitions/PyprojectReferencesFeatures;/definitions/RootSchema/properties/exclude;/definitions/RootSchema/properties/include/items;/definitions/SubSchema/properties/exclude;/definitions/SubSchema/properties/include/items
+f4d7fd9c9_package.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/sideEffects
+525fe4803_pnpm-workspace.json	HOLDS	HOLDS		
+2eb086dfa_pnpm-workspace.json	VIOLATED	VIOLATED		
+0b328bf24_global.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/msbuild-sdks;/properties/sdk
+a577d89d5_ty.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/AnalysisOptions/properties/strict-generic-narrowing;/definitions/Rules/properties/abstract-and-final-method;/definitions/SrcOptions/properties/exclude-scripts;/definitions/SrcOptions/properties/root
+2a3fb6035_package.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+6ea1e71aa_prek.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/BuiltinHooks;/definitions/Language
+48071a4f1_specmatic.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/SecuritySchemeConfigurationV3/properties/type
+f1b0527c4_publiccode.json	VIOLATED	VIOLATED		/definitions/FundingOrganisation
+a4fa6aca7_package.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+66e663ab5_crucible-code-schema.json	HOLDS	HOLDS		
+5c5270126_tombi.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/CommentStyle;/definitions/FormatRules/properties/comment-style;/definitions/RootSchema/properties/strict;/definitions/SubSchema/properties/strict
+4f9683522_youtrack-app.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+e7373bd3f_helmfile.json	VIOLATED	VIOLATED		
+a6e90c862_ruff.json	HOLDS	HOLDS		
+7df186831_appveyor.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/imageName
+b2651be2f_pnpm-workspace.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/packageConfig
+ced7a9dd7_crucible-code-schema.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/providers/patternProperties/^[^$]/properties/baseUrl;/properties/providers/patternProperties/^[^$]/properties/effort
+0fe5e8175_github-workflow.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+d65180589_package.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/publishConfig/properties/directory;/properties/publishConfig/properties/executableFiles;/properties/publishConfig/properties/linkDirectory
+bf9bf14cb_pnpm-workspace.json	HOLDS	HOLDS		
+c3495d15c_pnpm-workspace.json	HOLDS	HOLDS		
+062b5bc5e_crucible-code-schema.json	HOLDS	HOLDS		
+426108f05_scarb.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/TomlCairo/properties/add-types-debug-info
+fe4018c3c_crucible-code-schema.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/providers/patternProperties/^[^$]/properties/contextWindow;/properties/providers/patternProperties/^[^$]/properties/defaultContextWindow
+fcf7cbcf9_drupal-services.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/services/additionalProperties
+e1668aaae_crucible-code-schema.json	HOLDS	HOLDS		
+ecae713b2_drupal-services.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/services/additionalProperties/oneOf/1/properties/autoconfigure;/properties/services/additionalProperties/oneOf/1/properties/autowire;/properties/services/additionalProperties/oneOf/1/properties/decoration_inner_name;/properties/services/additionalProperties/oneOf/1/properties/decoration_on_invalid;/properties/services/additionalProperties/oneOf/1/properties/decoration_priority
+582d198b3_crucible-code-schema.json	VIOLATED	VIOLATED		/properties/env;/properties/providers
+91315f8f7_appveyor.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/imageName
+917289dff_github-workflow-template-properties.json	HOLDS	HOLDS		
+68028fd17_prek.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/definitions/BuiltinHook;/definitions/LocalHook;/definitions/MetaHook;/definitions/RemoteHook;/definitions/ToolchainPreference
+dac367344_rumdl.json	HOLDS	HOLDS		
+64a542049_vsls.json	HOLDS	HOLDS		
+6237e77dc_vsconfig.json	HOLDS	HOLDS		
+646e9a0f1_uproject.json	HOLDS	HOLDS		
+4dc019a23_typings.json	HOLDS	HOLDS		
+4dc019a23_typingsrc.json	HOLDS	HOLDS		
+e16714f32_tsd.json	HOLDS	HOLDS		
+e16714f32_tsdrc.json	HOLDS	HOLDS		
+b78c1cb6e_tmuxinator.json	HOLDS	HOLDS		
+f8ba74f66_tizen_workspace.json	HOLDS	HOLDS		
+f10fa6348_specif-1.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+f10fa6348_specif-1.1.json	NOT EVALUATED	HOLDS		
+9bdc4c761_sourcery_yaml_schema.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+80834e534_sourcemap-v3.json	HOLDS	HOLDS		
+3d7813f6d_sourcehut-build-0.41.2.json	HOLDS	HOLDS		
+a73c5b48a_solution-filter.json	HOLDS	HOLDS		
+8f41c4a28_slack-app-manifest.json	HOLDS	HOLDS		
+8ac6c2f02_safebox-schema-v1.0.0.json	HOLDS	HOLDS		
+5232fc040_rust-project.json	HOLDS	HOLDS		
+031a0c7a1_qfconfig.json	HOLDS	HOLDS		
+9d33ff794_pterodactyl.json	HOLDS	HOLDS		
+56d20d7a9_postcssrc.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+969b590d5_pm2-ecosystem.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+f8cbc44c9_omnisharp.json	HOLDS	HOLDS		
+e8eeda03a_nycrc.json	HOLDS	HOLDS		
+b65cf6498_nuget-project-3.3.0.json	HOLDS	HOLDS		
+b65cf6498_nuget-project.json	HOLDS	HOLDS		
+9b3a4b49d_pantsbuild-2.14.0.json	HOLDS	HOLDS		
+9b3a4b49d_pantsbuild-2.15.0.json	HOLDS	HOLDS		
+9b3a4b49d_pantsbuild-2.16.0.json	HOLDS	HOLDS		
+9b3a4b49d_pantsbuild-2.17.0.json	HOLDS	HOLDS		
+9b3a4b49d_pantsbuild-2.19.0.json	HOLDS	HOLDS		
+9b3a4b49d_pantsbuild-2.20.0.json	HOLDS	HOLDS		
+9b3a4b49d_pantsbuild-2.21.0.json	HOLDS	HOLDS		
+9b3a4b49d_pantsbuild-2.24.0.json	HOLDS	HOLDS		
+9b3a4b49d_pantsbuild-2.26.0.json	HOLDS	HOLDS		
+9b3a4b49d_pantsbuild-2.30.0.json	HOLDS	HOLDS		
+9b3a4b49d_pantsbuild-2.31.0.json	HOLDS	HOLDS		
+9b3a4b49d_pantsbuild-2.32.0.json	HOLDS	HOLDS		
+b514ab55c_mkdocs-1.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+b514ab55c_mkdocs-1.6.json	HOLDS	HOLDS		
+585707189_linutil-tab-data.json	HOLDS	HOLDS		
+585707189_linutil-tabs.json	VIOLATED	VIOLATED		
+4d1152d7e_linkinator-config.json	HOLDS	HOLDS		
+f0142393e_grpc-api-gateway.json	HOLDS	HOLDS		
+9acc8080b_global.json	HOLDS	HOLDS		
+a0b8327b0_esquio.json	HOLDS	HOLDS		
+96fd2325e_epr-manifest.json	HOLDS	HOLDS		
+5254c5bd7_stylua.json	HOLDS	HOLDS		
+171c12828_embrace-config-schema-1.0.0.json	HOLDS	HOLDS		
+4732f1274_dss-2.0.0.json	HOLDS	HOLDS		
+02a23a9e2_dotnet-releases-index.json	HOLDS	HOLDS		
+a267afc2c_docfx.json	HOLDS	HOLDS		
+6d8c7651b_detekt-1.14.1.json	HOLDS	HOLDS		
+6d8c7651b_detekt-1.22.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+c4ea50d0a_csscomb.json	HOLDS	HOLDS		
+007b6a2ce_cosmos-config.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+d010b17f2_content-security-policy-report-2.json	HOLDS	HOLDS		
+33e0c1aad_component-detection-manifest.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+3f7a68e36_agripparc-1.2.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+3f7a68e36_agripparc-1.3.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+3f7a68e36_agripparc-1.4.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+2fbc78141_web-manifest-app-info.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+2fbc78141_web-manifest-combined.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+2fbc78141_web-manifest-share-target.json	HOLDS	HOLDS		
+2fbc78141_web-manifest.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+8f564734e_mdxlintrc.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+8f564734e_rehyperc.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+8f564734e_remarkrc.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/definitions/partialPluginOptions;/definitions/pluginArray;/definitions/pluginObject
+0cb7fee4f_ninjs-1.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+0cb7fee4f_ninjs-1.1.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+0cb7fee4f_ninjs-1.2.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+0cb7fee4f_ninjs-1.3.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+0cb7fee4f_ninjs-1.4.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+0cb7fee4f_ninjs-2.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+24eb48915_anywork-ac-1.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/allOf/0/then/properties/swagger-codegen/properties/actions
+24eb48915_anywork-ac-1.1.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/version
+08dfd4c48_npmpackagejsonlintrc.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/dataType;/definitions/dependencies;/definitions/deprecated;/definitions/format;/definitions/packageJsonProperties;/definitions/requiredNode;/definitions/validValues
+449644d6d_stale.json	HOLDS	HOLDS		
+5d48284b4_ruff.json	HOLDS	HOLDS		
+1983458b5_es6importsorterrc.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+8cfea30d1_settings.job.json	HOLDS	HOLDS		
+8cfea30d1_webjob-publish-settings.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+8cfea30d1_webjobs-list.json	HOLDS	HOLDS		
+7de30f637_plagiarize-0.0.json	HOLDS	HOLDS		
+7de30f637_plagiarize.json	HOLDS	HOLDS		
+a3cf4d531_prettierrc-1.8.2.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/optionsDefinition;/definitions/overridesDefinition
+a3cf4d531_prettierrc-2.8.8.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+a3cf4d531_prettierrc.json	NOT EVALUATED	HOLDS		
+95251c446_openfin.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+8daf1ea17_local.settings.json	HOLDS	HOLDS		
+8cd5ed422_function.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+0883ffc55_foxx-manifest.json	HOLDS	HOLDS		
+17ffef983_dotnetcli.host.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/symbolInfo
+8e4aaf018_coffeelint.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+8f1ea95be_crowdin.json	HOLDS	HOLDS		
+57dbae09f_compilerconfig.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+57dbae09f_compilerdefaults.json	HOLDS	HOLDS		
+7db0907d2_debugsettings.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+ac29948d9_pattern.json	HOLDS	HOLDS		
+b46ae83d5_launchsettings.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/definitions/iisBindingContent;/definitions/iisSetting;/definitions/profile;/definitions/profileContent
+929201f41_clasp.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+cc3c8b16c_devinit.schema-1.0.json	HOLDS	HOLDS		
+cc3c8b16c_devinit.schema-2.0.json	HOLDS	HOLDS		
+cc3c8b16c_devinit.schema-3.0.json	HOLDS	HOLDS		
+cc3c8b16c_devinit.schema-4.0.json	HOLDS	HOLDS		
+cc3c8b16c_devinit.schema-5.0.json	HOLDS	HOLDS		
+cc3c8b16c_devinit.schema-6.0.json	HOLDS	HOLDS		
+2bb183f67_ubuntu-server-autoinstall.json	HOLDS	HOLDS		
+3227450c3_vsext.json	HOLDS	HOLDS		
+e24d3594f_commands.json	HOLDS	HOLDS		
+5518b8716_grafana-dashboard-5.x.json	HOLDS	HOLDS		
+1515ac50c_nswag.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+ffc516072_asmdef.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/anyOf/0/properties/excludePlatforms;/anyOf/0/properties/includePlatforms;/anyOf/1/properties/excludePlatforms;/anyOf/1/properties/includePlatforms;/anyOf/2/properties/excludePlatforms;/anyOf/2/properties/includePlatforms
+03ace7195_azure-iot-edge-deployment-1.0.json	HOLDS	HOLDS		
+03ace7195_azure-iot-edge-deployment-2.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+03ace7195_azure-iot-edge-deployment-template-1.0.json	HOLDS	HOLDS		
+03ace7195_azure-iot-edge-deployment-template-2.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+03ace7195_azure-iot-edge-deployment-template-3.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+03ace7195_azure-iot-edge-deployment-template-4.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+03ace7195_azure-iot-edgeagent-deployment-1.0.json	HOLDS	HOLDS		
+03ace7195_azure-iot-edgeagent-deployment-1.1.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+03ace7195_azure-iot-edgehub-deployment-1.1.json	HOLDS	HOLDS		
+03ace7195_azure-iot-edgehub-deployment-1.2.json	HOLDS	HOLDS		
+d448973fa_testenvironments.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+71fd0d508_vsix-manifestinjection.json	HOLDS	HOLDS		
+71fd0d508_vsix-publish.json	HOLDS	HOLDS		
+5bdf76a35_templatesources.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+66c06da92_staticwebapp.config.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+66c06da92_swa-cli.config.json	NOT EVALUATED	HOLDS		
+044bdde73_starlake.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/AppConfigV1/properties/gizmosql;/definitions/ConnectionV1/properties/_transpileDialect;/definitions/GizmoV1;/definitions/RestAPIEndpointV1/properties/errorPath;/definitions/RestAPIProxyV1;/definitions/RestAPIRetryV1;/definitions/RestAPITimeoutV1;/definitions/RestAPITlsV1;/definitions/RestAPIV1/properties/proxy;/definitions/RestAPIV1/properties/retry;/definitions/RestAPIV1/properties/timeout;/definitions/RestAPIV1/properties/tls
+6630c6262_crucible-code-schema.json	HOLDS	HOLDS		
+653b80f14_github-workflow.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/permissions-event/properties/copilot-requests
+3da93b2a1_tox.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/factor_labeled_dict/additionalProperties;/definitions/factor_labeled_dict/not/properties/prefix;/definitions/factor_range_dict/properties/default;/definitions/factor_values_dict
+36fa42f20_crucible-code-schema.json	HOLDS	HOLDS		
+fcd3ba71d_nightwatch.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+1aa2bfe5e_sprite.json	HOLDS	HOLDS		
+0a7821f40_resjson.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+13b84a502_creatomic.json	HOLDS	HOLDS		
+259c342b9_label-commenter-config.json	HOLDS	HOLDS		
+c8cfb07d7_lsdlschema-0.7.json	NOT EVALUATED	HOLDS		
+c8cfb07d7_lsdlschema-1.0.json	NOT EVALUATED	HOLDS		
+c8cfb07d7_lsdlschema-2.0.json	NOT EVALUATED	HOLDS		
+c8cfb07d7_lsdlschema-3.0.json	NOT EVALUATED	HOLDS		
+c8cfb07d7_lsdlschema-3.1.json	NOT EVALUATED	HOLDS		
+c8cfb07d7_lsdlschema-3.2.json	NOT EVALUATED	HOLDS		
+c8cfb07d7_lsdlschema-3.3.json	NOT EVALUATED	HOLDS		
+c8cfb07d7_lsdlschema-3.4.json	NOT EVALUATED	HOLDS		
+c8cfb07d7_lsdlschema-3.5.json	NOT EVALUATED	HOLDS		
+c8cfb07d7_lsdlschema-4.0.json	NOT EVALUATED	HOLDS		
+c8cfb07d7_lsdlschema-4.1.json	NOT EVALUATED	HOLDS		
+4dd722547_appsettings.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/ElmahIo;/definitions/Serilog/properties/MinimumLevel;/definitions/pwa
+5c0bfe97e_github-workflow.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/permissions-event/properties/vulnerability-alerts
+6110b687f_jfrog-pipelines.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/JFrog-Pipelines/anyOf/0;/definitions/JFrog-Pipelines/anyOf/1;/definitions/JFrog-Pipelines/anyOf/2;/definitions/JFrog-Pipelines/patternProperties/^.*$;/definitions/Pipeline/properties/configuration/properties/environmentVariables/properties/readOnly/additionalProperties;/definitions/Pipeline/properties/configuration/properties/runtime/else;/definitions/Pipeline/properties/configuration/properties/runtime/then;/definitions/Pipeline/properties/postRun/properties/configuration;/definitions/Pipeline/properties/preRun/properties/configuration
+31cabd307_crucible-code-schema.json	HOLDS	HOLDS		
+07a2d1017_dependabot-2.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+1ec8595a0_chrome-manifest.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+373c78ea3_jovo-language-model.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+fcd3a66b8_azure-deviceupdate-manifest-definitions-4.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/compatibility/items;/definitions/compatibilityInfo/additionalProperties;/definitions/file/properties/filename;/definitions/file/properties/hashes;/definitions/fileHashes/additionalProperties
+fcd3a66b8_azure-deviceupdate-manifest-definitions-5.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/compatibilityInfo/additionalProperties;/definitions/fileHashes/additionalProperties
+9743e7478_vs-nesting.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+1c03efc8a_renovate-39.json	HOLDS	HOLDS		
+1c03efc8a_renovate-40.json	HOLDS	HOLDS		
+64f8a2254_web-types.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+195da2efa_github-action.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+195da2efa_github-workflow.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/definitions/eventObject;/definitions/normalJob/properties/runs-on/anyOf/1/anyOf/0;/definitions/step/oneOf/0;/definitions/step/oneOf/1;/definitions/step/oneOf/2;/definitions/step/oneOf/3;/definitions/step/oneOf/4;/definitions/step/oneOf/5;/definitions/step/properties/with;/definitions/workflowDispatchInput
+201431e67_plagiarize-me-0.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+201431e67_plagiarize-me.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+1f5a671a7_tsconfig.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/buildOptionsDefinition;/definitions/compileOnSaveDefinition;/definitions/compilerOptionsDefinition;/definitions/excludeDefinition;/definitions/extendsDefinition;/definitions/filesDefinition;/definitions/includeDefinition;/definitions/referencesDefinition;/definitions/tsNodeDefinition;/definitions/typeAcquisitionDefinition;/definitions/watchOptionsDefinition
+1f5a671a7_tsoa.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+c9106d8e8_phraseapp.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+05d11753f_pocketmine-plugin.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+0450a9a05_pnpm-workspace.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+2d39ba6ac_pnpm-workspace.json	HOLDS	HOLDS		
+046eaaf2e_cryproj.52.schema.json	HOLDS	HOLDS		
+046eaaf2e_cryproj.53.schema.json	HOLDS	HOLDS		
+046eaaf2e_cryproj.54.schema.json	HOLDS	HOLDS		
+046eaaf2e_cryproj.55.schema.json	HOLDS	HOLDS		
+046eaaf2e_cryproj.dev.schema.json	HOLDS	HOLDS		
+046eaaf2e_cryproj.json	HOLDS	HOLDS		
+9935802fa_taurus.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+57569f218_solidaritySchema.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+3c1fedcb0_servicehub.config.schema.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/hosts;/properties/services
+3c1fedcb0_servicehub.service.schema.json	HOLDS	HOLDS		
+d496d2737_travis.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+ea1c58784_pnpm-workspace.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+959921ff5_crucible-code-schema.json	HOLDS	HOLDS		
+5ee09a8f0_rumdl.json	HOLDS	HOLDS		
+52f403f27_hias-hitf.json	NOT EVALUATED	HOLDS		
+52fc6197e_ruff.json	HOLDS	HOLDS		
+1ba34fe6a_jsone.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+13e89998e_cargo.json	VIOLATED	VIOLATED		
+09eef2889_aurora-1.0.json	HOLDS	HOLDS		
+09eef2889_aurora-1.1.json	HOLDS	HOLDS		
+09eef2889_aurora-1.2.json	HOLDS	HOLDS		
+09eef2889_aurora-1.3.json	HOLDS	HOLDS		
+09eef2889_aurora-2.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/widgetDefinition/then/properties/displayFields
+90bbd9118_crucible-code-schema.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/extensions/additionalProperties/properties/digest
+15df70842_foundryvtt-module-manifest.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+15df70842_foundryvtt-system-manifest.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+15df70842_foundryvtt-world-manifest.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+acc1b653d_github-action.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+419edef4b_github-workflow.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+1f04be83d_codeclimate.json	HOLDS	HOLDS		
+ee05618f7_feed-1.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+ee05618f7_feed.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+98e096e19_rumdl.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+be1537172_minecraft-recipe.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/cookingRecipeCategory/properties/category
+c8af098c9_package.manifest-7.0.0.json	HOLDS	HOLDS		
+c8af098c9_package.manifest-8.0.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+c8af098c9_package.manifest.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+cd8aa06c4_maturin.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/$defs/Bindings;/$defs/CompatibilityTag;/$defs/GitHubCIConfig/properties/publishing-environment;/$defs/GitHubCIConfig/properties/trusted-publishing;/$defs/PlatformTag;/properties/pgo-command
+3b367f183_rumdl.json	HOLDS	HOLDS		
+64a83f4a0_crucible-code-schema.json	VIOLATED	VIOLATED		
+764dff657_pnpm-workspace.json	HOLDS	HOLDS		
+ff02e09d1_pnpm-workspace.json	HOLDS	HOLDS		
+425eb8ebd_crucible-code-schema.json	HOLDS	HOLDS		
+7df82dcd3_dotnet-tools.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/tools/patternProperties/^.*$/properties/rollForward
+e4538c30a_rumdl.json	HOLDS	HOLDS		
+8f5de3e1d_compile-commands.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+12b7130cb_now.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+d4ba9022d_pull-request-labeler-4.json	HOLDS	HOLDS		
+d4ba9022d_pull-request-labeler-5.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/globRule;/definitions/match
+d4ba9022d_pull-request-labeler.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/globRule;/definitions/match
+e7f0b560a_pnpm-workspace.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+80dbcdc1a_pnpm-workspace.json	HOLDS	HOLDS		
+0263b3a59_crucible-code-schema.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/mcp/properties/servers
+4470367d5_ruff.json	HOLDS	HOLDS		
+f5babdc1c_partial-pyright.json	HOLDS	HOLDS		
+9ca2918cd_tsconfig.json	HOLDS	HOLDS		
+15220bcdd_specmatic.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/AsyncApiTestRunOptions/properties/subscriberReadinessWaitTime;/definitions/AsyncApiTestRunOptions/properties/subscriberReadinessWaitTimeout
+a1bfb2b17_github-workflow.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/cacheMode;/definitions/normalJob/properties/cache-mode;/definitions/reusableWorkflowCallJob/properties/cache-mode
+f6a4672f8_bunfig.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/properties/debug;/properties/install/properties/scopes;/properties/loader/additionalProperties
+bc93cb065_hugo.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/locale
+f7197bde7_xs-app.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/definitions/allowedOriginItem;/definitions/corsConfigItem;/definitions/hostPatternSchema;/properties/cors;/properties/responseHeaders;/properties/stateProtection
+82ebae3ea_proxies.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/requestOverrides-schema/patternProperties/^backend\.request\.headers\.(?!<HeaderName>).+$;/definitions/requestOverrides-schema/patternProperties/^backend\.request\.headers\..+$;/definitions/requestOverrides-schema/patternProperties/^backend\.request\.querystring\.(?!<ParameterName>).+$;/definitions/requestOverrides-schema/patternProperties/^backend\.request\.querystring\..+$;/definitions/responseOverrides-schema/patternProperties/^response\.headers\.(?!<HeaderName>).+$;/definitions/responseOverrides-schema/patternProperties/^response\.headers\..+$
+3fefe5b64_metricshub-connector.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/connector/properties/healthChecks
+8b994c014_github-workflow.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/permissions-event/properties/id-token
+b3525279d_dependabot-2.0.json	HOLDS	HOLDS		
+29ef6d663_sarif-1.0.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+29ef6d663_sarif-2.0.0-csd.2.beta.2018-10-10.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+29ef6d663_sarif-2.0.0-csd.2.beta.2019-01-09.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+29ef6d663_sarif-2.0.0-csd.2.beta.2019-01-24.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+29ef6d663_sarif-2.0.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+29ef6d663_sarif-2.1.0-rtm.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+29ef6d663_sarif-2.1.0-rtm.1.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+29ef6d663_sarif-2.1.0-rtm.2.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+29ef6d663_sarif-2.1.0-rtm.3.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+29ef6d663_sarif-2.1.0-rtm.4.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+29ef6d663_sarif-2.1.0-rtm.5.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+29ef6d663_sarif-2.1.0-rtm.6.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+29ef6d663_sarif-2.1.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+29ef6d663_sarif-external-property-file-2.1.0-rtm.0.json	NOT EVALUATED	HOLDS		
+29ef6d663_sarif-external-property-file-2.1.0-rtm.1.json	NOT EVALUATED	HOLDS		
+29ef6d663_sarif-external-property-file-2.1.0-rtm.2.json	NOT EVALUATED	HOLDS		
+29ef6d663_sarif-external-property-file-2.1.0-rtm.3.json	NOT EVALUATED	HOLDS		
+29ef6d663_sarif-external-property-file-2.1.0-rtm.4.json	NOT EVALUATED	HOLDS		
+29ef6d663_sarif-external-property-file-2.1.0-rtm.5.json	NOT EVALUATED	HOLDS		
+29ef6d663_sarif-external-property-file-2.1.0.json	NOT EVALUATED	HOLDS		
+29ef6d663_sarif-external-property-file.json	NOT EVALUATED	HOLDS		
+29ef6d663_sarif.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+7cd4ffa43_project-1.0.0-beta3.json	HOLDS	HOLDS		
+7cd4ffa43_project-1.0.0-beta4.json	HOLDS	HOLDS		
+7cd4ffa43_project-1.0.0-beta5.json	HOLDS	HOLDS		
+7cd4ffa43_project-1.0.0-beta6.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+7cd4ffa43_project-1.0.0-beta8.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+7cd4ffa43_project-1.0.0-rc1.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+7cd4ffa43_project-1.0.0-rc2.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+7cd4ffa43_project.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+6b21aa3c0_nest-cli.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+060c6eedb_ruff.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/Flake8TidyImportsOptions/properties/extend-banned-api
+4836277f2_mprocs-0.6.4.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/procs/patternProperties/^[a-zA-Z0-9_-]+$/oneOf/0/properties/shell;/properties/procs/patternProperties/^[a-zA-Z0-9_-]+$/oneOf/1/properties/cmd
+4836277f2_nest-cli.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+4836277f2_netlify.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/definitions/fields/items;/definitions/files/items;/definitions/widget
+4836277f2_nodemon.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/dependencies/pollingInterval/properties/legacyWatch
+4836277f2_openhab-5.1.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/items/patternProperties/^[a-zA-Z_][a-zA-Z0-9_]*$/allOf/0/if/properties/dimension;/properties/items/patternProperties/^[a-zA-Z_][a-zA-Z0-9_]*$/allOf/1/then/not/properties/dimension;/properties/items/patternProperties/^[a-zA-Z_][a-zA-Z0-9_]*$/allOf/2/not/properties/channel;/properties/items/patternProperties/^[a-zA-Z_][a-zA-Z0-9_]*$/allOf/2/not/properties/channels;/properties/items/patternProperties/^[a-zA-Z_][a-zA-Z0-9_]*$/properties/group/allOf/0/if/properties/dimension;/properties/items/patternProperties/^[a-zA-Z_][a-zA-Z0-9_]*$/properties/group/allOf/1/then/not/properties/dimension;/properties/things/patternProperties/^[A-Za-z0-9]([\w-]+:)+[\w-]+$/properties/channels/patternProperties/^.+$/allOf/0/if;/properties/things/patternProperties/^[A-Za-z0-9]([\w-]+:)+[\w-]+$/properties/channels/patternProperties/^.+$/allOf/0/then/not/anyOf/0/properties/kind;/properties/things/patternProperties/^[A-Za-z0-9]([\w-]+:)+[\w-]+$/properties/channels/patternProperties/^.+$/allOf/0/then/not/anyOf/1/properties/itemType;/properties/things/patternProperties/^[A-Za-z0-9]([\w-]+:)+[\w-]+$/properties/channels/patternProperties/^.+$/allOf/1/if/properties/itemDimension;/properties/things/patternProperties/^[A-Za-z0-9]([\w-]+:)+[\w-]+$/properties/channels/patternProperties/^.+$/allOf/2/then/not/properties/itemDimension
+4836277f2_opensrm.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/DurationSLO/anyOf/0/properties/p50;/definitions/DurationSLO/anyOf/1/properties/p90;/definitions/DurationSLO/anyOf/2/properties/p95;/definitions/DurationSLO/anyOf/3/properties/p99;/definitions/FeedbackLatencySLO/anyOf/0/properties/p50;/definitions/FeedbackLatencySLO/anyOf/1/properties/p90;/definitions/LatencySLO/anyOf/0/properties/p50;/definitions/LatencySLO/anyOf/1/properties/p90;/definitions/LatencySLO/anyOf/2/properties/p95;/definitions/LatencySLO/anyOf/3/properties/p99;/definitions/LatencySLO/anyOf/4/properties/p999;/definitions/ProcessingTimeSLO/anyOf/0/properties/p50;/definitions/ProcessingTimeSLO/anyOf/1/properties/p90;/definitions/ProcessingTimeSLO/anyOf/2/properties/p95;/definitions/ProcessingTimeSLO/anyOf/3/properties/p99;/definitions/QueryLatencySLO/anyOf/0/properties/p50;/definitions/QueryLatencySLO/anyOf/1/properties/p90;/definitions/QueryLatencySLO/anyOf/2/properties/p95;/definitions/QueryLatencySLO/anyOf/3/properties/p99;/definitions/QueryLatencySLO/anyOf/4/properties/p999
+4836277f2_paper-plugin.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/authors;/properties/contributors
+4836277f2_partial-pyright.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/defineConstant/additionalProperties
+4836277f2_phrase.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+4836277f2_pnpm-workspace.json	NOT EVALUATED	HOLDS		
+4836277f2_pre-commit-config.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/local_repo/properties/hooks/items/properties/entry;/definitions/local_repo/properties/hooks/items/properties/id;/definitions/local_repo/properties/hooks/items/properties/language;/definitions/local_repo/properties/hooks/items/properties/name
+4836277f2_prometheus.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/auth/allOf/0/if/not;/definitions/auth/allOf/0/then;/definitions/auth/allOf/1/if/not;/definitions/auth/allOf/1/then;/definitions/auth/allOf/2/if/not;/definitions/auth/allOf/2/then;/definitions/auth/allOf/3/if/not;/definitions/auth/allOf/3/then;/definitions/auth/allOf/4/if/not;/definitions/auth/allOf/4/then;/definitions/auth/allOf/5/if/not;/definitions/auth/allOf/5/then;/definitions/authorization/oneOf/0/properties/credentials;/definitions/authorization/oneOf/1/properties/credentials_file;/definitions/azuread/properties/sdk;/definitions/basic_auth/oneOf/0/properties/password;/definitions/basic_auth/oneOf/1/properties/password_file;/definitions/oauth2/oneOf/0/properties/client_secret;/definitions/oauth2/oneOf/1/properties/client_secret_file;/definitions/relabel_configs/items/if;/definitions/relabel_configs/items/then/properties/target_label
+4836277f2_pylock.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/1.0
+4836277f2_pyproject.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+4836277f2_pyrseas-0.8.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/onePriv/oneOf/1/properties/all;/definitions/onePriv/oneOf/10/properties/execute;/definitions/onePriv/oneOf/11/properties/create;/definitions/onePriv/oneOf/2/properties/insert;/definitions/onePriv/oneOf/3/properties/delete;/definitions/onePriv/oneOf/4/properties/select;/definitions/onePriv/oneOf/5/properties/update;/definitions/onePriv/oneOf/6/properties/truncate;/definitions/onePriv/oneOf/7/properties/references;/definitions/onePriv/oneOf/8/properties/trigger;/definitions/onePriv/oneOf/9/properties/usage
+4836277f2_size-limit.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/items/allOf/1/if/not;/items/allOf/1/then
+4836277f2_starlake.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/JDBCSchemaV1/allOf/1;/definitions/JDBCSchemasV1/allOf/1;/definitions/KafkaTopicConfigV1;/definitions/OpenAPIsV1/allOf/1;/definitions/RestAPIsV1/allOf/1;/definitions/StarlakeV1Base/oneOf/0/properties/extract;/definitions/StarlakeV1Base/oneOf/1/properties/load;/definitions/StarlakeV1Base/oneOf/10/properties/dag;/definitions/StarlakeV1Base/oneOf/2/properties/transform;/definitions/StarlakeV1Base/oneOf/3/properties/env;/definitions/StarlakeV1Base/oneOf/4/properties/types;/definitions/StarlakeV1Base/oneOf/5/properties/tables;/definitions/StarlakeV1Base/oneOf/6/properties/table;/definitions/StarlakeV1Base/oneOf/7/properties/task;/definitions/StarlakeV1Base/oneOf/8/properties/application;/definitions/StarlakeV1Base/oneOf/9/properties/refs
+4836277f2_tmlanguage.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/pattern/dependencies/begin/anyOf/0;/definitions/pattern/dependencies/begin/anyOf/1;/definitions/pattern/dependencies/beginCaptures/anyOf/0;/definitions/pattern/dependencies/beginCaptures/anyOf/1;/definitions/pattern/dependencies/contentName/anyOf/0;/definitions/pattern/dependencies/contentName/anyOf/1
+f71d8129b_pnpm-workspace.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+4ed4c5dd7_utam-page-object-1.5.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+4ed4c5dd7_utam-page-object-2.0.3.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+4ed4c5dd7_utam-page-object-2.2.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+4ed4c5dd7_utam-page-object.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/allOf/0/if;/allOf/1/if;/definitions/action;/definitions/arg/oneOf/0/properties/name;/definitions/arg/oneOf/1/properties/value/anyOf/0;/definitions/arg/oneOf/1/properties/value/anyOf/1;/definitions/arg/oneOf/1/properties/value/anyOf/2;/definitions/arg/oneOf/1/properties/value/anyOf/3;/definitions/arg/oneOf/1/properties/value/anyOf/4;/definitions/arg/oneOf/1/properties/value/anyOf/5;/definitions/arg/oneOf/2/properties/predicate;/definitions/element/properties/type;/definitions/interfaceMethod/properties/returnType;/definitions/metadata;/definitions/methodDescription;/definitions/pageObject/properties/beforeLoad;/definitions/rootDescription;/definitions/type
+af686ddb1_vtesttree-schema-v2.1.0.json	HOLDS	HOLDS		
+af686ddb1_vtesttree-schema-v2.2.0.json	HOLDS	HOLDS		
+af686ddb1_vtesttree-schema-v2.3.0.json	HOLDS	HOLDS		
+af686ddb1_vtesttree-schema-v2.4.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/param-values-vectors-combinatorics
+2aded6096_sarif-1.0.0.json	VIOLATED	VIOLATED		
+2aded6096_sarif-2.0.0-csd.2.beta.2018-10-10.json	VIOLATED	VIOLATED		
+2aded6096_sarif-2.0.0-csd.2.beta.2019-01-09.json	VIOLATED	VIOLATED		
+2aded6096_sarif-2.0.0-csd.2.beta.2019-01-24.json	VIOLATED	VIOLATED		
+2aded6096_sarif-2.0.0.json	VIOLATED	VIOLATED		
+2aded6096_sarif-2.1.0-rtm.0.json	VIOLATED	VIOLATED		
+2aded6096_sarif-2.1.0-rtm.1.json	VIOLATED	VIOLATED		
+2aded6096_sarif-2.1.0-rtm.2.json	VIOLATED	VIOLATED		
+2aded6096_sarif-2.1.0-rtm.3.json	VIOLATED	VIOLATED		
+2aded6096_sarif-2.1.0-rtm.4.json	VIOLATED	VIOLATED		
+2aded6096_sarif-2.1.0-rtm.5.json	VIOLATED	VIOLATED		
+2aded6096_sarif-2.1.0-rtm.6.json	VIOLATED	VIOLATED		
+2aded6096_sarif-2.1.0.json	VIOLATED	VIOLATED		
+2aded6096_sarif-external-property-file-2.1.0-rtm.0.json	VIOLATED	VIOLATED		
+2aded6096_sarif-external-property-file-2.1.0-rtm.1.json	VIOLATED	VIOLATED		
+2aded6096_sarif-external-property-file-2.1.0-rtm.2.json	VIOLATED	VIOLATED		
+2aded6096_sarif-external-property-file-2.1.0-rtm.3.json	VIOLATED	VIOLATED		
+2aded6096_sarif-external-property-file-2.1.0-rtm.4.json	VIOLATED	VIOLATED		
+2aded6096_sarif-external-property-file-2.1.0-rtm.5.json	VIOLATED	VIOLATED		
+2aded6096_sarif-external-property-file-2.1.0.json	VIOLATED	VIOLATED		
+2aded6096_sarif-external-property-file.json	VIOLATED	VIOLATED		
+2aded6096_sarif.json	VIOLATED	VIOLATED		
+78394b1fc_enonic-xp-cms-8.0.0-B4.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-cms-8.0.0-B5.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-cms-8.0.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-content-type-8.0.0-B4.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-content-type-8.0.0-B5.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-content-type-8.0.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-form-fragment-8.0.0-B4.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-form-fragment-8.0.0-B5.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-form-fragment-8.0.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-idprovider-8.0.0-B4.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-idprovider-8.0.0-B5.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-idprovider-8.0.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-layout-8.0.0-B4.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-layout-8.0.0-B5.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-layout-8.0.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-macro-8.0.0-B4.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-macro-8.0.0-B5.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-macro-8.0.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-mixin-8.0.0-B4.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-mixin-8.0.0-B5.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-mixin-8.0.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-page-8.0.0-B4.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-page-8.0.0-B5.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-page-8.0.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-part-8.0.0-B4.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-part-8.0.0-B5.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-part-8.0.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/formFragmentDef/oneOf/0;/$defs/formFragmentDef/oneOf/1;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-site-8.0.0-B4.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+78394b1fc_enonic-xp-site-8.0.0-B5.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+78394b1fc_enonic-xp-site-8.0.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+78394b1fc_enonic-xp-style-8.0.0-B4.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/imageStyleDef
+78394b1fc_enonic-xp-style-8.0.0-B5.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/imageStyleDef
+78394b1fc_enonic-xp-style-8.0.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/imageStyleDef
+78394b1fc_enonic-xp-task-8.0.0-B4.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-task-8.0.0-B5.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+78394b1fc_enonic-xp-task-8.0.0.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/attachmentUploaderDef;/$defs/checkBoxDef;/$defs/comboBoxDef;/$defs/contentSelectorDef;/$defs/contentTypeFilterDef;/$defs/customSelectorDef;/$defs/dateDef;/$defs/dateTimeDef;/$defs/doubleDef;/$defs/geoPointDef;/$defs/htmlAreaDef;/$defs/imageSelectorDef;/$defs/instantDef;/$defs/longDef;/$defs/mediaSelectorDef;/$defs/principalSelectorDef;/$defs/radioButtonDef;/$defs/tagDef;/$defs/textAreaDef;/$defs/textLineDef;/$defs/timeDef
+897f5028b_abc-supply-plan-10.0.0.json	HOLDS	HOLDS		
+897f5028b_abc-supply-plan-10.1.0.json	HOLDS	HOLDS		
+897f5028b_abc-supply-plan-11.0.0.json	HOLDS	HOLDS		
+897f5028b_abc-supply-plan-11.1.0.json	HOLDS	HOLDS		
+897f5028b_abc-supply-plan-11.2.0.json	HOLDS	HOLDS		
+897f5028b_abc-supply-plan-11.3.0.json	HOLDS	HOLDS		
+897f5028b_abc-supply-plan-11.4.0.json	HOLDS	HOLDS		
+897f5028b_abc-supply-plan-12.0.0.json	HOLDS	HOLDS		
+897f5028b_abc-supply-plan-4.0.0.json	HOLDS	HOLDS		
+897f5028b_abc-supply-plan-5.0.0.json	HOLDS	HOLDS		
+897f5028b_abc-supply-plan-6.0.0.json	HOLDS	HOLDS		
+897f5028b_abc-supply-plan-7.0.0.json	HOLDS	HOLDS		
+897f5028b_abc-supply-plan-8.0.0.json	HOLDS	HOLDS		
+897f5028b_abc-supply-plan-9.0.0.json	HOLDS	HOLDS		
+897f5028b_changepacks.json	HOLDS	HOLDS		
+897f5028b_devup.json	HOLDS	HOLDS		
+897f5028b_docker-bake.json	HOLDS	HOLDS		
+897f5028b_dotnet-tools.json	HOLDS	HOLDS		
+897f5028b_drupal-migration.json	HOLDS	HOLDS		
+897f5028b_evolving-resolutive-process-notation-1.0.json	HOLDS	HOLDS		
+897f5028b_gadget-yaml.json	HOLDS	HOLDS		
+897f5028b_git-cliff.json	HOLDS	HOLDS		
+897f5028b_github-cli-config.json	HOLDS	HOLDS		
+897f5028b_github-cli-hosts.json	HOLDS	HOLDS		
+897f5028b_hugo.json	HOLDS	HOLDS		
+897f5028b_jekyll.json	HOLDS	HOLDS		
+897f5028b_knowledge-unit.json	HOLDS	HOLDS		
+897f5028b_prometheus-alertmanager.json	HOLDS	HOLDS		
+897f5028b_prometheus.rules.test.json	HOLDS	HOLDS		
+897f5028b_pubspec.json	HOLDS	HOLDS		
+897f5028b_quikrun.json	HOLDS	HOLDS		
+897f5028b_rumdl.json	HOLDS	HOLDS		
+897f5028b_solarxy-config.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/Budgets/properties/default;/definitions/Budgets/properties/environment;/definitions/Budgets/properties/hero;/definitions/Budgets/properties/prop
+897f5028b_tizen_workspace.json	HOLDS	HOLDS		
+897f5028b_vespertide-model.json	HOLDS	HOLDS		
+831a1d518_abc-clinical-demand-forecast-1.0.0.json	HOLDS	HOLDS		
+831a1d518_abc-clinical-demand-forecast-2.0.0.json	HOLDS	HOLDS		
+831a1d518_abc-clinical-demand-forecast-3.0.0.json	HOLDS	HOLDS		
+831a1d518_abc-clinical-demand-forecast-4.0.0.json	HOLDS	HOLDS		
+831a1d518_abc-inventory-module-data-1.0.0.json	HOLDS	HOLDS		
+831a1d518_abc-inventory-module-data-2.0.0.json	HOLDS	HOLDS		
+831a1d518_abc-inventory-module-data-3.0.0.json	HOLDS	HOLDS		
+831a1d518_abc-inventory-module-data-4.0.0.json	HOLDS	HOLDS		
+831a1d518_abc-inventory-module-data-5.1.0.json	HOLDS	HOLDS		
+831a1d518_abc-inventory-module-data-5.2.0.json	HOLDS	HOLDS		
+831a1d518_abc-inventory-module-data-5.3.0.json	HOLDS	HOLDS		
+831a1d518_abc-inventory-module-data-5.4.0.json	HOLDS	HOLDS		
+831a1d518_abc-supply-plan-13.0.0.json	HOLDS	HOLDS		
+831a1d518_abc-supply-plan-14.0.0.json	HOLDS	HOLDS		
+831a1d518_aio-wasm-graph-config-1.0.0.json	HOLDS	HOLDS		
+831a1d518_aio-wasm-graph-config-1.1.0.json	HOLDS	HOLDS		
+831a1d518_aiproj-1.0.json	HOLDS	HOLDS		
+831a1d518_base-04.json	HOLDS	HOLDS		
+831a1d518_base.json	HOLDS	HOLDS		
+831a1d518_cargo-mutants-config.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+831a1d518_cfgd-configsource-0.10.0.json	HOLDS	HOLDS		
+831a1d518_cfgd-configsource-0.5.0.json	HOLDS	HOLDS		
+831a1d518_cfgd-module-0.10.0.json	HOLDS	HOLDS		
+831a1d518_cfgd-module-0.5.0.json	HOLDS	HOLDS		
+831a1d518_cfgd-profile-0.5.0.json	HOLDS	HOLDS		
+831a1d518_lsd-config.json	HOLDS	HOLDS		
+831a1d518_prometheus.rules.json	HOLDS	HOLDS		
+831a1d518_pulumi.json	HOLDS	HOLDS		
+831a1d518_tfpowershell-datasource.json	HOLDS	HOLDS		
+831a1d518_tfpowershell-provider.json	HOLDS	HOLDS		
+831a1d518_tfpowershell-resource.json	HOLDS	HOLDS		
+831a1d518_tombi.json	HOLDS	HOLDS		
+831a1d518_ty.json	HOLDS	HOLDS		
+831a1d518_vespertide-migration.json	HOLDS	HOLDS		
+831a1d518_winget-pkgs-locale-1.0.0.json	HOLDS	HOLDS		
+1aadbc182_djlint.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+efe119fba_pnpm-workspace.json	HOLDS	HOLDS		
+604a6035a_rumdl.json	HOLDS	HOLDS		
+955159784_vector.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/allOf/0/properties/enrichment_tables/additionalProperties;/allOf/0/properties/provider/oneOf/1;/allOf/0/properties/secret/additionalProperties;/allOf/0/properties/tests/items/properties/input/oneOf/1;/allOf/1/properties/expire_metrics/oneOf/1;/allOf/1/properties/expire_metrics_per_metric_set;/allOf/1/properties/wildcard_matching/oneOf/1;/definitions/codecs::decoding::DeserializerConfig;/definitions/codecs::decoding::FramingConfig;/definitions/codecs::encoding::config::EncodingConfig;/definitions/codecs::encoding::framing::framer::FramingConfig;/definitions/codecs::encoding::serializer::SerializerConfig;/definitions/core::option::Option<codecs::decoding::DeserializerConfig>/oneOf/1;/definitions/core::option::Option<codecs::decoding::FramingConfig>/oneOf/1;/definitions/core::option::Option<vector::sinks::util::buffer::compression::Compression>/oneOf/1;/definitions/vector::aws::auth::AwsAuthentication;/definitions/vector::aws::region::RegionOrEndpoint;/definitions/vector::common::http::server_auth::HttpServerAuthConfig;/definitions/vector::conditions::AnyCondition/oneOf/1;/definitions/vector::conditions::ConditionConfig;/definitions/vector::config::sink::SinkOuter<alloc::string::String>;/definitions/vector::config::source::SourceOuter;/definitions/vector::config::transform::TransformOuter<alloc::string::String>;/definitions/vector::enrichment_tables::file::FileConfig/properties/file/properties/encoding;/definitions/vector::enrichment_tables::memory::config::MemoryConfig/properties/source_config/oneOf/1;/definitions/vector::http::Auth;/definitions/vector::http::ParameterValue/oneOf/1;/definitions/vector::kafka::KafkaSaslConfig;/definitions/vector::nats::NatsAuthConfig;/definitions/vector::secrets::exec::ExecVersion;/definitions/vector::sinks::amqp::config::AmqpSinkConfig/allOf/0/properties/properties/oneOf/1;/definitions/vector::sinks::aws_s3::config::S3SinkConfig/allOf/0/properties/retry_strategy;/definitions/vector::sinks::azure_logs_ingestion::config::AzureLogsIngestionConfig/properties/auth;/definitions/vector::sinks::clickhouse::config::ClickhouseConfig/properties/batch_encoding/oneOf/1;/definitions/vector::sinks::databend::config::DatabendConfig/properties/encoding;/definitions/vector::sinks::elasticsearch::config::ElasticsearchConfig/properties/auth/oneOf/1;/definitions/vector::sinks::elasticsearch::config::ElasticsearchConfig/properties/data_stream/oneOf/1;/definitions/vector::sinks::gcp::cloud_storage::GcsSinkConfig/allOf/0/properties/acl/oneOf/1;/definitions/vector::sinks::gcp::cloud_storage::GcsSinkConfig/allOf/0/properties/storage_class/oneOf/1;/definitions/vector::sinks::gcp::stackdriver::logs::config::StackdriverConfig/allOf/0/properties/resource;/definitions/vector::sinks::gcp::stackdriver::metrics::config::StackdriverConfig/allOf/0/properties/resource;/definitions/vector::sinks::gcp_chronicle::chronicle_unstructured::ChronicleUnstructuredConfig/allOf/0/properties/compression/oneOf/1;/definitions/vector::sinks::nats::config::NatsSinkConfig/properties/jetstream/properties/headers/oneOf/1/properties/unevaluatedProperties;/definitions/vector::sinks::opentelemetry::OpenTelemetryConfig/properties/protocol;/definitions/vector::sinks::prometheus::remote_write::config::RemoteWriteConfig/properties/auth/oneOf/1;/definitions/vector::sinks::prometheus::remote_write::config::RemoteWriteConfig/properties/batch;/definitions/vector::sinks::prometheus::remote_write::config::RemoteWriteConfig/properties/request;/definitions/vector::sinks::pulsar::config::PulsarSinkConfig/properties/auth/oneOf/1;/definitions/vector::sinks::pulsar::config::PulsarSinkConfig/properties/connection_retry_options/oneOf/1;/definitions/vector::sinks::pulsar::config::PulsarSinkConfig/properties/tls/oneOf/1;/definitions/vector::sinks::redis::config::RedisSinkConfig/properties/list_option/oneOf/1;/definitions/vector::sinks::redis::config::RedisSinkConfig/properties/sentinel_connect/oneOf/1;/definitions/vector::sinks::redis::config::RedisSinkConfig/properties/sorted_set_option/oneOf/1;/definitions/vector::sinks::splunk_hec::common::acknowledgements::HecClientAcknowledgementsConfig;/definitions/vector::sinks::util::buffer::compression::Compression/oneOf/1;/definitions/vector::sinks::util::http::RequestConfig;/definitions/vector::sinks::util::service::health::HealthConfig;/definitions/vector::sinks::websocket_server::config::WebSocketListenerSinkConfig/properties/internal_metrics/properties/extra_tags/additionalProperties;/definitions/vector::sinks::websocket_server::config::WebSocketListenerSinkConfig/properties/message_buffering/oneOf/1;/definitions/vector::sinks::websocket_server::config::WebSocketListenerSinkConfig/properties/subprotocol;/definitions/vector::sources::aws_s3::AwsS3Config/allOf/0/properties/sqs/oneOf/1;/definitions/vector::sources::docker_logs::DockerLogsConfig/properties/tls/oneOf/1;/definitions/vector::sources::exec::ExecConfig/properties/scheduled/oneOf/1;/definitions/vector::sources::exec::ExecConfig/properties/streaming/oneOf/1;/definitions/vector::sources::file::FileConfig/properties/encoding/oneOf/1;/definitions/vector::sources::file::FileConfig/properties/fingerprint;/definitions/vector::sources::host_metrics::HostMetricsConfig/properties/cgroups/oneOf/1;/definitions/vector::sources::host_metrics::HostMetricsConfig/properties/collectors;/definitions/vector::sources::nats::config::NatsSourceConfig/properties/jetstream/oneOf/1;/definitions/vector::sources::postgresql_metrics::PostgresqlMetricsConfig/properties/tls/oneOf/1;/definitions/vector::sources::pulsar::PulsarSourceConfig/properties/auth/oneOf/1;/definitions/vector::sources::pulsar::PulsarSourceConfig/properties/dead_letter_queue_policy/oneOf/1;/definitions/vector::sources::pulsar::PulsarSourceConfig/properties/tls/oneOf/1;/definitions/vector::sources::redis::RedisSourceConfig/properties/list/oneOf/1;/definitions/vector::sources::websocket::config::WebSocketConfig/allOf/0/properties/pong_message/oneOf/1/oneOf/1;/definitions/vector::transforms::Transforms;/definitions/vector::transforms::aggregate::AggregateConfig/properties/mode;/definitions/vector::transforms::dedupe::config::DedupeConfig/properties/fields/oneOf/1;/definitions/vector::transforms::dedupe::config::DedupeConfig/properties/time_settings/oneOf/1;/definitions/vector::transforms::log_to_metric::LogToMetricConfig/properties/metrics;/definitions/vector::transforms::tag_cardinality_limit::config::Config/allOf/0/properties/per_metric_limits/additionalProperties;/definitions/vector_buffers::config::BufferType;/definitions/vector_core::config::metrics_expiration::MetricLabelMatcher;/definitions/vector_core::event::metric::Metric;/definitions/vector_core::event::metric::tags::MetricTags;/definitions/vector_core::event::metric::tags::TagValueSet/oneOf/1;/definitions/vector_core::event::metric::tags::TagValueSet/oneOf/2;/definitions/vector_core::event::metric::value::MetricSketch;/definitions/vector_core::tcp::TcpKeepaliveConfig;/definitions/vector_core::tls::settings::TlsConfig;/definitions/vector_core::tls::settings::TlsEnableableConfig;/definitions/vector_core::tls::settings::TlsSourceConfig
+35800d922_stylelintrc.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/customProperty/properties/custom-property-empty-line-before/oneOf/2/items/anyOf/1/properties/except/items;/definitions/customProperty/properties/custom-property-empty-line-before/oneOf/2/items/anyOf/1/properties/ignore/items;/definitions/declaration/properties/declaration-empty-line-before/oneOf/2/items/anyOf/1/properties/except/items
+05b037b7a_rumdl.json	HOLDS	HOLDS		
+1ace7f834_bun-lock.json	HOLDS	HOLDS		
+ca65ac1df_tox.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/venv_redirect;/properties/venv_redirect_env
+fa92202e8_pnpm-workspace.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/properties/tasks/additionalProperties/properties/cache;/properties/tasks/additionalProperties/properties/cargoTargetDir;/properties/tasks/additionalProperties/properties/concurrencyGroup;/properties/tasks/additionalProperties/properties/env;/properties/tasks/additionalProperties/properties/inputs;/properties/tasks/additionalProperties/properties/outputs;/properties/tasks/additionalProperties/properties/priority
+80b186b44_tox.json	HOLDS	HOLDS		
+04da89dcb_specmatic.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/AsyncApiClientDefinition;/definitions/AsyncApiInMemoryBroker;/definitions/AsyncApiInlineServerDefinition;/definitions/AsyncApiMockRunOptions/properties/inMemoryBroker;/definitions/AsyncApiMockRunOptions/properties/servers/items;/definitions/AsyncApiMockRunOptions/properties/specs;/definitions/AsyncApiMockSpecificationRuntimeDefinition;/definitions/AsyncApiMockSpecificationRuntimeDefinitionArray;/definitions/AsyncApiRootServerDefinition;/definitions/AsyncApiServerDefinition;/definitions/AsyncApiServerReferenceDefinition;/definitions/AsyncApiServerType;/definitions/AsyncApiTestRunOptions/properties/servers/items;/definitions/AsyncApiTestRunOptions/properties/specs;/definitions/AsyncApiTestSpecificationRuntimeDefinition;/definitions/AsyncApiTestSpecificationRuntimeDefinitionArray;/definitions/AsyncApiWrappedInlineServerDefinition;/definitions/AsyncApiWrappedServerDefinition
+58e57d16b_cargo.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/DetailedDependency
+c0508524b_aio-wasm-graph-config-1.1.0.json	HOLDS	HOLDS		
+314154a4c_pnpm-workspace.json	HOLDS	HOLDS		
+87bc8d9d7_pnpm-workspace.json	HOLDS	HOLDS		
+778278bb9_bitrise-step.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/ContainerReferenceModel/oneOf/1;/definitions/StepModel/properties/asset_urls;/definitions/StepModel/properties/inputs/items;/definitions/StepModel/properties/meta;/definitions/StepModel/properties/outputs/items
+778278bb9_bitrise.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/BitriseDataModel/anyOf/0/properties/format_version;/definitions/BitriseDataModel/anyOf/1/properties/include;/definitions/BitriseDataModel/properties/containers;/definitions/BitriseDataModel/properties/meta;/definitions/BitriseDataModel/properties/pipelines;/definitions/BitriseDataModel/properties/services;/definitions/BitriseDataModel/properties/stages;/definitions/BitriseDataModel/properties/step_bundles;/definitions/BitriseDataModel/properties/workflows;/definitions/ContainerReferenceModel/oneOf/1;/definitions/EnvModel/items;/definitions/PipelineModel/properties/stages/items;/definitions/PipelineModel/properties/workflows;/definitions/PushTriggerMapItemCommitsConditionModel/oneOf/0/properties/pattern;/definitions/PushTriggerMapItemCommitsConditionModel/oneOf/1/properties/regex;/definitions/StageModel/properties/workflows/items;/definitions/ToolConfigModel/properties/extra_plugins;/definitions/ToolsModel;/definitions/TriggerMapItemRegexConditionModel/oneOf/0/properties/pattern;/definitions/TriggerMapItemRegexConditionModel/oneOf/1/properties/regex;/definitions/WorkflowModel/properties/meta
+a83ce6f19_package.json	VIOLATED	VIOLATED		
+c6c2d035d_behat.json	HOLDS	HOLDS		
+c6c2d035d_bukkit-plugin.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/permission/properties/children
+c6c2d035d_catalog-info.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/anyOf/0/allOf/0;/anyOf/0/allOf/1/properties/spec/properties/definition;/anyOf/1/allOf/0;/anyOf/2/allOf/0;/anyOf/3/allOf/0;/anyOf/4/allOf/0;/anyOf/5/allOf/0;/anyOf/6/allOf/0;/anyOf/7/allOf/0;/anyOf/8/allOf/0;/anyOf/9/allOf/0;/definitions/common/definitions/relation/properties/target;/definitions/common/definitions/status/properties/items/items;/definitions/common/definitions/statusItem/properties/error;/definitions/common/definitions/statusItem/properties/level;/definitions/entity/properties/metadata/properties/annotations/patternProperties/^.+$;/definitions/entity/properties/relations/items;/definitions/entity/properties/status
+c6c2d035d_chisel-slices.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/properties/slices/patternProperties/^[_a-zA-Z][a-zA-Z0-9_-]*$/properties/contents/patternProperties/^.+$;/properties/slices/patternProperties/^[_a-zA-Z][a-zA-Z0-9_-]*$/properties/essential
+c6c2d035d_cinnamon-spice-settings.json	HOLDS	HOLDS		
+c6c2d035d_cloud-sdk-pipeline-config-schema.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+c6c2d035d_cloudify.json	HOLDS	HOLDS		
+c6c2d035d_datalogic-scan2deploy-android.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+c6c2d035d_deployed.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+c6c2d035d_dofigen.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/Healthcheck/properties/retries;/definitions/ImageName/properties/port;/definitions/Port/properties/port;/definitions/Secret/properties/gid;/definitions/Secret/properties/uid;/definitions/Ssh/properties/gid;/definitions/Ssh/properties/uid
+c6c2d035d_drupal-recipe.json	HOLDS	HOLDS		
+c6c2d035d_electron-builder.json	HOLDS	HOLDS		
+c6c2d035d_helmfile.json	HOLDS	HOLDS		
+c6c2d035d_install.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/optionDeclarationCommonProperties/additionalProperties/properties/products;/definitions/optionDeclarationCommonProperties/additionalProperties/properties/showIf
+c6c2d035d_jest.json	HOLDS	HOLDS		
+c6c2d035d_jsdoc-1.0.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+c6c2d035d_lerna.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+c6c2d035d_lintstagedrc.schema.json	HOLDS	HOLDS		
+c6c2d035d_metaschema-draft-07-unofficial-strict.json	HOLDS	HOLDS		
+c6c2d035d_metricshub-connector.json	HOLDS	HOLDS		
+c6c2d035d_metricshub.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/sources/additionalProperties/oneOf/2/properties/timeout
+c6c2d035d_minecraft-advancement.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+c6c2d035d_minecraft-biome.json	HOLDS	HOLDS		
+c6c2d035d_minecraft-dimension.json	HOLDS	HOLDS		
+c6c2d035d_minecraft-item-modifier.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/items/allOf/10/then/properties/limit;/items/allOf/12/then/properties/modifiers/items/additionalProperties/properties/slot
+c6c2d035d_minecraft-loot-table.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+c6c2d035d_minecraft-predicate.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/allOf/14/then/properties/value;/allOf/16/then/properties/range;/allOf/16/then/properties/value;/allOf/4/then/properties/scores/additionalProperties;/definitions/enchantments/items/properties/levels;/definitions/integerRange/properties/max;/definitions/integerRange/properties/min;/definitions/numberProvider/allOf/1/then/properties/max;/definitions/numberProvider/allOf/1/then/properties/min;/definitions/numberProvider/allOf/2/then/properties/n;/definitions/tagsCommonToAllEntities/properties/effects/additionalProperties/properties/amplifier;/definitions/tagsCommonToAllEntities/properties/effects/additionalProperties/properties/duration;/definitions/tagsCommonToAllEntities/properties/player/properties/advancements/additionalProperties;/definitions/tagsCommonToAllEntities/properties/player/properties/level;/definitions/tagsCommonToAllEntities/properties/player/properties/stats/additionalProperties/properties/value;/definitions/tagsCommonToAllItems/properties/count;/definitions/tagsCommonToAllItems/properties/durability;/definitions/tagsCommonToAllLocations/properties/block/properties/state/properties/key;/definitions/tagsCommonToAllLocations/properties/fluid/properties/state;/definitions/tagsCommonToAllLocations/properties/light/properties/light
+c6c2d035d_minecraft-recipe.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/allOf/2/then/properties/key/additionalProperties;/definitions/tagsCommonToAllCookingRecipes/properties/ingredient
+c6c2d035d_minecraft-template-pool.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+c6c2d035d_thunderbird-extension.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+c6c2d035d_webextension.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+c6c2d035d_xs-app.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/definitions/scopeTemplate
+c6c2d035d_yamllint.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/ignorable/properties/ignore;/$defs/ignorable/properties/ignore-from-file
+51b3fa1a0_partial-pixi.json	VIOLATED	VIOLATED		/$defs/ChannelInlineTable/properties/exclude-newer;/$defs/CondaPypiMapTable;/$defs/CudaTable;/$defs/Environment/properties/activation;/$defs/Environment/properties/channel-priority;/$defs/Environment/properties/channels;/$defs/Environment/properties/constraints;/$defs/Environment/properties/dependencies;/$defs/Environment/properties/dev;/$defs/Environment/properties/platforms;/$defs/Environment/properties/pypi-dependencies;/$defs/Environment/properties/pypi-options;/$defs/Environment/properties/solve-strategy;/$defs/Environment/properties/target;/$defs/Environment/properties/tasks;/$defs/Feature/properties/build-dependencies/additionalProperties/anyOf/1;/$defs/Feature/properties/constraints/additionalProperties/anyOf/1;/$defs/Feature/properties/dependencies/additionalProperties/anyOf/1;/$defs/Feature/properties/host-dependencies/additionalProperties/anyOf/1;/$defs/Feature/properties/platforms/items;/$defs/InheritableMatchspecTable;/$defs/MatchspecTable/properties/extras;/$defs/MatchspecTable/properties/flags;/$defs/MatchspecTable/properties/lfs;/$defs/MatchspecTable/properties/license-family;/$defs/MatchspecTable/properties/package;/$defs/MatchspecTable/properties/track-features;/$defs/MatchspecTable/properties/when;/$defs/Package/properties/build-dependencies/additionalProperties/anyOf/1;/$defs/Package/properties/build-dependencies/additionalProperties/anyOf/2;/$defs/Package/properties/host-dependencies/additionalProperties/anyOf/1;/$defs/Package/properties/host-dependencies/additionalProperties/anyOf/2;/$defs/Package/properties/host-dependencies/additionalProperties/anyOf/3;/$defs/Package/properties/run-dependencies/additionalProperties/anyOf/1;/$defs/Package/properties/run-dependencies/additionalProperties/anyOf/2;/$defs/Package/properties/run-dependencies/additionalProperties/anyOf/3;/$defs/PinCompatibleSpec;/$defs/PinSubpackageSpec;/$defs/PinTable;/$defs/PyPIGitBranchRequirement/properties/lfs;/$defs/PyPIGitRevRequirement/properties/lfs;/$defs/PyPIGitTagRequirement/properties/lfs;/$defs/RunExports;/$defs/Target/properties/build-dependencies/additionalProperties/anyOf/1;/$defs/Target/properties/constraints/additionalProperties/anyOf/1;/$defs/Target/properties/dependencies/additionalProperties/anyOf/1;/$defs/Target/properties/host-dependencies/additionalProperties/anyOf/1;/$defs/WhenAll;/$defs/WhenAny;/$defs/WhenPackage;/$defs/WorkspacePlatform;/properties/build-dependencies/additionalProperties/anyOf/1;/properties/constraints/additionalProperties/anyOf/1;/properties/dependencies/additionalProperties/anyOf/1;/properties/exclude-newer;/properties/host-dependencies/additionalProperties/anyOf/1;/properties/pypi-exclude-newer
+602dcfd1c_crucible-code-schema.json	HOLDS	HOLDS		
+ad43bde04_ty.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/Rules/properties/disjoint-cast;/definitions/Rules/properties/dynamic-function-decorator-return;/definitions/Rules/properties/invalid-init-type-variable;/definitions/Rules/properties/invalid-module-getattr-call;/definitions/Rules/properties/missing-direct-dependency;/definitions/Rules/properties/missing-slot;/definitions/Rules/properties/redundant-condition;/definitions/Rules/properties/redundant-condition-strict;/definitions/Rules/properties/truthiness-test-of-callable;/definitions/Rules/properties/truthiness-test-of-iterable;/definitions/Rules/properties/unsound-assignment;/definitions/Rules/properties/unsound-return-statement;/definitions/Rules/properties/unsound-yield
+51aa82eff_claude-code-plugin-manifest.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/channels/items/properties/userConfig/additionalProperties/properties/options;/properties/userConfig/additionalProperties/properties/options
+e81410faa_crucible-code-schema.json	HOLDS	HOLDS		
+ed615703b_pyproject.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/tool/properties/inwards
+9cb0a57a7_pnpm-workspace.json	HOLDS	HOLDS		
+806bf584d_crucible-code-schema.json	VIOLATED	VIOLATED		/properties/providers/additionalProperties/properties/fast
+aab158f83_aurora-2.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/definitions/propertyDefinition
+772eb66b0_crucible-code-schema.json	HOLDS	HOLDS		
+9ce810409_cargo.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/DetailedDependency/allOf/2;/definitions/DetailedDependency/allOf/3
+ea8ed70fa_ruff.json	HOLDS	HOLDS		
+de76181a2_crucible-code-schema.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+80b82ca24_tox.json	HOLDS	HOLDS		
+6abdd657e_expo-37.0.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+6abdd657e_expo-38.0.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+6abdd657e_expo-39.0.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+6abdd657e_expo-40.0.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/properties/expo/definitions/Android/properties/intentFilters/items/properties/category/anyOf/0;/properties/expo/definitions/Android/properties/intentFilters/items/properties/data/anyOf/1;/properties/expo/definitions/Android/properties/playStoreUrl;/properties/expo/definitions/IOS/properties/appStoreUrl
+6abdd657e_expo-41.0.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/properties/expo/definitions/Android/properties/intentFilters/items/properties/category/anyOf/0;/properties/expo/definitions/Android/properties/intentFilters/items/properties/data/anyOf/1;/properties/expo/definitions/Android/properties/playStoreUrl;/properties/expo/definitions/IOS/properties/appStoreUrl
+6abdd657e_expo-42.0.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/properties/expo/definitions/Android/properties/intentFilters/items/properties/category/anyOf/0;/properties/expo/definitions/Android/properties/intentFilters/items/properties/data/anyOf/1;/properties/expo/definitions/Android/properties/playStoreUrl;/properties/expo/definitions/IOS/properties/appStoreUrl
+6abdd657e_expo-46.0.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/properties/expo/definitions/Android/properties/intentFilters/items/properties/category/anyOf/0;/properties/expo/definitions/Android/properties/intentFilters/items/properties/data/anyOf/1;/properties/expo/definitions/Android/properties/playStoreUrl;/properties/expo/definitions/IOS/properties/appStoreUrl
+6abdd657e_expo-50.0.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/properties/expo/definitions/Android/properties/intentFilters/items/properties/category/anyOf/0;/properties/expo/definitions/Android/properties/intentFilters/items/properties/data/anyOf/1;/properties/expo/definitions/Android/properties/playStoreUrl;/properties/expo/definitions/IOS/properties/appStoreUrl
+6abdd657e_expo-52.0.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/properties/expo/definitions/Android/properties/intentFilters/items/properties/category/anyOf/0;/properties/expo/definitions/Android/properties/intentFilters/items/properties/data/anyOf/1;/properties/expo/definitions/Android/properties/playStoreUrl;/properties/expo/definitions/IOS/properties/appStoreUrl
+6abdd657e_expo-53.0.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+9f9b730a0_openapi-3.X.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/allOf/1/then;/allOf/2/then
+efb814231_openapi-arazzo-1.X.json	VIOLATED	VIOLATED		/allOf/1
+b825b8297_openapi-overlay-1.X.json	VIOLATED	VIOLATED		/allOf/2
+ce64da2a9_claude-code-settings.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+07f3ca4e7_rumdl.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/FormatMode;/definitions/LanguageToolConfig/properties/format-mode
+d8555f581_package.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/patchedDependencies
+c5505fc62_bitrise.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/StepBundleModel/properties/run_if;/definitions/StepBundleOverrideModel
+0627f6d69_ty.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/Rules/properties/invalid-mutable-override;/definitions/Rules/properties/invalid-property-type-override;/definitions/Rules/properties/truthiness-test-of-none-union
+3a449ddf4_ruff.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/AnnotationSemanticsSelection;/definitions/Flake8TypeCheckingOptions/properties/runtime-evaluated-base-classes;/definitions/Flake8TypeCheckingOptions/properties/runtime-evaluated-decorators;/definitions/RuntimeSemantics
+3ccab6931_pnpm-workspace.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+bf4e8f721_pnpm-workspace.json	NOT EVALUATED	HOLDS		
+394615451_ryl.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/definitions/AllRulesSelector;/definitions/FixRuleName;/definitions/FixableRuleSelector;/definitions/KeyOrderEntry;/definitions/RuleEntryForCommentsOptions;/definitions/RuleEntryForKeyOrderingOptions;/definitions/RuleEntryForTomlCommentsOptions;/definitions/RuleEntryForTomlKeyOrderingOptions;/definitions/RuleName;/definitions/RuleOptionsForCommentsOptions;/definitions/RuleOptionsForKeyOrderingOptions;/definitions/RuleOptionsForTomlCommentsOptions;/definitions/RuleOptionsForTomlKeyOrderingOptions;/definitions/RulesTable/properties/ALL;/definitions/RulesTable/properties/comments/anyOf/0;/definitions/RulesTable/properties/key-ordering/anyOf/0;/definitions/Unlisted;/properties/per-file-ignores/additionalProperties/items
+f5ba2d860_uv.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/definitions/AuditOptions/properties/malware-check;/definitions/AuditOptions/properties/malware-check-url;/definitions/ConflictingPreviewOptions;/definitions/Index/properties/hash-algorithm;/definitions/IndexHashAlgorithm;/definitions/MinimumLibcVersion;/definitions/PipOptions/properties/require-build-hashes;/definitions/PrereleasePackage;/definitions/PreviewFeature/anyOf/0;/definitions/Source/anyOf/4/properties/workspace;/definitions/TargetTriple/oneOf/12;/definitions/TargetTriple/oneOf/13;/definitions/TargetTriple/oneOf/14;/definitions/TargetTriple/oneOf/15;/definitions/TargetTriple/oneOf/16;/definitions/TargetTriple/oneOf/17;/definitions/TargetTriple/oneOf/18;/definitions/TargetTriple/oneOf/19;/definitions/TargetTriple/oneOf/20;/definitions/TargetTriple/oneOf/21;/definitions/TargetTriple/oneOf/22;/definitions/TargetTriple/oneOf/23;/definitions/TargetTriple/oneOf/24;/definitions/TargetTriple/oneOf/25;/definitions/TargetTriple/oneOf/26;/definitions/TargetTriple/oneOf/27;/definitions/TargetTriple/oneOf/28;/definitions/TargetTriple/oneOf/29;/definitions/TargetTriple/oneOf/30;/definitions/TargetTriple/oneOf/31;/definitions/TargetTriple/oneOf/32;/definitions/TargetTriple/oneOf/33;/definitions/TargetTriple/oneOf/34;/definitions/TargetTriple/oneOf/35;/definitions/TargetTriple/oneOf/36;/definitions/TargetTriple/oneOf/37;/definitions/TargetTriple/oneOf/38;/definitions/TargetTriple/oneOf/39;/definitions/TargetTriple/oneOf/40;/definitions/TargetTriple/oneOf/41;/definitions/TargetTriple/oneOf/42;/definitions/TargetTriple/oneOf/43;/definitions/TargetTriple/oneOf/44;/definitions/TargetTriple/oneOf/45;/definitions/TargetTriple/oneOf/46;/definitions/TargetTriple/oneOf/47;/definitions/TargetTriple/oneOf/48;/definitions/TargetTriple/oneOf/49;/definitions/TargetTriple/oneOf/50;/definitions/TargetTriple/oneOf/51;/definitions/TargetTriple/oneOf/52;/definitions/TargetTriple/oneOf/53;/definitions/TargetTriple/oneOf/54;/definitions/TargetTriple/oneOf/55;/definitions/TargetTriple/oneOf/56;/definitions/TargetTriple/oneOf/57;/definitions/TargetTriple/oneOf/58;/definitions/TargetTriple/oneOf/59;/definitions/TargetTriple/oneOf/60;/definitions/TargetTriple/oneOf/61;/definitions/TargetTriple/oneOf/62;/definitions/TargetTriple/oneOf/63;/definitions/TargetTriple/oneOf/64;/definitions/TargetTriple/oneOf/65;/definitions/TargetTriple/oneOf/66;/definitions/TargetTriple/oneOf/67;/definitions/TargetTriple/oneOf/68;/definitions/TargetTriple/oneOf/69;/definitions/TargetTriple/oneOf/70;/definitions/TargetTriple/oneOf/71;/definitions/TargetTriple/oneOf/72;/definitions/TargetTriple/oneOf/73;/definitions/TargetTriple/oneOf/74;/definitions/TargetTriple/oneOf/75;/definitions/TargetTriple/oneOf/76;/definitions/TargetTriple/oneOf/77;/definitions/TargetTriple/oneOf/78;/definitions/TargetTriple/oneOf/79;/definitions/WorkspaceReference;/not
+5e44c8eee_partial-inwards.json	VIOLATED	VIOLATED		/definitions/asyncBlockingOptions;/definitions/constructOnlyInOptions;/definitions/ormNamingOptions;/definitions/portsAbstractOptions;/definitions/pureDomainOptions;/definitions/template/properties/rules;/definitions/templateConstructOnlyIn;/definitions/templateRules;/definitions/thinEndpointOptions
+c95d52cfe_twee-ts.config.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+49530602c_pre-commit-hooks.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/language/anyOf/0
+96b28fcf0_partial-inwards.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/contentRuleOptions;/definitions/templateConstructOnlyIn/properties/check-tests;/definitions/templateRules/additionalProperties/properties/depends-called/anyOf/2/allOf/0;/definitions/templateRules/additionalProperties/properties/diagram-missing-dependency;/definitions/templateRules/additionalProperties/properties/duplicate-operation-id/anyOf/2/allOf/0;/definitions/templateRules/additionalProperties/properties/lifespan-events/anyOf/2/allOf/0;/definitions/templateRules/additionalProperties/properties/route-shadowing/anyOf/2/allOf/0;/definitions/templateRules/additionalProperties/properties/yield-dependency-swallows/anyOf/2/allOf/0
+70b5eb63d_powerpages.config.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/framework
+d50ef00b9_tombi.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/SchemaDeprecatedSeverity;/definitions/SchemaOverviewFormatOptions;/definitions/SchemaOverviewLintOptions;/definitions/SchemaOverviewLintRules;/definitions/SchemaOverviewOptions/properties/format;/definitions/SchemaOverviewOptions/properties/lint
+6b9673c4c_pyproject.json	VIOLATED	VIOLATED		/definitions/BuildSystem/properties/backend-path/items;/definitions/BuildSystem/properties/requires;/definitions/DependencyGroup;/definitions/entryPointName;/definitions/entryPointReference;/definitions/importName;/definitions/importNames;/definitions/projectAuthor/properties/name;/properties/dependency-groups
+93276d342_kustomization.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/FieldSelector/properties/fieldPath;/definitions/FieldSelector/properties/fieldpath
+fc3956739_lychee.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+777f4f47f_prometheus.json	HOLDS	HOLDS		
+0fd16c24f_pnpm-workspace.json	HOLDS	HOLDS		
+8ae3e0c8c_zeropress-wxr-import-base-0.7.json	VIOLATED	VIOLATED		/$defs/import
+b5f3cb281_pnpm-workspace.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+6d8c87852_ty.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/AnalysisOptions/properties/return-type-inference;/definitions/ReturnTypeInference;/definitions/Rules/properties/mismatched-sentinel-name
+0500f757f_ryl.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/CollectionStyleTarget;/definitions/FixRuleName;/definitions/FixableRuleSelector;/definitions/FormatTable;/definitions/LineEndingTarget;/definitions/LintTable;/definitions/MarkerTarget;/definitions/QuoteStyleTarget
+8555b2553_prek.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/BuiltinHook/properties/include_deleted;/definitions/BuiltinHooks;/definitions/HideStatus;/definitions/LocalHook/properties/include_deleted;/definitions/MetaHook/properties/include_deleted;/definitions/RemoteHook/properties/include_deleted;/properties/hide_status
+30fa09217_youtrack-app.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/youTrackApiAllowedEndpoints
+c8038b0f4_ryl.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/LintTable/properties/strict;/definitions/RuleOptionsForTomlAnchorsOptions/properties/forbid-anchors-and-aliases
+fac74e59d_tox.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/replace_posargs/properties/substitute
+ebccdba01_rumdl.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/BinaryPreference;/definitions/CodeBlockToolsConfig/properties/binary-preferences;/definitions/CodeBlockToolsConfig/properties/on-missing-language-tag;/definitions/CodeBlockToolsConfig/properties/on-missing-mode-definition;/definitions/CodeBlockToolsConfig/properties/on-no-tools-run;/definitions/CodeBlockToolsConfig/properties/on-unknown-language-tag
+bf7c67455_claude-code-settings.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/env/propertyNames
+8324c4fe6_publiccode.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+43ae0fcbc_traefik-v3.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/$defs/staticHTTPConfig/properties/aliasHeadersStrategy;/$defs/staticHTTPConfig/properties/underscoreHeadersStrategy
+33a259c1a_pnpm-workspace.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	
+b37ff9eed_webjob-publish-settings.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/notScheduled;/definitions/scheduled
+c61a985ef_partial-poetry.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/group/patternProperties/^[a-zA-Z-_.0-9]+$
+edcd8805f_hugo.json	HOLDS	HOLDS		
+5dca3c49a_crucible-code-schema.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/providers/additionalProperties/properties/access
+d227d9f54_dependabot-2.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/definitions/multi-ecosystem-group/properties/pull-request-branch-name;/definitions/pull-request-branch-name
+4b9347599_ruff.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/AllowedFloatValue;/definitions/AllowedValue;/definitions/PylintOptions/properties/allow-magic-values;/definitions/PylintOptions/properties/extend-allow-magic-values
+f4425c0ad_jest.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/runtime;/properties/waitForUnhandledRejections;/properties/workerGracefulExitTimeout
+6ae72b035_pyproject.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/tool/additionalProperties
+6f4f45c9e_tsconfig.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/compilerOptionsDefinition/properties/compilerOptions/anyOf/0/properties/explainFiles;/definitions/compilerOptionsDefinition/properties/compilerOptions/anyOf/0/properties/generateTrace;/definitions/compilerOptionsDefinition/properties/compilerOptions/anyOf/0/properties/stableTypeOrdering
+e44768a60_pyproject.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/tool/properties/complexipy
+59f54f46f_aurora-2.0.json	NOT EVALUATED	NOT EVALUATED	unjudged_construct	/definitions/additionalApisDefinition/properties/excludedLayers;/definitions/layersDefinition
+ec65ccfaf_ttheme-market.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	
+ec65ccfaf_ttheme-palette.json	VIOLATED	VIOLATED		/definitions/palette;/definitions/shade;/definitions/tags;/properties/ansi_source;/properties/colors;/properties/from;/properties/signature;/properties/subject
+b5a99a94b_ruff.json	HOLDS	HOLDS		
+a2e968439_rumdl.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/definitions/CodeBlockToolsConfig/properties/on-tool-version-mismatch;/definitions/CodeBlockToolsConfig/properties/tool-version-definition;/definitions/ToolVersionDefinition
+dbb687d78_cargo.json	HOLDS	HOLDS		
+01e666487_partial-black.json	HOLDS	HOLDS		
+18132a01a_pnpm-workspace.json	VIOLATED	VIOLATED		/definitions/includedSettings;/properties/include
+1f9ebc837_pnpm-workspace.json	NOT EVALUATED	NOT EVALUATED	unchecked_change	/properties/include/patternProperties/^\.\.?~1.*\.(ya?ml)$;/properties/include/patternProperties/^\.\.?~1[\s\S]*$

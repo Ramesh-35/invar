@@ -256,6 +256,16 @@ EVALUATED. On SchemaStore's history this earns HOLDS for 109 changes that
 were NOT EVALUATED, each checked independently in Python, and changes no
 VIOLATED or HOLDS verdict.
 
+From v0.2.20 the same normal form reads literals: `{"enum":["x"]}` and
+`{"const":"x"}` are one node, a bare `boolean` or `null` type names its
+values, a type beside an enum keeps only the values of that type and is
+dropped, and an `anyOf` of enums (a `oneOf` of disjoint enums) is their
+union ([JUDGE-CANON-R1-SPEC.md](docs/falsification/JUDGE-CANON-R1-SPEC.md)).
+A node that differs only in annotations is never a verdict, whatever
+construct it carries. On SchemaStore's history this earns HOLDS for 28
+more changes (every prettierrc option written `const` among them) and
+changes no VIOLATED or HOLDS verdict.
+
 In the Action, one input:
 
 ```yaml

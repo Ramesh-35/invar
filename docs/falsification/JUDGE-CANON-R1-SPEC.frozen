@@ -60,3 +60,9 @@ blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-prettierrc-a3cf4d53
 sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-prettierrc-a3cf4d531-before.json) = 297c04f47ef41685f5955138224cc0e9fd3c046c7b9854e3343a31c34578e35d
 blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-prettierrc-a3cf4d531-after.json) = 0bf30c143efd5326840af73badb8ff0ab0ac78d596bee0e61f29d177b0d61e53
 sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-prettierrc-a3cf4d531-after.json) = a5f9c7ed250e12c1b5fb7f0a2ae1b03e064513b40be96688cd2517925f42a6f0
+# Amendment B (after the measured outcome): docs/falsification/JUDGE-CANON-R1-SPEC.md
+blake3(docs/falsification/JUDGE-CANON-R1-SPEC.md) = 8fb65d2811217ec61be711eff1ae312bc2e775ba2c2d44c1fa068827e95ba73c
+sha256(docs/falsification/JUDGE-CANON-R1-SPEC.md) = c8b30dbd02aa7563114ee617c963a2c94421a106c9ad3227f3de8ef064f4672c
+# Amendment B (after the measured outcome): crates/invar-falsify/tests/judge_reach_test.rs
+blake3(crates/invar-falsify/tests/judge_reach_test.rs) = ac27e6a4fa3b0a42b848dc8cdc2755c834fff33a6c13830695b32a90cf2f17e3
+sha256(crates/invar-falsify/tests/judge_reach_test.rs) = 62ef68d5e73b2092a2c8dc79fe9ec2169f0f67bf158d0bde357c6fa38cc3b5ce

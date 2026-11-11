@@ -1,6 +1,6 @@
 # JUDGE-CANON r1: literals in normal form, and annotations never a verdict (r1, FROZEN)
 
-Drafted 2026-11-08 for ratification. Frozen with
+Ratified by the founder 2026-11-08. Frozen with
 crates/invar-falsify/tests/judge_canon_r1_test.rs and two real SchemaStore
 changes BEFORE implementation; freeze record: JUDGE-CANON-R1-SPEC.frozen.
 Extends JUDGE-CANON r0; every earlier ruling stays frozen as written,
@@ -115,3 +115,38 @@ record move from NOT EVALUATED to HOLDS (21 `unchecked_change`, 12
 on any corpus; label-free 26/14/50/0, Iglu 5/3/0, replay PASS unchanged.
 The r0 prototype undercounted by not following `$ref`; this one follows
 it, and the Measured outcome will say where the count still differs.
+
+## Measured outcome (after implementation, 2026-11-08)
+
+- Fixtures 11 of 11; amended c_f04 and r2_f13 pass. Full suite 837 tests.
+  Mutants 95 of 95 killed (CR1-M1..M5 new). Clippy silent.
+- Label-free 26/14/50/0, Iglu 5/3/0, SchemaStore replay PASS: unchanged.
+- Prediction: 28 of the 33 moved ([canon-r1-moves/schemastore.tsv](canon-r1-moves/schemastore.tsv)),
+  no other verdict or witness moved on SchemaStore or AsyncAPI, and one
+  Iglu change the prototype never looked at moved too (snowflake_config
+  1-0-1 to 1-0-2: descriptions added under an `anyOf`, covered by the
+  annotation rule, HOLDS). The five that did not move, and why the judge
+  is right:
+  - four package.json changes: the stated node is `jspm: {"$ref": "#"}`,
+    a reference to the document root, which contains `jspm`. JUDGE-SUBTYPE
+    r2 cuts a reference cycle and states it; nothing in r1 touches that.
+    The prototype followed the reference once and compared the roots.
+  - solarxy-config: `"minimum": 0.0` became `"minimum": 0`. The same
+    number, two spellings; the judge compares JSON values and these
+    differ, the prototype compared Python numbers and they do not. A
+    numeric normal form (an integral number written either way) is a
+    candidate for a later ruling, not slipped into this one.
+- Two implementation facts worth stating. Children are put in normal form
+  before their parent, so by the time step 2 looks at an `anyOf` beside an
+  enum, a `{"type": "null"}` branch is already `{"enum": [null]}`; step 2
+  therefore accepts a branch that is a bare type or a bare enum, which is
+  the ruling's intent read in that order. And a type list r0 expands may
+  produce an `anyOf` of two literal branches (`["boolean", "null"]`), so
+  step 3 runs once more on the expanded node; without that, fifteen HOLDS
+  of v0.2.19 regressed to NOT EVALUATED in the first build, caught by the
+  prediction run before anything else.
+- Amendment B: with r1 covering an annotation-only node before the diff
+  reads its keys, mutant RE-M2 (JUDGE-REACH r0) was no longer observable
+  through r_f05. Fixture r_f05b (an annotation changed beside a judged
+  change leaves no unchecked pointer) was added to judge_reach_test and
+  RE-M2 now names it. r_f05 is unchanged.

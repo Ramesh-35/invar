@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -184,7 +184,7 @@ run_one FP-M2 'let (c, b) = (head_path, base_path);' 'let (c, b) = (head_path, "
 run_one FP-M3 'let base_raw = std::fs::read(base_path).map_err(|e| anyhow::anyhow!("reading {base_path}: {e}"))?;' 'let base_raw = std::fs::read(head_path).map_err(|e| anyhow::anyhow!("reading {base_path}: {e}"))?;' fp_f10_unjudged_construct_is_not_evaluated judge_filepair_test
 # JUDGE-REACH r0 (docs/falsification/JUDGE-REACH-SPEC.md, Amendments A and B)
 run_one RE-M1 'diffs.iter().filter(|d| !covered_deep(d, &c))' 'diffs.iter().filter(|d| { let _ = d; false })' r_f04_unreferenced_definition_change_is_not_evaluated judge_reach_test
-run_one RE-M2 'if va == vb || ANNOTATIONS.contains(&k.as_str()) || !KNOWN.contains(&k.as_str()) {' 'if va == vb {' r_f05_annotation_only_change_holds judge_reach_test
+run_one RE-M2 'if va == vb || ANNOTATIONS.contains(&k.as_str()) || !KNOWN.contains(&k.as_str()) {' 'if va == vb {' r_f05b_annotation_beside_a_judged_change_is_not_unchecked judge_reach_test
 run_one RE-M3 'diff(&format!("{here}/{}", escape(n)), Some(k), na.and_then(|m| m.get(n)), nb.and_then(|m| m.get(n)), out);' 'if !ANNOTATIONS.contains(&n.as_str()) { diff(&format!("{here}/{}", escape(n)), Some(k), na.and_then(|m| m.get(n)), nb.and_then(|m| m.get(n)), out); }' r_f08_property_named_like_an_annotation_counts judge_reach_test
 run_one RE-M4 '        if c.whole.iter().any(|(_, w)| under(&d.ptr, w)) {' '        if c.whole.iter().any(|(_, w)| under(&d.ptr, w)) || c.kw.iter().any(|(_, p, _)| under(&d.ptr, p)) {' r_f01_change_behind_pattern_and_oneof_is_not_evaluated judge_reach_test
 run_one RE-M5 'for kw in ["type", "enum", "pattern", "format"].iter()' 'for kw in ["type", "enum", "const", "pattern", "format"].iter()' r_f13_reached_node_unread_keyword_is_not_evaluated judge_reach_test
@@ -231,7 +231,9 @@ run_one TS-M7 '        if ah is not None:
         witnesses.append(w)' t_f17_single_validator_is_unconfirmed judge_tests_test "$P"
 
 # CN-M1 the normal form is never applied (JUDGE-CANON r0)
-run_one CN-M1 '        a.is_object() && b.is_object() && form(a, false) != form(b, false) && normal(a) == normal(b)' '        a.is_object() && b.is_object() && form(a, false) != form(b, false) && form(a, false) == form(b, false)' c_f01_type_list_as_anyof_holds_and_is_stated judge_canon_test
+run_one CN-M1 '        a.is_object() && b.is_object() && normal(a) == normal(b)
+    }' '        a.is_object() && b.is_object() && form(a, false) == form(b, false)
+    }' c_f01_type_list_as_anyof_holds_and_is_stated judge_canon_test
 # CN-M2 a typed keyword is shared instead of following its type
 run_one CN-M2 '    fn is_typed(k: &str) -> bool {
         TYPED_STRING.contains(&k) || TYPED_NUMBER.contains(&k) || TYPED_ARRAY.contains(&k) || TYPED_OBJECT.contains(&k)
@@ -250,6 +252,22 @@ run_one CN-M4 '                            Value::Object(names) if NAME_MAPS.con
                             }' '                            Value::Object(names) if NAME_MAPS.contains(&kw) || kw == "dependencies" => {
                                 Value::Object(names.iter().filter(|(n, _)| KNOWN.contains(&n.as_str())).map(|(n, s)| (n.clone(), if s.is_object() { sub(s) } else { s.clone() })).collect())
                             }' c_f11_change_under_a_property_name_is_not_hidden judge_canon_test
+
+# CR1-M1 const not rewritten to enum (JUDGE-CANON r1)
+run_one CR1-M1 '        if let Some(c) = kept.remove("const") {' '        if let Some(c) = kept.remove("const_never") {' c1_f01_enum_of_one_value_to_const_holds judge_canon_r1_test
+# CR1-M2 boolean is not a literal
+run_one CR1-M2 '                Some("boolean") => return bare(vec![Value::Bool(false), Value::Bool(true)]),' '                Some("boolean_never") => return bare(vec![Value::Bool(false), Value::Bool(true)]),' c1_f03_enum_to_anyof_of_boolean_and_typed_const_holds judge_canon_r1_test
+# CR1-M3 oneOf union without the disjointness check
+run_one CR1-M3 '                        if kw == "anyOf" || disjoint {' '                        if kw == "anyOf" || disjoint || true {' c1_f07_overlapping_oneof_is_not_the_union judge_canon_r1_test
+# CR1-M4 the type constraint is not folded into the enum
+run_one CR1-M4 '                Some(Value::String(t)) => {
+                    types.push(t.clone());
+                    drop = Some("type");
+                }' '                Some(Value::String(_t)) => {}' c1_f09_value_outside_the_type_is_dropped judge_canon_r1_test
+# CR1-M5 D1 keeps refusing an annotation-only equality
+run_one CR1-M5 '        a.is_object() && b.is_object() && normal(a) == normal(b)
+    }' '        a.is_object() && b.is_object() && form(a, false) != form(b, false) && normal(a) == normal(b)
+    }' c1_f08_annotation_only_difference_at_a_combinator_holds_silently judge_canon_r1_test
 cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"; cp "$P.orig" "$P"; rm "$P.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"

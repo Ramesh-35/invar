@@ -1393,7 +1393,7 @@ mod reach {
     use super::ROOTS;
     use serde_json::Value;
     use std::cell::RefCell;
-    use std::collections::BTreeSet;
+    use std::collections::{BTreeMap, BTreeSet};
 
     #[derive(Default)]
     struct Cover {
@@ -1407,8 +1407,9 @@ mod reach {
         stack: Vec<(Vec<String>, Vec<String>)>,
         /// JUDGE-DRAFT r0: the root's draft migration is covered.
         draft: bool,
-        /// JUDGE-CANON r0: pointers covered by the type-list rewrite.
-        canon: BTreeSet<String>,
+        /// JUDGE-CANON r0 and r1: pointers covered by a rewrite, and whether
+        /// it was r0's type-list rewrite (else r1's literals).
+        canon: BTreeMap<String, bool>,
     }
 
     thread_local! {
@@ -1544,8 +1545,141 @@ mod reach {
         form(v, true)
     }
 
+    /// JUDGE-CANON r1: the JSON types a literal value has (an integral
+    /// number is both `integer` and `number`).
+    fn value_types(v: &Value) -> &'static [&'static str] {
+        match v {
+            Value::Null => &["null"],
+            Value::Bool(_) => &["boolean"],
+            Value::Number(n) => {
+                if n.is_i64() || n.is_u64() || n.as_f64().is_some_and(|f| f.fract() == 0.0) {
+                    &["integer", "number"]
+                } else {
+                    &["number"]
+                }
+            }
+            Value::String(_) => &["string"],
+            Value::Array(_) => &["array"],
+            Value::Object(_) => &["object"],
+        }
+    }
+
+    /// Canonical text of a value, for sorting and sameness (serde_json
+    /// keeps object keys sorted).
+    fn canon_key(v: &Value) -> String {
+        serde_json::to_string(v).unwrap_or_default()
+    }
+
+    /// A node that is exactly `{"enum": [...]}`: its values.
+    fn bare_enum(v: &Value) -> Option<&Vec<Value>> {
+        match v {
+            Value::Object(m) if m.len() == 1 => m.get("enum").and_then(Value::as_array),
+            _ => None,
+        }
+    }
+
+    /// A node that is exactly `{"type": "<name>"}`: the name.
+    fn bare_type(v: &Value) -> Option<&str> {
+        match v {
+            Value::Object(m) if m.len() == 1 => m.get("type").and_then(Value::as_str),
+            _ => None,
+        }
+    }
+
+    fn sorted_distinct(values: Vec<Value>) -> Vec<Value> {
+        let mut by_key: std::collections::BTreeMap<String, Value> = std::collections::BTreeMap::new();
+        for v in values {
+            by_key.entry(canon_key(&v)).or_insert(v);
+        }
+        by_key.into_values().collect()
+    }
+
+    /// JUDGE-CANON r1 steps 1 to 3 at one node whose children are already in
+    /// normal form. Ok(node) when the node became a bare enum (nothing more
+    /// to do), Err(kept) to continue with r0's type-list rewrite.
+    fn literals(mut kept: serde_json::Map<String, Value>) -> Result<Value, serde_json::Map<String, Value>> {
+        let bare = |vals: Vec<Value>| Ok(Value::Object(std::iter::once(("enum".to_string(), Value::Array(vals))).collect()));
+        // Step 1: a bare boolean or null type names its values.
+        if kept.len() == 1 {
+            match kept.get("type").and_then(Value::as_str) {
+                Some("boolean") => return bare(vec![Value::Bool(false), Value::Bool(true)]),
+                Some("null") => return bare(vec![Value::Null]),
+                _ => {}
+            }
+        }
+        // Step 1: const is an enum of one value.
+        if let Some(c) = kept.remove("const") {
+            let vals = match kept.get("enum").and_then(Value::as_array) {
+                Some(e) => e.iter().filter(|v| canon_key(v) == canon_key(&c)).cloned().collect(),
+                None => vec![c],
+            };
+            kept.insert("enum".to_string(), Value::Array(vals));
+        }
+        // Step 2: a type constraint beside the enum is folded into it.
+        if let Some(Value::Array(vals)) = kept.get("enum").cloned() {
+            // The constraint beside the enum: type names, and (from a branch
+            // step 1 already turned into an enum) literal values.
+            let mut types: Vec<String> = Vec::new();
+            let mut lits: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
+            let mut drop: Option<&str> = None;
+            match kept.get("type") {
+                Some(Value::String(t)) => {
+                    types.push(t.clone());
+                    drop = Some("type");
+                }
+                Some(Value::Array(ts)) if ts.iter().all(Value::is_string) => {
+                    types.extend(ts.iter().filter_map(Value::as_str).map(str::to_string));
+                    drop = Some("type");
+                }
+                _ => {
+                    for kw in ["anyOf", "oneOf"] {
+                        if let Some(Value::Array(bs)) = kept.get(kw) {
+                            if !bs.is_empty() && bs.iter().all(|b| bare_type(b).is_some() || bare_enum(b).is_some()) {
+                                for b in bs {
+                                    if let Some(t) = bare_type(b) {
+                                        types.push(t.to_string());
+                                    } else if let Some(e) = bare_enum(b) {
+                                        lits.extend(e.iter().map(canon_key));
+                                    }
+                                }
+                                drop = Some(kw);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            let vals = match drop {
+                Some(kw) => {
+                    kept.remove(kw);
+                    vals.into_iter()
+                        .filter(|v| value_types(v).iter().any(|t| types.iter().any(|u| u == t)) || lits.contains(&canon_key(v)))
+                        .collect()
+                }
+                None => vals,
+            };
+            kept.insert("enum".to_string(), Value::Array(sorted_distinct(vals)));
+        }
+        // Step 3: an anyOf of enums is their union; a oneOf only when disjoint.
+        if kept.len() == 1 {
+            for kw in ["anyOf", "oneOf"] {
+                if let Some(Value::Array(bs)) = kept.get(kw) {
+                    if !bs.is_empty() && bs.iter().all(|b| bare_enum(b).is_some()) {
+                        let sets: Vec<std::collections::BTreeSet<String>> = bs.iter().map(|b| bare_enum(b).unwrap().iter().map(canon_key).collect()).collect();
+                        let disjoint = (0..sets.len()).all(|i| (i + 1..sets.len()).all(|j| sets[i].is_disjoint(&sets[j])));
+                        if kw == "anyOf" || disjoint {
+                            let all: Vec<Value> = bs.iter().flat_map(|b| bare_enum(b).unwrap().iter().cloned()).collect();
+                            return bare(sorted_distinct(all));
+                        }
+                    }
+                }
+            }
+        }
+        Err(kept)
+    }
+
     /// The node with annotations and unknown keywords set aside, and with
-    /// its type lists rewritten when `rewrite` is set. Subschemas are found
+    /// its type lists and literals rewritten when `rewrite` is set. Subschemas are found
     /// where `diff` finds them: under name maps, schema-valued keywords and
     /// schema arrays; every other keyword's value is kept as written.
     fn form(v: &Value, rewrite: bool) -> Value {
@@ -1567,6 +1701,15 @@ mod reach {
                         (k.clone(), y)
                     })
                     .collect();
+                // JUDGE-CANON r1: literals, then r0's type lists.
+                let kept = if rewrite {
+                    match literals(kept) {
+                        Ok(done) => return done,
+                        Err(kept) => kept,
+                    }
+                } else {
+                    kept
+                };
                 let names: Option<Vec<&str>> = match kept.get("type") {
                     Some(Value::Array(ts)) if rewrite && ts.len() > 1 && !kept.contains_key("anyOf") => ts.iter().map(Value::as_str).collect(),
                     _ => None,
@@ -1584,20 +1727,40 @@ mod reach {
                             b.insert(k.clone(), x.clone());
                         }
                     }
-                    Value::Object(b)
+                    // JUDGE-CANON r1: a branch the rewrite created is itself in normal form.
+                    form(&Value::Object(b), true)
                 }).collect();
                 out.insert("anyOf".to_string(), Value::Array(branches));
-                Value::Object(out)
+                // JUDGE-CANON r1: the anyOf the rewrite produced may itself be a
+                // union of literals (`["boolean", "null"]`): step 3 once more.
+                match literals(out) {
+                    Ok(done) => done,
+                    Err(out) => Value::Object(out),
+                }
             }
             _ => v.clone(),
         }
     }
 
-    /// JUDGE-CANON r0: two nodes that differ once annotations are set
-    /// aside, but not in normal form. A difference only in annotations is
-    /// not this ruling's: it is judged exactly as before.
+    /// JUDGE-CANON r0 and r1: two nodes equal in normal form, whatever
+    /// differs in their spelling or annotations.
     pub(super) fn equivalent(a: &Value, b: &Value) -> bool {
-        a.is_object() && b.is_object() && form(a, false) != form(b, false) && normal(a) == normal(b)
+        a.is_object() && b.is_object() && normal(a) == normal(b)
+    }
+
+    /// JUDGE-CANON r1: the spelling of this very node differs (its type,
+    /// literals, or how many branches it has), so the note belongs here
+    /// rather than at a child.
+    fn spelled_here(a: &Value, b: &Value) -> bool {
+        let shape = |v: &Value| {
+            let m = match form(v, false) {
+                Value::Object(m) => m,
+                _ => return String::new(),
+            };
+            let count = |k: &str| m.get(k).and_then(Value::as_array).map(Vec::len);
+            format!("{:?}|{:?}|{:?}|{:?}|{:?}", m.get("type"), m.get("const"), m.get("enum"), count("anyOf"), count("oneOf"))
+        };
+        shape(a) != shape(b)
     }
 
     /// JUDGE-CANON r0: the rewrite happened at this very node, one side
@@ -1608,9 +1771,9 @@ mod reach {
     }
 
     /// JUDGE-CANON r0: record a covered equivalence at `ptr`.
-    pub(super) fn note_canon(ptr: &str) {
+    pub(super) fn note_canon(ptr: &str, type_list: bool) {
         COVER.with(|c| {
-            c.borrow_mut().canon.insert(ptr.to_string());
+            c.borrow_mut().canon.entry(ptr.to_string()).or_insert(type_list);
         });
     }
 
@@ -1618,12 +1781,18 @@ mod reach {
         if a == b {
             return;
         }
-        // JUDGE-CANON r0: the same meaning in another spelling is covered,
-        // noted at the node that was rewritten; above it the walk descends.
+        // JUDGE-CANON r0 and r1: the same meaning in another spelling is
+        // covered. A difference only in annotations is silent; a rewritten
+        // node is noted here; above it the diff descends to find the node.
         if let (Some(x), Some(y)) = (a, b) {
-            if rewritten_here(x, y) && equivalent(x, y) {
-                note_canon(ptr);
-                return;
+            if equivalent(x, y) {
+                if form(x, false) == form(y, false) {
+                    return;
+                }
+                if spelled_here(x, y) {
+                    note_canon(ptr, rewritten_here(x, y));
+                    return;
+                }
             }
         }
         let (Some(Value::Object(ma)), Some(Value::Object(mb))) = (a, b) else {
@@ -1749,12 +1918,15 @@ mod reach {
         });
         let all: Vec<String> = unchecked.into_iter().collect();
         let shallowest = all.iter().filter(|p| !all.iter().any(|q| q != *p && under(p, q))).cloned().collect();
-        let canon: Vec<String> = COVER.with(|c| c.borrow().canon.iter().cloned().collect());
+        let canon: Vec<(String, bool)> = COVER.with(|c| c.borrow().canon.iter().map(|(p, t)| (p.clone(), *t)).collect());
         let mut notes: Vec<String> = migration.into_iter().collect();
         notes.extend(
             canon.iter()
-                .filter(|p| !canon.iter().any(|q| q != *p && under(p, q)))
-                .map(|p| format!("equivalent after rewriting type lists as anyOf at {}", if p.is_empty() { "the document root" } else { p.as_str() })),
+                .filter(|(p, _)| !canon.iter().any(|(q, _)| q != p && under(p, q)))
+                .map(|(p, type_list)| {
+                    let what = if *type_list { "type lists as anyOf" } else { "literals (const, enum, boolean, null)" };
+                    format!("equivalent after rewriting {what} at {}", if p.is_empty() { "the document root" } else { p.as_str() })
+                }),
         );
         (shallowest, notes)
     }

@@ -101,13 +101,25 @@ fn r_f04_unreferenced_definition_change_is_not_evaluated() {
     assert!(text.contains(&line("/definitions/U")), "{text}");
 }
 
-/// r_f05: an annotation-only change asserts nothing; it holds. Kills RE-M2.
+/// r_f05: an annotation-only change asserts nothing; it holds. (Killed RE-M2 until JUDGE-CANON r1; see r_f05b.)
 #[test]
 fn r_f05_annotation_only_change_holds() {
     let pre = r#"{"properties":{"a":{"type":"string"}},"definitions":{"U":{"type":"string","description":"old","title":"U","examples":["x"],"default":"x","$comment":"c"}}}"#;
     let post = r#"{"properties":{"a":{"type":"string"}},"definitions":{"U":{"type":"string","description":"new","title":"U2","examples":["y"],"default":"y","$comment":"d"}}}"#;
     let (code, text, v) = both("f05", pre, post);
     assert_eq!(code, 0, "{text}");
+    assert_eq!(v["unchecked"], json!([]), "{v}");
+}
+
+/// r_f05b (added by JUDGE-CANON r1): an annotation changed beside a judged
+/// change leaves no unchecked pointer. Kills RE-M2 now that r1 covers an
+/// annotation-only node before the diff reads its keys.
+#[test]
+fn r_f05b_annotation_beside_a_judged_change_is_not_unchecked() {
+    let pre = r#"{"properties":{"a":{"type":"string","description":"old"}}}"#;
+    let post = r#"{"properties":{"a":{"type":"integer","description":"new"}}}"#;
+    let (code, text, v) = both("f05b", pre, post);
+    assert_eq!(code, 1, "{text}");
     assert_eq!(v["unchecked"], json!([]), "{v}");
 }
 
