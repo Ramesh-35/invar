@@ -1,6 +1,6 @@
-# JUDGE-TESTS r2: the Ajv side reads every draft the Python side reads (r2, FROZEN)
+# JUDGE-TESTS r2: the Ajv side reads every draft the Python side reads (r2)
 
-Drafted 2026-11-08 for ratification. Frozen with the four `t2_` fixtures
+Drafted 2026-11-08; built the same day after the freeze. Frozen with the four `t2_` fixtures
 appended to crates/invar-falsify/tests/judge_tests_test.rs BEFORE
 implementation; freeze record: JUDGE-TESTS-R2-SPEC.frozen. Extends
 JUDGE-TESTS r1; the Rust judge is untouched.
@@ -68,3 +68,31 @@ ruling changes the reading of. Which of them become `instances_pass`,
 `disputed` or VIOLATED is measured, not predicted: before r2 no document
 of theirs has ever been checked by Ajv. No VIOLATED or `instances_pass`
 change of r1 moves. The Rust judge's corpora and gates do not move.
+
+## Measured outcome (2026-11-08, after implementation)
+
+4 of 4 fixtures pass; TS2-M1 and TS2-M2 killed. On the 686 SchemaStore
+changes of the harness corpus (599 with test documents), both adapters
+run on the same inputs the same day, so the table is a per-change diff
+(`tests-r2-moves.tsv`):
+
+| r1 reason                 | r2 reason                            | changes |
+|---------------------------|--------------------------------------|--------:|
+| unverifiable              | instances_pass                       | 42      |
+| unverifiable              | no_base_valid_instance               | 1       |
+
+`unverifiable` falls from 113 to 70; 43 of the predicted at-most 46
+moved (the three schemas with no `$schema` were unverifiable for another
+reason, below, and stay). No change became VIOLATED or disputed: every
+2019-09 and 2020-12 test document SchemaStore ships is valid at the head
+in both validators. No VIOLATED or `instances_pass` change of r1 moved.
+The Rust judge's corpora and gates did not move (nothing in the judge
+changed).
+
+What is left in the 70: 67 schemas `$ref` a sibling SchemaStore file or a
+remote URL (`eslintrc.json`, `partial-setuptools.json`,
+`https://www.schemastore.org/quikrun.json`, ...), which neither validator
+can resolve from a single file; 3 use regex syntax outside Python `re`
+(`(?<name>`). The first class is the next harness ruling, when wanted:
+resolve `$ref` against the files of the same commit, both validators,
+offline, no fetching.

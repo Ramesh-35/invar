@@ -1,4 +1,4 @@
-// JUDGE-TESTS r1: the Ajv side of the two-validator check. Reads one JSON
+// JUDGE-TESTS r1/r2: the Ajv side of the two-validator check. Reads one JSON
 // object on stdin, {base, head, instances: [{file, doc}]}, and prints one
 // JSON object, {file: {base: A, head: A}}, where A is "valid", or
 // {invalid: {pointer, message}}, or {error: reason}. Classification lives
@@ -7,10 +7,36 @@
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 
+// JUDGE-TESTS r2: the class follows the schema's $schema, as the Python
+// side does. draft-04 -> ajv-draft-04; draft-06 -> Ajv with the draft-06
+// meta-schema; 2019-09 -> Ajv2019; 2020-12 -> Ajv2020; draft-07, no
+// $schema, or a URI naming none of these -> Ajv (draft-07), with the
+// unknown URI dropped so Ajv does not try to resolve it.
+function draftOf(uri) {
+  const u = String(uri || "");
+  if (u.includes("draft-04")) return "04";
+  if (u.includes("draft-06")) return "06";
+  if (u.includes("draft-07")) return "07";
+  if (u.includes("2019-09")) return "2019";
+  if (u.includes("2020-12")) return "2020";
+  return u ? "unknown" : "07";
+}
+
 function compile(schema) {
-  const draft4 = String(schema.$schema || "").includes("draft-04");
-  const Ajv = draft4 ? require("ajv-draft-04") : require("ajv");
-  const ajv = new Ajv({ strict: false, allErrors: false, validateFormats: false });
+  const draft = draftOf(schema.$schema);
+  const opts = { strict: false, allErrors: false, validateFormats: false };
+  let ajv;
+  if (draft === "04") ajv = new (require("ajv-draft-04"))(opts);
+  else if (draft === "2019") ajv = new (require("ajv/dist/2019"))(opts);
+  else if (draft === "2020") ajv = new (require("ajv/dist/2020"))(opts);
+  else {
+    ajv = new (require("ajv"))(opts);
+    if (draft === "06") ajv.addMetaSchema(require("ajv/dist/refs/json-schema-draft-06.json"));
+    if (draft === "unknown") {
+      schema = { ...schema };
+      delete schema.$schema;
+    }
+  }
   require("ajv-formats")(ajv);
   return ajv.compile(schema);
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1, JUDGE-CONST r0, WITNESS r0, JUDGE-D5 r1, REF-SIBLINGS r0). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5, K-R1..R2, W0-M1..M3, D5R1-M1..M2, RS-M1..M5) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1, JUDGE-CONST r0, WITNESS r0, JUDGE-D5 r1, REF-SIBLINGS r0, JUDGE-TESTS r2). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5, K-R1..R2, W0-M1..M3, D5R1-M1..M2, RS-M1..M5, TS2-M1..M2) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -10,7 +10,8 @@ set -uo pipefail
 J=crates/invar-falsify/src/judge.rs
 X=crates/invar-falsify/src/counterexample.rs
 P=action/tests.py
-cp "$J" "$J.orig"; cp "$X" "$X.orig"; cp "$P" "$P.orig"
+A=action/tests-ajv.mjs
+cp "$J" "$J.orig"; cp "$X" "$X.orig"; cp "$P" "$P.orig"; cp "$A" "$A.orig"
 pass=0; fail=0
 
 mutate() { python3 - "${3:-$J}" "$1" "$2" <<'EOF'
@@ -24,7 +25,7 @@ EOF
 
 run_one() { # name old new killer_test [test_target] [file]
   name=$1; old=$2; new=$3; killer=$4; target=${5:-judge_test}; file=${6:-$J}
-  cp "$J.orig" "$J"; cp "$X.orig" "$X"; cp "$P.orig" "$P"
+  cp "$J.orig" "$J"; cp "$X.orig" "$X"; cp "$P.orig" "$P"; cp "$A.orig" "$A"
   # An anchor that no longer matches mutates nothing: INVALID, never a verdict.
   if ! mutate "$old" "$new" "$file"; then
     echo "$name: INVALID (anchor does not match exactly once)"; fail=$((fail+1)); return
@@ -317,7 +318,13 @@ run_one RS-M4 '        if ref_siblings(root, &merged) {
         }' rs_f05_two_way_node_through_a_hop_is_stated ref_siblings_test
 # RS-M5 the root not checked
 run_one RS-M5 '                        if ref_siblings(&pre, &pre) || ref_siblings(&post, &post) {' '                        if false && (ref_siblings(&pre, &pre) || ref_siblings(&post, &post)) {' rs_f04_two_way_root_is_stated ref_siblings_test
-cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"; cp "$P.orig" "$P"; rm "$P.orig"
+
+# JUDGE-TESTS r2 (docs/falsification/JUDGE-TESTS-R2-SPEC.md), mutating action/tests-ajv.mjs
+# TS2-M1 the draft switch dropped: every schema read as draft-07
+run_one TS2-M1 '  const draft = draftOf(schema.$schema);' '  const draft = "07"; void draftOf(schema.$schema);' t2_f01_draft_2019_09_is_checked_by_both_validators judge_tests_test "$A"
+# TS2-M2 2020-12 read with the 2019-09 class
+run_one TS2-M2 '  else if (draft === "2020") ajv = new (require("ajv/dist/2020"))(opts);' '  else if (draft === "2020") ajv = new (require("ajv/dist/2019"))(opts);' t2_f02_draft_2020_12_prefix_items_is_checked judge_tests_test "$A"
+cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"; cp "$P.orig" "$P"; rm "$P.orig"; cp "$A.orig" "$A"; rm "$A.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"
 [ "$fail" -eq 0 ]

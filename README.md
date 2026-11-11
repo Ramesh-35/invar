@@ -359,7 +359,12 @@ the static judge could reach. A document the two validators answer
 differently is listed as disputed, never a break and never a pass, and
 documents that pass prove nothing: there is no HOLDS from a corpus
 ([JUDGE-TESTS-SPEC.md](docs/falsification/JUDGE-TESTS-SPEC.md),
-[JUDGE-TESTS-R1-SPEC.md](docs/falsification/JUDGE-TESTS-R1-SPEC.md)). On
+[JUDGE-TESTS-R1-SPEC.md](docs/falsification/JUDGE-TESTS-R1-SPEC.md)).
+Both validators read the schema's own draft, 04 through 2020-12; a
+`$schema` naming none of them is read as draft-07 by both
+([JUDGE-TESTS-R2-SPEC.md](docs/falsification/JUDGE-TESTS-R2-SPEC.md),
+v0.2.25: before it the Ajv side refused 2019-09 and 2020-12 schemas, and
+43 SchemaStore changes were unverifiable for that reason alone). On
 SchemaStore's own test files this finds 15 changes that break a document
 of their own, 7 of them beyond the static judge's reach
 (`pull-request-labeler`, `ryl`, `github-action` and `global.json` among
