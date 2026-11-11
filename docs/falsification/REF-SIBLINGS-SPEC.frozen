@@ -1,0 +1,89 @@
+# REF-SIBLINGS r0 freeze record, written before any implementation.
+# Baseline: v0.2.23 candidate (JUDGE-D5 r1). Drafted 2026-11-08, awaiting ratification.
+# Measured before implementation: ref_siblings_test 0 of 8 pass. The guards
+#   rs_f02 and rs_f03 already give the right verdict (VIOLATED, tightened) and
+#   fail only on the new JSON field `ref_siblings_paths`, absent today; the six
+#   others fail on the ruling. Clippy silent.
+# Prediction measured with a throwaway build of the ruling (its diff kept as
+#   refsib-throwaway.diff outside the repository; the build was discarded
+#   before this freeze): on SchemaStore exactly these 70 changes move, all to
+#   NOT EVALUATED (ref_siblings); Iglu and AsyncAPI none; WG 31/45/0; replay PASS;
+#   label-free VIOLATED 39; Iglu 5/3/0.
+#   b0bfd76eb_youtrack-app.json	NOT EVALUATED
+#   71b24fdd7_tox.json	NOT EVALUATED
+#   cb9cdced4_pnpm-workspace.json	HOLDS
+#   6debd6cb6_tox.json	NOT EVALUATED
+#   6f2e0a123_pnpm-workspace.json	HOLDS
+#   bc1a40196_pnpm-workspace.json	HOLDS
+#   61ef5c60e_pnpm-workspace.json	HOLDS
+#   803561f5f_pnpm-workspace.json	HOLDS
+#   25b50ebc9_pnpm-workspace.json	HOLDS
+#   3dccfc0ce_pnpm-workspace.json	HOLDS
+#   95771093c_tox.json	HOLDS
+#   b3f8099cd_webextension.json	NOT EVALUATED
+#   03afb205b_youtrack-app.json	NOT EVALUATED
+#   f40c891d3_youtrack-app.json	NOT EVALUATED
+#   773fe876b_circleciconfig.json	NOT EVALUATED
+#   6313b56ae_schema-org-action.json	NOT EVALUATED
+#   6313b56ae_schema-org-contact-point.json	NOT EVALUATED
+#   6313b56ae_schema-org-place.json	NOT EVALUATED
+#   6313b56ae_schema-org-thing.json	NOT EVALUATED
+#   142dde599_ide.host.json	NOT EVALUATED
+#   e02051cf4_cargo-make.json	NOT EVALUATED
+#   bd00a0821_pnpm-workspace.json	NOT EVALUATED
+#   8b8c3a0bb_pnpm-workspace.json	HOLDS
+#   f619bbab9_pnpm-workspace.json	HOLDS
+#   525fe4803_pnpm-workspace.json	HOLDS
+#   4f9683522_youtrack-app.json	NOT EVALUATED
+#   b2651be2f_pnpm-workspace.json	NOT EVALUATED
+#   bf9bf14cb_pnpm-workspace.json	HOLDS
+#   c3495d15c_pnpm-workspace.json	HOLDS
+#   b514ab55c_mkdocs-1.0.json	NOT EVALUATED
+#   6d8c7651b_detekt-1.22.0.json	NOT EVALUATED
+#   449644d6d_stale.json	VIOLATED
+#   8cd5ed422_function.json	NOT EVALUATED
+#   8e4aaf018_coffeelint.json	NOT EVALUATED
+#   7db0907d2_debugsettings.json	NOT EVALUATED
+#   b46ae83d5_launchsettings.json	NOT EVALUATED
+#   1515ac50c_nswag.json	NOT EVALUATED
+#   3da93b2a1_tox.json	NOT EVALUATED
+#   0a7821f40_resjson.json	NOT EVALUATED
+#   259c342b9_label-commenter-config.json	HOLDS
+#   1c03efc8a_renovate-39.json	HOLDS
+#   1c03efc8a_renovate-40.json	HOLDS
+#   64f8a2254_web-types.json	NOT EVALUATED
+#   0450a9a05_pnpm-workspace.json	NOT EVALUATED
+#   2d39ba6ac_pnpm-workspace.json	HOLDS
+#   ea1c58784_pnpm-workspace.json	NOT EVALUATED
+#   15df70842_foundryvtt-module-manifest.json	NOT EVALUATED
+#   15df70842_foundryvtt-system-manifest.json	NOT EVALUATED
+#   15df70842_foundryvtt-world-manifest.json	NOT EVALUATED
+#   1f04be83d_codeclimate.json	HOLDS
+#   764dff657_pnpm-workspace.json	HOLDS
+#   ff02e09d1_pnpm-workspace.json	HOLDS
+#   e7f0b560a_pnpm-workspace.json	NOT EVALUATED
+#   80dbcdc1a_pnpm-workspace.json	HOLDS
+#   4836277f2_nodemon.json	NOT EVALUATED
+#   4836277f2_pnpm-workspace.json	HOLDS
+#   f71d8129b_pnpm-workspace.json	NOT EVALUATED
+#   af686ddb1_vtesttree-schema-v2.1.0.json	HOLDS
+#   af686ddb1_vtesttree-schema-v2.2.0.json	HOLDS
+#   af686ddb1_vtesttree-schema-v2.3.0.json	HOLDS
+#   af686ddb1_vtesttree-schema-v2.4.0.json	NOT EVALUATED
+#   ca65ac1df_tox.json	NOT EVALUATED
+#   80b186b44_tox.json	HOLDS
+#   c6c2d035d_drupal-recipe.json	HOLDS
+#   c6c2d035d_minecraft-loot-table.json	NOT EVALUATED
+#   c6c2d035d_thunderbird-extension.json	NOT EVALUATED
+#   c6c2d035d_webextension.json	NOT EVALUATED
+#   80b82ca24_tox.json	HOLDS
+#   30fa09217_youtrack-app.json	NOT EVALUATED
+#   fac74e59d_tox.json	NOT EVALUATED
+blake3(docs/falsification/REF-SIBLINGS-SPEC.md) = 2c4ac9d7cc3dd11be8d07e7e1c47151619d99ceb78c3fd5ed057a3e70b45e2e5
+sha256(docs/falsification/REF-SIBLINGS-SPEC.md) = d373eb354272b7b23311b3c2a12b0395eba844f8241a10091f456263a5874da7
+blake3(crates/invar-falsify/tests/ref_siblings_test.rs) = af0d0002775bb95c4987cdbad4a50cb04d76173adb2c662f1ecc3d1af814d981
+sha256(crates/invar-falsify/tests/ref_siblings_test.rs) = c4f755248156b40f34e13510b41430365d6e11580857b6207feb3d83f7acbc83
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-stale-449644d6d-before.json) = 894eb6683327f9ceaf7af12ef2e98854ffb226194635d3f865e66e883af9cd8f
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-stale-449644d6d-before.json) = a252ebcfa7a36df2f3a9bb3bbb31e93506605a49f51725cc09bebe4d694dfc2f
+blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-stale-449644d6d-after.json) = 9c10a63fc0261611eb8cbd662a174594057f90416d33e81d1209eb3786377831
+sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-stale-449644d6d-after.json) = 51eb9388e42b83bec816b03110a6a469f859186c1a380cad4a6ea5521edaf4a4
