@@ -1,0 +1,14 @@
+# JUDGE-CC r0 freeze record, written before any implementation.
+# Baseline: v0.2.26 release (JUDGE-TESTS r3). Drafted 2026-11-09 on the user's directive.
+# Measured before implementation: cc_f01, cc_f02, cc_f06 FAIL (VIOLATED today), cc_f04
+#   FAILS on the stated line; cc_f03 and cc_f05 (guards) pass. 2 of 6. Clippy silent.
+# Pre-registered: 6 of 6; CC-M1..M3 killed with every earlier mutant (JS-M4, W0-M2
+#   re-anchored if needed, recorded); SchemaStore VIOLATED 67 -> 38 with exactly the 29
+#   changes in cc-predicted.txt moving to NOT EVALUATED; no change anywhere becomes HOLDS;
+#   WG gate stays 0 HOLDS; full suite.
+blake3(docs/falsification/JUDGE-CC-SPEC.md) = ba90369e1c80b5f007eec4505768a0504c6eb0d22c821a7dbb45a8bc4294d217
+sha256(docs/falsification/JUDGE-CC-SPEC.md) = 4c348b31d9d22a7bd77eacc3b85f9918c6b44eebdb360fbe4f670fb59e474a22
+blake3(docs/falsification/cc-predicted.txt) = fac68d5701e87b9a2f75be123c7059d9d90b9bbd5fd20097af11c42ab4f6e6c9
+sha256(docs/falsification/cc-predicted.txt) = e0ccaa88f5e7a475a82e59d13cfd8af325d169f4ef2b1418dbfff1ea0213f1a8
+blake3(crates/invar-falsify/tests/judge_cc_test.rs) = a466d5a15b46f58249c8997866061056f5df6f6a00a81b9ece87160843fc22e4
+sha256(crates/invar-falsify/tests/judge_cc_test.rs) = f6177efed49444c66e6ec88215ffcaef768c591e630b4d69b40b393af1e6b5d0
