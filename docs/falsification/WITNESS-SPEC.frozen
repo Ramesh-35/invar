@@ -1,0 +1,12 @@
+# WITNESS r0 freeze record, written before any implementation.
+# Baseline: v0.2.21 candidate (JUDGE-CONST r0). Drafted 2026-11-08, awaiting ratification.
+# Measured before implementation: witness_test 0 of 7 pass (there is no
+#   `invar witness` yet; w_f06 fails because the unknown command exits 2, not 3).
+# Pre-registered: 7 of 7; W0-M1..M3 killed with every earlier mutant; full
+#   suite; clippy silent; no verdict moves on any corpus; label-free 26/14/50/0,
+#   Iglu 5/3/0, replay PASS unchanged. On the 15 two-validator breaks the count
+#   of documents written is reported, not predicted.
+blake3(docs/falsification/WITNESS-SPEC.md) = 7bf06b3a0e40f7645f903300551d58b936571c6c7eecea81341d512b385a256f
+sha256(docs/falsification/WITNESS-SPEC.md) = 8ea6106c27a54efcb36e57510367806dcda7d6b10498c515f8278127bb1f1af1
+blake3(crates/invar-falsify/tests/witness_test.rs) = 99cfafaae5718a42877b09e396fd75619be7db02b434cf9b587f7967d8b0e13a
+sha256(crates/invar-falsify/tests/witness_test.rs) = 51d78b53728a928db1f66505b1ac2cd767b94253e3c2dc3b11b68ca33b06d90e
