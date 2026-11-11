@@ -1,0 +1,11 @@
+# JUDGE-RECEIPT r1 (A3-RECEIPT) freeze record, written before any implementation.
+# Baseline: v0.2.26 candidate (JUDGE-TESTS r3). Drafted 2026-11-08, awaiting ratification.
+# Measured before implementation: jr1_f01, f02, f03, f04, f06 FAIL with exit 3
+#   ("--receipt with --contracts is not supported in r0"); jr1_f05 (guard) passes.
+#   1 of 6. Clippy silent.
+# Pre-registered: 6 of 6; RM1-1..3 killed with every earlier mutant; r0's jr_f01..f10
+#   unchanged and green; full suite; no corpus moves; gates unchanged.
+blake3(docs/falsification/JUDGE-RECEIPT-R1-SPEC.md) = 94006fc75a9e445d1e92d0cd39dbdfeb690e5ecb28672e33b49e34b1312aa6f8
+sha256(docs/falsification/JUDGE-RECEIPT-R1-SPEC.md) = 6d9cc67e807dacf62181d6ee293a1368706dc96d1ab7cc0e27135269ab5bf7d7
+blake3(crates/invar-falsify/tests/judge_receipt_test.rs) = 2e17925ebe588073eed14f53a6607044ef31645de635592bf5e50ecc381469de
+sha256(crates/invar-falsify/tests/judge_receipt_test.rs) = 44e929932572d0c1198fb7dd5792e1147cb2015814b498956102570e5326e6b1
