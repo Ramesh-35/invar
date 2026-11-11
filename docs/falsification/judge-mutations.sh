@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # JUDGE-1 mutant elimination (JUDGE-SPEC r1, JUDGE-SUBTYPE r1, JUDGE-SARIF r0,
-# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1, JUDGE-CONST r0, WITNESS r0). Each operator (JM-M1..M6, JS-M1..M4,
-# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5, K-R1..R2, W0-M1..M3) must first COMPILE (else INVALID), then is
+# JUDGE-RECEIPT r0, JUDGE-SUBTYPE r2, JUDGE-CONTRACTS r0, JUDGE-WIDEN r0, COUNTEREXAMPLE r0, JUDGE-R3 r0, COUNTEREXAMPLE r1, COUNTEREXAMPLE r2, JUDGE-D9 r0, JUDGE-FILEPAIR r0, JUDGE-REACH r0, JUDGE-DRAFT r0, JUDGE-ITEMS r0, JUDGE-TESTS r0 and r1, JUDGE-CANON r0 and r1, JUDGE-CONST r0, WITNESS r0, JUDGE-D5 r1). Each operator (JM-M1..M6, JS-M1..M4,
+# SF-M1..M3, RM-1..4, R2-M1..M6, JC-M1..M7, W-M1..M4, CX-M1..M5, R3-M1..M4, K-M1..M8, C-M1..M5, D9-M1..M3, FP-M1..M3, RE-M1..M8, DR-M1..M4, IT-M1..M4, TS-M1..M7, CN-M1..M4, CR1-M1..M5, K-R1..R2, W0-M1..M3, D5R1-M1..M2) must first COMPILE (else INVALID), then is
 # applied to src/judge.rs (or src/counterexample.rs) as a real source mutation; the named killer
 # fixture must FAIL under the mutant (mutant KILLED) and the file is
 # restored. Any mutant that survives is reported SURVIVED and the run
@@ -103,7 +103,10 @@ run_one R2-M4 '("NOT EVALUATED", Some("unjudged_construct"))' '("HOLDS", None)' 
 # R2-M5 local reference resolution disabled (Amendment A)
 run_one R2-M5 'Some(roots) => deref(&roots[side], v, active),' 'Some(_roots) => { let _ = active; (v.clone(), Vec::new()) },' r2_f12_tightened_defs_target_is_violated judge_subtype_r2_test
 # R2-M6 implied-type check dropped (Amendment B)
-run_one R2-M6 'if type_str(pv) == "unspecified" && type_made_explicit(pv, qv) {' 'if false && type_str(pv) == "unspecified" && type_made_explicit(pv, qv) {' r2_f15_implied_type_made_explicit_is_a_note judge_subtype_r2_test
+# (JUDGE-D5 r1: R2-M6 re-aimed; the note is now the mutant, not the rule)
+run_one R2-M6 '            if type_str(pv) == "unspecified" && enum_covered(pv, qv) {' '            if type_str(pv) == "unspecified" && !pv.get("properties").is_none() && type_str(qv) == "object" {
+                out.push(Witness { post_type: Some(type_str(qv)), ..stated_witness(&dotted, "type_enum_covered", pv) });
+            } else if type_str(pv) == "unspecified" && enum_covered(pv, qv) {' r2_f15_implied_type_made_explicit_is_a_note judge_subtype_r2_test
 # JUDGE-CONTRACTS r0 (docs/falsification/JUDGE-CONTRACTS-SPEC.md)
 # JC-M1 unchanged-file filter dropped: every matching contract judged
 run_one JC-M1 'let changed: Vec<String> = changed.into_iter().filter(|p| matched.contains(p)).collect();' 'let changed: Vec<String> = { let _ = changed; matched.iter().cloned().collect() };' jc_f01_three_schemas_only_changed_ones_judged judge_contracts_test
@@ -282,6 +285,19 @@ run_one W0-M1 '    let kind_dir = if positive { "src/test" } else { "src/negativ
 run_one W0-M2 '            None => without.push(format!("{} {}: {}", w.kind, w.path, w.counterexample_reason.as_deref().unwrap_or("no document"))),' '            None => { let n = planned.len() + 1; planned.push((format!("invar-{n:02}-{}.json", witness_slug(&w.path)), b"null\n".to_vec(), format!("{} {}", w.kind, w.path))); }' w_f04_witness_without_document_is_stated witness_test
 # W0-M3 the slug not applied
 run_one W0-M3 '                let file = format!("invar-{n:02}-{}.json", witness_slug(&w.path));' '                let file = format!("invar-{n:02}-{}.json", w.path);' w_f05_two_breaks_numbered_and_slugged witness_test
+
+# D5R1-M1 the implied-type note reintroduced (JUDGE-D5 r1)
+run_one D5R1-M1 '            if type_str(pv) == "unspecified" && enum_covered(pv, qv) {' '            if type_str(pv) == "unspecified" && pv.get("properties").is_some() && type_str(qv) == "object" {
+                out.push(Witness { post_type: Some(type_str(qv)), ..stated_witness(&dotted, "type_enum_covered", pv) });
+            } else if type_str(pv) == "unspecified" && enum_covered(pv, qv) {' d5_f01_object_type_written_where_none_was_is_violated judge_d5_r1_test
+# D5R1-M2 unspecified-to-object not reported as retyped
+run_one D5R1-M2 '            } else if type_str(pv) != type_str(qv) {
+                out.push(Witness {
+                    path: dotted.clone(),
+                    kind: "retyped",' '            } else if type_str(pv) != type_str(qv) && !(type_str(pv) == "unspecified" && type_str(qv) == "object") {
+                out.push(Witness {
+                    path: dotted.clone(),
+                    kind: "retyped",' d5_f01_object_type_written_where_none_was_is_violated judge_d5_r1_test
 cp "$J.orig" "$J"; rm "$J.orig"; cp "$X.orig" "$X"; rm "$X.orig"; cp "$P.orig" "$P"; rm "$P.orig"
 cargo build -q 2>/dev/null
 echo "mutants killed: $pass of $((pass+fail))"

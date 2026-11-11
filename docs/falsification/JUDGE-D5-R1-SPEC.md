@@ -96,3 +96,54 @@ no move. Label-free counts change (more VIOLATED, stated in the Measured
 outcome), Iglu 5/3/0 may rise, SchemaStore replay PASS unchanged, the WG
 gate passes with 0 HOLDS. Every new counterexample is run through the
 two validators; the count that fails that check is reported, not hidden.
+
+## Measured outcome (after implementation, 2026-11-08)
+
+- Fixtures 6 of 6; r2_f15 and i_f13 as amended pass. Full suite 856
+  tests. Mutants 102 of 102 killed (D5R1-M1, D5R1-M2 new; R2-M6 re-aimed
+  at the note as a mutant). Clippy silent. The D5 branch, its helper and
+  its note renderer are deleted, not disabled.
+- WG gate PASS: 76 pairs, VIOLATED 31, NOT EVALUATED 45, HOLDS 0. Label-free
+  PASS (40 VIOLATED, 21 confirmed by a checked counterexample, 19
+  unconfirmed). Iglu PASS 5/3/0. SchemaStore replay PASS after Amendment C
+  to its manifest (below).
+- Corpus moves ([d5-r1-moves/schemastore.tsv](d5-r1-moves/schemastore.tsv)):
+  SchemaStore 13 HOLDS to VIOLATED (as predicted) and 7 NOT EVALUATED to
+  VIOLATED (the prediction said they would stay NOT EVALUATED with a
+  witness added; a VIOLATED witness decides the verdict whatever else is
+  unchecked, as it always has, so the prediction misread the engine's own
+  precedence). Iglu 0 moves: the 4 Iglu HOLDS the prediction named carry
+  the D9 note ("every value of its enum already is"), whose wording shares
+  three words with the withdrawn note; the prediction matched text, not
+  rulings. AsyncAPI 0 moves.
+- Every new counterexample against two validators: 35 built by the engine,
+  35 confirmed (valid at the base, rejected at the head, Python jsonschema
+  and Ajv 8 agreeing); 21 not built, with the reason stated in the output
+  (pattern 12, patternProperties 7, path 2). For the 13 commits involved,
+  a document was confirmed by both validators in every case, 9 from the
+  engine's own counterexamples and 4 built by hand for the Measured
+  outcome (vsext, pattern, band-manifest, paper-plugin: values satisfying
+  the base's patterns, then a string where the head now demands an
+  object).
+- One change is VIOLATED by the engine and NOT confirmed: stale.json
+  (449644d6d). Its root carries `$ref` beside `properties` under draft-07.
+  Python jsonschema ignores a `$ref`'s siblings there and accepts the
+  document at the head; Ajv 8 reads them and rejects it. The engine reads
+  them too. The two validators INVAR trusts disagree, so the manifest
+  labels the commit `disputed` (no assertion) and the next ruling,
+  REF-SIBLINGS, decides what the judge does at such a node; until then
+  this one verdict stands on Ajv's reading and is marked as such here.
+- Amendment A: fixture d5_f05 asserted a built counterexample for
+  schema-catalog; the builder declines there (`pattern` on `url`) and says
+  so. The fixture now asserts the stated reason; the document confirmed
+  by both validators is
+  `{"$schema":"https://json.schemastore.org/schema-catalog.json","version":1,"schemas":[{"name":"n","description":"d","url":"https://x/y.json","versions":"oops"}]}`.
+- Amendment B: JUDGE-ITEMS i_f13 (vsext, real bytes) had frozen the same
+  false HOLDS ("both notes"); `{"version":"1.0","extensions":["just-a-string"]}`
+  is valid before and rejected after. It now asserts VIOLATED at
+  `extensions[]` with the migration still noted.
+- Amendment C (schemastore-replay/MANIFEST.tsv): 13 commits relabelled
+  `real` with the validator-confirmed documents above; 449644d6d
+  relabelled `disputed`. The hand labels of JUDGE-SUBTYPE r2 were made
+  under the D5 belief and inherited its error; the ground truth here is
+  the validators', not the labeller's.

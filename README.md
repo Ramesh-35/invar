@@ -287,6 +287,19 @@ files for the 6 the static judge reaches, each confirmed by both
 validators; the other 9 are the instance check's, and are not
 pretended into documents.
 
+From v0.2.23 a `type` written where a field had none is a break, not a
+note: a field with object keywords and no type accepted a string, a
+number, null; writing `"type": "object"` rejects them, and the
+counterexample says so ([JUDGE-D5-R1-SPEC.md](docs/falsification/JUDGE-D5-R1-SPEC.md)).
+Until this release the judge called that "type made explicit" and HOLDS,
+on 13 SchemaStore changes and in two of its own frozen fixtures. It was
+found by a dataset INVAR did not make: 76 SchemaStore version pairs that
+a complete witness-generation algorithm (Attouche et al., ACM TODS 2026,
+shipped with Baazizi et al. 2026) proved to break; INVAR said HOLDS on
+one. Those 76 pairs are now a release gate (`docs/falsification/wg-bench`),
+the first whose labels INVAR did not produce: HOLDS on any of them fails
+the release.
+
 In the Action, one input:
 
 ```yaml

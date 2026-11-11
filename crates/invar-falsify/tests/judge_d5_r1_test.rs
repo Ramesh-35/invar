@@ -84,6 +84,12 @@ fn d5_f04_widened_type_holds() {
 }
 
 /// d5_f05: real bytes, the pair the WG dataset labelled a break.
+/// Amendment A (after the freeze): the frozen form asserted a counterexample
+/// document. The builder declines here, and says why: the catalog's `url`
+/// carries `"pattern": "^https://"`, which the builder does not satisfy by
+/// construction. The verdict stands on the type rule; the document the
+/// harness confirmed is in the spec's Measured outcome. A fixture must not
+/// assert more than the engine claims.
 #[test]
 fn d5_f05_real_schema_catalog_v12_v13_is_violated() {
     let (code, text, v) = both("f05", CATALOG_V12, CATALOG_V13);
@@ -91,7 +97,8 @@ fn d5_f05_real_schema_catalog_v12_v13_is_violated() {
     let w = &v["witnesses"][0];
     assert_eq!(w["kind"], json!("retyped"), "{v}");
     assert_eq!(w["path"], json!("schemas[].versions"), "{v}");
-    assert!(w["counterexample"].is_object(), "{v}");
+    assert!(w["counterexample"].is_null(), "{v}");
+    assert!(w["counterexample_reason"].as_str().unwrap_or("").contains("pattern"), "{v}");
 }
 
 /// d5_f06: real bytes, devinit 2.0, `run` gained `type: array`.

@@ -182,13 +182,16 @@ fn i_f12_real_cargo_crate_type_enum_is_a_break() {
     assert!(!["bin", "lib", "rlib", "dylib", "cdylib", "staticlib", "proc-macro"].iter().any(|k| el == k), "{v}");
 }
 
-/// i_f13: real SchemaStore bytes, "Migrated vsext.json to draft-07": the
-/// migration and the element's implied object type, both stated.
+/// i_f13: real SchemaStore bytes, "Migrated vsext.json to draft-07". Amended
+/// by JUDGE-D5 r1: the element gained `type: object` where it had none, and
+/// `{"version":"1.0","extensions":["just-a-string"]}` is valid before and
+/// rejected after (checked with jsonschema). This fixture froze a false
+/// HOLDS; it now asserts the break, with the migration still noted.
 #[test]
 fn i_f13_real_vsext_holds_with_both_notes() {
     let (code, text, v) = both("f13", VSEXT_BEFORE, VSEXT_AFTER);
-    assert_eq!(code, 0, "{text}");
+    assert_eq!(code, 1, "{text}");
     assert!(text.contains("noted: draft migration: $schema moves from draft-04 to draft-07"), "{text}");
-    assert!(text.contains("extensions[]"), "{text}");
+    assert!(v["witnesses"].as_array().unwrap().iter().any(|w| w["kind"] == "retyped" && w["path"] == "extensions[]"), "{v}");
     assert_eq!(v["unchecked"], json!([]), "{v}");
 }

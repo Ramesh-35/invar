@@ -538,11 +538,11 @@ fn judge_child(dotted: &str, pv_raw: &Value, qv_raw: Option<&Value>, p_site: Str
                 }
                 reach::cover_refs(side, chain);
             }
-            if type_str(pv) == "unspecified" && type_made_explicit(pv, qv) {
-                // D5 (r2 Amendment B): the type its own keywords already
-                // implied, now written down: a stated note, not a break.
-                out.push(stated_witness(&dotted, "type_explicit", qv));
-            } else if type_str(pv) == "unspecified" && enum_covered(pv, qv) {
+            // JUDGE-D5 r1: the D5 branch of r2 Amendment B ("type made
+            // explicit", a note) is withdrawn. A type written where none was
+            // rejects every other type a validator accepted there before,
+            // and is judged below by the type rule like any other retype.
+            if type_str(pv) == "unspecified" && enum_covered(pv, qv) {
                 // D9 (JUDGE-D9 r0): the enum (or const) already limited
                 // the field to values of the new type.
                 out.push(Witness { post_type: Some(type_str(qv)), ..stated_witness(&dotted, "type_enum_covered", pv) });
@@ -665,20 +665,6 @@ fn has_combinator(v: &Value) -> bool {
     ["anyOf", "oneOf", "allOf", "$ref"].iter().any(|k| v.get(*k).is_some())
 }
 
-/// D5 (r2 Amendment B): is every type `post` declares already implied by
-/// the keywords `pre` carried while it declared none?
-fn type_made_explicit(pre: &Value, post: &Value) -> bool {
-    const IMPLIED: [(&str, &[&str]); 4] = [
-        ("object", &["properties", "additionalProperties", "patternProperties", "required", "propertyNames", "minProperties", "maxProperties"]),
-        ("array", &["items", "prefixItems", "contains", "minItems", "maxItems", "uniqueItems"]),
-        ("string", &["minLength", "maxLength", "pattern", "format"]),
-        ("number", &["minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "multipleOf"]),
-    ];
-    let implied: Vec<&str> = IMPLIED.iter().filter(|(_, kws)| kws.iter().any(|k| pre.get(*k).is_some())).map(|(t, _)| *t).collect();
-    let post_type = type_str(post);
-    let declared: Vec<&str> = post_type.split('|').map(|t| if t == "integer" { "number" } else { t }).collect();
-    !implied.is_empty() && declared.iter().all(|t| implied.contains(t))
-}
 
 /// D7 (JUDGE-WIDEN r0): does `post` accept every type `pre` declared?
 /// `integer` is contained in `number`; no `type` at post accepts all. A
@@ -791,13 +777,6 @@ fn take_stated(w: &mut Vec<Witness>) -> Stated {
                 "type made explicit: {} is now {}, which every value of its enum already is; every value valid before is still valid.",
                 x.path,
                 x.post_type.as_deref().unwrap_or("unspecified")
-            ));
-            false
-        }
-        "type_explicit" => {
-            st.notes.push(format!(
-                "type made explicit: {} is now {}, which its own keywords already implied; values of other types, accepted before, are now rejected.",
-                x.path, x.pre_type
             ));
             false
         }

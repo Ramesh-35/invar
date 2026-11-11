@@ -28,3 +28,15 @@ sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-devinit-2.0-cc3c8b1
 blake3(crates/invar-falsify/tests/fixtures/judge/schemastore-devinit-2.0-cc3c8b16c-after.json) = 4b5265b9afe96a2231e3417c429534edf6a16531462983c9b36f038284e1c63b
 sha256(crates/invar-falsify/tests/fixtures/judge/schemastore-devinit-2.0-cc3c8b16c-after.json) = 2f8652204310db5957ad259eea3db270270f96758f17345ed16e0d39453cb930
 blake3(docs/falsification/wg-bench/pairs, 152 files, sorted) = 27b1fa216d819c07ba2644892dada043078b047fa7707361e09b00a08a06aefd
+# Amendments A to C (after the measured outcome): docs/falsification/JUDGE-D5-R1-SPEC.md
+blake3(docs/falsification/JUDGE-D5-R1-SPEC.md) = c5bb986eeb7a3d671506565071b3dec06248c5508b63924e9382c03f4c7ba6a9
+sha256(docs/falsification/JUDGE-D5-R1-SPEC.md) = 39008c3dc9ef1bd65e5a770390b1d5b929bfee433baafc99d5b7f43326857460
+# Amendments A to C (after the measured outcome): crates/invar-falsify/tests/judge_d5_r1_test.rs
+blake3(crates/invar-falsify/tests/judge_d5_r1_test.rs) = 4995c546b7e1a6a1c3be3f8f5771313b29935f12de73727a7371ed83a39b4c08
+sha256(crates/invar-falsify/tests/judge_d5_r1_test.rs) = 85fda69b90747dd74f74520714bbdcb81997e1aca45fa1e99bd911bf2d55b722
+# Amendments A to C (after the measured outcome): crates/invar-falsify/tests/judge_items_test.rs
+blake3(crates/invar-falsify/tests/judge_items_test.rs) = 8f3382c73b7c863840ae4803d623179be08adef65d5ab91a5ac18e5e71b8d619
+sha256(crates/invar-falsify/tests/judge_items_test.rs) = c81df5aabab0d8453f9e005f3116bbd23755956a4daa6fa35c33347fd0d88a63
+# Amendments A to C (after the measured outcome): docs/falsification/schemastore-replay/MANIFEST.tsv
+blake3(docs/falsification/schemastore-replay/MANIFEST.tsv) = 7ec04c0f52fb117f69ab56cfba22f2266dfc5a003b76c8a76a2f327b69b7e9b3
+sha256(docs/falsification/schemastore-replay/MANIFEST.tsv) = 05ec437caf56a8e584c5126a215170d7fb8937d61cdcef25bd507ad1d16e7f11
