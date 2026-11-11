@@ -112,6 +112,10 @@ enum Command {
     /// program that reads the file; record exit 0, exit N or a timeout.
     /// The reader never moves the verdict or the exit code.
     Reader(ReaderArgs),
+    /// A3-ACCEPT: prepare or check a person's signed acceptance of one
+    /// receipt. Prepared by anyone; standing only with a listed
+    /// signature, the full witness list, and the receipt's own verdict.
+    Accept(AcceptArgs),
     /// Research harness: evaluate the falsification corpus and persist the run.
     Run(RunArgs),
     /// Research harness: structurally validate a corpus manifest.
@@ -423,6 +427,25 @@ struct JudgeArgs {
 }
 
 #[derive(Parser)]
+struct AcceptArgs {
+    /// The receipt the acceptance is about.
+    #[arg(value_name = "RECEIPT")]
+    receipt: String,
+    /// Emit the acceptance skeleton for a person to complete and sign.
+    #[arg(long, conflicts_with = "acceptance")]
+    prepare: bool,
+    /// With --prepare: write the skeleton here instead of stdout.
+    #[arg(long, requires = "prepare")]
+    out: Option<String>,
+    /// The signed acceptance file to check (its .sig sits beside it).
+    #[arg(long, requires = "signers")]
+    acceptance: Option<String>,
+    /// The allowed-signers file the signature must verify against.
+    #[arg(long)]
+    signers: Option<String>,
+}
+
+#[derive(Parser)]
 struct ReaderArgs {
     /// The base (the promise), then the head (the change).
     #[arg(value_name = "FILE", num_args = 2)]
@@ -552,6 +575,19 @@ fn main() {
         Command::Hook(a) => dispatch_r2(cmd_hook(a)),
         Command::Judge(a) => dispatch_r2(cmd_judge(a)),
         Command::Witness(a) => dispatch_r2(invar_falsify::judge::run_witness(&a.files[0], &a.files[1], &a.name, &a.out, a.positive)),
+        Command::Accept(a) => {
+            if a.prepare {
+                dispatch_r2(invar_falsify::judge::accept_prepare(&a.receipt, a.out.as_deref()))
+            } else if let (Some(acc), Some(signers)) = (a.acceptance.as_deref(), a.signers.as_deref()) {
+                dispatch_r2(
+                    std::env::current_dir()
+                        .context("reading the current directory")
+                        .and_then(|root| invar_falsify::judge::accept_check(&root, &a.receipt, acc, signers)),
+                )
+            } else {
+                dispatch_r2(Err(anyhow::anyhow!("accept takes --prepare, or --acceptance FILE --signers FILE")))
+            }
+        }
         Command::Reader(a) => {
             let envs: Result<Vec<(String, String)>, anyhow::Error> = a
                 .envs

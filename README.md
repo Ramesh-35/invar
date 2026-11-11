@@ -425,7 +425,17 @@ exactly what it did: exit 0, exit N, or timed out
 measured motivation, where six of ten programs loaded documents their
 own published schema rejects, is checked in under
 docs/falsification/prog0/). The reader line never moves the schema
-verdict, and its `--out` report verifies as recorded, not re-derived:
+verdict, and its `--out` report verifies as recorded, not re-derived.
+Accepting a break is its own signed record: `invar accept RECEIPT
+--prepare` fills the skeleton (the receipt's hash, verdict and every
+finding), a person completes and signs it (`ssh-keygen -Y sign -n
+invar-acceptance`), and `invar accept RECEIPT --acceptance FILE
+--signers FILE` checks the four standing rules
+([ACCEPT-SPEC.md](docs/falsification/ACCEPT-SPEC.md), v0.2.30): the
+named receipt reproduces, the signature verifies against keys the
+repository lists, every finding is listed or nothing is accepted, and
+the verdict matches, HOLDS having nothing to accept. Git is the ledger;
+there is no server:
 
 ```sh
 ssh-keygen -Y sign -n invar-receipt -f ~/.ssh/id_ed25519 receipt.json

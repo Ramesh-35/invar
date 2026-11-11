@@ -74,6 +74,17 @@ one CI command; this ruling deliberately ships the pieces first.
 - ac_f06 judge-change receipt: accepted as one unit, paths per contract.
 - ac_f07 NOT EVALUATED: acceptable; stated paths listed or nothing.
 
+## Amendment A (2026-11-10, during the build)
+
+Two fixture defects, no ruling change. ac_f04's "further" change removed
+a property from an OPEN object, which JUDGE r2 (D2) states as a loosening
+rather than accusing, so no second VIOLATED receipt could exist; the
+change is corrected to a tightened bound. And the test helper that signs
+acceptances now removes a stale `.sig` first: `ssh-keygen -Y sign`
+refuses to overwrite one yet exits 0, so re-signing fixtures were
+verifying the stale signature, and rule 2 (correctly) refused them
+before rules 3 and 4 were ever exercised.
+
 ## Mutation operators
 
 - AC-M1 the verdict not compared to accepts   -> ac_f02
@@ -86,3 +97,11 @@ one CI command; this ruling deliberately ships the pieces first.
 No corpus moves, no verdict changes anywhere: acceptance reads receipts,
 it never judges. Suite, clippy, WG gate and all 124 earlier mutants
 unchanged, plus the four above.
+
+## Measured outcome (2026-11-10, after implementation)
+
+7 of 7 fixtures pass (0 of 7 at the freeze); AC-M1..M4 killed; suite 903,
+clippy silent; WG gate unchanged (28/48, 0 HOLDS, PASS); no corpus moves,
+as pre-registered: acceptance reads receipts, it never judges. Amendment
+A is recorded above. Zero new dependencies: receipt::parse, the
+verify-receipt reproduction and verify_ssh carry the four rules.

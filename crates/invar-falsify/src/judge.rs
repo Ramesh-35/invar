@@ -580,6 +580,153 @@ pub fn verify_change_receipt(root: &Path, body: &Value, body_text: &str) -> Resu
     Ok(0)
 }
 
+/// A3-ACCEPT (docs/falsification/ACCEPT-SPEC.md): everything a receipt
+/// found, as the list an acceptance must repeat in full. Witness paths
+/// first in receipt order, then every stated finding as "not evaluated:
+/// PATH"; for a change receipt each entry is prefixed "CONTRACT: ".
+fn acceptance_paths(body: &Value) -> Vec<String> {
+    fn one(doc: &Value, prefix: &str, out: &mut Vec<String>) {
+        for w in doc.get("witnesses").and_then(Value::as_array).into_iter().flatten() {
+            if let Some(p) = w.get("path").and_then(Value::as_str) {
+                out.push(format!("{prefix}{p}"));
+            }
+        }
+        for key in ["unchecked", "not_evaluated_paths", "ref_siblings_paths", "undecided_paths"] {
+            for p in doc.get(key).and_then(Value::as_array).into_iter().flatten() {
+                if let Some(p) = p.as_str() {
+                    out.push(format!("{prefix}not evaluated: {p}"));
+                }
+            }
+        }
+    }
+    let mut out = Vec::new();
+    let result = body.get("result").cloned().unwrap_or_default();
+    if body.get("receipt_kind").and_then(Value::as_str) == Some("judge-change") {
+        for c in result.get("contracts").and_then(Value::as_array).into_iter().flatten() {
+            let name = c.get("contract").and_then(Value::as_str).unwrap_or("?");
+            one(c, &format!("{name}: "), &mut out);
+        }
+    } else {
+        one(&result, "", &mut out);
+    }
+    out
+}
+
+/// The verdict a receipt records: a single receipt's own, a change
+/// receipt's worst (the same rule as its exit code).
+fn receipt_verdict(body: &Value) -> String {
+    if body.get("receipt_kind").and_then(Value::as_str) == Some("judge-change") {
+        let n = |k: &str| body.pointer(&format!("/result/summary/{k}")).and_then(Value::as_u64).unwrap_or(0);
+        if n("violated") > 0 {
+            "VIOLATED".into()
+        } else if n("not_evaluated") > 0 {
+            "NOT EVALUATED".into()
+        } else {
+            "HOLDS".into()
+        }
+    } else {
+        body.pointer("/result/verdict").and_then(Value::as_str).unwrap_or("?").to_string()
+    }
+}
+
+/// `invar accept RECEIPT --prepare`: the skeleton a person completes and
+/// signs. An agent may run this; it cannot sign.
+pub fn accept_prepare(receipt_path: &str, out: Option<&str>) -> Result<i32> {
+    let text = std::fs::read_to_string(receipt_path).with_context(|| format!("reading {receipt_path}"))?;
+    let parsed = crate::receipt::parse(&text)?;
+    let verdict = receipt_verdict(&parsed.body);
+    if verdict == "HOLDS" {
+        println!("nothing to accept: the receipt records HOLDS, and an acceptance exists only for a verdict someone must answer for.");
+        return Ok(1);
+    }
+    let skeleton = json!({
+        "acceptance_format": 1,
+        "accepts": [verdict],
+        "principal": "",
+        "reason": "",
+        "receipt_blake3": blake3::hash(parsed.body_text.as_bytes()).to_hex().to_string(),
+        "signed_on": "",
+        "witness_paths": acceptance_paths(&parsed.body),
+    });
+    let rendered = format!("{}\n", serde_json::to_string_pretty(&skeleton).unwrap_or_default());
+    match out {
+        Some(p) => {
+            std::fs::write(p, &rendered).with_context(|| format!("writing {p}"))?;
+            println!("acceptance skeleton written to {p}: fill reason, principal and signed_on, then sign it:");
+            println!("  ssh-keygen -Y sign -n invar-acceptance -f <your key> {p}");
+        }
+        None => print!("{rendered}"),
+    }
+    Ok(0)
+}
+
+/// `invar accept RECEIPT --acceptance FILE --signers FILE`: the four
+/// standing rules, in order, naming the first that fails. The acceptance
+/// stands only when all four hold.
+pub fn accept_check(root: &Path, receipt_path: &str, acceptance_path: &str, signers: &str) -> Result<i32> {
+    let text = std::fs::read_to_string(receipt_path).with_context(|| format!("reading {receipt_path}"))?;
+    let parsed = crate::receipt::parse(&text)?;
+    let receipt_hash = blake3::hash(parsed.body_text.as_bytes()).to_hex().to_string();
+    let accept_bytes = std::fs::read(acceptance_path).with_context(|| format!("reading {acceptance_path}"))?;
+    let acceptance: Value = serde_json::from_slice(&accept_bytes).with_context(|| format!("parsing {acceptance_path}"))?;
+    let field = |k: &str| acceptance.get(k).and_then(Value::as_str).unwrap_or("").to_string();
+
+    // Rule 1: the named receipt, and that receipt itself reproduces.
+    let named = field("receipt_blake3");
+    if named != receipt_hash {
+        println!("rule 1: the acceptance names receipt {}..., this receipt is {}...: hash mismatch. New bytes need a new receipt and a new acceptance.", named.get(..8).unwrap_or("?"), &receipt_hash[..8]);
+        println!("result: acceptance NOT standing");
+        return Ok(1);
+    }
+    let reproduced = if parsed.body.get("receipt_kind").and_then(Value::as_str) == Some("judge-change") {
+        verify_change_receipt(root, &parsed.body, &parsed.body_text)?
+    } else {
+        verify_receipt(root, &parsed.body, &parsed.body_text)?
+    };
+    if reproduced != 0 {
+        println!("rule 1: the receipt itself does not verify; nothing to accept until it does.");
+        println!("result: acceptance NOT standing");
+        return Ok(1);
+    }
+
+    // Rule 2: the signature, by a key the repository lists.
+    let principal = field("principal");
+    let sig = std::path::PathBuf::from(format!("{acceptance_path}.sig"));
+    let signed = sig.exists()
+        && crate::receipt::verify_ssh(&accept_bytes, &sig, std::path::Path::new(signers), &principal, "invar-acceptance")?;
+    if !signed {
+        println!("rule 2: the signature does not verify for {principal:?} against {signers} (namespace invar-acceptance). An agent may prepare an acceptance; only a listed person signs one.");
+        println!("result: acceptance NOT standing");
+        return Ok(1);
+    }
+
+    // Rule 3: complete or nothing.
+    let expected = acceptance_paths(&parsed.body);
+    let mut listed: Vec<String> = acceptance.get("witness_paths").and_then(Value::as_array).into_iter().flatten().filter_map(|v| v.as_str().map(str::to_string)).collect();
+    let mut want = expected.clone();
+    listed.sort();
+    want.sort();
+    if listed != want {
+        let missing: Vec<&String> = want.iter().filter(|p| !listed.contains(p)).collect();
+        let extra: Vec<&String> = listed.iter().filter(|p| !want.contains(p)).collect();
+        println!("rule 3: witness_paths must list every witness and every stated finding of the receipt, and nothing else; an acceptance that omits one accepts nothing. missing: {missing:?}; not in the receipt: {extra:?}");
+        println!("result: acceptance NOT standing");
+        return Ok(1);
+    }
+
+    // Rule 4: accepts names the verdict, and HOLDS has nothing to accept.
+    let verdict = receipt_verdict(&parsed.body);
+    let accepts: Vec<String> = acceptance.get("accepts").and_then(Value::as_array).into_iter().flatten().filter_map(|v| v.as_str().map(str::to_string)).collect();
+    if verdict == "HOLDS" || accepts != vec![verdict.clone()] {
+        println!("rule 4: the receipt records verdict {verdict}; accepts says {accepts:?}. An acceptance names exactly the verdict it answers for, and HOLDS has nothing to accept.");
+        println!("result: acceptance NOT standing");
+        return Ok(1);
+    }
+
+    println!("acceptance standing: {principal} accepted {verdict} for receipt {}... on {}: {}", &receipt_hash[..8], field("signed_on"), field("reason"));
+    Ok(0)
+}
+
 /// JUDGE-RECEIPT r0 verification, after the footer, format, engine version
 /// and optional signature have been checked upstream: the inputs must be
 /// the recorded bytes, and re-judging them must reproduce the recorded

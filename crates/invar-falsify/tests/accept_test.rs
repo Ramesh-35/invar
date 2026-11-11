@@ -66,6 +66,10 @@ fn keypair(d: &Path, principal: &str) -> (PathBuf, PathBuf) {
 }
 
 fn sign(key: &Path, file: &Path) {
+    // Amendment A: ssh-keygen -Y sign refuses to overwrite an existing
+    // .sig yet exits 0, silently keeping the stale signature; remove it
+    // first so re-signing in a fixture signs the current bytes.
+    let _ = std::fs::remove_file(format!("{}.sig", file.display()));
     let o = Command::new("ssh-keygen").args(["-Y", "sign", "-n", "invar-acceptance", "-f"]).arg(key).arg(file).output().unwrap();
     assert!(o.status.success(), "{}", String::from_utf8_lossy(&o.stderr));
 }
@@ -151,7 +155,10 @@ fn ac_f04_new_receipt_needs_a_new_acceptance() {
     let d = repo("f04");
     let (key, signers) = keypair(&d, "nikhil@test");
     let (r, a) = accepted(&d, &key);
-    let further = r#"{"type":"object","properties":{"b":{"type":"string"}}}"#;
+    // Amendment A: as frozen this removed a property from an open object,
+    // which D2 states as a loosening (HOLDS), so no second receipt could
+    // exist; a tightened bound restores the fixture's purpose.
+    let further = r#"{"type":"object","properties":{"a":{"enum":["x"]},"b":{"type":"string","minLength":1}}}"#;
     std::fs::write(d.join("schemas/contract.json"), further).unwrap();
     let (_, out) = invar(&d, &["judge", "--contract", "schemas/contract.json", "--base", "main", "--receipt", &r]);
     assert!(out.contains("VIOLATED"), "{out}");

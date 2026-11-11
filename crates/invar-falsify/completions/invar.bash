@@ -3,7 +3,7 @@
 _invar() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
   if [ "$COMP_CWORD" -eq 1 ]; then
-    COMPREPLY=( $(compgen -W "demo init check lock coverage dependents backtest verify-receipt receipt fix explain gate mcp hook judge witness reader completions run validate report verify audit replay help" -- "$cur") )
+    COMPREPLY=( $(compgen -W "demo init check lock coverage dependents backtest verify-receipt receipt fix explain gate mcp hook judge witness reader accept completions run validate report verify audit replay help" -- "$cur") )
     return 0
   fi
   case "${COMP_WORDS[1]}" in
@@ -20,6 +20,7 @@ _invar() {
     judge)          COMPREPLY=( $(compgen -W "--contract --base --format --receipt --help" -- "$cur") );;
     witness)        COMPREPLY=( $(compgen -W "--name --out --positive --help" -- "$cur") );;
     reader)         COMPREPLY=( $(compgen -W "--cmd --timeout --env --out --format --help" -- "$cur") );;
+    accept)         COMPREPLY=( $(compgen -W "--prepare --out --acceptance --signers --help" -- "$cur") );;
     completions)    COMPREPLY=( $(compgen -W "bash zsh fish" -- "$cur") );;
     *)              COMPREPLY=( $(compgen -W "--help" -- "$cur") );;
   esac
