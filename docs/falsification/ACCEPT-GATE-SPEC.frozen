@@ -1,0 +1,12 @@
+# A3-GATE freeze record, written before any implementation.
+# Baseline: v0.2.30 release (A3-ACCEPT), landed, pushed and published 2026-11-11.
+# Drafted 2026-11-11 on the user's directive ("A3-GATE can now be locked").
+# Measured before implementation: ag_f01..ag_f06 FAIL (judge has no --acceptances
+#   flag; clap exits 2); ag_f07 guard passes. 1 of 7.
+# Pre-registered: 7 of 7; AG-M1..M3 killed with every earlier mutant (131); no
+#   corpus moves; WG gate unchanged; full suite; clippy silent.
+# Open for ratification before build: rule 1 (judged identity excludes commit fields).
+blake3(docs/falsification/ACCEPT-GATE-SPEC.md) = a1558da66475e193fe4fe78958af6b61b806ee6de2635f1f3200ce129bcede3c
+sha256(docs/falsification/ACCEPT-GATE-SPEC.md) = 30324eaa2bb9cdf93265589803633d8cc3dea60af18b7eaf6b9fede9d7fb6094
+blake3(crates/invar-falsify/tests/accept_gate_test.rs) = a6fb21920bce8e89d995b76da33272eb07a230076822627f57151cfc298b60c8
+sha256(crates/invar-falsify/tests/accept_gate_test.rs) = 573d16c740888ef4a900729cefadb7e693d02cfae7e4d11d7019831749d86ad8
