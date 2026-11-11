@@ -1,0 +1,18 @@
+# PROGRAM r0 freeze record, written before any implementation.
+# Baseline: v0.2.28 release (JUDGE-RECEIPT r1). Drafted 2026-11-09 on the user's
+#   directive ("PROGRAM r0 (v0.2.29), bringing the runtime truth corpus into the
+#   receipted product"; "augments, but never overrides, the static inclusion verdict").
+# Measured before implementation: rd_f01..rd_f08 all FAIL (the subcommand does not
+#   exist; clap exits 2). 0 of 8. Clippy silent on the baseline.
+# Pre-registered: 8 of 8; RD-M1..M4 killed with every earlier mutant; no corpus
+#   moves; WG gate unchanged; full suite.
+blake3(docs/falsification/PROGRAM-SPEC.md) = 76a121c3a18aed0c174b68dd7fda405215a09567385c76ab63d51f08775b9612
+sha256(docs/falsification/PROGRAM-SPEC.md) = 5e51d6ff8915a01ce9174d2751cf6b7869ee2c308b7c187436c197a33cb6fdc9
+blake3(crates/invar-falsify/tests/reader_test.rs) = c56b8dfe6fdc924acd602d373259c591e47b2d56cbcb2987ef0ebfda11fc1bb9
+sha256(crates/invar-falsify/tests/reader_test.rs) = 5e04767662588170c3d819afe44a83f1b60d47eeacd6136e95d914317953e7e4
+blake3(docs/falsification/prog0/PREREG.md) = 5cbd99c4367dfda073801c9fffe29b55e5715fdb14755cb43bce7c0b282356c0
+sha256(docs/falsification/prog0/PREREG.md) = f2411f5f37c57864f03f48cc29a3608c9c066d902ef1ebb6604a6a6b217df401
+blake3(docs/falsification/prog0/DEVIATIONS.md) = 4d27bdbeb827cc25bbf045102b6040db147f6649423d9f99bb46d5e7fb7a8670
+sha256(docs/falsification/prog0/DEVIATIONS.md) = 78ca4cb15bb1d0d1185b448f179c1348625c9185a4279024c2e3247394c12444
+blake3(docs/falsification/prog0/RESULTS.md) = 6d1bc01647ceba89d46ca51e02ddf15c5dd52a63caedbe1216f138ef8fc9c3cd
+sha256(docs/falsification/prog0/RESULTS.md) = db76b19121eb6ca239ea6c2228759e1976d2064225046a6738cc339298ccf3a2
