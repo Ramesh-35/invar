@@ -333,3 +333,123 @@ fn t2_f04_unknown_schema_uri_reads_as_draft_07() {
     assert_eq!(code, 1, "{text}");
     assert_eq!(v["witnesses"][0]["file"], json!("empty.json"), "{v}");
 }
+
+// JUDGE-TESTS r3 (docs/falsification/JUDGE-TESTS-R3-SPEC.md): a `$ref` to a
+// file is resolved from the schema's own directory, by the last segment of
+// the URI (then with `.json` added), read-only, in both validators, never
+// from the network. Frozen before implementation.
+//
+// - TS3-M1 the jsonschema side resolves nothing (offline registry back) -> t3_f01
+// - TS3-M2 the Ajv side loads no sibling                                  -> t3_f01
+// - TS3-M3 the `.json` fallback dropped                                   -> t3_f03
+// - TS3-M4 head siblings read from the base directory                     -> t3_f06
+
+const SIB_NAME: &str = r#"{"$schema":"http://json-schema.org/draft-07/schema#","definitions":{"name":{"type":"string"}}}"#;
+const SIB_NAME_MIN2: &str = r#"{"$schema":"http://json-schema.org/draft-07/schema#","definitions":{"name":{"type":"string","minLength":2}}}"#;
+
+fn with_siblings(d: &Path, files: &[(&str, &str)]) {
+    for (name, body) in files {
+        let p = d.join(name);
+        std::fs::create_dir_all(p.parent().unwrap()).unwrap();
+        std::fs::write(p, body).unwrap();
+    }
+}
+
+fn run_args(d: &Path, format: &str, extra: &[&str]) -> (i32, String) {
+    let mut args = vec![SCRIPT, "base.json", "head.json", "instances", "--format", format];
+    args.extend_from_slice(extra);
+    let o = Command::new("python3").args(&args).current_dir(d).output().expect("python3 on the PATH");
+    let mut s = String::from_utf8_lossy(&o.stdout).into_owned();
+    s.push_str(&String::from_utf8_lossy(&o.stderr));
+    (o.status.code().unwrap_or(-1), s)
+}
+
+fn ref_pair(r: &str) -> (String, String) {
+    let pre = format!(r#"{{"$schema":"http://json-schema.org/draft-07/schema#","type":"object","properties":{{"n":{{"$ref":"{r}"}}}}}}"#);
+    let post = format!(r#"{{"$schema":"http://json-schema.org/draft-07/schema#","type":"object","properties":{{"n":{{"allOf":[{{"$ref":"{r}"}},{{"minLength":2}}]}}}}}}"#);
+    (pre, post)
+}
+
+/// t3_f01: a relative `$ref` to a sibling file is resolved by both validators;
+/// the document goes through the reference on both sides. Kills TS3-M1, TS3-M2.
+#[test]
+fn t3_f01_relative_sibling_ref_is_resolved_by_both_validators() {
+    let (pre, post) = ref_pair("common.json#/definitions/name");
+    let d = setup("t3f01", &pre, &post, &[("one.json", r#"{"n":"x"}"#)]);
+    with_siblings(&d, &[("common.json", SIB_NAME)]);
+    let (code, text, v) = both(&d);
+    assert_eq!(code, 1, "{text}");
+    assert_eq!(v["validators"], json!(["jsonschema", "ajv"]), "{v}");
+    assert_eq!(v["witnesses"][0]["file"], json!("one.json"), "{v}");
+    assert!(v["witnesses"][0]["ajv_message"].as_str().is_some_and(|m| !m.is_empty()), "{v}");
+    assert_eq!(v["not_checked"], json!([]), "{v}");
+}
+
+/// t3_f02: an absolute URL `$ref` whose last segment names a sibling is read
+/// from that sibling, never fetched.
+#[test]
+fn t3_f02_absolute_url_ref_is_read_from_the_sibling_file() {
+    let (pre, post) = ref_pair("https://www.schemastore.org/common.json#/definitions/name");
+    let d = setup("t3f02", &pre, &post, &[("one.json", r#"{"n":"x"}"#)]);
+    with_siblings(&d, &[("common.json", SIB_NAME)]);
+    let (code, text, v) = both(&d);
+    assert_eq!(code, 1, "{text}");
+    assert_eq!(v["witnesses"][0]["file"], json!("one.json"), "{v}");
+    assert_eq!(v["not_checked"], json!([]), "{v}");
+}
+
+/// t3_f03: an extensionless `$ref` (`common#/...`) finds `common.json`. Kills TS3-M3.
+#[test]
+fn t3_f03_extensionless_ref_finds_the_json_sibling() {
+    let (pre, post) = ref_pair("common#/definitions/name");
+    let d = setup("t3f03", &pre, &post, &[("one.json", r#"{"n":"x"}"#)]);
+    with_siblings(&d, &[("common.json", SIB_NAME)]);
+    let (code, text, v) = both(&d);
+    assert_eq!(code, 1, "{text}");
+    assert_eq!(v["witnesses"][0]["file"], json!("one.json"), "{v}");
+    assert_eq!(v["not_checked"], json!([]), "{v}");
+}
+
+/// t3_f04 guard: a `$ref` to a file that is not there stays unverifiable in
+/// both validators; nothing is fetched and nothing is a break.
+#[test]
+fn t3_f04_missing_sibling_stays_unverifiable() {
+    let (pre, post) = ref_pair("absent.json#/definitions/name");
+    let d = setup("t3f04", &pre, &post, &[("one.json", r#"{"n":"x"}"#)]);
+    let (code, text, v) = both(&d);
+    assert_eq!(code, 4, "{text}");
+    assert_eq!(v["reason"], json!("unverifiable"), "{v}");
+    assert_eq!(v["witnesses"], json!([]), "{v}");
+    assert_eq!(v["not_checked"].as_array().map(|a| a.len()), Some(1), "{v}");
+}
+
+/// t3_f05: a sibling that itself refers to another sibling is followed, both validators.
+#[test]
+fn t3_f05_transitive_sibling_refs_are_followed() {
+    let a = r#"{"$schema":"http://json-schema.org/draft-07/schema#","definitions":{"wrapped":{"$ref":"b.json#/definitions/name"}}}"#;
+    let (pre, post) = ref_pair("a.json#/definitions/wrapped");
+    let d = setup("t3f05", &pre, &post, &[("one.json", r#"{"n":"x"}"#)]);
+    with_siblings(&d, &[("a.json", a), ("b.json", SIB_NAME)]);
+    let (code, text, v) = both(&d);
+    assert_eq!(code, 1, "{text}");
+    assert_eq!(v["witnesses"][0]["file"], json!("one.json"), "{v}");
+    assert_eq!(v["not_checked"], json!([]), "{v}");
+}
+
+/// t3_f06: each side resolves against its own siblings (`--base-siblings`,
+/// `--head-siblings`): the contract is unchanged, the sibling it refers to
+/// tightened, and the document that was a promise is rejected. Kills TS3-M4.
+#[test]
+fn t3_f06_each_side_resolves_against_its_own_siblings() {
+    let (pre, _) = ref_pair("common.json#/definitions/name");
+    let d = setup("t3f06", &pre, &pre, &[("one.json", r#"{"n":"x"}"#)]);
+    with_siblings(&d, &[("sibs/base/common.json", SIB_NAME), ("sibs/head/common.json", SIB_NAME_MIN2)]);
+    let extra = ["--base-siblings", "sibs/base", "--head-siblings", "sibs/head"];
+    let (code, text) = run_args(&d, "text", &extra);
+    let (_, j) = run_args(&d, "json", &extra);
+    let v: Value = serde_json::from_str(&j).unwrap_or(Value::Null);
+    assert_eq!(code, 1, "{text}");
+    assert_eq!(v["witnesses"][0]["file"], json!("one.json"), "{v}");
+    assert!(v["witnesses"][0]["ajv_message"].as_str().is_some_and(|m| !m.is_empty()), "{v}");
+    assert_eq!(v["not_checked"], json!([]), "{v}");
+}

@@ -1,0 +1,13 @@
+# JUDGE-TESTS r3 freeze record, written before any implementation.
+# Baseline: v0.2.25 candidate (JUDGE-TESTS r2). Drafted 2026-11-08, awaiting ratification.
+# Measured before implementation: t3_f01, f02, f03, f05 FAIL (both validators:
+#   "Unresolvable: <ref>" / "can't resolve reference"), t3_f06 FAILS with exit 3
+#   (the flags --base-siblings/--head-siblings do not exist yet); t3_f04 (guard)
+#   passes today. 1 of 6. Clippy silent.
+# Pre-registered: 6 of 6; TS3-M1..M4 killed with every earlier mutant; full
+#   suite; of the 70 unverifiable at most 67 move; no other change moves;
+#   the Rust judge's gates unchanged.
+blake3(docs/falsification/JUDGE-TESTS-R3-SPEC.md) = 3f18b4469a64e3dec285ca2997ef84017def8be6403d128037d2d555733a4ee7
+sha256(docs/falsification/JUDGE-TESTS-R3-SPEC.md) = 787bec95292ea55bc8e34e359dd2a2a6ecb017829623dd310d0145d4f242f659
+blake3(crates/invar-falsify/tests/judge_tests_test.rs) = 03b4d775d4a333d4cc743869e6ea56f029ff0a62f919fc217ea42f3ea4e21af0
+sha256(crates/invar-falsify/tests/judge_tests_test.rs) = a65fffce36a349e713e72845f132f3c27c4017c8062b517b57a9c8cb462e5cd5
