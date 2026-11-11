@@ -91,6 +91,153 @@ pub fn run(root: &Path, contract: &str, base: &str, format: &str, receipt_out: O
     })
 }
 
+/// PROGRAM r0 (docs/falsification/PROGRAM-SPEC.md): run the judge's own
+/// counterexamples through the real program that reads the file, and
+/// record what it did. The reader never moves the verdict or the exit
+/// code; the environment is cleared; the report is recorded, not
+/// re-derived.
+pub fn run_reader(base_path: &str, head_path: &str, cmd: &str, timeout_s: u64, envs: &[(String, String)], out: Option<&str>, format: &str) -> Result<i32> {
+    let One { verdict, reason, witnesses, stated, .. } = judge_pair(base_path, head_path)?;
+    let head: Value = serde_json::from_slice(&std::fs::read(head_path)?)?;
+
+    let nanos = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
+    let work = std::env::temp_dir().join(format!("invar_reader_{}_{nanos}", std::process::id()));
+    let home = work.join("home");
+    std::fs::create_dir_all(&home).with_context(|| format!("creating {}", work.display()))?;
+
+    // One run: write the document, run the command on it, record the outcome.
+    let run_one = |label: &str, doc: &Value| -> Result<(String, Option<i64>, String)> {
+        let file = work.join(format!("{}.json", blake3::hash(label.as_bytes()).to_hex()));
+        let bytes = serde_json::to_vec(doc).unwrap_or_default();
+        std::fs::write(&file, &bytes)?;
+        let doc_b3 = blake3::hash(&bytes).to_hex().to_string();
+        let line = cmd.replace("{}", &file.display().to_string());
+        let mut c = Command::new("sh");
+        c.args(["-c", &line]).current_dir(&work);
+        // RD-M1 guard: nothing of the caller's environment reaches the
+        // command except PATH; HOME and TMPDIR are fresh.
+        c.env_clear();
+        if let Ok(path) = std::env::var("PATH") {
+            c.env("PATH", path);
+        }
+        c.env("HOME", &home).env("TMPDIR", &work);
+        for (k, v) in envs {
+            c.env(k, v);
+        }
+        let mut child = c.stdin(std::process::Stdio::null()).stdout(std::process::Stdio::null()).stderr(std::process::Stdio::null()).spawn().with_context(|| format!("running sh -c {line}"))?;
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(timeout_s);
+        let outcome = loop {
+            if let Some(st) = child.try_wait()? {
+                break match st.code() {
+                    Some(n) => format!("exit {n}"),
+                    None => "killed by a signal".to_string(),
+                };
+            }
+            if std::time::Instant::now() >= deadline {
+                let _ = child.kill();
+                let _ = child.wait();
+                break format!("timed out after {timeout_s}s");
+            }
+            std::thread::sleep(std::time::Duration::from_millis(25));
+        };
+        let exit = outcome.strip_prefix("exit ").and_then(|n| n.parse::<i64>().ok());
+        Ok((outcome, exit, doc_b3))
+    };
+
+    // The control: the minimal document the HEAD contract accepts. A
+    // control that does not exit 0 means the command may not be reading
+    // this document at all, and every run is read in that light.
+    let planned: Vec<(&Witness, &Value)> = witnesses.iter().filter_map(|w| w.counterexample.as_ref().map(|c| (w, c))).collect();
+    let mut reader_lines: Vec<String> = Vec::new();
+    let mut control_json = json!(null);
+    let mut runs_json: Vec<Value> = Vec::new();
+    if planned.is_empty() {
+        reader_lines.push("reader: no counterexamples to run; nothing was run.".to_string());
+    } else {
+        match crate::counterexample::minimal(&head, &head, 0) {
+            Ok(doc) => {
+                let (outcome, exit, b3) = run_one("control", &doc)?;
+                let note = if exit == Some(0) { String::new() } else { " — the command may not read this document at all".to_string() };
+                reader_lines.push(format!("reader: control (minimal document the head accepts): {outcome}{note}"));
+                control_json = json!({"document": doc, "document_blake3": b3, "outcome": outcome});
+            }
+            Err(why) => {
+                reader_lines.push(format!("reader: control not built ({why})."));
+                control_json = json!({"not_built": why});
+            }
+        }
+        for (w, doc) in &planned {
+            let (outcome, _, b3) = run_one(&w.path, doc)?;
+            reader_lines.push(format!("reader: {outcome} on {}: {}", w.path, serde_json::to_string(doc).unwrap_or_default()));
+            runs_json.push(json!({"document": doc, "document_blake3": b3, "outcome": outcome, "witness_path": w.path}));
+        }
+    }
+    reader_lines.push(format!("reader: command: {cmd}; environment cleared (PATH kept, fresh HOME); not sandboxed: it ran with your permissions."));
+
+    let reader_json = json!({"command": cmd, "control": control_json, "runs": runs_json, "timeout_s": timeout_s});
+    let (contract_label, base_label) = (head_path, base_path);
+    match format {
+        "json" => {
+            let mut body = body_json(verdict, reason, contract_label, base_label, &witnesses, &stated);
+            body["reader"] = reader_json.clone();
+            println!("{}", serde_json::to_string_pretty(&body).unwrap_or_default());
+        }
+        _ => {
+            print!("{}", render_text(verdict, reason, contract_label, base_label, &witnesses, &stated));
+            for l in &reader_lines {
+                println!("{l}");
+            }
+        }
+    }
+    if let Some(p) = out {
+        let base_raw = std::fs::read(base_path)?;
+        let head_raw = std::fs::read(head_path)?;
+        let report = json!({
+            "engine": {"version": env!("CARGO_PKG_VERSION")},
+            "inputs": {
+                "base": base_path,
+                "base_blake3": blake3::hash(&base_raw).to_hex().to_string(),
+                "command": cmd,
+                "head": head_path,
+                "head_blake3": blake3::hash(&head_raw).to_hex().to_string(),
+                "timeout_s": timeout_s,
+            },
+            "reader": reader_json,
+            "receipt_format": crate::receipt::RECEIPT_FORMAT,
+            "receipt_kind": "reader",
+            "schema_verdict": verdict,
+        });
+        std::fs::write(p, crate::receipt::render(&report)).with_context(|| format!("writing report {p}"))?;
+    }
+    Ok(match verdict {
+        "HOLDS" => 0,
+        "VIOLATED" => 1,
+        _ => 4,
+    })
+}
+
+/// PROGRAM r0 verification of a reader report: the footer was checked
+/// upstream; the schema files must still hash as recorded (drift is exit
+/// 1). The program result itself is recorded, not re-derived: re-deriving
+/// it would mean re-running a program whose version this engine cannot pin.
+pub fn verify_reader_report(body: &Value) -> Result<i32> {
+    let s = |k: &str| body.pointer(&format!("/inputs/{k}")).and_then(Value::as_str).map(str::to_string);
+    for (path_key, hash_key) in [("base", "base_blake3"), ("head", "head_blake3")] {
+        let path = s(path_key).ok_or_else(|| anyhow::anyhow!("reader report has no inputs.{path_key}"))?;
+        let want = s(hash_key).unwrap_or_default();
+        let raw = std::fs::read(&path).with_context(|| format!("reading {path}"))?;
+        if blake3::hash(&raw).to_hex().to_string() != want {
+            println!("input drift: {path} is not the schema the reader ran against");
+            println!("result: report NOT confirmed");
+            return Ok(1);
+        }
+    }
+    println!("inputs ok: both schemas hash as recorded");
+    println!("the program result is recorded, not re-derived: re-run the same program version to confirm it");
+    println!("result: report inputs confirmed");
+    Ok(0)
+}
+
 /// JUDGE-FILEPAIR r0: judge two files directly, no git anywhere. The
 /// first path is the base (the promise), the second the head (the
 /// change), and the paths as given are the labels every surface prints.

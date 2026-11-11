@@ -293,7 +293,7 @@ fn place(inst: &mut Value, root: &Value, steps: &[Step], nodes: &[Value], leaf: 
 
 /// The smallest instance a schema allows, deterministically (spec order:
 /// const, first enum value, first declared type).
-fn minimal(root: &Value, schema: &Value, depth: usize) -> Result<Value, String> {
+pub(crate) fn minimal(root: &Value, schema: &Value, depth: usize) -> Result<Value, String> {
     if depth > 32 {
         return Err(format!("the instance would be larger than {MAX_BYTES} bytes"));
     }

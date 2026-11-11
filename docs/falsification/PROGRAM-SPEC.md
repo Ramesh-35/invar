@@ -82,3 +82,15 @@ engine as `invar judge`, then:
 
 No corpus moves anywhere: the reader records, it does not judge. Suite,
 clippy, WG gate and every earlier mutant unchanged, plus the four above.
+
+## Measured outcome (2026-11-09, after implementation)
+
+8 of 8 fixtures pass (0 of 8 at the freeze); RD-M1..M4 killed; suite 896,
+clippy silent; WG gate unchanged (28 VIOLATED / 48 NOT EVALUATED, 0
+HOLDS, PASS); no corpus moves, as pre-registered: the reader records, it
+does not judge. Two of the build's own slips were caught by existing
+gates and fixed without weakening either: the CLI-surface fixture refused
+the new subcommand until `reader` appeared in all three completion
+scripts, and FP-M2 went INVALID because run_reader duplicated its anchor
+line verbatim; the duplicate was renamed (contract_label, base_label) and
+the mutation itself is unchanged.

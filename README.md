@@ -416,7 +416,16 @@ head commit named only when the judged bytes are committed, and
 `verify-receipt` re-judges every listed contract and must reproduce the
 body byte for byte, so a change touching five schemas is accepted or
 disputed as one record. Sign it with your own key (INVAR never holds
-one):
+one). And when the file has one known program reading it, `invar reader
+base.json head.json --cmd 'yourtool --config {}'` runs the judge's own
+counterexamples, and a control document the head accepts, through the
+real program with a cleared environment and a timeout, and records
+exactly what it did: exit 0, exit N, or timed out
+([PROGRAM-SPEC.md](docs/falsification/PROGRAM-SPEC.md), v0.2.29; the
+measured motivation, where six of ten programs loaded documents their
+own published schema rejects, is checked in under
+docs/falsification/prog0/). The reader line never moves the schema
+verdict, and its `--out` report verifies as recorded, not re-derived:
 
 ```sh
 ssh-keygen -Y sign -n invar-receipt -f ~/.ssh/id_ed25519 receipt.json

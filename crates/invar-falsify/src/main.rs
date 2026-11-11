@@ -108,6 +108,10 @@ enum Command {
     /// SchemaStore test file (src/negative_test/NAME/, or src/test/NAME/
     /// with --positive). A generator, not a verdict: exit 0 when it ran.
     Witness(WitnessArgs),
+    /// PROGRAM r0: run the judge's counterexamples through the real
+    /// program that reads the file; record exit 0, exit N or a timeout.
+    /// The reader never moves the verdict or the exit code.
+    Reader(ReaderArgs),
     /// Research harness: evaluate the falsification corpus and persist the run.
     Run(RunArgs),
     /// Research harness: structurally validate a corpus manifest.
@@ -419,6 +423,30 @@ struct JudgeArgs {
 }
 
 #[derive(Parser)]
+struct ReaderArgs {
+    /// The base (the promise), then the head (the change).
+    #[arg(value_name = "FILE", num_args = 2)]
+    files: Vec<String>,
+    /// The command that reads the document; {} is replaced by the
+    /// document's path and the whole template runs under sh -c, with a
+    /// cleared environment (PATH kept, fresh HOME). Not sandboxed.
+    #[arg(long)]
+    cmd: String,
+    /// Seconds before a run is killed and recorded as timed out.
+    #[arg(long, default_value_t = 30)]
+    timeout: u64,
+    /// Pass one environment variable through, KEY=VALUE. Repeatable.
+    #[arg(long = "env", value_name = "KEY=VALUE")]
+    envs: Vec<String>,
+    /// Also write a canonical reader report (BLAKE3 footer) here.
+    #[arg(long)]
+    out: Option<String>,
+    /// Output format: text or json.
+    #[arg(long, default_value = "text")]
+    format: String,
+}
+
+#[derive(Parser)]
 struct WitnessArgs {
     /// The base (the promise), then the head (the change).
     #[arg(value_name = "FILE", num_args = 2)]
@@ -524,6 +552,14 @@ fn main() {
         Command::Hook(a) => dispatch_r2(cmd_hook(a)),
         Command::Judge(a) => dispatch_r2(cmd_judge(a)),
         Command::Witness(a) => dispatch_r2(invar_falsify::judge::run_witness(&a.files[0], &a.files[1], &a.name, &a.out, a.positive)),
+        Command::Reader(a) => {
+            let envs: Result<Vec<(String, String)>, anyhow::Error> = a
+                .envs
+                .iter()
+                .map(|e| e.split_once('=').map(|(k, v)| (k.to_string(), v.to_string())).ok_or_else(|| anyhow::anyhow!("--env takes KEY=VALUE, not {e:?}")))
+                .collect();
+            dispatch_r2(envs.and_then(|envs| invar_falsify::judge::run_reader(&a.files[0], &a.files[1], &a.cmd, a.timeout, &envs, a.out.as_deref(), &a.format)))
+        }
         Command::Fix(a) => dispatch_r2(cmd_fix(a)),
         Command::Explain(a) => {
             let (out, code) = invar_falsify::explain::explain(a.code.as_deref());
@@ -1618,6 +1654,9 @@ fn cmd_verify_receipt(args: VerifyReceiptArgs) -> Result<i32> {
     if body.get("receipt_kind").and_then(|v| v.as_str()) == Some("judge-change") {
         let root = std::env::current_dir().context("reading the current directory")?;
         return invar_falsify::judge::verify_change_receipt(&root, body, &parsed.body_text);
+    }
+    if body.get("receipt_kind").and_then(|v| v.as_str()) == Some("reader") {
+        return invar_falsify::judge::verify_reader_report(body);
     }
 
     // Inputs: the config and lock must be the recorded bytes.
