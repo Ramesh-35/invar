@@ -271,3 +271,65 @@ fn t_f18_both_reject_is_a_witness_with_both_messages() {
     assert_eq!(v["validators"], json!(["jsonschema", "ajv"]), "{v}");
     assert_eq!(v["instances"]["disputed"], json!(0), "{v}");
 }
+
+// JUDGE-TESTS r2 (docs/falsification/JUDGE-TESTS-R2-SPEC.md): the Ajv side
+// reads each schema under its own draft: 2019-09 and 2020-12 through Ajv's
+// own classes for them, draft-06 with its meta-schema added. Until r2 those
+// drafts were `unverifiable` on the Ajv side and no document could be a
+// witness. Mutation operators:
+// - TS2-M1 every schema read as draft-07 (the draft switch dropped)  -> t2_f01
+// - TS2-M2 2020-12 read with the 2019-09 class                        -> t2_f02
+
+const D2019_A: &str = r#"{"$schema":"https://json-schema.org/draft/2019-09/schema","type":"object","properties":{"a":{"type":"string"}}}"#;
+const D2019_A_MIN1: &str = r#"{"$schema":"https://json-schema.org/draft/2019-09/schema","type":"object","properties":{"a":{"type":"string","minLength":1}}}"#;
+const D2020_ITEMS: &str = r#"{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","properties":{"t":{"type":"array","prefixItems":[{"type":"string"}],"items":true}}}"#;
+const D2020_ITEMS_CLOSED: &str = r#"{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","properties":{"t":{"type":"array","prefixItems":[{"type":"string"}],"items":false}}}"#;
+const D06_A: &str = r#"{"$schema":"http://json-schema.org/draft-06/schema#","type":"object","properties":{"a":{"type":"string"}}}"#;
+const D06_A_MIN1: &str = r#"{"$schema":"http://json-schema.org/draft-06/schema#","type":"object","properties":{"a":{"type":"string","minLength":1}}}"#;
+
+/// t2_f01: a 2019-09 schema pair; both validators run and both reject. Kills TS2-M1.
+#[test]
+fn t2_f01_draft_2019_09_is_checked_by_both_validators() {
+    let d = setup("t2f01", D2019_A, D2019_A_MIN1, &[("empty.json", r#"{"a":""}"#)]);
+    let (code, text, v) = both(&d);
+    assert_eq!(code, 1, "{text}");
+    assert_eq!(v["validators"], json!(["jsonschema", "ajv"]), "{v}");
+    assert_eq!(v["witnesses"][0]["file"], json!("empty.json"), "{v}");
+    assert!(v["witnesses"][0]["ajv_message"].as_str().is_some_and(|m| !m.is_empty()), "{v}");
+    assert_eq!(v["not_checked"], json!([]), "{v}");
+}
+
+/// t2_f02: a 2020-12 schema pair using `prefixItems` and `items: false`,
+/// which only the 2020-12 class reads as the specification does. Kills TS2-M2.
+#[test]
+fn t2_f02_draft_2020_12_prefix_items_is_checked() {
+    let d = setup("t2f02", D2020_ITEMS, D2020_ITEMS_CLOSED, &[("two.json", r#"{"t":["x",1]}"#)]);
+    let (code, text, v) = both(&d);
+    assert_eq!(code, 1, "{text}");
+    assert_eq!(v["witnesses"][0]["file"], json!("two.json"), "{v}");
+    assert!(v["witnesses"][0]["ajv_message"].as_str().is_some_and(|m| !m.is_empty()), "{v}");
+    assert_eq!(v["not_checked"], json!([]), "{v}");
+    assert_eq!(v["instances"]["disputed"], json!(0), "{v}");
+}
+
+/// t2_f03: a draft-06 schema pair; both validators run.
+#[test]
+fn t2_f03_draft_06_is_checked_by_both_validators() {
+    let d = setup("t2f03", D06_A, D06_A_MIN1, &[("empty.json", r#"{"a":""}"#)]);
+    let (code, text, v) = both(&d);
+    assert_eq!(code, 1, "{text}");
+    assert_eq!(v["witnesses"][0]["file"], json!("empty.json"), "{v}");
+    assert!(v["witnesses"][0]["ajv_message"].as_str().is_some_and(|m| !m.is_empty()), "{v}");
+    assert_eq!(v["not_checked"], json!([]), "{v}");
+}
+
+/// t2_f04 guard: an unknown `$schema` is still read as draft-07 by both, as before.
+#[test]
+fn t2_f04_unknown_schema_uri_reads_as_draft_07() {
+    let pre = r#"{"$schema":"https://example.com/not-a-draft","type":"object","properties":{"a":{"type":"string"}}}"#;
+    let post = r#"{"$schema":"https://example.com/not-a-draft","type":"object","properties":{"a":{"type":"string","minLength":1}}}"#;
+    let d = setup("t2f04", pre, post, &[("empty.json", r#"{"a":""}"#)]);
+    let (code, text, v) = both(&d);
+    assert_eq!(code, 1, "{text}");
+    assert_eq!(v["witnesses"][0]["file"], json!("empty.json"), "{v}");
+}

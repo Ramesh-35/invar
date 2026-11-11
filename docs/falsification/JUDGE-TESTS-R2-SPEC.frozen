@@ -1,0 +1,14 @@
+# JUDGE-TESTS r2 freeze record, written before any implementation.
+# Baseline: v0.2.24 candidate (REF-SIBLINGS r0). Drafted 2026-11-08, awaiting ratification.
+# Measured before implementation: t2_f01..t2_f04 all FAIL with
+#   NOT EVALUATED (unverifiable), "no schema with key or ref <the $schema URI>"
+#   from the Ajv side; t2_f04 (the guard for an unknown URI) fails the same
+#   way, which is itself a finding: the Python side read it as draft-07 and
+#   the Ajv side refused it, so the change was unverifiable. Clippy silent.
+# Pre-registered: 4 of 4; TS2-M1..M2 killed with every earlier mutant; full
+#   suite; the fall in unverifiable at most 46 of 113; no VIOLATED or
+#   instances_pass change of r1 moves; the Rust judge's gates unchanged.
+blake3(docs/falsification/JUDGE-TESTS-R2-SPEC.md) = a0df8a18fc2c5b7cbbb38c2f1c7ff379635de18cf1656a4c8684694e230db73c
+sha256(docs/falsification/JUDGE-TESTS-R2-SPEC.md) = 5c4b18e7e4b75ae8f9d4a562abd45834d066a78d20cf29f1e3dc06c44bde64d6
+blake3(crates/invar-falsify/tests/judge_tests_test.rs) = f62f21a0298385d2de56f81e3d53a4f2345a3736de19869e8feaacc4d30cdf42
+sha256(crates/invar-falsify/tests/judge_tests_test.rs) = ff52008db85fa4ae00ef529c1152a212b8648f5b5af8e9c83323c3a6090e1bfb
