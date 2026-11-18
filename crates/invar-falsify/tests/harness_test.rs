@@ -1304,7 +1304,7 @@ fn fix_suggest_and_mcp_server() {
     let replies: Vec<serde_json::Value> = String::from_utf8(out).unwrap().lines().map(|l| serde_json::from_str(l).unwrap()).collect();
     assert_eq!(replies.len(), 5, "no reply to a notification");
     assert_eq!(replies[0]["result"]["protocolVersion"], "2024-11-05");
-    assert_eq!(replies[1]["result"]["tools"].as_array().unwrap().len(), 4);
+    assert_eq!(replies[1]["result"]["tools"].as_array().unwrap().len(), 5);
     let check = &replies[2]["result"]["structuredContent"];
     assert_eq!(check["result"], "violated", "{check}");
     assert_eq!(check["contracts"][0]["residue"][0]["field"], "Order.amount_cents");
@@ -2106,8 +2106,8 @@ fn mcp_dependents_and_coverage_match_cli() {
     assert_eq!(out.status.code(), Some(0), "mcp exits 0 at EOF, never a verdict");
     let replies: Vec<serde_json::Value> = String::from_utf8(out.stdout).unwrap().lines().map(|s| serde_json::from_str(s).unwrap()).collect();
     assert_eq!(replies.len(), 5);
-    assert_eq!(replies[1]["result"]["tools"].as_array().unwrap().len(), 4);
-    assert!(replies[1]["result"]["tools"].as_array().unwrap().iter().all(|t| t["annotations"]["readOnlyHint"] == true), "all four tools read-only");
+    assert_eq!(replies[1]["result"]["tools"].as_array().unwrap().len(), 5);
+    assert!(replies[1]["result"]["tools"].as_array().unwrap().iter().all(|t| t["annotations"]["readOnlyHint"] == true), "all five tools read-only");
     assert_eq!(replies[2]["result"]["structuredContent"], cli_dep, "dependents: one rendering path");
     assert_eq!(replies[3]["result"]["structuredContent"], cli_cov, "coverage: one rendering path");
     let mcp_dep = &replies[2]["result"]["structuredContent"];
@@ -2309,4 +2309,73 @@ fn no_reuse<'a>(args: &[&'a str]) -> Vec<&'a str> {
         v.push("--no-reuse");
     }
     v
+}
+
+
+/// MCP-JUDGE r0: the `judge` tool returns exactly the JSON body of
+/// `invar judge BASE HEAD --format json` (one engine, one renderer), refuses
+/// paths outside the repository root, needs no invar.toml, and ignores any
+/// verdict a client tries to supply.
+#[test]
+fn mcp_judge_matches_cli_and_stays_inside_the_repository() {
+    use std::io::Write;
+    let tmp = std::env::temp_dir().join(format!("invar-mcp-judge-{}", std::process::id()));
+    let repo = tmp.join("repo");
+    std::fs::create_dir_all(repo.join("c")).unwrap();
+    let base = r#"{"type":"object","required":["id","total"],"properties":{"id":{"type":"string"},"total":{"type":"number"}}}"#;
+    let head = r#"{"type":"object","required":["id","total"],"properties":{"id":{"type":"string"},"total":{"type":"string"}}}"#;
+    std::fs::write(repo.join("c/base.json"), base).unwrap();
+    std::fs::write(repo.join("c/head.json"), head).unwrap();
+    std::fs::write(tmp.join("outside.json"), base).unwrap();
+    let bin = env!("CARGO_BIN_EXE_invar");
+    let cli = std::process::Command::new(bin).current_dir(&repo).args(["judge", "c/base.json", "c/head.json", "--format", "json"]).output().unwrap();
+    assert_eq!(cli.status.code(), Some(1), "the CLI says VIOLATED");
+    let cli_body: serde_json::Value = serde_json::from_slice(&cli.stdout).unwrap();
+    let mut child = std::process::Command::new(bin)
+        .args(["mcp", "--offline", "--config", repo.join("invar.toml").to_str().unwrap()])
+        .stdin(std::process::Stdio::piped()).stdout(std::process::Stdio::piped()).spawn().unwrap();
+    let input = concat!(
+        r#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}"#, "\n",
+        r#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"judge","arguments":{"base":"c/base.json","head":"c/head.json"}}}"#, "\n",
+        r#"{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"judge","arguments":{"base":"c/base.json","head":"../outside.json"}}}"#, "\n",
+        r#"{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"judge","arguments":{"base":"c/base.json","head":"c/head.json","verdict":"HOLDS"}}}"#, "\n",
+        r#"{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"judge","arguments":{"base":"c/base.json"}}}"#, "\n",
+    );
+    child.stdin.take().unwrap().write_all(input.as_bytes()).unwrap();
+    let out = child.wait_with_output().unwrap();
+    assert_eq!(out.status.code(), Some(0), "mcp exits 0 at EOF, never a verdict");
+    let r: Vec<serde_json::Value> = String::from_utf8(out.stdout).unwrap().lines().map(|s| serde_json::from_str(s).unwrap()).collect();
+    assert_eq!(r[1]["result"]["isError"], false);
+    assert_eq!(r[1]["result"]["structuredContent"], cli_body, "judge: one rendering path with the CLI");
+    assert_eq!(r[1]["result"]["structuredContent"]["verdict"], "VIOLATED");
+    assert_eq!(r[2]["result"]["isError"], true, "outside the repository root is refused");
+    assert!(r[2]["result"]["content"][0]["text"].as_str().unwrap().contains("not a verdict"));
+    assert_eq!(r[3]["result"]["structuredContent"], cli_body, "a client-supplied verdict changes nothing");
+    assert_eq!(r[4]["result"]["isError"], true, "a missing head is an error, never a verdict");
+    // Repository mode: the working tree against a git ref, same body as the CLI.
+    let git = |args: &[&str]| assert!(std::process::Command::new("git").current_dir(&repo).args(args).output().unwrap().status.success(), "git {args:?}");
+    git(&["init", "-q"]);
+    git(&["-c", "user.name=t", "-c", "user.email=t@t", "add", "c/base.json"]);
+    std::fs::write(repo.join("c/order.json"), base).unwrap();
+    git(&["add", "c/order.json"]);
+    git(&["-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "promise"]);
+    std::fs::write(repo.join("c/order.json"), head).unwrap();
+    let cli = std::process::Command::new(bin).current_dir(&repo).args(["judge", "--contract", "c/order.json", "--base", "HEAD", "--format", "json"]).output().unwrap();
+    let cli_repo: serde_json::Value = serde_json::from_slice(&cli.stdout).unwrap();
+    let mut child = std::process::Command::new(bin)
+        .args(["mcp", "--offline", "--config", repo.join("invar.toml").to_str().unwrap()])
+        .stdin(std::process::Stdio::piped()).stdout(std::process::Stdio::piped()).spawn().unwrap();
+    let input = concat!(
+        r#"{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"judge","arguments":{"contract":"c/order.json"}}}"#, "\n",
+        r#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"judge","arguments":{"contract":"c/order.json","base_ref":"--output=x"}}}"#, "\n",
+        r#"{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"judge","arguments":{"contract":"c/order.json","head":"c/head.json"}}}"#, "\n",
+    );
+    child.stdin.take().unwrap().write_all(input.as_bytes()).unwrap();
+    let out = child.wait_with_output().unwrap();
+    let r: Vec<serde_json::Value> = String::from_utf8(out.stdout).unwrap().lines().map(|s| serde_json::from_str(s).unwrap()).collect();
+    assert_eq!(r[0]["result"]["structuredContent"], cli_repo, "repository mode: one rendering path with the CLI");
+    assert_eq!(r[0]["result"]["structuredContent"]["verdict"], "VIOLATED");
+    assert_eq!(r[1]["result"]["isError"], true, "an option-looking ref is refused");
+    assert_eq!(r[2]["result"]["isError"], true, "mixing the two modes is refused");
+    std::fs::remove_dir_all(&tmp).unwrap();
 }

@@ -14,6 +14,12 @@
 //!   * `coverage`: per-contract evaluation disclosure, never a verdict. Same
 //!     rendering path as `invar coverage --format json`.
 //!
+//!   * `judge` (MCP-JUDGE r0, proposal): a proposed change to a JSON Schema
+//!     contract, judged against its promise: two files inside this
+//!     repository, base then head, the same engine and JSON body as
+//!     `invar judge BASE HEAD --format json`. Needs no invar.toml, no git and
+//!     no network. Paths outside the repository root are refused.
+//!
 //! JSON-RPC 2.0, one message per line. The server never writes files; adding
 //! a write-capable tool (e.g. init) would revoke that stated guarantee and
 //! needs its own ratification first.
@@ -417,6 +423,41 @@ impl Server<'_> {
         Ok(serde_json::from_str(&out)?)
     }
 
+    /// MCP-JUDGE r0: judge a proposed contract change (base, head) inside
+    /// this repository. The verdict is computed here and only here; nothing
+    /// the client sends can set it. Paths resolve against the directory of
+    /// the config file and must stay inside it after symlinks are resolved.
+    pub fn judge(&self, args: &Value) -> Result<Value> {
+        let root = self.config.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
+        let root = root.canonicalize().map_err(|e| anyhow!("resolving the repository root {}: {e}", root.display()))?;
+        let inside = |key: &str| -> Result<String> {
+            let given = args.get(key).and_then(Value::as_str).ok_or_else(|| anyhow!("`{key}` is required: a path to a JSON Schema file in this repository"))?;
+            let p = root.join(given).canonicalize().map_err(|e| anyhow!("{key} {given:?}: {e}"))?;
+            if !p.starts_with(&root) {
+                return Err(anyhow!("{key} {given:?} is outside the repository root; refused"));
+            }
+            Ok(p.strip_prefix(&root).map(|r| r.display().to_string()).unwrap_or_else(|_| given.to_string()))
+        };
+        // Repository mode: the change in the working tree against a git ref.
+        if args.get("contract").is_some() {
+            if args.get("base").is_some() || args.get("head").is_some() {
+                return Err(anyhow!("give either `contract` (with optional `base_ref`) or `base` and `head`, not both"));
+            }
+            let contract = inside("contract")?;
+            let base_ref = args.get("base_ref").and_then(Value::as_str).unwrap_or("HEAD");
+            if base_ref.starts_with('-') || base_ref.contains("..") || base_ref.chars().any(char::is_whitespace) {
+                return Err(anyhow!("base_ref {base_ref:?} is not a plain git ref; refused"));
+            }
+            return crate::judge::repo_json(&root, &contract, base_ref);
+        }
+        let (base, head) = (inside("base")?, inside("head")?);
+        let here = std::env::current_dir()?;
+        std::env::set_current_dir(&root)?;
+        let out = crate::judge::files_json(&base, &head);
+        std::env::set_current_dir(here)?;
+        out
+    }
+
     /// One JSON-RPC message in, at most one out (notifications get none).
     pub fn handle(&self, msg: &Value) -> Option<Value> {
         let id = msg.get("id")?.clone();
@@ -437,11 +478,22 @@ impl Server<'_> {
                     "protocolVersion": version,
                     "capabilities": {"tools": {}},
                     "serverInfo": {"name": "invar", "version": env!("CARGO_PKG_VERSION")},
-                    "instructions": "Read-only. `check` evaluates this repository's cross-repository contracts; `contract` lists the producer fields it depends on (invar.lock); `dependents` answers who depends on a producer field from local invar.lock files; `coverage` discloses what is and is not evaluated here. A violation is contract residue, not proof of a runtime failure; a skipped contract was not evaluated.",
+                    "instructions": "Read-only. `judge` takes a JSON Schema contract you changed (`contract`, judged against git `base_ref`, default HEAD) and returns HOLDS, VIOLATED (with a dotted-path witness and a counterexample where one can be built) or NOT EVALUATED (with the reason and the constructs not judged); call it before committing a schema change and again after editing. `check` evaluates this repository's cross-repository contracts; `contract` lists the producer fields it depends on (invar.lock); `dependents` answers who depends on a producer field from local invar.lock files; `coverage` discloses what is and is not evaluated here. A violation is contract residue, not proof of a runtime failure; a skipped contract was not evaluated.",
                 }))
             }
             "ping" => ok(json!({})),
             "tools/list" => ok(json!({"tools": [
+                {
+                    "name": "judge",
+                    "description": "Judge a proposed change to a JSON Schema contract against its promise, in the direction: every instance valid before must stay valid. Repository mode: `contract` (a path in this repository) is judged as it stands in the working tree against its version at `base_ref` (default HEAD). File mode: `base` and `head`, two paths in this repository. Returns verdict HOLDS (nothing this engine judges was narrowed or removed), VIOLATED (each broken promise with a dotted-path witness, line numbers and, where one can be built, a counterexample document the old contract accepted and the new one rejects) or NOT EVALUATED (with the reason and the constructs that were not judged). NOT EVALUATED is never a pass. Each witness has compatibility_scope: DECLARED_INPUT (instances using what the old contract declared are now rejected) or UNDECLARED_PROPERTY_SPACE (only instances that sent a key the old contract never declared are rejected); findings counts them apart. Whether any real caller is affected is not observed (observed_caller_usage UNKNOWN). Needs no invar.toml or network; repository mode reads git. Read-only.",
+                    "inputSchema": {"type": "object", "properties": {
+                        "contract": {"type": "string", "description": "Repository mode: path of the contract in this repository; the working-tree file is judged against its version at base_ref"},
+                        "base_ref": {"type": "string", "description": "Repository mode: the git ref holding the promise (default HEAD, the last commit; use origin/main for a branch's whole change)"},
+                        "base": {"type": "string", "description": "File mode: path of the contract as promised"},
+                        "head": {"type": "string", "description": "File mode: path of the changed contract"}
+                    }, "additionalProperties": false},
+                    "annotations": {"readOnlyHint": true},
+                },
                 {
                     "name": "check",
                     "description": "Evaluate the contracts in invar.toml against invar.lock and its waivers. Returns per-contract status (holds, holds_waived, violated, skipped) with Type.field residue, read sites and reasons. Read-only.",
@@ -483,6 +535,7 @@ impl Server<'_> {
                     .cloned()
                     .unwrap_or_else(|| json!({}));
                 let r = match name {
+                    "judge" => self.judge(&args),
                     "check" => self.check(),
                     "contract" => self.contract(),
                     "dependents" => self.dependents(&args),

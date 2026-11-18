@@ -230,12 +230,97 @@ const ROOT_LINE: &str = "  not evaluated: the document root changed in a way thi
 
 /// r_f14: an open object gains a typed property; {"k":1} was valid before
 /// and is rejected now. Kills RE-M6.
+///
+/// AMENDED by OPEN-ADD r0 (founder ruling, 16 November 2026,
+/// docs/falsification/OPEN-ADD-SPEC.md): under the compatibility direction
+/// "every instance valid at the base stays valid at the head", this change
+/// is now judged VIOLATED with a confirmed counterexample instead of being
+/// stated as unchecked. The original r_f14 expectation (exit 4, unchecked
+/// /properties/k) is kept in the spec's amendment record. RE-M6 is still
+/// killed: the added property is never silently covered as a pass.
 #[test]
 fn r_f14_open_object_gains_constrained_property() {
     let (code, text, v) = both("f14", r#"{"properties":{"a":{"type":"string"}}}"#, r#"{"properties":{"a":{"type":"string"},"k":{"type":"string"}}}"#);
+    assert_eq!(code, 1, "{text}");
+    assert_eq!(v["verdict"], json!("VIOLATED"), "{v}");
+    assert_eq!(v["unchecked"], json!([]), "{v}");
+    assert!(text.contains("constrained: k is newly declared as string"), "{text}");
+}
+
+/// OPEN-ADD r0 (docs/falsification/OPEN-ADD-SPEC.md): what an added
+/// property is, by the base object's openness. Each VIOLATED carries a
+/// counterexample the base accepts and the head rejects.
+#[test]
+fn oa_added_property_by_openness() {
+    let cases: [(&str, &str, &str, i32); 10] = [
+        ("oa01", r#"{"type":"object"}"#, r#"{"type":"object","properties":{"status":{"type":"string"}}}"#, 1),
+        ("oa02", r#"{"type":"object","additionalProperties":false}"#, r#"{"type":"object","properties":{"s":{"type":"string"}},"additionalProperties":false}"#, 0),
+        ("oa03", r#"{"type":"object"}"#, r#"{"type":"object","properties":{"m":{}}}"#, 0),
+        ("oa04", r#"{"type":"object"}"#, r#"{"type":"object","properties":{"m":{"description":"free"}}}"#, 0),
+        ("oa05", r#"{"type":"object","additionalProperties":{"type":"string"}}"#, r#"{"type":"object","properties":{"s":{"type":"string","minLength":3}},"additionalProperties":{"type":"string"}}"#, 1),
+        ("oa06", r#"{"type":"object","additionalProperties":{"type":"string"}}"#, r#"{"type":"object","properties":{"s":{"type":"string"}},"additionalProperties":{"type":"string"}}"#, 4),
+        ("oa07", r#"{"type":"object","patternProperties":{"^s":{"type":"string"}}}"#, r#"{"type":"object","properties":{"status":{"type":"string"}},"patternProperties":{"^s":{"type":"string"}}}"#, 4),
+        ("oa08", r#"{"type":"object"}"#, r#"{"type":"object","properties":{"p":{"pattern":"^a"}}}"#, 4),
+        ("oa09", r#"{"type":"object","properties":{"a":{"type":"object","additionalProperties":false}}}"#, r#"{"type":"object","properties":{"a":{"type":"object","properties":{"c":{"type":"boolean"}},"additionalProperties":false}}}"#, 0),
+        ("oa10", r#"{"type":"object","properties":{"a":{"type":"object"}}}"#, r#"{"type":"object","properties":{"a":{"type":"object","properties":{"c":{"type":"boolean"}}}}}"#, 1),
+    ];
+    for (tag, pre, post, want) in cases {
+        let (code, text, v) = both(tag, pre, post);
+        assert_eq!(code, want, "{tag}: {text}");
+        if want == 1 {
+            let w = v["witnesses"].as_array().unwrap();
+            assert!(w.iter().all(|x| x["kind"] == "added_constrained" && !x["counterexample"].is_null()), "{tag}: {v}");
+        }
+        if want == 4 {
+            assert_eq!(v["verdict"], json!("NOT EVALUATED"), "{tag}: {v}");
+        }
+    }
+}
+
+/// OPEN-ADD r1 (founder ruling, 17 November 2026): the verdict stays
+/// VIOLATED; each witness says which part of the base's accepted instances
+/// it breaks, and the result counts the two kinds apart. Caller usage is
+/// never claimed. Kills: scope by kind dropped, previously_declared taken
+/// from pre_line, an unconfirmed OPEN-ADD printed as a construct.
+#[test]
+fn oa_r1_scope_is_stated_per_witness() {
+    // declared break (enum narrowed) beside an undeclared restriction
+    let (code, text, v) = both("r1a", r#"{"type":"object","properties":{"d":{"enum":["asc","desc"]}}}"#, r#"{"type":"object","properties":{"d":{"enum":["ASC","DESC"]},"p":{"type":"string"}}}"#);
+    assert_eq!(code, 1, "{text}");
+    assert_eq!(v["findings"]["category"], "DECLARED_USAGE_VIOLATION", "{v}");
+    assert_eq!(v["findings"]["declared_usage_violations"], 1, "{v}");
+    assert_eq!(v["findings"]["undeclared_property_restrictions"], 1, "{v}");
+    let w = v["witnesses"].as_array().unwrap();
+    let d = w.iter().find(|x| x["path"] == "d").unwrap();
+    let p = w.iter().find(|x| x["path"] == "p").unwrap();
+    assert_eq!((d["compatibility_scope"].as_str(), d["previously_declared"].as_bool()), (Some("DECLARED_INPUT"), Some(true)), "{d}");
+    assert_eq!((p["compatibility_scope"].as_str(), p["previously_declared"].as_bool()), (Some("UNDECLARED_PROPERTY_SPACE"), Some(false)), "{p}");
+    for x in [d, p] {
+        assert_eq!(x["witness_basis"], "OLD_ACCEPTS_NEW_REJECTS", "{x}");
+        assert_eq!(x["observed_caller_usage"], "UNKNOWN", "{x}");
+        assert_eq!(x["impact_assessment"], "NOT_ESTABLISHED", "{x}");
+        assert!(!x["counterexample"].is_null(), "{x}");
+    }
+    assert!(text.contains("declared usage: 1; undeclared properties only: 1"), "{text}");
+    // undeclared only: still VIOLATED, exit 1
+    let (code, text, v) = both("r1b", r#"{"type":"object","properties":{"id":{"type":"string"}}}"#, r#"{"type":"object","properties":{"id":{"type":"string"},"priority":{"type":"string"}}}"#);
+    assert_eq!((code, v["verdict"].as_str()), (1, Some("VIOLATED")), "{text}");
+    assert_eq!(v["findings"]["category"], "UNDECLARED_PROPERTY_RESTRICTION", "{v}");
+    assert!(text.contains("declared usage: 0; undeclared properties only: 1"), "{text}");
+    // a property that becomes required without being declared before breaks declared usage
+    let (_, _, v) = both("r1c", r#"{"type":"object"}"#, r#"{"type":"object","properties":{"q":{"type":"string"}},"required":["q"]}"#);
+    let q = v["witnesses"].as_array().unwrap().iter().find(|x| x["kind"] == "escalated").cloned().unwrap();
+    assert_eq!((q["compatibility_scope"].as_str(), q["previously_declared"].as_bool()), (Some("DECLARED_INPUT"), Some(false)), "{v}");
+    // unconfirmed OPEN-ADD: NOT EVALUATED, undecided, never "anyOf, oneOf"
+    let (code, text, v) = both("r1d", r#"{"type":"object"}"#, r#"{"type":"object","properties":{"p":{"pattern":"^a"}}}"#);
     assert_eq!(code, 4, "{text}");
-    assert!(text.contains(&line("/properties/k")), "{text}");
-    assert_eq!(v["unchecked"], json!(["/properties/k"]), "{v}");
+    assert_eq!(v["undecided_paths"], json!(["p"]), "{v}");
+    assert_eq!(v["not_evaluated_paths"], json!([]), "{v}");
+    assert!(!text.contains("uses anyOf"), "{text}");
+    // HOLDS carries an empty qualification
+    let (code, _, v) = both("r1e", r#"{"type":"object","properties":{"a":{"type":"string"}}}"#, r#"{"type":"object","properties":{"a":{"type":"string","description":"x"}}}"#);
+    assert_eq!(code, 0);
+    assert_eq!(v["findings"]["category"], Value::Null, "{v}");
 }
 
 /// r_f15: the root object is closed. Kills RE-M7.

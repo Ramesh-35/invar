@@ -24,7 +24,7 @@ const UPPER: [&str; 4] = ["maximum", "exclusiveMaximum", "maxLength", "maxItems"
 
 pub struct Witness {
     pub path: String,
-    /// removed | retyped | narrowed | tightened | escalated
+    /// removed | retyped | narrowed | tightened | escalated | added_constrained
     pub kind: &'static str,
     pub pre_type: String,
     pub post_type: Option<String>,
@@ -41,6 +41,9 @@ pub struct Witness {
     /// checked before it is set; or why none was built.
     pub counterexample: Option<Value>,
     pub counterexample_reason: Option<String>,
+    /// OPEN-ADD r1: whether the path is declared in the base contract.
+    /// Set once per evaluation from the base schema; not in receipts.
+    pub declared_before: Option<bool>,
 }
 
 enum BaseRead {
@@ -66,7 +69,8 @@ pub fn run(root: &Path, contract: &str, base: &str, format: &str, receipt_out: O
         _ => None,
     };
     let One { verdict, reason, witnesses, stated, .. } = judge_one(contract, read, Some(&post_raw));
-    let body = body_json(verdict, reason, contract, base, &witnesses, &stated);
+    let mut body = body_json(verdict, reason, contract, base, &witnesses, &stated);
+    qualify(&mut body, &witnesses);
     match format {
         "json" => println!("{}", serde_json::to_string_pretty(&body).unwrap_or_default()),
         "sarif" => println!("{}", serde_json::to_string_pretty(&render_sarif(verdict, reason, contract, base, &witnesses, &stated)).unwrap_or_default()),
@@ -179,6 +183,7 @@ pub fn run_reader(base_path: &str, head_path: &str, cmd: &str, timeout_s: u64, e
     match format {
         "json" => {
             let mut body = body_json(verdict, reason, contract_label, base_label, &witnesses, &stated);
+            qualify(&mut body, &witnesses);
             body["reader"] = reader_json.clone();
             println!("{}", serde_json::to_string_pretty(&body).unwrap_or_default());
         }
@@ -248,7 +253,11 @@ pub fn run_files(base_path: &str, head_path: &str, format: &str) -> Result<i32> 
     let One { verdict, reason, witnesses, stated, .. } = judge_pair(base_path, head_path)?;
     let (c, b) = (head_path, base_path);
     match format {
-        "json" => println!("{}", serde_json::to_string_pretty(&body_json(verdict, reason, c, b, &witnesses, &stated)).unwrap_or_default()),
+        "json" => {
+            let mut shown = body_json(verdict, reason, c, b, &witnesses, &stated);
+            qualify(&mut shown, &witnesses);
+            println!("{}", serde_json::to_string_pretty(&shown).unwrap_or_default())
+        }
         "sarif" => println!("{}", serde_json::to_string_pretty(&render_sarif(verdict, reason, c, b, &witnesses, &stated)).unwrap_or_default()),
         "github" => print!("{}", render_github(verdict, reason, c, b, &witnesses, &stated)),
         _ => print!("{}", render_text(verdict, reason, c, b, &witnesses, &stated)),
@@ -258,6 +267,29 @@ pub fn run_files(base_path: &str, head_path: &str, format: &str) -> Result<i32> 
         "VIOLATED" => 1,
         _ => 4,
     })
+}
+
+/// MCP-JUDGE r0: repository mode for the MCP `judge` tool. The base is read
+/// from the git ref (the SIB-3 discipline: the base tree, never the working
+/// tree), the head from the working tree, the same body as
+/// `invar judge --contract PATH --base REF --format json`.
+pub fn repo_json(root: &Path, contract: &str, base: &str) -> Result<Value> {
+    let post_raw = std::fs::read(root.join(contract)).map_err(|e| anyhow::anyhow!("reading {contract} from the working tree: {e}"))?;
+    let read = base_bytes(root, base, contract)?;
+    let One { verdict, reason, witnesses, stated, .. } = judge_one(contract, read, Some(&post_raw));
+    let mut body = body_json(verdict, reason, contract, base, &witnesses, &stated);
+    qualify(&mut body, &witnesses);
+    Ok(body)
+}
+
+/// MCP-JUDGE r0 (proposal): the file-pair judgment as the same JSON body
+/// `invar judge BASE HEAD --format json` prints, for the MCP `judge` tool.
+/// Same judge_pair, same body_json: the two surfaces cannot diverge.
+pub fn files_json(base_path: &str, head_path: &str) -> Result<Value> {
+    let One { verdict, reason, witnesses, stated, .. } = judge_pair(base_path, head_path)?;
+    let mut body = body_json(verdict, reason, head_path, base_path, &witnesses, &stated);
+    qualify(&mut body, &witnesses);
+    Ok(body)
 }
 
 /// WITNESS r0 (docs/falsification/WITNESS-SPEC.md): judge BASE and HEAD as
@@ -409,7 +441,22 @@ fn evaluate(read: BaseRead, post_bytes: &str) -> (&'static str, Option<&'static 
                             let (c, why) = crate::counterexample::build(x, &pre, &post);
                             x.counterexample = c;
                             x.counterexample_reason = why;
+                            x.declared_before = Some(crate::counterexample::declared_in(&pre, &x.path));
                         }
+                        // OPEN-ADD r0: an added property is a break only with a
+                        // confirmed counterexample; otherwise it is stated.
+                        w.retain(|x| {
+                            if x.kind != "added_constrained" || x.counterexample.is_some() {
+                                return true;
+                            }
+                            stated.undecided.push(x.path.clone());
+                            stated.undecided_changes.push(format!(
+                                "{} was newly declared on an open object and no instance valid before and rejected now could be confirmed ({})",
+                                x.path,
+                                x.counterexample_reason.as_deref().unwrap_or("no candidate")
+                            ));
+                            false
+                        });
                         let (v, r) = if !w.is_empty() {
                             ("VIOLATED", None)
                         } else if !stated.ref_siblings.is_empty() {
@@ -568,6 +615,8 @@ pub fn verify_change_receipt(root: &Path, body: &Value, body_text: &str) -> Resu
             "unchanged": unchanged,
         },
     });
+    let mut rederived_result = rederived_result;
+    qualify_all(&mut rederived_result, &ones);
     let rederived = change_receipt_body(&base_ref, base_commit.clone(), head_commit, &contracts, rederived_result);
     let rendered = serde_json::to_string_pretty(&rederived).unwrap_or_default();
     if rendered != body_text {
@@ -784,7 +833,9 @@ pub fn verify_receipt(root: &Path, body: &Value, body_text: &str) -> Result<i32>
         contract: &contract,
         post_contract_blake3: post_b3,
     };
-    let rederived = receipt_body(&inputs, body_json(verdict, reason, &contract, &base_ref, &witnesses, &stated));
+    let mut result = body_json(verdict, reason, &contract, &base_ref, &witnesses, &stated);
+    qualify(&mut result, &witnesses);
+    let rederived = receipt_body(&inputs, result);
     let rendered = serde_json::to_string_pretty(&rederived).unwrap_or_default();
     if rendered != body_text {
         println!("re-judging the recorded inputs gives a different result ({verdict})");
@@ -888,6 +939,7 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
             anchor_line: None,
             counterexample: None,
             counterexample_reason: None,
+                declared_before: None,
         });
     }
     // D2 (r2): a removal breaks validation only when the object it left is
@@ -901,6 +953,52 @@ fn walk(prefix: &str, pre: &Value, post: &Value, out: &mut Vec<Witness>) {
         let dotted = if prefix.is_empty() { k.clone() } else { format!("{prefix}.{k}") };
         let site = |props: &str| format!("{props}/properties/{}", reach::escape(k));
         judge_child(&dotted, pv, qp.get(k), site(&p_props), site(&q_props), closed, patterned, out);
+    }
+    // OPEN-ADD r0: a property the head declares that the base did not, on an
+    // object the base left open. Compatibility direction: every instance
+    // valid at the base must stay valid at the head. The base accepted any
+    // value under that key; the head may not. The judge only proposes the
+    // break here: COUNTEREXAMPLE decides it (an instance the base accepts and
+    // the head rejects), and without one the path is stated as not
+    // evaluated, never accused. A base with patternProperties is left to
+    // JUDGE-REACH (unchecked): a pattern may already constrain the key.
+    if !adds_ok && pre.get("patternProperties").is_none() {
+        for (k, qv) in qp {
+            if pp.contains_key(k) {
+                continue;
+            }
+            let dotted = if prefix.is_empty() { k.clone() } else { format!("{prefix}.{k}") };
+            let site = format!("{q_props}/properties/{}", reach::escape(k));
+            reach::cover_whole(1, &[site]);
+            if asserts_nothing(qv) {
+                continue; // `{}`, `true` or annotations only: every value is still accepted.
+            }
+            out.push(Witness {
+                path: dotted,
+                kind: "added_constrained",
+                pre_type: "any value (open object)".to_string(),
+                post_type: Some(type_str(qv)),
+                pre_line: None,
+                post_line: None,
+                keyword: Some("properties"),
+                pre_value: None,
+                post_value: Some(qv.to_string()),
+                anchor_line: None,
+                counterexample: None,
+                counterexample_reason: None,
+                declared_before: None,
+            });
+        }
+    }
+}
+
+/// OPEN-ADD r0: a schema that accepts every instance as written: `true`,
+/// or an object carrying only annotation keywords.
+fn asserts_nothing(s: &Value) -> bool {
+    match s {
+        Value::Bool(b) => *b,
+        Value::Object(m) => m.keys().all(|k| ["title", "description", "$comment", "examples", "default", "deprecated", "readOnly", "writeOnly"].contains(&k.as_str())),
+        _ => false,
     }
 }
 
@@ -962,6 +1060,7 @@ fn judge_child(dotted: &str, pv_raw: &Value, qv_raw: Option<&Value>, p_site: Str
             anchor_line: None,
             counterexample: None,
             counterexample_reason: None,
+                declared_before: None,
         }),
         Some(qv) if has_combinator(pv) || has_combinator(qv) => {
             // D1 (r2): a node under anyOf/oneOf/allOf/$ref is not followed,
@@ -1009,6 +1108,7 @@ fn judge_child(dotted: &str, pv_raw: &Value, qv_raw: Option<&Value>, p_site: Str
                     anchor_line: None,
                     counterexample: None,
                     counterexample_reason: None,
+                declared_before: None,
                 });
             }
             constraints(&dotted, pv, qv, out);
@@ -1238,6 +1338,7 @@ fn stated_witness(path: &str, kind: &'static str, pv: &Value) -> Witness {
         anchor_line: None,
         counterexample: None,
         counterexample_reason: None,
+                declared_before: None,
     }
 }
 
@@ -1443,6 +1544,7 @@ fn constraint_witness(path: &str, kind: &'static str, keyword: &'static str, pv:
         anchor_line: None,
         counterexample: None,
         counterexample_reason: None,
+                declared_before: None,
     }
 }
 
@@ -1537,6 +1639,62 @@ fn find_line(text: &str, key: &str) -> Option<u64> {
     None
 }
 
+/// OPEN-ADD r1 (founder ruling, 17 November 2026): qualify a printed
+/// result. Each witness says which part of the base's accepted instances it
+/// breaks: DECLARED_INPUT (instances using what the base declared) or
+/// UNDECLARED_PROPERTY_SPACE (only instances that sent a key the base did
+/// not declare, accepted because the object was open). The verdict, exit
+/// code and every existing field are unchanged. Caller usage is never
+/// observed by the judge, so impact is never asserted. Applied to the CLI
+/// JSON, the MCP tool and the receipt `result` alike (receipts reproduce
+/// only under the engine version that wrote them).
+pub(crate) fn qualify(body: &mut Value, w: &[Witness]) {
+    let mut declared = 0;
+    let mut undeclared = 0;
+    if let Some(items) = body.get_mut("witnesses").and_then(Value::as_array_mut) {
+        for (item, x) in items.iter_mut().zip(w) {
+            let scope = if x.kind == "added_constrained" { "UNDECLARED_PROPERTY_SPACE" } else { "DECLARED_INPUT" };
+            if x.kind == "added_constrained" { undeclared += 1 } else { declared += 1 }
+            item["compatibility_scope"] = json!(scope);
+            item["witness_basis"] = json!(if x.counterexample.is_some() { "OLD_ACCEPTS_NEW_REJECTS" } else { "SCHEMA_CHANGE" });
+            item["previously_declared"] = json!(x.declared_before);
+            item["observed_caller_usage"] = json!("UNKNOWN");
+            item["impact_assessment"] = json!("NOT_ESTABLISHED");
+        }
+    }
+    body["findings"] = json!({
+        "compatibility_direction": "every instance valid at the base stays valid at the head",
+        "declared_usage_violations": declared,
+        "undeclared_property_restrictions": undeclared,
+        "category": if declared > 0 {
+            json!("DECLARED_USAGE_VIOLATION")
+        } else if undeclared > 0 {
+            json!("UNDECLARED_PROPERTY_RESTRICTION")
+        } else {
+            Value::Null
+        },
+    });
+}
+
+/// `qualify` for every contract of a multi-contract result, with the
+/// summary counting contracts by category.
+fn qualify_all(result: &mut Value, ones: &[One]) {
+    let mut declared = 0;
+    let mut undeclared = 0;
+    if let Some(items) = result.get_mut("contracts").and_then(Value::as_array_mut) {
+        for (item, o) in items.iter_mut().zip(ones) {
+            qualify(item, &o.witnesses);
+            match item["findings"]["category"].as_str() {
+                Some("DECLARED_USAGE_VIOLATION") => declared += 1,
+                Some("UNDECLARED_PROPERTY_RESTRICTION") => undeclared += 1,
+                _ => {}
+            }
+        }
+    }
+    result["summary"]["declared_usage_violations"] = json!(declared);
+    result["summary"]["undeclared_property_restrictions"] = json!(undeclared);
+}
+
 /// One JSON document, deterministically ordered (sorted keys), the same
 /// facts the text states: the machine surface for agents and CI.
 fn body_json(verdict: &str, reason: Option<&str>, contract: &str, base: &str, w: &[Witness], st: &Stated) -> Value {
@@ -1614,6 +1772,11 @@ fn witness_sentence(x: &Witness, base: &str) -> String {
                 x.path
             )
         }
+        "added_constrained" => format!(
+            "constrained: {} is newly declared as {} on an object that accepted any value under that key. Instances carrying another value there, valid before, are now rejected; leave it undeclared, or version the change.",
+            x.path,
+            x.post_type.as_deref().unwrap_or("a constrained schema")
+        ),
         "escalated" => format!(
             "escalated: {} is now required. Instances that omit it, valid before, are now rejected; keep it optional, or version the change.",
             x.path
@@ -1688,6 +1851,13 @@ fn render_text(verdict: &str, reason: Option<&str>, contract: &str, base: &str, 
             let n = w.len();
             let noun = if n == 1 { "promise" } else { "promises" };
             s.push_str(&format!("VIOLATED: {contract} breaks {n} {noun} made at {base}.\n"));
+            let undeclared = w.iter().filter(|x| x.kind == "added_constrained").count();
+            if undeclared > 0 {
+                s.push_str(&format!(
+                    "  declared usage: {}; undeclared properties only: {undeclared} (rejects instances that sent such a key with another value; whether any caller does is not observed).\n",
+                    n - undeclared
+                ));
+            }
             for x in w {
                 s.push_str(&format!("  {}\n", witness_sentence(x, base)));
                 s.push_str(&format!("    {}\n", counterexample_line(x, base)));
@@ -1905,12 +2075,13 @@ pub fn run_many(root: &Path, globs: &[String], base: &str, format: &str, receipt
     let not_evaluated = count(&|o| o.verdict == "NOT EVALUATED");
     let new = count(&|o| o.reason == Some("new_contract"));
 
-    let result_body = json!({
+    let mut result_body = json!({
         "base": base,
         "globs": globs,
         "contracts": ones.iter().map(|o| body_json(o.verdict, o.reason, &o.contract, base, &o.witnesses, &o.stated)).collect::<Vec<_>>(),
         "summary": { "violated": violated, "holds": holds, "not_evaluated": not_evaluated, "new": new, "unchanged": unchanged },
     });
+    qualify_all(&mut result_body, &ones);
     match format {
         "json" => {
             println!("{}", serde_json::to_string_pretty(&result_body).unwrap_or_default());

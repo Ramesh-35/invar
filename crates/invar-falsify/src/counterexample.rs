@@ -56,7 +56,7 @@ pub fn build(w: &Witness, base: &Value, post: &Value) -> (Option<Value>, Option<
 }
 
 fn try_build(w: &Witness, base: &Value, post: &Value) -> Result<Value, String> {
-    let (keys, nodes) = follow(base, &w.path, w.kind == "escalated").ok_or("the path could not be followed")?;
+    let (keys, nodes) = follow(base, &w.path, w.kind == "escalated" || w.kind == "added_constrained").ok_or("the path could not be followed")?;
     let leaf_schema = nodes.last().cloned().unwrap_or(Value::Null);
     let mut unknown: Option<String> = None;
     for leaf in candidates(w, base, &leaf_schema) {
@@ -108,6 +108,10 @@ fn candidates(w: &Witness, root: &Value, leaf: &Value) -> Vec<Option<Value>> {
             _ => vec![minimal(root, leaf, 0).ok()],
         },
         "tightened" => tightened(w, root, leaf),
+        // OPEN-ADD r0: the base said nothing about this key; try one value of
+        // each JSON type. The checker keeps only one the base accepts (its
+        // additionalProperties included) and the head rejects.
+        "added_constrained" => [json!(null), json!(true), json!(0), json!(0.5), json!(""), json!([]), json!({})].into_iter().map(Some).collect(),
         _ => Vec::new(),
     }
 }
@@ -184,6 +188,11 @@ enum Step {
 /// schema (`items`), once per `[]` (JUDGE-ITEMS r0). Returns the steps and
 /// the schema at each step (root first). With `allow_missing_leaf`, the
 /// last key need not be declared (a newly required field may be new).
+/// OPEN-ADD r1: is this dotted witness path declared in the base contract?
+pub fn declared_in(base: &Value, path: &str) -> bool {
+    follow(base, path, false).is_some()
+}
+
 fn follow(root: &Value, path: &str, allow_missing_leaf: bool) -> Option<(Vec<Step>, Vec<Value>)> {
     let segs: Vec<&str> = path.split('.').collect();
     let mut steps = Vec::new();

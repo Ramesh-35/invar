@@ -118,8 +118,10 @@ hold, a skip or an error never claims safety and never thrashes the loop.
 A directory without invar.toml is silent, so one global entry is safe
 everywhere.
 
-`invar mcp` is a read-only MCP server for coding agents (tools: check,
-contract, dependents, coverage); it never writes files. Started with
+`invar mcp` is a read-only MCP server for coding agents (tools: judge,
+check, contract, dependents, coverage); it never writes files. `judge`
+lets an agent check a JSON Schema change against its last commit before
+committing it, with a counterexample for every break it confirms. Started with
 `--lock-signers`/`--lock-principal`, every check and contract result
 states whether invar.lock's signature verified in that call
 (`lock_state`, `lock_verified`), and a lock that does not verify is an
